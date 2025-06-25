@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "Makefile": "makefile",
+        "*.asm": "gbz80",
+        "gj_gamesheet_png.h": "c"
+    }
+}

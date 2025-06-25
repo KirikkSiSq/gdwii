@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "WII",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "${workspaceFolder}/build",
+                "${env:DEVKITPRO}/libogc/include",
+                "${env:DEVKITPRO}/libogc/include/**",
+                "${env:HOME}/grr/GRRLIB/GRRLIB/**"
+            ],
+            "defines": [
+                "GEKKO=1"
+            ],
+            "compilerPath": "${env:DEVKITPRO}/devkitPPC/bin/powerpc-eabi-gcc",
+            "intelliSenseMode": "${default}"
+        }
+    ],
+    "version": 4
+}

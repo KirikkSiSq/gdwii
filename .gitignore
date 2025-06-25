@@ -1,0 +1,8 @@
+venv/
+architectds/__pycache__
+.ninja_log
+.ninja_deps
+*.dol
+*.elf
+build/
+
