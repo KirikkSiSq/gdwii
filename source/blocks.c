@@ -6,8 +6,8 @@ struct ObjectDefinition objects[] = {
     { // Basic block
         .layers = {
             {
-                .sheet_x = 694,
-                .sheet_y = 761,
+                .sheet_x = 156,
+                .sheet_y = 732,
                 .sheet_w = 32,
                 .sheet_h = 32
             }
