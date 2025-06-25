@@ -33,7 +33,7 @@ LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lgrrlib -lpngu `$(PREFIX)pkg-config freetype2 libpng libjpeg --libs` -lfat -lwiiuse -lbte -logc -lm
+LIBS	:=	-lgrrlib -lpngu -lwiiuse -lfat -lbte -lvorbisidec -logg -lasnd -logc -lm `$(PREFIX)pkg-config freetype2 libpng libjpeg --libs` 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -95,11 +95,26 @@ export LIBPATHS	:= -L$(LIBOGC_LIB) $(foreach dir,$(LIBDIRS),-L$(dir)/lib)
 export OUTPUT	:=	$(CURDIR)/$(TARGET)
 .PHONY: $(BUILD) clean
 
+ifeq (,$(wildcard $(DEVKITPRO)/portlibs/ppc/include/tremor/ivorbiscodec.h))
+
+$(BUILD):
+	@echo
+	@echo "*------------------------------------------------------------------------------------------*"
+	@echo
+	@echo "Please install libvorbisidec using (dkp-)pacman -S ppc-libvorbisidec"
+	@echo
+	@echo "See https://devkitpro.org/viewtopic.php?f=13&t=8702 for details"
+	@echo
+	@echo "*------------------------------------------------------------------------------------------*"
+	@echo
+else
+
 #---------------------------------------------------------------------------------
 $(BUILD):
 	@[ -d $@ ] || mkdir -p $@
 	@$(MAKE) --no-print-directory -C $(BUILD) -f $(CURDIR)/Makefile
 
+endif
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
@@ -122,6 +137,16 @@ $(OUTPUT).dol: $(OUTPUT).elf
 $(OUTPUT).elf: $(OFILES)
 
 $(OFILES_SOURCES) : $(HFILES)
+
+
+#---------------------------------------------------------------------------------
+# This rule links in binary data with the .ogg extension
+#---------------------------------------------------------------------------------
+%.ogg.o	%_ogg.h :	%.ogg
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	$(bin2o)
+
 
 #---------------------------------------------------------------------------------
 # This rule links in binary data with the .jpg extension

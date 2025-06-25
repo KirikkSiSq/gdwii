@@ -11,11 +11,17 @@
 #include <wiiuse/wpad.h>
 #include <math.h>
 
+#include <asndlib.h>
 #include "blocks.h"
 
 // Include Graphics
 #include "GJ_GameSheet_png.h"
 #include "game_bg_png.h"
+
+#include "oggplayer.h"
+
+// include generated header
+#include "BackOnTrack_ogg.h"
 
 // Declare Static Functions
 static void ExitGame(void);
@@ -27,6 +33,9 @@ int main() {
     GRRLIB_Init();
     WPAD_Init();
 
+    // Initialise the audio subsystem
+	ASND_Init();
+
     load_spritesheet();
 
     bg = GRRLIB_LoadTexturePNG(game_bg_png);
@@ -34,7 +43,9 @@ int main() {
     
     GRRLIB_SetAntiAliasing(FALSE);
 
-    f32 angle = 0;
+    PlayOgg(BackOnTrack_ogg, BackOnTrack_ogg_size, 0, OGG_ONE_TIME);
+
+    float angle = 0;
     while (true) {
         WPAD_ScanPads();
 
@@ -56,7 +67,10 @@ int main() {
         }
         GRRLIB_Render();
         angle++;
+
+        if (angle >= 360.f) angle = 0;
     }
+	StopOgg();
     ExitGame();
     return 0;
 }

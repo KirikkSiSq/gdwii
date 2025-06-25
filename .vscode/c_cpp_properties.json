@@ -5,8 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/build",
-                "${env:DEVKITPRO}/libogc/include",
-                "${env:DEVKITPRO}/libogc/include/**",
+                "${env:DEVKITPRO}/libogc/**",
+                "${env:DEVKITPRO}/portlibs/**",
                 "${env:HOME}/grr/GRRLIB/GRRLIB/**"
             ],
             "defines": [

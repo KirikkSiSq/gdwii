@@ -2,6 +2,12 @@
     "files.associations": {
         "Makefile": "makefile",
         "*.asm": "gbz80",
-        "gj_gamesheet_png.h": "c"
+        "gj_gamesheet_png.h": "c",
+        "backontrack_ogg.h": "c",
+        "game_bg_png.h": "c",
+        "wpad.h": "c",
+        "grrlib.h": "c",
+        "ivorbiscodec.h": "c",
+        "stdlib.h": "c"
     }
 }
