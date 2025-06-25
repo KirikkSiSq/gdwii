@@ -25,7 +25,7 @@ jobs:
       - name: Prepare for build publishing
         run: |
           mkdir -p out/rom
-          cp build/gdwii.dol out/rom
+          cp gdwii.dol out/rom
       - name: Publish build to GH Actions
         uses: actions/upload-artifact@v4
         with:
