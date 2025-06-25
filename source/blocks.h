@@ -1,6 +1,8 @@
 #include <grrlib.h>
 
 #define MAX_OBJECT_LAYERS 4
+#define BG_DIMENSIONS 4
+#define BG_CHUNK (1024/BG_DIMENSIONS)
 
 enum Objects {
     BASIC_BLOCK,
@@ -20,5 +22,6 @@ struct ObjectDefinition {
 };
 
 void put_object(u32 id, f32 x, f32 y, f32 angle);
+void draw_background(f32 x, f32 y);
 void load_spritesheet();
 void unload_spritesheet();

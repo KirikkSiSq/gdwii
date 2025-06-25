@@ -16,7 +16,6 @@
 
 // Include Graphics
 #include "GJ_GameSheet_png.h"
-#include "game_bg_png.h"
 
 #include "oggplayer.h"
 
@@ -25,8 +24,6 @@
 
 // Declare Static Functions
 static void ExitGame(void);
-
-GRRLIB_texImg *bg;
 
 int main() {
     // Init GRRLIB & WiiUse
@@ -38,8 +35,6 @@ int main() {
 
     load_spritesheet();
 
-    bg = GRRLIB_LoadTexturePNG(game_bg_png);
-
     
     GRRLIB_SetAntiAliasing(FALSE);
 
@@ -49,7 +44,7 @@ int main() {
     while (true) {
         WPAD_ScanPads();
 
-        GRRLIB_DrawImg(0, -512, bg, 0, 1, 1, RGBA(56, 121, 255, 255));
+        draw_background(0, -512);
 
         // put_object(BASIC_BLOCK, 64, 8, 0);
         // put_object(BASIC_BLOCK, 128, 64, 45);
@@ -77,8 +72,6 @@ int main() {
 
 static void ExitGame(void) {
     unload_spritesheet();
-
-    GRRLIB_FreeTexture(bg);
 
     // Deinitialize GRRLIB & Video
     GRRLIB_Exit();
