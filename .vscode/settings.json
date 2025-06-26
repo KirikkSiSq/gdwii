@@ -8,6 +8,11 @@
         "wpad.h": "c",
         "grrlib.h": "c",
         "ivorbiscodec.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "square_07_001_png.h": "c",
+        "square_06_001_png.h": "c",
+        "pit_01_001_png.h": "c",
+        "square_05_001_png.h": "c",
+        "square_01_001_png.h": "c"
     }
 }
