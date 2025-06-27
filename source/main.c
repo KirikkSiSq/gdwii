@@ -57,10 +57,9 @@ int main() {
     screenWidth  = rmode->fbWidth;   // Framebuffer width (typically 640)
     screenHeight = rmode->efbHeight; // EFB height (usually 480 or 576)
 
-
-    PlayOgg(BackOnTrack_ogg, BackOnTrack_ogg_size, 0, OGG_ONE_TIME);
-
     load_level();
+    
+    PlayOgg(BackOnTrack_ogg, BackOnTrack_ogg_size, 0, OGG_ONE_TIME);
 
     while (true) {
         WPAD_ScanPads();

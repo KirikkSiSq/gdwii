@@ -602,8 +602,8 @@ void draw_all_object_layers() {
             float calc_x = (obj->x / 30.f * 44) - camera_x;
             float calc_y = VI_MAX_HEIGHT_NTSC - (obj->y / 30.f * 44) - camera_y;
 
-            if (calc_x > -60 && calc_x < screenWidth + 60) {        
-                if (calc_y > -60 && calc_y < screenHeight + 60) {        
+            if (calc_x > -90 && calc_x < screenWidth + 90) {        
+                if (calc_y > -90 && calc_y < screenHeight + 90) {        
                     put_object_layer(obj, calc_x, calc_y, layer);
                 }
             }
