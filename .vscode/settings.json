@@ -13,6 +13,23 @@
         "square_06_001_png.h": "c",
         "pit_01_001_png.h": "c",
         "square_05_001_png.h": "c",
-        "square_01_001_png.h": "c"
+        "square_01_001_png.h": "c",
+        "array": "c",
+        "charconv": "c",
+        "compare": "c",
+        "functional": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "variant": "c",
+        "level_loading.h": "c",
+        "portal_01_back_001_png.h": "c",
+        "portal_01_front_001_png.h": "c",
+        "portal_02_back_001_png.h": "c",
+        "portal_02_front_001_png.h": "c",
+        "portal_04_front_001_png.h": "c",
+        "rod_01_001_png.h": "c",
+        "rod_02_001_png.h": "c",
+        "d_spikes_03_001_png.h": "c"
     }
 }

@@ -21,11 +21,15 @@
 #include "level_loading.h"
 #include "blocks.h"
 
+#include "crash_screen.h"
+
 // Declare Static Functions
 static void ExitGame(void);
 
 float camera_x = 0;
 float camera_y = 0;
+
+extern void __exception_sethandler(u32 n, void (*handler)(frame_context *));
 
 int main() {
     SYS_STDIO_Report(true);
@@ -35,12 +39,15 @@ int main() {
     WPAD_SetIdleTimeout( 60 * 10 );
     WPAD_SetDataFormat( WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR );
 
+    __exception_sethandler(EX_DSI, crash_handler);
+    __exception_sethandler(EX_ISI, crash_handler);
+    __exception_sethandler(EX_PRG, crash_handler);
+
     // Initialise the audio subsystem
 	ASND_Init();
 
     load_spritesheet();
 
-    GRRLIB_SetAntiAliasing(FALSE);
 
     PlayOgg(BackOnTrack_ogg, BackOnTrack_ogg_size, 0, OGG_ONE_TIME);
 

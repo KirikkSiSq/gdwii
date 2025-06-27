@@ -18,7 +18,7 @@ include $(DEVKITPPC)/wii_rules
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source
-DATA		:=	data data/objects
+DATA		:=	data data/objects data/portals
 INCLUDES	:=
 
 #---------------------------------------------------------------------------------
@@ -143,6 +143,14 @@ $(OFILES_SOURCES) : $(HFILES)
 # This rule links in binary data with the .ogg extension
 #---------------------------------------------------------------------------------
 %.ogg.o	%_ogg.h :	%.ogg
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	$(bin2o)
+
+#---------------------------------------------------------------------------------
+# This rule links in binary data with the .ttf extension
+#---------------------------------------------------------------------------------
+%.ttf.o	:	%.ttf
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	$(bin2o)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "blocks.h"
+
 typedef enum {
     GD_VAL_INT,
     GD_VAL_FLOAT,
@@ -28,6 +30,7 @@ typedef struct {
     int colorB;      // key 9
     float duration;  // key 10
     bool touchTriggered; // key 11
+    int zsheetlayer; // no key has this, but used internally
     int zlayer;      // key 24
     int zorder;      // key 25
     char *text;      // key 31 (base64 string)
@@ -57,7 +60,24 @@ typedef struct {
     int originalIndex;
 } GDObjectSortable;
 
+typedef struct {
+    GDObjectTyped *obj;
+    struct ObjectLayer *layer;
+    int layerNum;
+} GDObjectLayer;
+
+typedef struct {
+    GDObjectLayer *layer;
+    int originalIndex;
+} GDLayerSortable;
+
+typedef struct {
+    int count;
+    GDObjectLayer **layers;
+} GDObjectLayerList;
+
 extern GDTypedObjectList *objectsArrayList;
+extern GDObjectLayerList *layersArrayList;
 
 void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GDObjectTyped **array, int count);

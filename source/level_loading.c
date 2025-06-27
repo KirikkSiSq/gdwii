@@ -274,8 +274,6 @@ int parse_gd_object(const char *objStr, GDObject *obj) {
 
     obj->propCount = 0;
 
-    //printf("Object: props=%d\n", obj->propCount);
-
     for (int i = 0; i + 1 < count && obj->propCount < 20; i += 2) {
         int key = atoi(tokens[i]);
         const char *valStr = tokens[i + 1];
@@ -302,8 +300,6 @@ int parse_gd_object(const char *objStr, GDObject *obj) {
                 break;
         }
 
-        //print_prop(obj->keys[obj->propCount], obj->types[obj->propCount], obj->values[obj->propCount]);
-
         obj->propCount++;
     }
 
@@ -325,24 +321,24 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
 
     // Initialize all fields to default values:
     memset(typed, 0, sizeof(GDObjectTyped));
+    
     typed->text = NULL;
     typed->scaling = 1.0f;
 
-    for (int i = 0; i < obj->propCount; i++) {
+    typed->id = obj->values[0].i;
+    typed->x = obj->values[1].f;
+    typed->y = obj->values[2].f;
+
+    typed->zsheetlayer = objects[typed->id - 1].spritesheet_layer;
+    typed->zlayer = objects[typed->id - 1].def_zlayer;
+    typed->zorder = objects[typed->id - 1].def_zorder;
+
+    for (int i = 2; i < obj->propCount; i++) {
         int key = obj->keys[i];
         GDValueType type = obj->types[i];
         GDValue val = obj->values[i];
 
         switch (key) {
-            case 1:  // ID
-                if (type == GD_VAL_INT) typed->id = val.i;
-                break;
-            case 2:  // X
-                if (type == GD_VAL_FLOAT) typed->x = val.f;
-                break;
-            case 3:  // Y
-                if (type == GD_VAL_FLOAT) typed->y = val.f;
-                break;
             case 4:  // FlippedH
                 if (type == GD_VAL_BOOL) typed->flippedH = val.b;
                 break;
@@ -493,23 +489,71 @@ int compare_typed_objects(const void *a, const void *b) {
     int zlayerB = objB->obj->zlayer;
 
     if (zlayerA != zlayerB)
-        return zlayerB - zlayerA; // Descending
+        return zlayerA - zlayerB; // Ascending
+       
+    int zsheetlayerA = objA->obj->zsheetlayer;
+    int zsheetlayerB = objB->obj->zsheetlayer;
+
+    if (zsheetlayerA != zsheetlayerB)
+        return zsheetlayerB - zsheetlayerA; // Descending
 
     int zorderA = objA->obj->zorder;
     int zorderB = objB->obj->zorder;
 
     if (zorderA != zorderB)
-        return zorderB - zorderA; // Descending
+        return zorderA - zorderB; // Ascending
 
     return objA->originalIndex - objB->originalIndex; // Stable fallback
+}
+
+int compare_sortable_layers(const void *a, const void *b) {
+    GDLayerSortable *layerSortA = (GDLayerSortable *)a;
+    GDLayerSortable *layerSortB = (GDLayerSortable *)b;
+
+    struct ObjectLayer *layerA = layerSortA->layer->layer;
+    struct ObjectLayer *layerB = layerSortB->layer->layer;
+
+    GDObjectTyped *objA = layerSortA->layer->obj;
+    GDObjectTyped *objB = layerSortB->layer->obj;
+
+    int zlayerA = objA->zlayer + layerA->zlayer_offset;
+    int zlayerB = objB->zlayer + layerB->zlayer_offset;
+
+    if (zlayerA != zlayerB)
+        return zlayerA - zlayerB; // Ascending
+
+    int obj_idA = objA->id - 1;
+    int obj_idB = objB->id - 1;
+
+    int sheetA = objects[obj_idA].spritesheet_layer;
+    int sheetB = objects[obj_idB].spritesheet_layer;
+
+    if (sheetA != sheetB)
+        return sheetB - sheetA; // Descending
+
+    int zorderA = objA->zorder;
+    int zorderB = objB->zorder;
+
+    if (zorderA != zorderB)
+        return zorderA - zorderB; // Ascending
+
+    return layerSortA->originalIndex - layerSortB->originalIndex; // Stable fallback
 }
 
 // Me when this is like Java (using Comparable interface)
 void sort_typed_objects_by_layer(GDTypedObjectList *list) {
     if (!list || list->count <= 1) return;
 
+    printf("Sorting object list\n");
+
     // Wrap objects with indices
     GDObjectSortable *sortable = malloc(sizeof(GDObjectSortable) * list->count);
+
+    if (sortable == NULL) {
+        printf("Couldn't allocate sortable object\n");
+        return;
+    }
+
     for (int i = 0; i < list->count; i++) {
         sortable[i].obj = list->objects[i];
         sortable[i].originalIndex = i;
@@ -526,6 +570,43 @@ void sort_typed_objects_by_layer(GDTypedObjectList *list) {
     free(sortable);
 }
 
+// Me when this is like Java (using Comparable interface)
+void sort_layers_by_layer(GDObjectLayerList *list) {
+    if (!list || list->count <= 1) return;
+
+    printf("Sorting layer list\n");
+    
+    // Wrap objects with indices
+    GDLayerSortable *sortable = malloc(sizeof(GDLayerSortable) * list->count);
+
+    if (sortable == NULL) {
+        printf("Couldn't allocate sortable layer\n");
+        return;
+    }
+
+    for (int i = 0; i < list->count; i++) {
+        sortable[i].layer = list->layers[i];
+        sortable[i].originalIndex = i;
+
+        // GD epicness
+        int zlayer = sortable[i].layer->obj->zlayer;
+        bool blending = channels[sortable[i].layer->layer->col_channel].blending;
+        if (blending ^ (zlayer % 2 == 0)) {
+            sortable[i].layer->obj->zlayer--;
+        }
+    }
+
+    // Sort
+    qsort(sortable, list->count, sizeof(GDLayerSortable), compare_sortable_layers);
+
+    // Rebuild the list
+    for (int i = 0; i < list->count; i++) {
+        list->layers[i] = sortable[i].layer;
+    }
+
+    free(sortable);
+}
+
 void free_typed_object_array(GDObjectTyped **array, int count) {
     if (!array) return;
     for (int i = 0; i < count; i++) {
@@ -534,7 +615,77 @@ void free_typed_object_array(GDObjectTyped **array, int count) {
     free(array); // Free the array of pointers itself
 }
 
+GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
+    // Count layers
+    int layerCount = 0;
+    for (int i = 0; i < objList->count; i++) {
+        GDObjectTyped *obj = objList->objects[i];
+
+        int obj_id = obj->id - 1;
+
+        if (obj_id < OBJECT_COUNT)
+            layerCount += objects[obj->id - 1].num_layers;
+    }
+
+    printf("Allocating %d bytes for %d layers\n", sizeof(GDObjectLayer) * layerCount, layerCount);
+    GDObjectLayer *layers = malloc(sizeof(GDObjectLayer) * layerCount);
+
+    if (layers == NULL) {
+        printf("Couldn't allocate layers\n");
+        return NULL;
+    }
+
+    printf("Allocated %d layers\n", layerCount);
+
+    // Fill array
+    int count = 0;
+    for (int i = 0; i < objList->count; i++) {
+        GDObjectTyped *obj = objList->objects[i];
+
+        int obj_id = obj->id - 1;
+
+
+        if (obj_id < OBJECT_COUNT)
+            for (int j = 0; j < objects[obj->id - 1].num_layers; j++) {
+                layers[count].layer = (struct ObjectLayer *) &objects[obj->id - 1].layers[j];
+                layers[count].obj = obj;
+                layers[count].layerNum = j;
+                count++;
+            }
+    }
+    
+    printf("Finished filling %d layers\n", count);
+
+    printf("Allocating layer list\n");
+    GDObjectLayerList *layerList = malloc(sizeof(GDObjectLayerList));
+    
+    if (layerList == NULL) {
+        printf("Couldn't allocate layer list\n");
+        free(layers);
+        return NULL;
+    }
+
+    // Allocate array of pointers to GDObjectLayer
+    layerList->layers = malloc(sizeof(GDObjectLayer *) * layerCount);
+
+    if (layerList->layers == NULL) {
+        printf("Couldn't allocate layer pointers\n");
+        free(layers);
+        free(layerList);
+        return NULL;
+    }
+
+    for (int i = 0; i < layerCount; i++) {
+        layerList->layers[i] = &layers[i];
+    }
+
+    layerList->count = layerCount;
+
+    return layerList;
+}
+
 GDTypedObjectList *objectsArrayList = NULL;
+GDObjectLayerList *layersArrayList = NULL;
 
 void load_level() {
     char *level_string = decompress_level();
@@ -561,4 +712,16 @@ void load_level() {
     }
     
     sort_typed_objects_by_layer(objectsArrayList);
+
+    layersArrayList = fill_layers_array(objectsArrayList);
+
+    if (layersArrayList == NULL) {
+        printf("Couldn't sort layers\n");
+        free_typed_object_list(objectsArrayList);
+        return;
+    }
+
+    sort_layers_by_layer(layersArrayList);
+
+    printf("Finished loading level\n");
 }
