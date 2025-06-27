@@ -1,5 +1,21 @@
+#pragma once
+
 extern int screenWidth;
 extern int screenHeight;
 
-extern float camera_x;
-extern float camera_y;
+typedef struct {
+    float camera_x;
+    float camera_y;
+} GameState;
+
+enum ThreadIndex {
+    GAMEPLAY_THREAD,
+    RENDER_THREAD,
+    THREAD_COUNT
+};
+
+extern GameState state_buffers[THREAD_COUNT];
+extern GameState *gameplay_state;
+extern GameState *render_state;
+
+void print_debug(GRRLIB_ttfFont *font);

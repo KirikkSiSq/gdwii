@@ -5,6 +5,7 @@
 #include "stdio.h"
 #include "object_includes.h"
 #include "main.h"
+#include "math.h"
 
 struct ColorChannel channels[COL_CHANNEL_COUNT] = {
     // BG
@@ -590,20 +591,28 @@ void draw_background(f32 x, f32 y) {
     }
 }
 
+int layersDrawn = 0;
+
 void draw_all_object_layers() {
+    if (layersArrayList == NULL) return;
+
+    const float scale = 44.0f / 30.0f;
+    float screen_x_max = screenWidth + 90.0f;
+    float screen_y_max = screenHeight + 90.0f;
     for (int i = 0; i < layersArrayList->count; i++) {
         GDObjectTyped *obj = layersArrayList->layers[i]->obj;
 
         int obj_id = obj->id - 1;
 
         if (obj_id < OBJECT_COUNT) {
-            GDObjectLayer *layer = layersArrayList->layers[i];
+            float calc_x = (obj->x * scale) - render_state->camera_x;
+            float calc_y = screenHeight - (obj->y * scale) - render_state->camera_y;
 
-            float calc_x = (obj->x / 30.f * 44) - camera_x;
-            float calc_y = VI_MAX_HEIGHT_NTSC - (obj->y / 30.f * 44) - camera_y;
-
-            if (calc_x > -90 && calc_x < screenWidth + 90) {        
-                if (calc_y > -90 && calc_y < screenHeight + 90) {        
+            if (calc_x > -90 && calc_x < screen_x_max) {        
+                if (calc_y > -90 && calc_y < screen_y_max) {        
+                    layersDrawn++;
+                    
+                    GDObjectLayer *layer = layersArrayList->layers[i];
                     put_object_layer(obj, calc_x, calc_y, layer);
                 }
             }
@@ -612,9 +621,4 @@ void draw_all_object_layers() {
 }
 
 void handle_objects() {
-    draw_all_object_layers();
-    
-    // for (int i = 0; i < objectsArrayList->count; i++) {
-    //     ;;
-    // }
 }

@@ -13,6 +13,15 @@
 
 #include <asndlib.h>
 #include "blocks.h"
+#include <stdio.h>
+#include <ogc/lwp_watchdog.h>
+#include <ogc/lwp.h>
+
+#include <unistd.h>
+
+#include <malloc.h>
+
+#include "main.h"
 
 #include "oggplayer.h"
 
@@ -21,18 +30,149 @@
 #include "level_loading.h"
 #include "blocks.h"
 
+#include "pusab_ttf.h"
+
 #include "crash_screen.h"
 
 // Declare Static Functions
 static void ExitGame(void);
 
-float camera_x = 0;
-float camera_y = 0;
-
 int screenWidth = 0;
 int screenHeight = 0;
 
 extern void __exception_sethandler(u32 n, void (*handler)(frame_context *));
+
+u64 startTime;
+int frameCount = 0;
+float fps = 0;
+
+GameState state_buffers[THREAD_COUNT];
+GameState *gameplay_state;
+GameState *render_state;
+
+GRRLIB_ttfFont *font = NULL;
+
+int update_game(float dt) {
+    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
+        gameplay_state->camera_x -= 8 * dt; 
+    }
+    
+    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_RIGHT) {
+        gameplay_state->camera_x += 8 * dt; 
+    }
+    
+    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_UP) {
+        gameplay_state->camera_y -= 8 * dt; 
+    }
+    
+    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_DOWN) {
+        gameplay_state->camera_y += 8 * dt; 
+    }
+
+    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
+        return 1;
+    }
+    
+    return 0;
+}
+
+static inline float ticksToSeconds(u64 ticks) {
+    return (float)ticks / (float)TB_TIMER_CLOCK;
+}
+
+#define TICK_RATE  (1.0f / 60.0f)    // 60 logic updates per second
+#define TICKS_PER_SEC  (float)TB_TIMER_CLOCK   // ~81,000,000 on Wii
+
+lwp_t graphics_thread_handle;
+lwp_t gameplay_thread_handle;
+
+void *graphics_thread(void *arg) {
+    printf("Graphics thread started\n");
+    while (1) {
+        memcpy(render_state, gameplay_state, sizeof(GameState));
+
+        draw_background(0, -512);
+
+        draw_all_object_layers();
+        
+        // FPS logic
+        frameCount++;
+        u64 currentTime = gettime();
+        float elapsed = ticks_to_millisecs(currentTime - startTime) / 1000.0f;
+
+        if (elapsed >= 1.0f) {
+            fps = frameCount / elapsed;
+            frameCount = 0;
+            startTime = currentTime;
+        }
+
+        // Render FPS
+        char fpsText[64];
+        snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
+        GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White text
+
+        // Get available memory
+        u32 mem1_free = SYS_GetArena1Hi() - SYS_GetArena1Lo();
+        u32 mem1_free_kb = mem1_free / 1024;
+
+        u32 mem2_free = SYS_GetArena2Hi() - SYS_GetArena2Lo();
+        u32 mem2_free_kb = mem2_free / 1024;
+
+        // Render mem
+        char memText[64];
+        snprintf(memText, sizeof(memText), "MEM1: %u KB / 24576 KB", mem1_free_kb);
+        GRRLIB_PrintfTTF(20, 50, font, memText, 20, 0xFFFFFFFF);
+        
+        snprintf(memText, sizeof(memText), "MEM2: %u KB / 65536 KB", mem2_free_kb);
+        GRRLIB_PrintfTTF(20, 80, font, memText, 20, 0xFFFFFFFF);
+        
+        snprintf(memText, sizeof(memText), "Drawn layers: %u", layersDrawn);
+        GRRLIB_PrintfTTF(20, 110, font, memText, 20, 0xFFFFFFFF);
+
+        GRRLIB_Render();
+
+        layersDrawn = 0;
+    }
+    return NULL;
+}
+
+void *gameplay_thread(void *arg) {
+    
+    printf("Gameplay thread started\n");
+    load_level();
+    
+    PlayOgg(BackOnTrack_ogg, BackOnTrack_ogg_size, 0, OGG_ONE_TIME);
+
+    // Create render thread
+    int result = LWP_CreateThread(
+        &graphics_thread_handle, // Thread handle (output)
+        graphics_thread,     // Function to run
+        NULL,               // Argument to thread function
+        NULL,               // Stack (NULL = auto allocate)
+        32768,               // Stack size
+        20                  // Priority (lower = higher priority)
+    );
+
+    if (result != 0) {
+        printf("Failed to create graphics thread: %d\n", result);
+        return NULL;
+    }
+
+    u64 lastTicks = gettime();  // Initial time in ticks
+    while (1) {
+        WPAD_ScanPads();
+        u64 currentTicks = gettime();
+        float deltaTime = ticksToSeconds(currentTicks - lastTicks) / 16.666666666666;
+        lastTicks = currentTicks;
+
+        if (update_game(deltaTime)) {
+            break;
+        }
+
+        usleep(16666);
+    }
+    return NULL;
+}
 
 int main() {
     SYS_STDIO_Report(true);
@@ -57,43 +197,32 @@ int main() {
     screenWidth  = rmode->fbWidth;   // Framebuffer width (typically 640)
     screenHeight = rmode->efbHeight; // EFB height (usually 480 or 576)
 
-    load_level();
-    
-    PlayOgg(BackOnTrack_ogg, BackOnTrack_ogg_size, 0, OGG_ONE_TIME);
+    startTime = gettime();    
 
-    while (true) {
-        WPAD_ScanPads();
+    font = GRRLIB_LoadTTF(pusab_ttf, pusab_ttf_size);
 
-        draw_background(0, -512);
+    gameplay_state = &state_buffers[GAMEPLAY_THREAD];
+    render_state = &state_buffers[RENDER_THREAD];
 
-        // put_object(BASIC_BLOCK, 64, 8, 0);
-        // put_object(BASIC_BLOCK, 128, 64, 45);
-        // put_object(BASIC_BLOCK, 64, 128, 90);
-        // put_object(BASIC_BLOCK, 640/2, 500/2, 180);
+    // Create gameplay thread
+    int result = LWP_CreateThread(
+        &gameplay_thread_handle, // Thread handle (output)
+        gameplay_thread,     // Function to run
+        NULL,               // Argument to thread function
+        NULL,               // Stack (NULL = auto allocate)
+        32768,               // Stack size
+        50                  // Priority (lower = higher priority)
+    );
 
-        handle_objects();
-
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
-            camera_x -= 8; 
-        }
-        
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_RIGHT) {
-            camera_x += 8; 
-        }
-        
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_UP) {
-            camera_y -= 8; 
-        }
-        
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_DOWN) {
-            camera_y += 8; 
-        }
-
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
-            break;
-        }
-        GRRLIB_Render();
+    if (result != 0) {
+        printf("Failed to create gameplay thread: %d\n", result);
+        goto exit;
     }
+
+    while(1) {
+        usleep(100000); // Sleep for 100 ms
+    }
+exit:
 	StopOgg();
     ExitGame();
     return 0;

@@ -106,6 +106,9 @@ typedef struct {
 extern struct ColorChannel channels[COL_CHANNEL_COUNT];
 extern const ObjectDefinition objects[];
 
+extern int layersDrawn;
+
+void draw_all_object_layers();
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer);
 void draw_background(f32 x, f32 y);
 void load_spritesheet();

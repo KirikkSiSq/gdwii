@@ -10,7 +10,8 @@
                 "${env:HOME}/grr/GRRLIB/GRRLIB/**"
             ],
             "defines": [
-                "GEKKO=1"
+                "GEKKO=1",
+                "HW_DOL= 1"
             ],
             "compilerPath": "${env:DEVKITPRO}/devkitPPC/bin/powerpc-eabi-gcc",
             "intelliSenseMode": "${default}"
