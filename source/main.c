@@ -29,6 +29,9 @@ static void ExitGame(void);
 float camera_x = 0;
 float camera_y = 0;
 
+int screenWidth = 0;
+int screenHeight = 0;
+
 extern void __exception_sethandler(u32 n, void (*handler)(frame_context *));
 
 int main() {
@@ -47,6 +50,12 @@ int main() {
 	ASND_Init();
 
     load_spritesheet();
+
+    GXRModeObj *rmode = VIDEO_GetPreferredMode(NULL);  // Auto-detects best mode
+
+    // Set resolution based on mode
+    screenWidth  = rmode->fbWidth;   // Framebuffer width (typically 640)
+    screenHeight = rmode->efbHeight; // EFB height (usually 480 or 576)
 
 
     PlayOgg(BackOnTrack_ogg, BackOnTrack_ogg_size, 0, OGG_ONE_TIME);
