@@ -401,8 +401,105 @@ const ObjectDefinition objects[] = {
         .def_zlayer = LAYER_B1,
         .def_zorder = 9,
         .num_layers = 1
-    }
-
+    },
+    // 1.0 TRIGGERS -- add later
+    unknown, // 22
+    unknown, // 23
+    unknown, // 24
+    unknown, // 25
+    unknown, // 26
+    unknown, // 27
+    unknown, // 28
+    unknown, // 29
+    unknown, // 30
+    unknown, // 31
+    unknown, // 32
+    unknown, // 33
+    unknown, // 34
+    { // Yellow pad
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = UNMODIFIABLE,
+                .zlayer_offset = 0,
+                .texture = bump_01_001_png
+            }
+        },
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 12,
+        .num_layers = 1
+    },
+    { // Yellow pad
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = UNMODIFIABLE,
+                .zlayer_offset = 0,
+                .texture = ring_01_001_png
+            }
+        },
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 12,
+        .num_layers = 1
+    },
+    unknown, // 37
+    unknown, // 38
+    { // Half spike
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = spike_02_001_png
+            }
+        },
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 1
+    },
+    { // Slab
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = BLACK,
+                .zlayer_offset = 0,
+                .texture = plank_01_color_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = plank_01_001_png
+            },
+        },
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 2
+    },
+    { // Chains
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = chain_01_001_png
+            }
+        },
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .num_layers = 1
+    },
 };
 
 // Prepare Graphics

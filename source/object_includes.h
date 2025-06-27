@@ -29,3 +29,13 @@
 #include "d_spikes_02_001_png.h"
 #include "d_spikes_03_001_png.h"
 #include "d_spikes_04_001_png.h"
+
+#include "bump_01_001_png.h"
+#include "ring_01_001_png.h"
+
+#include "spike_02_001_png.h"
+
+#include "plank_01_001_png.h"
+#include "plank_01_color_001_png.h"
+
+#include "chain_01_001_png.h"
