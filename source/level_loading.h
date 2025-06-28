@@ -86,3 +86,4 @@ extern char level_pool_buffer[LEVEL_POOL_SIZE];
 void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GDObjectTyped **array, int count);
 void load_level();
+void unload_level();

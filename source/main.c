@@ -52,9 +52,9 @@ GRRLIB_ttfFont *font = NULL;
 
 lwp_t state_mutex;
 
-volatile int ram_usage = 0;
+volatile bool should_exit = 0;
 
-int update_game(float dt) {
+void update_game(float dt) {
     LWP_MutexLock(state_mutex);
     
     if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
@@ -74,12 +74,6 @@ int update_game(float dt) {
     }
     
     LWP_MutexUnlock(state_mutex);
-
-    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
-        return 1;
-    }
-    
-    return 0;
 }
 
 static inline float ticksToSeconds(u64 ticks) {
@@ -96,6 +90,10 @@ void *graphics_thread(void *arg) {
     printf("Graphics thread started\n");
 
     while (1) {
+        if (should_exit) {
+            break;
+        }
+
         LWP_MutexLock(state_mutex);
         memcpy(render_state, gameplay_state, sizeof(GameState));
         LWP_MutexUnlock(state_mutex);
@@ -165,12 +163,10 @@ void *gameplay_thread(void *arg) {
         u64 currentTicks = gettime();
         float deltaTime = ticksToSeconds(currentTicks - lastTicks) / 16.666666666666;
         lastTicks = currentTicks;
+        
+        update_game(deltaTime);
 
-        if (update_game(deltaTime)) {
-            unload_spritesheet();
-            StopOgg();
-            ExitGame();
-            exit(0);
+        if (should_exit) {
             break;
         }
 
@@ -225,10 +221,17 @@ int main() {
     }
 
     while(1) {
+        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
+            break;
+        }
         VIDEO_WaitVSync();
     }
 exit:
-    unload_spritesheet();
+    should_exit = 1; // Signal threads to exit
+    
+    void *retval;
+    LWP_JoinThread(gameplay_thread_handle, &retval);
+    LWP_JoinThread(graphics_thread_handle, &retval);
 	StopOgg();
     ExitGame();
     return 0;
@@ -236,6 +239,7 @@ exit:
 
 static void ExitGame(void) {
     unload_spritesheet();
+    unload_level();
 
     // Deinitialize GRRLIB & Video
     GRRLIB_Exit();

@@ -730,3 +730,7 @@ void load_level() {
 
     printf("Finished loading level\n");
 }
+
+void unload_level() {
+    mempool_init(&level_pool, level_pool_buffer, LEVEL_POOL_SIZE);
+}
