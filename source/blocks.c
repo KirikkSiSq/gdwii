@@ -8,6 +8,7 @@
 #include "ground_line_png.h"
 #include "main.h"
 #include "math.h"
+#include <math.h>
 
 struct ColorChannel channels[COL_CHANNEL_COUNT] = {
     // BG
@@ -87,6 +88,13 @@ const ObjectDefinition objects[] = {
     { // Basic block
         .layers = {
             {
+                .x_offset = 0.5,
+                .y_offset = 0.5,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = square_01_glow_001_png
+            },
+            {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = OBJ,
@@ -97,7 +105,7 @@ const ObjectDefinition objects[] = {
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Checker edge
         .layers = {
@@ -107,15 +115,29 @@ const ObjectDefinition objects[] = {
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
                 .texture = square_02_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = square_02_glow_001_png
             }
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Checker corner
         .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = square_03_glow_001_png
+            },
             {
                 .x_offset = 0,
                 .y_offset = 0,
@@ -127,10 +149,17 @@ const ObjectDefinition objects[] = {
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Checker inside corner
         .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = square_04_glow_001_png
+            },
             {
                 .x_offset = 0,
                 .y_offset = 0,
@@ -142,7 +171,7 @@ const ObjectDefinition objects[] = {
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Checker filler
         .layers = {
@@ -166,16 +195,30 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
+                .texture = square_06_glow_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
                 .texture = square_06_001_png
             }
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Checker pillar
         .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = square_07_glow_001_png
+            },
             {
                 .x_offset = 0,
                 .y_offset = 0,
@@ -187,10 +230,17 @@ const ObjectDefinition objects[] = {
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Spike
         .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 1,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = spike_01_glow_001_png
+            },
             {
                 .x_offset = 0,
                 .y_offset = 0,
@@ -202,7 +252,7 @@ const ObjectDefinition objects[] = {
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Ground spike
         .layers = {
@@ -466,16 +516,30 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
+                .texture = spike_02_glow_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
                 .texture = spike_02_001_png
             }
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Slab
         .layers = {
+            {
+                .x_offset = 0.5,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = square_h_01_glow_001_png
+            },
             {
                 .x_offset = 0,
                 .y_offset = 0,
@@ -489,12 +553,12 @@ const ObjectDefinition objects[] = {
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
                 .texture = plank_01_001_png
-            },
+            }
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
-        .num_layers = 2
+        .num_layers = 3
     },
     { // Chains
         .layers = {
@@ -575,8 +639,8 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     int y_flip_mult = (obj->flippedV ? -1 : 1);
 
     struct ObjectLayer *objectLayer = layer->layer;
-    int x_offset = objectLayer->x_offset * x_flip_mult;
-    int y_offset = objectLayer->y_offset * y_flip_mult;
+    float x_offset = objectLayer->x_offset * x_flip_mult;
+    float y_offset = objectLayer->y_offset * y_flip_mult;
 
     GRRLIB_texImg *image = object_images[obj_id][layer_index];
 
@@ -594,11 +658,18 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     int opacity = getFadeValue(x, screenWidth);
     
     u32 color = RGBA(channels[col_channel].r, channels[col_channel].g, channels[col_channel].b, opacity);
+        
+    float angle_rad = obj->rotation * (M_PI / 180.0f); // Convert degrees to radians
+    float cos_a = cosf(angle_rad);
+    float sin_a = sinf(angle_rad);
 
-    GRRLIB_SetHandle(image, (width/2) + x_offset, (height/2) + y_offset);
+    float x_off_rot = x_offset * cos_a - y_offset * sin_a;
+    float y_off_rot = x_offset * sin_a + y_offset * cos_a;
+
+    GRRLIB_SetHandle(image, (width/2), (height/2));
     GRRLIB_DrawImg(
-        /* X        */ x + 6 - (width/2), 
-        /* Y        */ y + 6 - (height/2),
+        /* X        */ x + 6 - (width/2) + x_off_rot, 
+        /* Y        */ y + 6 - (height/2) + y_off_rot,
         /* Texture  */ image, 
         /* Rotation */ obj->rotation, 
         /* Scale X  */ 0.73333333333333333333333333333333 * x_flip_mult * obj->scaling, 

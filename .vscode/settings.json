@@ -42,6 +42,10 @@
         "mem_pool.h": "c",
         "stdio.h": "c",
         "math.h": "c",
-        "blocks.h": "c"
+        "blocks.h": "c",
+        "square_01_glow_001_png.h": "c",
+        "portal_03_front_001_png.h": "c",
+        "square_07_glow_001_png.h": "c",
+        "spike_01_glow_001_png.h": "c"
     }
 }

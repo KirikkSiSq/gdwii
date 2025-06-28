@@ -89,8 +89,8 @@ struct ColorChannel {
 };
 
 struct ObjectLayer {
-    u32 x_offset;
-    u32 y_offset;
+    float x_offset;
+    float y_offset;
     u32 col_channel;
     s32 zlayer_offset;
     const u8 *texture;

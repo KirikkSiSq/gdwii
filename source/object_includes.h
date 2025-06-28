@@ -1,3 +1,15 @@
+#include "square_01_glow_001_png.h"
+#include "square_02_glow_001_png.h"
+#include "square_03_glow_001_png.h"
+#include "square_04_glow_001_png.h"
+#include "square_06_glow_001_png.h"
+#include "square_07_glow_001_png.h"
+
+#include "square_h_01_glow_001_png.h"
+
+#include "spike_01_glow_001_png.h"
+#include "spike_02_glow_001_png.h"
+
 #include "square_01_001_png.h"
 #include "square_02_001_png.h"
 #include "square_03_001_png.h"
