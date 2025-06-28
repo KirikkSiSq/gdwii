@@ -1,6 +1,7 @@
 #pragma once
 
 #include "blocks.h"
+#include "mem_pool.h"
 
 typedef enum {
     GD_VAL_INT,
@@ -18,7 +19,6 @@ typedef union {
 } GDValue;
 
 typedef struct {
-    // Only the keys you want to support explicitly:
     int id;          // key 1
     float x;         // key 2
     float y;         // key 3
@@ -35,7 +35,6 @@ typedef struct {
     int zorder;      // key 25
     char *text;      // key 31 (base64 string)
     float scaling;   // key 32
-    // Add other fields as you need
 } GDObjectTyped;
 
 typedef struct {
@@ -78,6 +77,11 @@ typedef struct {
 
 extern GDTypedObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;
+
+#define LEVEL_POOL_SIZE 16 * 1024 * 1024
+
+extern MemPool level_pool;
+extern char level_pool_buffer[LEVEL_POOL_SIZE];
 
 void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GDObjectTyped **array, int count);

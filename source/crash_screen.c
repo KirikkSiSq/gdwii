@@ -7,6 +7,7 @@
 
 #include "pusab_ttf.h"
 
+// This is not even used thanks libogc
 void crash_handler(frame_context *ctx) {
     struct GRRLIB_Font *font = GRRLIB_LoadTTF(pusab_ttf, pusab_ttf_size);
 
@@ -33,7 +34,7 @@ void crash_handler(frame_context *ctx) {
         GRRLIB_PrintfTTF(40, y, font, line, 20, 0xFFFFFFFF);
         y += 30;
 
-        // Display a few GPRs (optional: print all 32 if you want)
+        // Display a few GPRs
         for (int i = 0; i < 8; i++) {
             snprintf(line, sizeof(line), "GPR[%2d]: 0x%08X", i, ctx->GPR[i]);
             GRRLIB_PrintfTTF(40, y, font, line, 20, 0xFFFFFFFF);

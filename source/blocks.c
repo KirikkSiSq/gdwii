@@ -537,6 +537,18 @@ void unload_spritesheet() {
     }
 }
 
+int getFadeValue(float x, int right_edge) {
+    #define FADE_WIDTH 60
+    if (x < 0 || x > right_edge)
+        return 0;
+    else if (x < FADE_WIDTH)
+        return (int)(255.0f * (x / FADE_WIDTH));
+    else if (x > right_edge - FADE_WIDTH)
+        return (int)(255.0f * ((right_edge - x) / FADE_WIDTH));
+    else
+        return 255;
+}
+
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
     int obj_id = obj->id - 1;
 
@@ -562,7 +574,9 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
         GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
     }
     
-    u32 color = RGBA(channels[col_channel].r, channels[col_channel].g, channels[col_channel].b, 255);
+    int opacity = getFadeValue(x, screenWidth);
+    
+    u32 color = RGBA(channels[col_channel].r, channels[col_channel].g, channels[col_channel].b, opacity);
 
     GRRLIB_SetHandle(image, (width/2) + x_offset, (height/2) + y_offset);
     GRRLIB_DrawImg(

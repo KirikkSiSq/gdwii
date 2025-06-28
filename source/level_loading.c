@@ -9,6 +9,11 @@
 
 #include "test_gmd.h"
 
+#include "mem_pool.h"
+
+MemPool level_pool;
+char level_pool_buffer[LEVEL_POOL_SIZE];
+
 char *extract_base64(const char *data) {
     const char *start_tag = "<k>k4</k><s>";
     const char *end_tag = "</s>";
@@ -28,7 +33,7 @@ char *extract_base64(const char *data) {
     }
 
     int len = end - start;
-    char *b64 = malloc(len + 1);
+    char *b64 = mempool_alloc(&level_pool, len + 1);
     strncpy(b64, start, len);
     b64[len] = '\0';
     return b64;
@@ -97,7 +102,7 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
 
     // Allocate output buffer with some room; grow if needed
     size_t buffer_size = 8192;
-    char *out = malloc(buffer_size);
+    char *out = mempool_alloc(&level_pool, buffer_size);
     if (!out) {
         printf("malloc failed\n");
         inflateEnd(&strm);
@@ -107,7 +112,7 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
     while (1) {
         if (strm.total_out >= buffer_size) {
             buffer_size *= 2;
-            out = realloc(out, buffer_size);
+            out = mempool_realloc(&level_pool, out, buffer_size);
             if (!out) {
                 printf("realloc failed\n");
                 inflateEnd(&strm);
@@ -122,7 +127,7 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
         if (ret == Z_STREAM_END) break;
         if (ret != Z_OK) {
             printf("inflate failed with code %d\n", ret);
-            free(out);
+            mempool_free(&level_pool, out);
             inflateEnd(&strm);
             return NULL;
         }
@@ -132,7 +137,7 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
     inflateEnd(&strm);
 
     // Final shrink to fit
-    out = realloc(out, *out_len + 1); // +1 for null terminator, if you want it as string
+    out = mempool_realloc(&level_pool, out, *out_len + 1); // +1 for null terminator
     out[*out_len] = '\0';
 
     printf("Decompressed %lu bytes successfully\n", *out_len);
@@ -150,12 +155,12 @@ char *decompress_level() {
 
     fix_base64_url(b64);
 
-    unsigned char *decoded = malloc(strlen(b64));
+    unsigned char *decoded = mempool_alloc(&level_pool, strlen(b64));
     int decoded_len = base64_decode(b64, decoded);
     if (decoded_len <= 0) {
         printf("Failed to decode base64\n");
-        free(b64);
-        free(decoded);
+        mempool_free(&level_pool, b64);
+        mempool_free(&level_pool, decoded);
         return NULL;
     }
 
@@ -163,13 +168,13 @@ char *decompress_level() {
     char *decompressed = decompress_data(decoded, decoded_len, &decompressed_len);
     if (!decompressed) {
         printf("Decompression failed (check zlib error above)\n");
-        free(decoded);
-        free(b64);
+        mempool_free(&level_pool, decoded);
+        mempool_free(&level_pool, b64);
         return NULL;
     }
 
-    free(decoded);
-    free(b64);
+    mempool_free(&level_pool, decoded);
+    mempool_free(&level_pool, b64);
     
     return decompressed;
 }
@@ -185,11 +190,11 @@ char **split_string(const char *str, char delimiter, int *outCount) {
         if (*ptr == delimiter) {
             int len = ptr - start;
             if (len > 0) {
-                char *token = (char *)malloc(len + 1);
+                char *token = (char *)mempool_alloc(&level_pool, len + 1);
                 strncpy(token, start, len);
                 token[len] = '\0';
 
-                result = (char **)realloc(result, sizeof(char*) * (count + 1));
+                result = (char **)mempool_realloc(&level_pool, result, sizeof(char*) * (count + 1));
                 result[count++] = token;
             }
             start = ptr + 1;
@@ -198,10 +203,10 @@ char **split_string(const char *str, char delimiter, int *outCount) {
     }
     if (ptr > start) {
         int len = ptr - start;
-        char *token = (char *)malloc(len + 1);
+        char *token = (char *)mempool_alloc(&level_pool, len + 1);
         strncpy(token, start, len);
         token[len] = '\0';
-        result = (char **)realloc(result, sizeof(char*) * (count + 1));
+        result = (char **)mempool_realloc(&level_pool, result, sizeof(char*) * (count + 1));
         result[count++] = token;
     }
 
@@ -210,8 +215,8 @@ char **split_string(const char *str, char delimiter, int *outCount) {
 }
 
 void free_string_array(char **arr, int count) {
-    for (int i = 0; i < count; i++) free(arr[i]);
-    free(arr);
+    for (int i = 0; i < count; i++) mempool_free(&level_pool, arr[i]);
+    mempool_free(&level_pool, arr);
 }
 
 GDValueType get_value_type_for_key(int key) {
@@ -310,13 +315,13 @@ int parse_gd_object(const char *objStr, GDObject *obj) {
 void free_gd_object(GDObject *obj) {
     for (int i = 0; i < obj->propCount; i++) {
         if (obj->types[i] == GD_VAL_STRING && obj->values[i].s) {
-            free(obj->values[i].s);
+            mempool_free(&level_pool, obj->values[i].s);
         }
     }
 }
 
 GDObjectTyped *convert_to_typed(const GDObject *obj) {
-    GDObjectTyped *typed = malloc(sizeof(GDObjectTyped));
+    GDObjectTyped *typed = mempool_alloc(&level_pool, sizeof(GDObjectTyped));
     if (!typed) return NULL;
 
     // Initialize all fields to default values:
@@ -391,14 +396,14 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
 
 void free_typed_object(GDObjectTyped *obj) {
     if (!obj) return;
-    if (obj->text) free(obj->text);
-    free(obj);
+    if (obj->text) mempool_free(&level_pool, obj->text);
+    mempool_free(&level_pool, obj);
 }
 
 GDTypedObjectList *convert_all_to_typed(GDObjectList *objList) {
     if (!objList) return NULL;
 
-    GDObjectTyped **typedArray = malloc(sizeof(GDObjectTyped *) * objList->objectCount);
+    GDObjectTyped **typedArray = mempool_alloc(&level_pool, sizeof(GDObjectTyped *) * objList->objectCount);
     if (!typedArray) return NULL;
 
     for (int i = 0; i < objList->objectCount; i++) {
@@ -408,18 +413,18 @@ GDTypedObjectList *convert_all_to_typed(GDObjectList *objList) {
             for (int j = 0; j < i; j++) {
                 free_typed_object(typedArray[j]);
             }
-            free(typedArray);
+            mempool_free(&level_pool, typedArray);
             return NULL;
         }
     }
 
-    GDTypedObjectList *typedList = malloc(sizeof(GDTypedObjectList));
+    GDTypedObjectList *typedList = mempool_alloc(&level_pool, sizeof(GDTypedObjectList));
     if (!typedList) {
         printf("Failed to allocate the typed list");
         for (int i = 0; i < objList->objectCount; i++) {
             free_typed_object(typedArray[i]);
         }
-        free(typedArray);
+        mempool_free(&level_pool, typedArray);
         return NULL;
     }
 
@@ -433,8 +438,8 @@ void free_gd_object_list(GDObjectList *list) {
     for (int i = 0; i < list->objectCount; i++) {
         free_gd_object(&list->objects[i]);
     }
-    free(list->objects);
-    free(list);
+    mempool_free(&level_pool, list->objects);
+    mempool_free(&level_pool, list);
 }
 
 GDObjectList *parse_string(const char *levelString) {
@@ -448,7 +453,7 @@ GDObjectList *parse_string(const char *levelString) {
     }
 
     int objectCount = sectionCount - 1;
-    GDObject *objects = (GDObject *)malloc(sizeof(GDObject) * objectCount);
+    GDObject *objects = (GDObject *)mempool_alloc(&level_pool, sizeof(GDObject) * objectCount);
 
     for (int i = 1; i < sectionCount; i++) {
         if (!parse_gd_object(sections[i], &objects[i - 1])) {
@@ -458,10 +463,10 @@ GDObjectList *parse_string(const char *levelString) {
 
     free_string_array(sections, sectionCount);
 
-    GDObjectList *objectList = malloc(sizeof(GDObjectList));
+    GDObjectList *objectList = mempool_alloc(&level_pool, sizeof(GDObjectList));
     if (!objectList) {
         printf("Memory allocation failed for objectList\n");
-        free(objects);
+        mempool_free(&level_pool, objects);
         return NULL;
     }
 
@@ -477,8 +482,8 @@ void free_typed_object_list(GDTypedObjectList *list) {
     for (int i = 0; i < list->count; i++) {
         free_typed_object(list->objects[i]);
     }
-    free(list->objects);
-    free(list);
+    mempool_free(&level_pool, list->objects);
+    mempool_free(&level_pool, list);
 }
 
 int compare_typed_objects(const void *a, const void *b) {
@@ -547,7 +552,7 @@ void sort_typed_objects_by_layer(GDTypedObjectList *list) {
     printf("Sorting object list\n");
 
     // Wrap objects with indices
-    GDObjectSortable *sortable = malloc(sizeof(GDObjectSortable) * list->count);
+    GDObjectSortable *sortable = mempool_alloc(&level_pool, sizeof(GDObjectSortable) * list->count);
 
     if (sortable == NULL) {
         printf("Couldn't allocate sortable object\n");
@@ -567,7 +572,7 @@ void sort_typed_objects_by_layer(GDTypedObjectList *list) {
         list->objects[i] = sortable[i].obj;
     }
 
-    free(sortable);
+    mempool_free(&level_pool, sortable);
 }
 
 // Me when this is like Java (using Comparable interface)
@@ -577,7 +582,7 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
     printf("Sorting layer list\n");
     
     // Wrap objects with indices
-    GDLayerSortable *sortable = malloc(sizeof(GDLayerSortable) * list->count);
+    GDLayerSortable *sortable = mempool_alloc(&level_pool, sizeof(GDLayerSortable) * list->count);
 
     if (sortable == NULL) {
         printf("Couldn't allocate sortable layer\n");
@@ -604,7 +609,7 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
         list->layers[i] = sortable[i].layer;
     }
 
-    free(sortable);
+    mempool_free(&level_pool, sortable);
 }
 
 void free_typed_object_array(GDObjectTyped **array, int count) {
@@ -612,7 +617,7 @@ void free_typed_object_array(GDObjectTyped **array, int count) {
     for (int i = 0; i < count; i++) {
         free_typed_object(array[i]);
     }
-    free(array); // Free the array of pointers itself
+    mempool_free(&level_pool, array); // Free the array of pointers itself
 }
 
 GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
@@ -628,7 +633,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     }
 
     printf("Allocating %d bytes for %d layers\n", sizeof(GDObjectLayer) * layerCount, layerCount);
-    GDObjectLayer *layers = malloc(sizeof(GDObjectLayer) * layerCount);
+    GDObjectLayer *layers = mempool_alloc(&level_pool, sizeof(GDObjectLayer) * layerCount);
 
     if (layers == NULL) {
         printf("Couldn't allocate layers\n");
@@ -657,21 +662,21 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     printf("Finished filling %d layers\n", count);
 
     printf("Allocating layer list\n");
-    GDObjectLayerList *layerList = malloc(sizeof(GDObjectLayerList));
+    GDObjectLayerList *layerList = mempool_alloc(&level_pool, sizeof(GDObjectLayerList));
     
     if (layerList == NULL) {
         printf("Couldn't allocate layer list\n");
-        free(layers);
+        mempool_free(&level_pool, layers);
         return NULL;
     }
 
     // Allocate array of pointers to GDObjectLayer
-    layerList->layers = malloc(sizeof(GDObjectLayer *) * layerCount);
+    layerList->layers = mempool_alloc(&level_pool, sizeof(GDObjectLayer *) * layerCount);
 
     if (layerList->layers == NULL) {
         printf("Couldn't allocate layer pointers\n");
-        free(layers);
-        free(layerList);
+        mempool_free(&level_pool, layers);
+        mempool_free(&level_pool, layerList);
         return NULL;
     }
 
@@ -696,7 +701,7 @@ void load_level() {
     }
 
     GDObjectList *objectsList = parse_string(level_string);
-    free(level_string);
+    mempool_free(&level_pool, level_string);
 
     if (objectsList == NULL) {
         printf("Failed parsing the objects.\n");

@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <ogc/lwp_watchdog.h>
 #include <ogc/lwp.h>
+#include <ogc/lwp_mutex.h>
 
 #include <unistd.h>
 
@@ -40,8 +41,6 @@ static void ExitGame(void);
 int screenWidth = 0;
 int screenHeight = 0;
 
-extern void __exception_sethandler(u32 n, void (*handler)(frame_context *));
-
 u64 startTime;
 int frameCount = 0;
 float fps = 0;
@@ -52,7 +51,13 @@ GameState *render_state;
 
 GRRLIB_ttfFont *font = NULL;
 
+lwp_t state_mutex;
+
+volatile int ram_usage = 0;
+
 int update_game(float dt) {
+    LWP_MutexLock(state_mutex);
+    
     if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
         gameplay_state->camera_x -= 8 * dt; 
     }
@@ -68,6 +73,8 @@ int update_game(float dt) {
     if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_DOWN) {
         gameplay_state->camera_y += 8 * dt; 
     }
+    
+    LWP_MutexUnlock(state_mutex);
 
     if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
         return 1;
@@ -88,8 +95,11 @@ lwp_t gameplay_thread_handle;
 
 void *graphics_thread(void *arg) {
     printf("Graphics thread started\n");
+
     while (1) {
+        LWP_MutexLock(state_mutex);
         memcpy(render_state, gameplay_state, sizeof(GameState));
+        LWP_MutexUnlock(state_mutex);
 
         draw_background(0, -512);
 
@@ -111,22 +121,12 @@ void *graphics_thread(void *arg) {
         snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
         GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White text
 
-        // Get available memory
-        u32 mem1_free = SYS_GetArena1Hi() - SYS_GetArena1Lo();
-        u32 mem1_free_kb = mem1_free / 1024;
-
-        u32 mem2_free = SYS_GetArena2Hi() - SYS_GetArena2Lo();
-        u32 mem2_free_kb = mem2_free / 1024;
-
         // Render mem
         char memText[64];
-        snprintf(memText, sizeof(memText), "MEM1: %u KB / 24576 KB", mem1_free_kb);
+        snprintf(memText, sizeof(memText), "Level pool: %0.2f KB / %d KB", mempool_bytes_used(&level_pool) / 1024.f, mempool_bytes_total(&level_pool) / 1024);
         GRRLIB_PrintfTTF(20, 50, font, memText, 20, 0xFFFFFFFF);
         
-        snprintf(memText, sizeof(memText), "MEM2: %u KB / 65536 KB", mem2_free_kb);
-        GRRLIB_PrintfTTF(20, 80, font, memText, 20, 0xFFFFFFFF);
-        
-        snprintf(memText, sizeof(memText), "Drawn layers: %u", layersDrawn);
+        snprintf(memText, sizeof(memText), "Drawn layers: %d", layersDrawn);
         GRRLIB_PrintfTTF(20, 110, font, memText, 20, 0xFFFFFFFF);
 
         GRRLIB_Render();
@@ -150,7 +150,7 @@ void *gameplay_thread(void *arg) {
         NULL,               // Argument to thread function
         NULL,               // Stack (NULL = auto allocate)
         32768,               // Stack size
-        20                  // Priority (lower = higher priority)
+        20                  // Priority
     );
 
     if (result != 0) {
@@ -182,9 +182,9 @@ int main() {
     WPAD_SetIdleTimeout( 60 * 10 );
     WPAD_SetDataFormat( WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR );
 
-    __exception_sethandler(EX_DSI, crash_handler);
-    __exception_sethandler(EX_ISI, crash_handler);
-    __exception_sethandler(EX_PRG, crash_handler);
+    mempool_init(&level_pool, level_pool_buffer, LEVEL_POOL_SIZE);
+
+    LWP_MutexInit(&state_mutex, false);
 
     // Initialise the audio subsystem
 	ASND_Init();
@@ -211,7 +211,7 @@ int main() {
         NULL,               // Argument to thread function
         NULL,               // Stack (NULL = auto allocate)
         32768,               // Stack size
-        50                  // Priority (lower = higher priority)
+        50                  // Priority
     );
 
     if (result != 0) {
@@ -220,7 +220,7 @@ int main() {
     }
 
     while(1) {
-        usleep(100000); // Sleep for 100 ms
+        VIDEO_WaitVSync();
     }
 exit:
 	StopOgg();
