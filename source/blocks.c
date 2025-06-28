@@ -677,7 +677,7 @@ void draw_ground(f32 y) {
         (screenWidth / 2) - (line_width / (2 / LINE_SCALE)),
         calc_y + 6,
         ground_line,
-        0, LINE_SCALE, LINE_SCALE,
+        0, LINE_SCALE, 0.75,
         RGBA(channels[LINE].r, channels[LINE].g, channels[LINE].b, 255)
     );
     
