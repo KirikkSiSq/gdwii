@@ -590,18 +590,46 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     );
 }
 
-void draw_background(f32 x, f32 y) {
+void draw_background_image(f32 x, f32 y, bool vflip) {
     for (s32 i = 0; i < BG_DIMENSIONS; i++) {
+        u32 calc_x = i*BG_CHUNK;
         for (s32 j = 0; j < BG_DIMENSIONS; j++) {
-            u32 calc_x = i*BG_CHUNK;
             u32 calc_y = j*BG_CHUNK;
+            
+            GRRLIB_SetHandle(bg, 512, 512);
             GRRLIB_DrawPart(
-                x + calc_x, y + calc_y, 
-                calc_x, calc_y,
-                BG_CHUNK, BG_CHUNK,
-                bg, 0, 1, 1, RGBA(channels[BG].r, channels[BG].g, channels[BG].b, 255)
+                x + calc_x, 
+                y + (vflip ? 768 - calc_y : calc_y), 
+                calc_x, 
+                calc_y,
+                BG_CHUNK, 
+                BG_CHUNK,
+                bg, 0, 1, (vflip ? -1 : 1), RGBA(channels[BG].r, channels[BG].g, channels[BG].b, 255)
             );
         }
+    }
+}
+
+void draw_background(f32 x, f32 y) {
+    float big_calc_y = positive_fmod(y, 2048);
+
+    float calc_x = positive_fmod(x, 1024);
+    float calc_y = positive_fmod(y, 1024);
+
+    int flip = big_calc_y >= 1024;
+
+    draw_background_image(-calc_x, -calc_y, FALSE ^ flip);
+
+    if (-calc_x + 1024 < screenWidth) {
+        draw_background_image(-calc_x + 1024, -calc_y, FALSE ^ flip);
+    }
+
+    if (-calc_y + 1024 < screenHeight) {
+        draw_background_image(-calc_x, -calc_y + 1024, TRUE ^ flip);
+    }  
+
+    if (-calc_y + 1024 < screenHeight && -calc_x + 1024 < screenWidth) {
+        draw_background_image(-calc_x + 1024, -calc_y + 1024, TRUE ^ flip);
     }
 }
 

@@ -33,7 +33,6 @@
 
 #include "pusab_ttf.h"
 
-#include "crash_screen.h"
 
 // Declare Static Functions
 static void ExitGame(void);
@@ -101,7 +100,7 @@ void *graphics_thread(void *arg) {
         memcpy(render_state, gameplay_state, sizeof(GameState));
         LWP_MutexUnlock(state_mutex);
 
-        draw_background(0, -512);
+        draw_background(render_state->camera_x / 8, (render_state->camera_y / 8) + 512);
 
         draw_all_object_layers();
         
