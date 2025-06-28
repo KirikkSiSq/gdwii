@@ -41,6 +41,7 @@
         "stddef.h": "c",
         "mem_pool.h": "c",
         "stdio.h": "c",
-        "math.h": "c"
+        "math.h": "c",
+        "blocks.h": "c"
     }
 }

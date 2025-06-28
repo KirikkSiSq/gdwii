@@ -1,9 +1,11 @@
 #include <grrlib.h>
 #include "game_bg_png.h"
+#include "game_ground_png.h"
 #include "blocks.h"
 #include "level_loading.h"
 #include "stdio.h"
 #include "object_includes.h"
+#include "ground_line_png.h"
 #include "main.h"
 #include "math.h"
 
@@ -28,6 +30,13 @@ struct ColorChannel channels[COL_CHANNEL_COUNT] = {
         .g = 255,
         .b = 255,
         .blending = FALSE
+    },
+    // Line
+    {
+        .r = 255,
+        .g = 255,
+        .b = 255,
+        .blending = TRUE
     },
     // Black
     {
@@ -506,11 +515,17 @@ const ObjectDefinition objects[] = {
 
 // Prepare Graphics
 GRRLIB_texImg *bg;
+GRRLIB_texImg *ground;
+GRRLIB_texImg *ground_line;
 GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS]; 
+
+const float scale = 44.0f / 30.0f;
 
 void load_spritesheet() {
     // Load Textures 
     bg = GRRLIB_LoadTexturePNG(game_bg_png);
+    ground = GRRLIB_LoadTexturePNG(game_ground_png);
+    ground_line = GRRLIB_LoadTexturePNG(ground_line_png);
 
     for (s32 object = 0; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < objects[object].num_layers; layer++) {
@@ -529,6 +544,8 @@ void load_spritesheet() {
 void unload_spritesheet() {
     // Free all memory used by textures.
     GRRLIB_FreeTexture(bg);
+    GRRLIB_FreeTexture(ground);
+    GRRLIB_FreeTexture(ground_line);
     
     for (s32 object = 0; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < objects[object].num_layers; layer++) {
@@ -633,12 +650,47 @@ void draw_background(f32 x, f32 y) {
     }
 }
 
+#define GROUND_SIZE 176 // pixels
+#define LINE_SCALE 0.5f
+
+void draw_ground(f32 y) {
+    float calc_x = 0 - positive_fmod(render_state->camera_x, GROUND_SIZE);
+    float calc_y = screenHeight - (y * scale) - render_state->camera_y;
+
+    for (float i = -GROUND_SIZE; i < screenWidth + GROUND_SIZE; i += GROUND_SIZE) {
+        GRRLIB_DrawImg(
+            calc_x + i + 6, 
+            calc_y + 6,    
+            ground,
+            0, 1.375, 1.375,
+            RGBA(channels[GROUND].r, channels[GROUND].g, channels[GROUND].b, 255) 
+        );
+    }
+
+    if (channels[LINE].blending) {
+        GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
+    }
+
+    int line_width = ground_line->w;
+    
+    GRRLIB_DrawImg(
+        (screenWidth / 2) - (line_width / (2 / LINE_SCALE)),
+        calc_y + 6,
+        ground_line,
+        0, LINE_SCALE, LINE_SCALE,
+        RGBA(channels[LINE].r, channels[LINE].g, channels[LINE].b, 255)
+    );
+    
+    if (channels[LINE].blending) {
+        GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
+    }
+}
+
 int layersDrawn = 0;
 
 void draw_all_object_layers() {
     if (layersArrayList == NULL) return;
 
-    const float scale = 44.0f / 30.0f;
     float screen_x_max = screenWidth + 90.0f;
     float screen_y_max = screenHeight + 90.0f;
     for (int i = 0; i < layersArrayList->count; i++) {

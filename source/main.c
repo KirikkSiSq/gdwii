@@ -104,6 +104,8 @@ void *graphics_thread(void *arg) {
 
         draw_all_object_layers();
         
+        draw_ground(0);
+        
         // FPS logic
         frameCount++;
         u64 currentTime = gettime();
@@ -165,6 +167,10 @@ void *gameplay_thread(void *arg) {
         lastTicks = currentTicks;
 
         if (update_game(deltaTime)) {
+            unload_spritesheet();
+            StopOgg();
+            ExitGame();
+            exit(0);
             break;
         }
 
@@ -222,6 +228,7 @@ int main() {
         VIDEO_WaitVSync();
     }
 exit:
+    unload_spritesheet();
 	StopOgg();
     ExitGame();
     return 0;

@@ -66,6 +66,7 @@ enum ColChannels {
     BG,
     GROUND,
     OBJ,
+    LINE,
     BLACK,
     LBG,
     P1,
@@ -111,6 +112,7 @@ extern int layersDrawn;
 void draw_all_object_layers();
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer);
 void draw_background(f32 x, f32 y);
+void draw_ground(f32 x);
 void load_spritesheet();
 void unload_spritesheet();
 void handle_objects();
