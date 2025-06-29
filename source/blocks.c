@@ -701,16 +701,16 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
         case FADE_NONE:
             break;
         case FADE_UP:
-            fade_y = -get_xy_fade_offset(x, screenWidth);
-            break;
-        case FADE_DOWN:
             fade_y = get_xy_fade_offset(x, screenWidth);
             break;
+        case FADE_DOWN:
+            fade_y = -get_xy_fade_offset(x, screenWidth);
+            break;
         case FADE_RIGHT:
-            fade_x = -get_xy_fade_offset(x, screenWidth);
+            fade_x = get_xy_fade_offset(x, screenWidth);
             break;
         case FADE_LEFT:
-            fade_x = get_xy_fade_offset(x, screenWidth);
+            fade_x = -get_xy_fade_offset(x, screenWidth);
             break;
         case FADE_SCALE_IN:
             fade_scale = get_in_scale_fade(x, screenWidth);
