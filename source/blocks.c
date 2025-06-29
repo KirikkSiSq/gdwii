@@ -84,6 +84,15 @@ const ObjectDefinition unknown = {
     .num_layers = 0,  
 };
 
+const ObjectDefinition trigger = {
+    .layers = {},
+    .spritesheet_layer = SHEET_BLOCKS,
+    .def_zlayer = 0,
+    .def_zorder = 0,
+    .num_layers = 0,  
+    .is_trigger = TRUE
+};
+
 const ObjectDefinition objects[] = {
     { // Basic block
         .layers = {
@@ -464,13 +473,13 @@ const ObjectDefinition objects[] = {
         .num_layers = 1
     },
     // 1.0 TRIGGERS -- add later
-    unknown, // 22
-    unknown, // 23
-    unknown, // 24
-    unknown, // 25
-    unknown, // 26
-    unknown, // 27
-    unknown, // 28
+    trigger, // 22
+    trigger, // 23
+    trigger, // 24
+    trigger, // 25
+    trigger, // 26
+    trigger, // 27
+    trigger, // 28
     unknown, // 29
     unknown, // 30
     unknown, // 31
@@ -585,6 +594,8 @@ GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS];
 
 const float scale = 44.0f / 30.0f;
 
+int current_fading_effect = FADE_NONE;
+
 void load_spritesheet() {
     // Load Textures 
     bg = GRRLIB_LoadTexturePNG(game_bg_png);
@@ -618,7 +629,7 @@ void unload_spritesheet() {
     }
 }
 
-int getFadeValue(float x, int right_edge) {
+int get_fade_value(float x, int right_edge) {
     #define FADE_WIDTH 60
     if (x < 0 || x > right_edge)
         return 0;
@@ -630,8 +641,23 @@ int getFadeValue(float x, int right_edge) {
         return 255;
 }
 
+int get_xy_fade_offset(float x, int right_edge) {
+    int fade = get_fade_value(x, right_edge);
+    return (255 - fade) / 2;
+}
+
+float get_in_scale_fade(float x, int right_edge) {
+    int fade = get_fade_value(x, right_edge);
+    return (fade / 255.f);
+}
+
+float get_out_scale_fade(float x, int right_edge) {
+    int fade = 255 - get_fade_value(x, right_edge);
+    return 1 + ((fade / 255.f) / 2);
+}
+
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
-    int obj_id = obj->id - 1;
+    int obj_id = obj->id;
 
     int layer_index = layer->layerNum;
 
@@ -655,7 +681,7 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
         GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
     }
     
-    int opacity = getFadeValue(x, screenWidth);
+    int opacity = get_fade_value(x, screenWidth);
     
     u32 color = RGBA(channels[col_channel].r, channels[col_channel].g, channels[col_channel].b, opacity);
         
@@ -666,14 +692,42 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     float x_off_rot = x_offset * cos_a - y_offset * sin_a;
     float y_off_rot = x_offset * sin_a + y_offset * cos_a;
 
+    int fade_x = 0;
+    int fade_y = 0;
+
+    float fade_scale = 1.f;
+
+    switch (current_fading_effect) {
+        case FADE_NONE:
+            break;
+        case FADE_UP:
+            fade_y = -get_xy_fade_offset(x, screenWidth);
+            break;
+        case FADE_DOWN:
+            fade_y = get_xy_fade_offset(x, screenWidth);
+            break;
+        case FADE_RIGHT:
+            fade_x = -get_xy_fade_offset(x, screenWidth);
+            break;
+        case FADE_LEFT:
+            fade_x = get_xy_fade_offset(x, screenWidth);
+            break;
+        case FADE_SCALE_IN:
+            fade_scale = get_in_scale_fade(x, screenWidth);
+            break;
+        case FADE_SCALE_OUT:
+            fade_scale = get_out_scale_fade(x, screenWidth);
+            break;
+    }
+
     GRRLIB_SetHandle(image, (width/2), (height/2));
     GRRLIB_DrawImg(
-        /* X        */ x + 6 - (width/2) + x_off_rot, 
-        /* Y        */ y + 6 - (height/2) + y_off_rot,
+        /* X        */ x + 6 - (width/2) + x_off_rot + fade_x,
+        /* Y        */ y + 6 - (height/2) + y_off_rot + fade_y,
         /* Texture  */ image, 
         /* Rotation */ obj->rotation, 
-        /* Scale X  */ 0.73333333333333333333333333333333 * x_flip_mult * obj->scaling, 
-        /* Scale Y  */ 0.73333333333333333333333333333333 * y_flip_mult * obj->scaling, 
+        /* Scale X  */ 0.73333333333333333333333333333333 * x_flip_mult * fade_scale, 
+        /* Scale Y  */ 0.73333333333333333333333333333333 * y_flip_mult * fade_scale, 
         /* Color    */ color
     );
 }
@@ -767,7 +821,7 @@ void draw_all_object_layers() {
     for (int i = 0; i < layersArrayList->count; i++) {
         GDObjectTyped *obj = layersArrayList->layers[i]->obj;
 
-        int obj_id = obj->id - 1;
+        int obj_id = obj->id;
 
         if (obj_id < OBJECT_COUNT) {
             float calc_x = (obj->x * scale) - render_state->camera_x;
@@ -785,5 +839,51 @@ void draw_all_object_layers() {
     }
 }
 
+void handle_triggers(int i) {
+    GDObjectTyped *obj = objectsArrayList->objects[i];
+
+    int obj_id = obj->id;
+
+    if (objects[obj_id].is_trigger) {
+        
+        float calc_x = (obj->x * scale) - render_state->camera_x;
+
+        if (calc_x < screenWidth / 2) {
+            switch (obj_id) {
+                case TRIGGER_FADE_NONE:
+                    current_fading_effect = FADE_NONE;
+                    break;
+                    
+                case TRIGGER_FADE_UP:
+                    current_fading_effect = FADE_UP;
+                    break;
+                    
+                case TRIGGER_FADE_DOWN:
+                    current_fading_effect = FADE_DOWN;
+                    break;
+                    
+                case TRIGGER_FADE_RIGHT:
+                    current_fading_effect = FADE_RIGHT;
+                    break;
+                    
+                case TRIGGER_FADE_LEFT:
+                    current_fading_effect = FADE_LEFT;
+                    break;
+                    
+                case TRIGGER_FADE_SCALE_IN:
+                    current_fading_effect = FADE_SCALE_IN;
+                    break;
+                    
+                case TRIGGER_FADE_SCALE_OUT:
+                    current_fading_effect = FADE_DOWN;
+                    break;
+            }
+        }
+    }
+}
+
 void handle_objects() {
+    for (int i = 0; i < objectsArrayList->count; i++) {
+        handle_triggers(i);
+    }
 }

@@ -56,6 +56,8 @@ volatile bool should_exit = 0;
 
 void update_game(float dt) {
     LWP_MutexLock(state_mutex);
+
+    handle_objects();
     
     if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
         gameplay_state->camera_x -= 8 * dt; 

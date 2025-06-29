@@ -326,17 +326,14 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
 
     // Initialize all fields to default values:
     memset(typed, 0, sizeof(GDObjectTyped));
-    
-    typed->text = NULL;
-    typed->scaling = 1.0f;
 
-    typed->id = obj->values[0].i;
+    typed->id = obj->values[0].i - 1;
     typed->x = obj->values[1].f;
     typed->y = obj->values[2].f;
 
-    typed->zsheetlayer = objects[typed->id - 1].spritesheet_layer;
-    typed->zlayer = objects[typed->id - 1].def_zlayer;
-    typed->zorder = objects[typed->id - 1].def_zorder;
+    typed->zsheetlayer = objects[typed->id].spritesheet_layer;
+    typed->zlayer = objects[typed->id].def_zlayer;
+    typed->zorder = objects[typed->id].def_zorder;
 
     for (int i = 2; i < obj->propCount; i++) {
         int key = obj->keys[i];
@@ -354,33 +351,22 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
                 if (type == GD_VAL_FLOAT) typed->rotation = val.f;
                 break;
             case 7:  // Color R
-                if (type == GD_VAL_INT) typed->colorR = val.i;
+                if (type == GD_VAL_INT) typed->trig_colorR = val.i;
                 break;
             case 8:  // Color G
-                if (type == GD_VAL_INT) typed->colorG = val.i;
+                if (type == GD_VAL_INT) typed->trig_colorG = val.i;
                 break;
             case 9:  // Color B
-                if (type == GD_VAL_INT) typed->colorB = val.i;
+                if (type == GD_VAL_INT) typed->trig_colorB = val.i;
                 break;
             case 10: // Duration
-                if (type == GD_VAL_FLOAT) typed->duration = val.f;
-                break;
-            case 11: // Touch Triggered
-                if (type == GD_VAL_BOOL) typed->touchTriggered = val.b;
+                if (type == GD_VAL_FLOAT) typed->trig_duration = val.f;
                 break;
             case 24: // Z layer
                 if (type == GD_VAL_INT) typed->zlayer = val.i;
                 break;
             case 25: // Z order
                 if (type == GD_VAL_INT) typed->zorder = val.i;
-                break;
-            case 31: // Text (string)
-                if (type == GD_VAL_STRING && val.s) {
-                    typed->text = strdup(val.s);
-                }
-                break;
-            case 32: // Scaling
-                if (type == GD_VAL_FLOAT) typed->scaling = val.f;
                 break;
 
             // Add more keys here as needed
@@ -396,7 +382,7 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
 
 void free_typed_object(GDObjectTyped *obj) {
     if (!obj) return;
-    if (obj->text) mempool_free(&level_pool, obj->text);
+    //if (obj->text) mempool_free(&level_pool, obj->text);
     mempool_free(&level_pool, obj);
 }
 
@@ -527,8 +513,8 @@ int compare_sortable_layers(const void *a, const void *b) {
     if (zlayerA != zlayerB)
         return zlayerA - zlayerB; // Ascending
 
-    int obj_idA = objA->id - 1;
-    int obj_idB = objB->id - 1;
+    int obj_idA = objA->id;
+    int obj_idB = objB->id;
 
     int sheetA = objects[obj_idA].spritesheet_layer;
     int sheetB = objects[obj_idB].spritesheet_layer;
@@ -626,10 +612,10 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     for (int i = 0; i < objList->count; i++) {
         GDObjectTyped *obj = objList->objects[i];
 
-        int obj_id = obj->id - 1;
+        int obj_id = obj->id;
 
         if (obj_id < OBJECT_COUNT)
-            layerCount += objects[obj->id - 1].num_layers;
+            layerCount += objects[obj->id].num_layers;
     }
 
     printf("Allocating %d bytes for %d layers\n", sizeof(GDObjectLayer) * layerCount, layerCount);
@@ -647,12 +633,11 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     for (int i = 0; i < objList->count; i++) {
         GDObjectTyped *obj = objList->objects[i];
 
-        int obj_id = obj->id - 1;
-
+        int obj_id = obj->id;
 
         if (obj_id < OBJECT_COUNT)
-            for (int j = 0; j < objects[obj->id - 1].num_layers; j++) {
-                layers[count].layer = (struct ObjectLayer *) &objects[obj->id - 1].layers[j];
+            for (int j = 0; j < objects[obj->id].num_layers; j++) {
+                layers[count].layer = (struct ObjectLayer *) &objects[obj->id].layers[j];
                 layers[count].obj = obj;
                 layers[count].layerNum = j;
                 count++;

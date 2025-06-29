@@ -29,13 +29,13 @@ enum Objects {
     DECO_SPIKES_MEDIUM,
     DECO_SPIKES_SMALL,
     DECO_SPIKES_TINY,
-    NO_FADE_EFFECT,
-    FADE_UP,
-    FADE_DOWN,
-    FADE_LEFT,
-    FADE_RIGHT,
-    FADE_SCALE_LEFT,
-    FADE_SCALE_RIGHT,
+    TRIGGER_FADE_NONE,
+    TRIGGER_FADE_UP,
+    TRIGGER_FADE_DOWN,
+    TRIGGER_FADE_LEFT,
+    TRIGGER_FADE_RIGHT,
+    TRIGGER_FADE_SCALE_IN,
+    TRIGGER_FADE_SCALE_OUT,
     BG_TRIGGER,
     GROUND_TRIGGER,
     START_POS,
@@ -75,6 +75,17 @@ enum ColChannels {
     COL_CHANNEL_COUNT
 };
 
+enum FadingEffects {
+    FADE_NONE,
+    FADE_UP,
+    FADE_DOWN,
+    FADE_RIGHT,
+    FADE_LEFT,
+    FADE_SCALE_IN,
+    FADE_SCALE_OUT,
+    FADE_COUNT
+};
+
 enum SpriteSheets {
     SHEET_BLOCKS,
     SHEET_PORTALS,
@@ -98,10 +109,11 @@ struct ObjectLayer {
 
 typedef struct {
     struct ObjectLayer layers[MAX_OBJECT_LAYERS];
-    s32 spritesheet_layer;
-    s32 def_zlayer;
-    s32 def_zorder;
-    u32 num_layers;
+    s8 spritesheet_layer;
+    s8 def_zlayer;
+    s8 def_zorder;
+    u8 num_layers;
+    u8 is_trigger;
 } ObjectDefinition;
 
 extern struct ColorChannel channels[COL_CHANNEL_COUNT];
