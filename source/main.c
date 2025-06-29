@@ -33,6 +33,8 @@
 
 #include "pusab_ttf.h"
 
+#include "player.h"
+
 
 // Declare Static Functions
 static void ExitGame(void);
@@ -54,27 +56,14 @@ lwp_t state_mutex;
 
 volatile bool should_exit = 0;
 
-void update_game(float dt) {
+float dt;
+
+void update_game() {
     LWP_MutexLock(state_mutex);
 
     handle_objects();
-    
-    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
-        gameplay_state->camera_x -= 8 * dt; 
-    }
-    
-    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_RIGHT) {
-        gameplay_state->camera_x += 8 * dt; 
-    }
-    
-    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_UP) {
-        gameplay_state->camera_y -= 8 * dt; 
-    }
-    
-    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_DOWN) {
-        gameplay_state->camera_y += 8 * dt; 
-    }
-    
+    handle_player();
+
     LWP_MutexUnlock(state_mutex);
 }
 
@@ -103,8 +92,9 @@ void *graphics_thread(void *arg) {
         draw_background(render_state->camera_x / 8, (render_state->camera_y / 8) + 512);
 
         draw_all_object_layers();
-        
         draw_ground(0);
+        
+        draw_player();
         
         // FPS logic
         frameCount++;
@@ -163,10 +153,10 @@ void *gameplay_thread(void *arg) {
     while (1) {
         WPAD_ScanPads();
         u64 currentTicks = gettime();
-        float deltaTime = ticksToSeconds(currentTicks - lastTicks) / 16.666666666666;
+        dt = ticksToSeconds(currentTicks - lastTicks) / 4000;
         lastTicks = currentTicks;
         
-        update_game(deltaTime);
+        update_game();
 
         if (should_exit) {
             break;
@@ -206,6 +196,8 @@ int main() {
 
     gameplay_state = &state_buffers[GAMEPLAY_THREAD];
     render_state = &state_buffers[RENDER_THREAD];
+
+    init_player();
 
     // Create gameplay thread
     int result = LWP_CreateThread(

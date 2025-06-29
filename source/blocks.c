@@ -76,8 +76,28 @@ struct ColorChannel channels[COL_CHANNEL_COUNT] = {
     }
 };
 
+
+const ObjectHitbox gamemode_portal_hitbox = {
+    .width = 34,
+    .height = 86,
+    .type = HITBOX_SPECIAL
+};
+
+const ObjectHitbox gravity_portal_hitbox = {
+    .width = 25,
+    .height = 75,
+    .type = HITBOX_SPECIAL
+};
+
+const ObjectHitbox no_hitbox = {
+    .width = 0,
+    .height = 0,
+    .type = HITBOX_NONE
+};
+
 const ObjectDefinition unknown = {
     .layers = {},
+    .hitbox = no_hitbox,
     .spritesheet_layer = SHEET_BLOCKS,
     .def_zlayer = 0,
     .def_zorder = 0,
@@ -86,6 +106,7 @@ const ObjectDefinition unknown = {
 
 const ObjectDefinition trigger = {
     .layers = {},
+    .hitbox = no_hitbox,
     .spritesheet_layer = SHEET_BLOCKS,
     .def_zlayer = 0,
     .def_zorder = 0,
@@ -111,6 +132,11 @@ const ObjectDefinition objects[] = {
                 .texture = square_01_001_png
             }
         },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_SOLID
+        },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
@@ -132,6 +158,11 @@ const ObjectDefinition objects[] = {
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             }
+        },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_SOLID
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
@@ -155,6 +186,11 @@ const ObjectDefinition objects[] = {
                 .texture = square_03_001_png
             }
         },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_SOLID
+        },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
@@ -177,6 +213,11 @@ const ObjectDefinition objects[] = {
                 .texture = square_04_001_png
             }
         },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_SOLID
+        },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
@@ -192,6 +233,7 @@ const ObjectDefinition objects[] = {
                 .texture = square_05_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
         .def_zorder = -7,
@@ -213,6 +255,11 @@ const ObjectDefinition objects[] = {
                 .zlayer_offset = 0,
                 .texture = square_06_001_png
             }
+        },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_SOLID
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
@@ -236,6 +283,11 @@ const ObjectDefinition objects[] = {
                 .texture = square_07_001_png
             }
         },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_SOLID
+        },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
@@ -258,6 +310,11 @@ const ObjectDefinition objects[] = {
                 .texture = spike_01_001_png
             }
         },
+        .hitbox = {
+            .width = 6,
+            .height = 12,
+            .type = HITBOX_SPIKE
+        },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
@@ -272,6 +329,11 @@ const ObjectDefinition objects[] = {
                 .zlayer_offset = 0,
                 .texture = pit_01_001_png
             }
+        },
+        .hitbox = {
+            .width = 9,
+            .height = 10.8,
+            .type = HITBOX_SPIKE
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
@@ -295,6 +357,7 @@ const ObjectDefinition objects[] = {
                 .texture = portal_01_front_001_png
             }
         },
+        .hitbox = gravity_portal_hitbox,
         .spritesheet_layer = SHEET_PORTALS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 10,
@@ -317,6 +380,7 @@ const ObjectDefinition objects[] = {
                 .texture = portal_02_front_001_png
             }
         },
+        .hitbox = gravity_portal_hitbox,
         .spritesheet_layer = SHEET_PORTALS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 10,
@@ -339,6 +403,7 @@ const ObjectDefinition objects[] = {
                 .texture = portal_03_front_001_png
             }
         },
+        .hitbox = gamemode_portal_hitbox,
         .spritesheet_layer = SHEET_PORTALS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 10,
@@ -361,6 +426,7 @@ const ObjectDefinition objects[] = {
                 .texture = portal_04_front_001_png
             }
         },
+        .hitbox = gamemode_portal_hitbox,
         .spritesheet_layer = SHEET_PORTALS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 10,
@@ -377,6 +443,7 @@ const ObjectDefinition objects[] = {
                 .texture = rod_01_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
         .def_zorder = -6,
@@ -392,6 +459,7 @@ const ObjectDefinition objects[] = {
                 .texture = rod_02_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
         .def_zorder = -6,
@@ -407,6 +475,7 @@ const ObjectDefinition objects[] = {
                 .texture = rod_03_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
         .def_zorder = -6,
@@ -422,6 +491,7 @@ const ObjectDefinition objects[] = {
                 .texture = d_spikes_01_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B1,
         .def_zorder = 9,
@@ -437,6 +507,7 @@ const ObjectDefinition objects[] = {
                 .texture = d_spikes_02_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B1,
         .def_zorder = 9,
@@ -452,6 +523,7 @@ const ObjectDefinition objects[] = {
                 .texture = d_spikes_03_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B1,
         .def_zorder = 9,
@@ -467,6 +539,7 @@ const ObjectDefinition objects[] = {
                 .texture = d_spikes_04_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B1,
         .def_zorder = 9,
@@ -496,12 +569,17 @@ const ObjectDefinition objects[] = {
                 .texture = bump_01_001_png
             }
         },
+        .hitbox = {
+            .width = 25,
+            .height = 4,
+            .type = HITBOX_SPECIAL
+        },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B1,
         .def_zorder = 12,
         .num_layers = 1
     },
-    { // Yellow pad
+    { // Yellow orb
         .layers = {
             {
                 .x_offset = 0,
@@ -510,6 +588,11 @@ const ObjectDefinition objects[] = {
                 .zlayer_offset = 0,
                 .texture = ring_01_001_png
             }
+        },
+        .hitbox = {
+            .width = 36,
+            .height = 36,
+            .type = HITBOX_SPECIAL
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B1,
@@ -534,6 +617,11 @@ const ObjectDefinition objects[] = {
                 .zlayer_offset = 0,
                 .texture = spike_02_001_png
             }
+        },
+        .hitbox = {
+            .width = 6,
+            .height = 5.6,
+            .type = HITBOX_SPIKE
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
@@ -564,6 +652,11 @@ const ObjectDefinition objects[] = {
                 .texture = plank_01_001_png
             }
         },
+        .hitbox = {
+            .width = 30,
+            .height = 14,
+            .type = HITBOX_SOLID
+        },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
         .def_zorder = 2,
@@ -579,6 +672,7 @@ const ObjectDefinition objects[] = {
                 .texture = chain_01_001_png
             }
         },
+        .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B1,
         .def_zorder = 9,
@@ -591,8 +685,6 @@ GRRLIB_texImg *bg;
 GRRLIB_texImg *ground;
 GRRLIB_texImg *ground_line;
 GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS]; 
-
-const float scale = 44.0f / 30.0f;
 
 int current_fading_effect = FADE_NONE;
 
@@ -779,8 +871,8 @@ void draw_background(f32 x, f32 y) {
 #define LINE_SCALE 0.5f
 
 void draw_ground(f32 y) {
-    float calc_x = 0 - positive_fmod(render_state->camera_x, GROUND_SIZE);
-    float calc_y = screenHeight - (y * scale) - render_state->camera_y;
+    float calc_x = 0 - positive_fmod(render_state->camera_x * scale, GROUND_SIZE);
+    float calc_y = screenHeight - ((y - render_state->camera_y) * scale);
 
     for (float i = -GROUND_SIZE; i < screenWidth + GROUND_SIZE; i += GROUND_SIZE) {
         GRRLIB_DrawImg(
@@ -824,8 +916,8 @@ void draw_all_object_layers() {
         int obj_id = obj->id;
 
         if (obj_id < OBJECT_COUNT) {
-            float calc_x = (obj->x * scale) - render_state->camera_x;
-            float calc_y = screenHeight - (obj->y * scale) - render_state->camera_y;
+            float calc_x = ((obj->x - render_state->camera_x) * scale);
+            float calc_y = screenHeight - ((obj->y - render_state->camera_y) * scale);
 
             if (calc_x > -90 && calc_x < screen_x_max) {        
                 if (calc_y > -90 && calc_y < screen_y_max) {        
@@ -845,10 +937,7 @@ void handle_triggers(int i) {
     int obj_id = obj->id;
 
     if (objects[obj_id].is_trigger) {
-        
-        float calc_x = (obj->x * scale) - render_state->camera_x;
-
-        if (calc_x < screenWidth / 2) {
+        if (obj->x < gameplay_state->player.x) {
             switch (obj_id) {
                 case TRIGGER_FADE_NONE:
                     current_fading_effect = FADE_NONE;

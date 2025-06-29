@@ -99,6 +99,22 @@ struct ColorChannel {
     u32 g:8;
 };
 
+enum HitboxTypes {
+    HITBOX_NONE,
+    HITBOX_SOLID,
+    HITBOX_SPIKE,
+    HITBOX_SPECIAL,
+    HITBOX_TYPES
+};
+
+typedef struct {
+    float width;
+    float height;
+    float radius;
+    bool is_circular;
+    int type;
+} ObjectHitbox;
+
 struct ObjectLayer {
     float x_offset;
     float y_offset;
@@ -114,10 +130,16 @@ typedef struct {
     s8 def_zorder;
     u8 num_layers;
     u8 is_trigger;
+    ObjectHitbox hitbox;
 } ObjectDefinition;
+
+
+#define scale (44.0f / 30.0f)
 
 extern struct ColorChannel channels[COL_CHANNEL_COUNT];
 extern const ObjectDefinition objects[];
+
+extern GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS];
 
 extern int layersDrawn;
 
