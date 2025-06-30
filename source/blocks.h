@@ -8,6 +8,7 @@
 #define BG_CHUNK (1024/BG_DIMENSIONS)
 
 enum Objects {
+    PLAYER_OBJECT,
     BASIC_BLOCK,
     CHECKER_EDGE,
     CHECKER_CORNER,
@@ -125,16 +126,19 @@ struct ObjectLayer {
 
 typedef struct {
     struct ObjectLayer layers[MAX_OBJECT_LAYERS];
-    s8 spritesheet_layer;
-    s8 def_zlayer;
-    s8 def_zorder;
+    int spritesheet_layer;
+    int def_zlayer;
+    int def_zorder;
     u8 num_layers;
     u8 is_trigger;
     ObjectHitbox hitbox;
 } ObjectDefinition;
 
+#define BLOCK_SIZE_PX 44.f
+#define scale (BLOCK_SIZE_PX / 30.0f)
 
-#define scale (44.0f / 30.0f)
+extern const struct ObjectLayer player_layer;
+extern int current_fading_effect;
 
 extern struct ColorChannel channels[COL_CHANNEL_COUNT];
 extern const ObjectDefinition objects[];
@@ -146,7 +150,7 @@ extern int layersDrawn;
 void draw_all_object_layers();
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer);
 void draw_background(f32 x, f32 y);
-void draw_ground(f32 x);
+void draw_ground(f32 x, bool is_ceiling);
 void load_spritesheet();
 void unload_spritesheet();
 void handle_objects();

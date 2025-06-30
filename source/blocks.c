@@ -114,7 +114,25 @@ const ObjectDefinition trigger = {
     .is_trigger = TRUE
 };
 
+
+const struct ObjectLayer player_layer = {
+    .col_channel = UNMODIFIABLE,
+    .zlayer_offset = 0,
+    .texture = NULL
+};
+
+const ObjectDefinition player_object = {
+    .layers = { player_layer },
+    .hitbox = no_hitbox,
+    .spritesheet_layer = SHEET_BLOCKS,
+    .def_zlayer = LAYER_T1-1,
+    .def_zorder = 9999999,
+    .num_layers = 1,  
+    .is_trigger = TRUE
+};
+
 const ObjectDefinition objects[] = {
+    player_object,
     { // Basic block
         .layers = {
             {
@@ -694,10 +712,11 @@ void load_spritesheet() {
     ground = GRRLIB_LoadTexturePNG(game_ground_png);
     ground_line = GRRLIB_LoadTexturePNG(ground_line_png);
 
-    for (s32 object = 0; object < OBJECT_COUNT; object++) {
+    for (s32 object = 1; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < objects[object].num_layers; layer++) {
             printf("Loading texture of object %d layer %d\n", object, layer);
 
+            
             GRRLIB_texImg *image = GRRLIB_LoadTexturePNG((const u8 *) objects[object].layers[layer].texture);
             if (image == NULL || image->data == NULL) {
                 printf("Couldn't load texture of object %d layer %d\n", object, layer);
@@ -870,7 +889,9 @@ void draw_background(f32 x, f32 y) {
 #define GROUND_SIZE 176 // pixels
 #define LINE_SCALE 0.5f
 
-void draw_ground(f32 y) {
+void draw_ground(f32 y, bool is_ceiling) {
+    int mult = (is_ceiling ? -1 : 1);
+
     float calc_x = 0 - positive_fmod(render_state->camera_x * scale, GROUND_SIZE);
     float calc_y = screenHeight - ((y - render_state->camera_y) * scale);
 
@@ -879,7 +900,7 @@ void draw_ground(f32 y) {
             calc_x + i + 6, 
             calc_y + 6,    
             ground,
-            0, 1.375, 1.375,
+            0, 1.375, 1.375 * mult,
             RGBA(channels[GROUND].r, channels[GROUND].g, channels[GROUND].b, 255) 
         );
     }
@@ -892,7 +913,7 @@ void draw_ground(f32 y) {
     
     GRRLIB_DrawImg(
         (screenWidth / 2) - (line_width / (2 / LINE_SCALE)),
-        calc_y + 6,
+        calc_y + (is_ceiling ? 4 : 6),
         ground_line,
         0, LINE_SCALE, 0.75,
         RGBA(channels[LINE].r, channels[LINE].g, channels[LINE].b, 255)
@@ -910,12 +931,15 @@ void draw_all_object_layers() {
 
     float screen_x_max = screenWidth + 90.0f;
     float screen_y_max = screenHeight + 90.0f;
+
     for (int i = 0; i < layersArrayList->count; i++) {
         GDObjectTyped *obj = layersArrayList->layers[i]->obj;
 
         int obj_id = obj->id;
 
-        if (obj_id < OBJECT_COUNT) {
+        if (obj_id == PLAYER_OBJECT) {
+            draw_player();
+        } else if (obj_id < OBJECT_COUNT) {
             float calc_x = ((obj->x - render_state->camera_x) * scale);
             float calc_y = screenHeight - ((obj->y - render_state->camera_y) * scale);
 

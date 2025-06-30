@@ -20,14 +20,13 @@
 
 #include <unistd.h>
 
-#include <malloc.h>
 
 #include "main.h"
 
 #include "oggplayer.h"
 
 // include generated header
-#include "BackOnTrack_ogg.h"
+#include "Jumper_ogg.h"
 #include "level_loading.h"
 #include "blocks.h"
 
@@ -58,19 +57,6 @@ volatile bool should_exit = 0;
 
 float dt;
 
-void update_game() {
-    LWP_MutexLock(state_mutex);
-
-    handle_objects();
-    handle_player();
-
-    LWP_MutexUnlock(state_mutex);
-}
-
-static inline float ticksToSeconds(u64 ticks) {
-    return (float)ticks / (float)TB_TIMER_CLOCK;
-}
-
 #define TICK_RATE  (1.0f / 60.0f)    // 60 logic updates per second
 #define TICKS_PER_SEC  (float)TB_TIMER_CLOCK   // ~81,000,000 on Wii
 
@@ -89,12 +75,12 @@ void *graphics_thread(void *arg) {
         memcpy(render_state, gameplay_state, sizeof(GameState));
         LWP_MutexUnlock(state_mutex);
 
-        draw_background(render_state->camera_x / 8, (render_state->camera_y / 8) + 512);
+        draw_background(render_state->camera_x / 8, -(render_state->camera_y / 8) + 512);
 
         draw_all_object_layers();
-        draw_ground(0);
-        
-        draw_player();
+
+        draw_ground(render_state->player.ground_y, FALSE);
+        draw_ground(render_state->player.ceiling_y, TRUE);
         
         // FPS logic
         frameCount++;
@@ -117,8 +103,9 @@ void *graphics_thread(void *arg) {
         snprintf(memText, sizeof(memText), "Level pool: %0.2f KB / %d KB", mempool_bytes_used(&level_pool) / 1024.f, mempool_bytes_total(&level_pool) / 1024);
         GRRLIB_PrintfTTF(20, 50, font, memText, 20, 0xFFFFFFFF);
         
-        snprintf(memText, sizeof(memText), "Drawn layers: %d", layersDrawn);
-        GRRLIB_PrintfTTF(20, 110, font, memText, 20, 0xFFFFFFFF);
+        char layerText[64];
+        snprintf(layerText, sizeof(layerText), "Drawn layers: %d", layersDrawn);
+        GRRLIB_PrintfTTF(20, 110, font, layerText, 20, 0xFFFFFFFF);
 
         GRRLIB_Render();
 
@@ -127,12 +114,14 @@ void *graphics_thread(void *arg) {
     return NULL;
 }
 
+#define ticks_to_secs_float(ticks) (((float)(ticks)/(float)(TB_TIMER_CLOCK*1000)))
+
 void *gameplay_thread(void *arg) {
     
     printf("Gameplay thread started\n");
     load_level();
     
-    PlayOgg(BackOnTrack_ogg, BackOnTrack_ogg_size, 0, OGG_ONE_TIME);
+    PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
 
     // Create render thread
     int result = LWP_CreateThread(
@@ -141,7 +130,7 @@ void *gameplay_thread(void *arg) {
         NULL,               // Argument to thread function
         NULL,               // Stack (NULL = auto allocate)
         32768,               // Stack size
-        20                  // Priority
+        50                  // Priority
     );
 
     if (result != 0) {
@@ -152,17 +141,38 @@ void *gameplay_thread(void *arg) {
     u64 lastTicks = gettime();  // Initial time in ticks
     while (1) {
         WPAD_ScanPads();
-        u64 currentTicks = gettime();
-        dt = ticksToSeconds(currentTicks - lastTicks) / 4000;
-        lastTicks = currentTicks;
+
+        u64 frameStart = gettime();
+        dt = ticks_to_secs_float(frameStart - lastTicks) / 4; // 4 because it has to be 1/240 for gameplay 
+        lastTicks = frameStart;
+
+        LWP_MutexLock(state_mutex);
+
+        handle_objects();
+        handle_player();
         
-        update_game();
+        LWP_MutexUnlock(state_mutex);
+        
+        if (gameplay_state->player.dead) {
+            StopOgg();
+            handle_death();
+            PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
+            lastTicks = frameStart = gettime();
+            dt = 1 / 240.f;
+        }
+
 
         if (should_exit) {
             break;
         }
+        
+        u64 frameEnd = gettime();
+        double elapsed = ticks_to_microsecs(frameEnd - frameStart);
+        double sleepTime = 16666 - elapsed;
 
-        usleep(16666);
+        if (sleepTime > 0) {
+            usleep((long) sleepTime);
+        }
     }
     return NULL;
 }
@@ -197,7 +207,7 @@ int main() {
     gameplay_state = &state_buffers[GAMEPLAY_THREAD];
     render_state = &state_buffers[RENDER_THREAD];
 
-    init_player();
+    init_variables();
 
     // Create gameplay thread
     int result = LWP_CreateThread(

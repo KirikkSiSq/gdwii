@@ -8,6 +8,12 @@ extern int screenHeight;
 typedef struct {
     float camera_x;
     float camera_y;
+
+    float camera_intended_y;
+
+    float camera_x_lerp;
+    float camera_y_lerp;
+    
     Player player;
 } GameState;
 

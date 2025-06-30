@@ -48,6 +48,7 @@
         "square_07_glow_001_png.h": "c",
         "spike_01_glow_001_png.h": "c",
         "numbers": "c",
-        "object_includes.h": "c"
+        "object_includes.h": "c",
+        "player.h": "c"
     }
 }

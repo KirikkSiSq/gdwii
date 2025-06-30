@@ -20,7 +20,6 @@ int color_lerp(int color1, int color2, float fraction) {
 }
 
 Vec2D rotate(Vec2D point, float angle, Vec2D origin) {
-    
     float s = sinf(angle);
     float c = cosf(angle);
     point.x -= origin.x;
@@ -34,4 +33,12 @@ Vec2D rotate(Vec2D point, float angle, Vec2D origin) {
 
 float maxf(float a, float b) {
     return a > b ? a : b;
+}
+
+float approachf(float current, float target, float speed, float smoothing) {
+    float diff = target - current;
+    float step = diff * smoothing; // smoothing in [0,1], e.g. 0.1 for gentle, 0.5 for fast
+    if (fabsf(diff) < speed)
+        return target;
+    return current + step + (diff > 0 ? speed : -speed);
 }

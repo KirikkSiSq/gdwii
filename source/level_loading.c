@@ -327,7 +327,7 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
     // Initialize all fields to default values:
     memset(typed, 0, sizeof(GDObjectTyped));
 
-    typed->id = obj->values[0].i - 1;
+    typed->id = obj->values[0].i;
     typed->x = obj->values[1].f;
     typed->y = obj->values[2].f;
 
@@ -580,10 +580,12 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
         sortable[i].originalIndex = i;
 
         // GD epicness
-        int zlayer = sortable[i].layer->obj->zlayer;
-        bool blending = channels[sortable[i].layer->layer->col_channel].blending;
-        if (blending ^ (zlayer % 2 == 0)) {
-            sortable[i].layer->obj->zlayer--;
+        if (sortable[i].layer->obj->id != PLAYER_OBJECT) {
+            int zlayer = sortable[i].layer->obj->zlayer;
+            bool blending = channels[sortable[i].layer->layer->col_channel].blending;
+            if (blending ^ (zlayer % 2 == 0)) {
+                sortable[i].layer->obj->zlayer--;
+            }
         }
     }
 
@@ -608,7 +610,7 @@ void free_typed_object_array(GDObjectTyped **array, int count) {
 
 GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     // Count layers
-    int layerCount = 0;
+    int layerCount = 1; // Count player
     for (int i = 0; i < objList->count; i++) {
         GDObjectTyped *obj = objList->objects[i];
 
@@ -626,11 +628,21 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
         return NULL;
     }
 
+    // Put player
+    GDObjectTyped *obj = mempool_alloc(&level_pool, sizeof(GDObjectTyped));
+    obj->id = PLAYER_OBJECT;
+    obj->zlayer = LAYER_T1-1;
+    obj->zorder = 0;
+    obj->zsheetlayer = 0;
+    layers[0].obj = obj;
+    layers[0].layer = (struct ObjectLayer *) &objects[obj->id].layers[0];
+    layers[0].layerNum = 0;
+
     printf("Allocated %d layers\n", layerCount);
 
     // Fill array
-    int count = 0;
-    for (int i = 0; i < objList->count; i++) {
+    int count = 1;
+    for (int i = 1; i < objList->count; i++) {
         GDObjectTyped *obj = objList->objects[i];
 
         int obj_id = obj->id;
