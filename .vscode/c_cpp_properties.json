@@ -6,8 +6,7 @@
                 "${workspaceFolder}/**",
                 "${workspaceFolder}/build",
                 "${env:DEVKITPRO}/libogc/**",
-                "${env:DEVKITPRO}/portlibs/**",
-                "${env:HOME}/grr/GRRLIB/GRRLIB/**"
+                "${env:DEVKITPRO}/portlibs/**"
             ],
             "defines": [
                 "GEKKO=1",

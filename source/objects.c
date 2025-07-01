@@ -1,7 +1,7 @@
 #include <grrlib.h>
 #include "game_bg_png.h"
 #include "game_ground_png.h"
-#include "blocks.h"
+#include "objects.h"
 #include "level_loading.h"
 #include "stdio.h"
 #include "object_includes.h"
@@ -10,68 +10,89 @@
 #include "math.h"
 #include <math.h>
 
+#include "particles.h"
+#include "particle_png.h"
+
 struct ColorChannel channels[COL_CHANNEL_COUNT] = {
     // BG
     {
-        .r = 56,
-        .g = 121,
-        .b = 255,
+        .color = {
+            .r = 56,
+            .g = 121,
+            .b = 255,
+        },
         .blending = FALSE
     },
     // Ground
     {
-        .r = 56,
-        .g = 121,
-        .b = 255,
+        .color = {
+            .r = 56,
+            .g = 121,
+            .b = 255,
+        },
         .blending = FALSE
     },
     // Obj
     {
-        .r = 255,
-        .g = 255,
-        .b = 255,
+        .color = {
+            .r = 255,
+            .g = 255,
+            .b = 255,
+        },
         .blending = FALSE
     },
     // Line
     {
-        .r = 255,
-        .g = 255,
-        .b = 255,
+        .color = {
+            .r = 255,
+            .g = 255,
+            .b = 255,
+        },
         .blending = TRUE
     },
     // Black
     {
-        .r = 0,
-        .g = 0,
-        .b = 0,
+        .color = {
+            .r = 0,
+            .g = 0,
+            .b = 0,
+        },
         .blending = FALSE
     },
     // LBG -- add later
     {
-        .r = 0,
-        .g = 0,
-        .b = 0,
+        .color = {
+            .r = 0,
+            .g = 0,
+            .b = 0,
+        },
         .blending = FALSE
     },
     // P1
     {
-        .r = 0,
-        .g = 255,
-        .b = 0,
+        .color = {
+            .r = 0,
+            .g = 255,
+            .b = 0,
+        },
         .blending = TRUE
     },
     // P2
     {
-        .r = 0,
-        .g = 255,
-        .b = 255,
+        .color = {
+            .r = 0,
+            .g = 255,
+            .b = 255,
+        },
         .blending = TRUE
     },
     // Unmodifiable (white)
     {
-        .r = 255,
-        .g = 255,
-        .b = 255,
+        .color = {
+            .r = 255,
+            .g = 255,
+            .b = 255,
+        },
         .blending = FALSE
     }
 };
@@ -571,8 +592,8 @@ const ObjectDefinition objects[] = {
     trigger, // 26
     trigger, // 27
     trigger, // 28
-    unknown, // 29
-    unknown, // 30
+    trigger, // 29
+    trigger, // 30
     unknown, // 31
     unknown, // 32
     unknown, // 33
@@ -706,11 +727,14 @@ GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS];
 
 int current_fading_effect = FADE_NONE;
 
+struct TriggerBuffer trigger_buffer[COL_CHANNEL_COUNT];
+
 void load_spritesheet() {
     // Load Textures 
     bg = GRRLIB_LoadTexturePNG(game_bg_png);
     ground = GRRLIB_LoadTexturePNG(game_ground_png);
     ground_line = GRRLIB_LoadTexturePNG(ground_line_png);
+    particleTex = GRRLIB_LoadTexturePNG(particle_png);
 
     for (s32 object = 1; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < objects[object].num_layers; layer++) {
@@ -725,6 +749,8 @@ void load_spritesheet() {
             }
         }
     }
+
+    load_icons();
 }
 
 void unload_spritesheet() {
@@ -732,12 +758,15 @@ void unload_spritesheet() {
     GRRLIB_FreeTexture(bg);
     GRRLIB_FreeTexture(ground);
     GRRLIB_FreeTexture(ground_line);
-    
+    GRRLIB_FreeTexture(particleTex);
+
     for (s32 object = 0; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < objects[object].num_layers; layer++) {
             GRRLIB_FreeTexture(object_images[object][layer]);
         }
     }
+    
+    unload_icons();
 }
 
 int get_fade_value(float x, int right_edge) {
@@ -794,7 +823,7 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     
     int opacity = get_fade_value(x, screenWidth);
     
-    u32 color = RGBA(channels[col_channel].r, channels[col_channel].g, channels[col_channel].b, opacity);
+    u32 color = RGBA(channels[col_channel].color.r, channels[col_channel].color.g, channels[col_channel].color.b, opacity);
         
     float angle_rad = obj->rotation * (M_PI / 180.0f); // Convert degrees to radians
     float cos_a = cosf(angle_rad);
@@ -857,7 +886,7 @@ void draw_background_image(f32 x, f32 y, bool vflip) {
                 calc_y,
                 BG_CHUNK, 
                 BG_CHUNK,
-                bg, 0, 1, (vflip ? -1 : 1), RGBA(channels[BG].r, channels[BG].g, channels[BG].b, 255)
+                bg, 0, 1, (vflip ? -1 : 1), RGBA(channels[BG].color.r, channels[BG].color.g, channels[BG].color.b, 255)
             );
         }
     }
@@ -892,8 +921,8 @@ void draw_background(f32 x, f32 y) {
 void draw_ground(f32 y, bool is_ceiling) {
     int mult = (is_ceiling ? -1 : 1);
 
-    float calc_x = 0 - positive_fmod(render_state->camera_x * scale, GROUND_SIZE);
-    float calc_y = screenHeight - ((y - render_state->camera_y) * scale);
+    float calc_x = 0 - positive_fmod(render_state->camera_x * SCALE, GROUND_SIZE);
+    float calc_y = screenHeight - ((y - render_state->camera_y) * SCALE);
 
     for (float i = -GROUND_SIZE; i < screenWidth + GROUND_SIZE; i += GROUND_SIZE) {
         GRRLIB_DrawImg(
@@ -901,7 +930,7 @@ void draw_ground(f32 y, bool is_ceiling) {
             calc_y + 6,    
             ground,
             0, 1.375, 1.375 * mult,
-            RGBA(channels[GROUND].r, channels[GROUND].g, channels[GROUND].b, 255) 
+            RGBA(channels[GROUND].color.r, channels[GROUND].color.g, channels[GROUND].color.b, 255) 
         );
     }
 
@@ -916,7 +945,7 @@ void draw_ground(f32 y, bool is_ceiling) {
         calc_y + (is_ceiling ? 4 : 6),
         ground_line,
         0, LINE_SCALE, 0.75,
-        RGBA(channels[LINE].r, channels[LINE].g, channels[LINE].b, 255)
+        RGBA(channels[LINE].color.r, channels[LINE].color.g, channels[LINE].color.b, 255)
     );
     
     if (channels[LINE].blending) {
@@ -938,10 +967,11 @@ void draw_all_object_layers() {
         int obj_id = obj->id;
 
         if (obj_id == PLAYER_OBJECT) {
+            draw_particles();
             draw_player();
         } else if (obj_id < OBJECT_COUNT) {
-            float calc_x = ((obj->x - render_state->camera_x) * scale);
-            float calc_y = screenHeight - ((obj->y - render_state->camera_y) * scale);
+            float calc_x = ((obj->x - render_state->camera_x) * SCALE);
+            float calc_y = screenHeight - ((obj->y - render_state->camera_y) * SCALE);
 
             if (calc_x > -90 && calc_x < screen_x_max) {        
                 if (calc_y > -90 && calc_y < screen_y_max) {        
@@ -955,13 +985,40 @@ void draw_all_object_layers() {
     }
 }
 
+void handle_col_triggers() {
+    for (int chan = 0; chan < COL_CHANNEL_COUNT; chan++) {
+        struct TriggerBuffer *buffer = &trigger_buffer[chan];
+
+        if (buffer->active) {
+            Color lerped_color;
+
+            if (buffer->seconds > 0) {
+                float multiplier = buffer->time_run / buffer->seconds;
+                lerped_color = color_lerp(buffer->old_color, buffer->new_color, multiplier);
+            } else {
+                lerped_color = buffer->new_color;
+            }
+
+            channels[chan].color = lerped_color;
+
+            buffer->time_run += dt;
+
+            if (buffer->time_run > buffer->seconds) {
+                buffer->active = FALSE;
+            }
+        }
+    }
+}
+
 void handle_triggers(int i) {
     GDObjectTyped *obj = objectsArrayList->objects[i];
 
     int obj_id = obj->id;
 
+    struct TriggerBuffer *buffer = NULL;
+
     if (objects[obj_id].is_trigger) {
-        if (obj->x < gameplay_state->player.x) {
+        if (obj->x < gameplay_state->player.x && obj->x > gameplay_state->old_player.x) {
             switch (obj_id) {
                 case TRIGGER_FADE_NONE:
                     current_fading_effect = FADE_NONE;
@@ -990,6 +1047,28 @@ void handle_triggers(int i) {
                 case TRIGGER_FADE_SCALE_OUT:
                     current_fading_effect = FADE_DOWN;
                     break;
+
+                case BG_TRIGGER:
+                    buffer = &trigger_buffer[BG];
+                    buffer->active = TRUE;
+                    buffer->old_color = channels[BG].color;
+                    buffer->new_color.r = obj->trig_colorR;
+                    buffer->new_color.g = obj->trig_colorG;
+                    buffer->new_color.b = obj->trig_colorB;
+                    buffer->seconds = obj->trig_duration;
+                    buffer->time_run = 0;
+                    break;
+                
+                case GROUND_TRIGGER:
+                    buffer = &trigger_buffer[GROUND];
+                    buffer->active = TRUE;
+                    buffer->old_color = channels[GROUND].color;
+                    buffer->new_color.r = obj->trig_colorR;
+                    buffer->new_color.g = obj->trig_colorG;
+                    buffer->new_color.b = obj->trig_colorB;
+                    buffer->seconds = obj->trig_duration;
+                    buffer->time_run = 0;
+                    break;
             }
         }
     }
@@ -999,4 +1078,5 @@ void handle_objects() {
     for (int i = 0; i < objectsArrayList->count; i++) {
         handle_triggers(i);
     }
+    handle_col_triggers();
 }

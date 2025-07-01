@@ -29,6 +29,8 @@ typedef struct {
     bool dead;
 
     int buffering_state;
+
+    float time_since_ground;
 } Player;
 
 enum BufferingState {
@@ -45,5 +47,7 @@ enum PlayerGamemode {
 
 void handle_death();
 void init_variables();
+void load_icons();
+void unload_icons();
 void draw_player();
 void handle_player();

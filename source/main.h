@@ -1,6 +1,7 @@
 #pragma once
 
 #include "player.h"
+#include "particles.h"
 
 extern int screenWidth;
 extern int screenHeight;
@@ -15,6 +16,9 @@ typedef struct {
     float camera_y_lerp;
     
     Player player;
+    Player old_player;
+    
+    Particle particles[MAX_PARTICLES];
 } GameState;
 
 enum ThreadIndex {
@@ -24,6 +28,7 @@ enum ThreadIndex {
 };
 
 extern float dt;
+extern int frame_counter;
 
 extern GameState state_buffers[THREAD_COUNT];
 extern GameState *gameplay_state;

@@ -1,6 +1,6 @@
 #include "player.h"
 #include "collision.h"
-#include "blocks.h"
+#include "objects.h"
 #include "level_loading.h"
 #include "main.h"
 #include <wiiuse/wpad.h>
@@ -9,7 +9,15 @@
 #include "object_includes.h"
 #include <unistd.h>
 #include <stdio.h>
+#include "icons_includes.h"
 
+GRRLIB_texImg *icon_l1;
+GRRLIB_texImg *icon_l2;
+GRRLIB_texImg *ship_l1;
+GRRLIB_texImg *ship_l2;
+
+Color p1;
+Color p2;
 
 inline float getTop(Player *player)  { return player->y + player->height / 2; }
 inline float getBottom(Player *player)  { return player->y - player->height / 2; }
@@ -96,12 +104,14 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
             } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0) {
                 player->vel_y = 0;
                 player->on_ground = TRUE;
+                player->time_since_ground = 0;
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
             } else {
                 if (player->gamemode == GAMEMODE_SHIP) {
                     if (gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) {
                         player->vel_y = 0;
                         player->on_ground = TRUE;
+                        player->time_since_ground = 0;
                         player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
                     }
                 }
@@ -147,6 +157,19 @@ void cube_gamemode(Player *player) {
 
     if (player->on_ground) {
         player->rotation = round(player->rotation / 90.0f) * 90.0f;
+    }
+
+    if ((player->time_since_ground < 0.05f)&& (frame_counter & 0b11) == 0) {
+        float vx = -random_float(0.1f, 0.5f);
+        float vy = random_float(0.3f, 0.8f) * mult;
+        float scale = random_float(0.1f, 0.4f);
+        ColorAlpha color;
+        color.r = p1.r;
+        color.g = p1.g;
+        color.b = p1.b;
+        color.a = 255;
+
+        spawn_particle(player->x, (player->upside_down ? getTop(player) : getBottom(player)), vx, vy, 0.01f, -0.025f * mult, scale, -0.005f, color, 200 + random_float(-20, 20));
     }
 
     if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
@@ -233,6 +256,8 @@ void run_player() {
         
     }
     
+    player->time_since_ground += dt;
+    
     player->vel_y += player->gravity * dt;
     player->y += player_get_vel(player, player->vel_y) * dt;
     player->x += player->vel_x * dt;
@@ -244,6 +269,7 @@ void run_player() {
         player->vel_y = 0;
         player->y = player->ground_y + (player->height / 2);
         player->on_ground = TRUE;
+        player->time_since_ground = 0;
     } 
 
     // Ceiling
@@ -251,20 +277,20 @@ void run_player() {
         player->vel_y = 0;
         player->y = player->ceiling_y - (player->height / 2);
         player->on_ground = TRUE;
+        player->time_since_ground = 0;  
     } 
+    
 }
 
 void handle_player() {
-    for (int i = 0; i < 4; i++) {
-        run_player();
-        run_camera();
-        collide_with_objects();
-    }
+    run_player();
+    run_camera();
+    collide_with_objects();
 }
 
 void init_variables() {
-    gameplay_state->camera_x = -90;
-    gameplay_state->camera_x_lerp = -90;
+    gameplay_state->camera_x = -120;
+    gameplay_state->camera_x_lerp = -120;
     gameplay_state->camera_y = -90;
     gameplay_state->camera_y_lerp = -90;
 
@@ -283,29 +309,139 @@ void init_variables() {
     player->ceiling_y = 999999;
     player->gamemode = GAMEMODE_CUBE;
     player->on_ground = TRUE;
+    player->upside_down = FALSE;
     player->dead = FALSE;
 }
 
 void handle_death() {
     usleep(1000000);
     init_variables();
+    reload_level();
+}
+
+void load_icons() {
+    icon_l1 = GRRLIB_LoadTexturePNG(player_01_001_png);
+    icon_l2 = GRRLIB_LoadTexturePNG(player_01_2_001_png);
+    ship_l1 = GRRLIB_LoadTexturePNG(ship_01_001_png);
+    ship_l2 = GRRLIB_LoadTexturePNG(ship_01_2_001_png);
+
+    p1.r = 0;
+    p1.g = 255;
+    p1.b = 0;
+
+    p2.r = 0;
+    p2.g = 255;
+    p2.b = 255;
+}
+
+void unload_icons() {
+    GRRLIB_FreeTexture(icon_l1);
+    GRRLIB_FreeTexture(icon_l2);
+}
+
+void draw_ship(Player *player, float calc_x, float calc_y) {
+    GRRLIB_SetHandle(icon_l1, 30, 30);  // 60x60
+    GRRLIB_SetHandle(icon_l2, 30, 30);
+    GRRLIB_SetHandle(ship_l1, 38, 24);  // 76x48
+    GRRLIB_SetHandle(ship_l2, 38, 24);
+
+    int mult = (player->upside_down ? -1 : 1);
+
+    float x;
+    float y;
+
+    #define CUBE_DIVISOR 1.8
+
+    rotate_point_around_center(
+        calc_x, calc_y,
+        7, (player->upside_down) ? 5 : -9,
+        30, 30,
+        60, 60,
+        player->rotation,
+        &x, &y
+    );
+
+    // Top (icon)
+    GRRLIB_DrawImg(
+        x,
+        y,
+        icon_l1,
+        player->rotation,
+        0.733f / CUBE_DIVISOR, 0.733f / CUBE_DIVISOR,
+        RGBA(p1.r, p1.g, p1.b, 255)
+    );
+
+    GRRLIB_DrawImg(
+        x,
+        y,
+        icon_l2,
+        player->rotation,
+        0.733f / CUBE_DIVISOR, 0.733f / CUBE_DIVISOR,
+        RGBA(p2.r, p2.g, p2.b, 255)
+    );
+
+    rotate_point_around_center(
+        calc_x, calc_y,
+        0, (player->upside_down) ? -4 : 12,
+        30, 30,
+        76, 48,
+        player->rotation,
+        &x, &y
+    );
+
+    // Bottom (ship)
+    GRRLIB_DrawImg(
+        x,
+        y,
+        ship_l1,
+        player->rotation,
+        0.733f, 0.733f * mult,
+        RGBA(p1.r, p1.g, p1.b, 255)
+    );
+
+    GRRLIB_DrawImg(
+        x,
+        y,
+        ship_l2,
+        player->rotation,
+        0.733f, 0.733f * mult,
+        RGBA(p2.r, p2.g, p2.b, 255)
+    );
 }
 
 void draw_player() {
     Player *player = &render_state->player;
 
-    float calc_x = ((getLeft(player) - render_state->camera_x) * scale);
-    float calc_y = screenHeight - ((getTop(player) - render_state->camera_y) * scale);
-
-    GRRLIB_texImg *image = object_images[BASIC_BLOCK][1];
+    float calc_x = ((getLeft(player) - render_state->camera_x) * SCALE);
+    float calc_y = screenHeight - ((getTop(player) - render_state->camera_y) * SCALE);
 
     GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
-    GRRLIB_DrawImg(
-        calc_x, calc_y - 2,
-        image,
-        player->rotation,
-        0.73333333333333333333333333333333,
-        0.73333333333333333333333333333333,
-        RGBA(255, 255, 255, 255)
-    );
+
+    switch (player->gamemode) {
+        case GAMEMODE_CUBE:
+            GRRLIB_SetHandle(icon_l1, 30, 30);
+            GRRLIB_SetHandle(icon_l2, 30, 30);
+            GRRLIB_DrawImg(
+                calc_x, calc_y - 2,
+                icon_l1,
+                player->rotation,
+                0.73333333333333333333333333333333,
+                0.73333333333333333333333333333333,
+                RGBA(p1.r, p1.g, p1.b, 255)
+            );
+
+            GRRLIB_DrawImg(
+                calc_x, calc_y - 2,
+                icon_l2,
+                player->rotation,
+                0.73333333333333333333333333333333,
+                0.73333333333333333333333333333333,
+                RGBA(p2.r, p2.g, p2.b, 255)
+            );
+            break;
+        case GAMEMODE_SHIP:
+            draw_ship(player, calc_x - 8, calc_y);
+            break;
+    }
+
 }

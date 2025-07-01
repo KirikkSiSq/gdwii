@@ -1,6 +1,6 @@
 #pragma once
 
-#include "blocks.h"
+#include "objects.h"
 #include "mem_pool.h"
 
 typedef enum {
@@ -25,9 +25,9 @@ typedef struct {
     bool flippedH;   // key 4
     bool flippedV;   // key 5
     float rotation;  // key 6
-    int trig_colorR;      // key 7
-    int trig_colorG;      // key 8
-    int trig_colorB;      // key 9
+    u8 trig_colorR;      // key 7
+    u8 trig_colorG;      // key 8
+    u8 trig_colorB;      // key 9
     float trig_duration;  // key 10
     int zsheetlayer; // no key has this, but used internally
     int zlayer;      // key 24
@@ -72,6 +72,26 @@ typedef struct {
     GDObjectLayer **layers;
 } GDObjectLayerList;
 
+typedef struct {
+    int fromRed;
+    int fromGreen;
+    int fromBlue;
+    int playerColor;
+    bool blending;
+    int channelID;
+    float fromOpacity;
+    bool toggleOpacity;
+    int inheritedChannelID;
+    int hsv; // or a struct if you support HSV
+    int toRed;
+    int toGreen;
+    int toBlue;
+    float deltaTime;
+    float toOpacity;
+    float duration;
+    bool copyOpacity;
+} GDColorChannel;
+
 extern GDTypedObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;
 
@@ -84,3 +104,5 @@ void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GDObjectTyped **array, int count);
 void load_level();
 void unload_level();
+void reload_level();
+void set_color_channels();

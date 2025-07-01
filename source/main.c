@@ -12,7 +12,7 @@
 #include <math.h>
 
 #include <asndlib.h>
-#include "blocks.h"
+#include "objects.h"
 #include <stdio.h>
 #include <ogc/lwp_watchdog.h>
 #include <ogc/lwp.h>
@@ -28,7 +28,7 @@
 // include generated header
 #include "Jumper_ogg.h"
 #include "level_loading.h"
-#include "blocks.h"
+#include "objects.h"
 
 #include "pusab_ttf.h"
 
@@ -56,6 +56,8 @@ lwp_t state_mutex;
 volatile bool should_exit = 0;
 
 float dt;
+
+int frame_counter = 0;
 
 #define TICK_RATE  (1.0f / 60.0f)    // 60 logic updates per second
 #define TICKS_PER_SEC  (float)TB_TIMER_CLOCK   // ~81,000,000 on Wii
@@ -148,8 +150,14 @@ void *gameplay_thread(void *arg) {
 
         LWP_MutexLock(state_mutex);
 
-        handle_objects();
-        handle_player();
+        
+        for (int i = 0; i < 4; i++) {
+            gameplay_state->old_player = gameplay_state->player;
+            handle_player();
+            handle_objects();
+            update_particles();
+            frame_counter++;
+        }
         
         LWP_MutexUnlock(state_mutex);
         
@@ -188,6 +196,8 @@ int main() {
     mempool_init(&level_pool, level_pool_buffer, LEVEL_POOL_SIZE);
 
     LWP_MutexInit(&state_mutex, false);
+
+    srand(time(NULL));
 
     // Initialise the audio subsystem
 	ASND_Init();

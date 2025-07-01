@@ -93,11 +93,30 @@ enum SpriteSheets {
     SHEET_COUNT
 };
 
+typedef struct {
+    u8 r;
+    u8 b;
+    u8 g;
+} Color;
+
+typedef struct {
+    u8 r;
+    u8 b;
+    u8 g;
+    u8 a;
+} ColorAlpha;
+
 struct ColorChannel {
+    Color color;
     bool blending;
-    u32 r:8;
-    u32 b:8;
-    u32 g:8;
+};
+
+struct TriggerBuffer {
+    bool active;
+    Color old_color;
+    Color new_color;
+    float seconds;
+    float time_run;
 };
 
 enum HitboxTypes {
@@ -135,7 +154,7 @@ typedef struct {
 } ObjectDefinition;
 
 #define BLOCK_SIZE_PX 44.f
-#define scale (BLOCK_SIZE_PX / 30.0f)
+#define SCALE (BLOCK_SIZE_PX / 30.0f)
 
 extern const struct ObjectLayer player_layer;
 extern int current_fading_effect;
@@ -144,6 +163,8 @@ extern struct ColorChannel channels[COL_CHANNEL_COUNT];
 extern const ObjectDefinition objects[];
 
 extern GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS];
+
+extern struct TriggerBuffer trigger_buffer[COL_CHANNEL_COUNT];
 
 extern int layersDrawn;
 

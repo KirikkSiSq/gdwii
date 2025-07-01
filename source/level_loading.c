@@ -4,7 +4,7 @@
 #include <zlib.h>
 #include <stdbool.h>
 
-#include "blocks.h"
+#include "objects.h"
 #include "level_loading.h"
 
 #include "test_gmd.h"
@@ -144,6 +144,47 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
     return out;
 }
 
+char *get_metadata_value(const char *levelString, const char *key) {
+    if (!levelString || !key) return NULL;
+
+    // Find the first semicolon, which separates metadata from objects
+    const char *end = strchr(levelString, ';');
+    if (!end) return NULL;
+
+    printf("Found metadata\n");
+
+    // We'll scan only the metadata portion
+    size_t metadataLen = end - levelString;
+    char *metadata = mempool_alloc(&level_pool, metadataLen + 1);
+    if (!metadata) return NULL;
+
+    printf("Allocated metadata\n");
+
+    strncpy(metadata, levelString, metadataLen);
+    metadata[metadataLen] = '\0';
+
+    
+    printf("Copied metadata: %s\n", metadata);
+
+    // Tokenize metadata by comma
+    char *token = strtok(metadata, ",");
+    while (token) {
+        if (strcmp(token, key) == 0) {
+            char *value = strtok(NULL, ",");  // get value after key
+            if (!value) break;
+
+            // Copy and return value
+            char *result = strdup(value);
+            mempool_free(&level_pool, metadata);
+            return result;
+        }
+        token = strtok(NULL, ",");
+    }
+
+    mempool_free(&level_pool, metadata);
+    return NULL;
+}
+
 char *decompress_level() {
     printf("Loading level data...\n");
 
@@ -217,6 +258,60 @@ char **split_string(const char *str, char delimiter, int *outCount) {
 void free_string_array(char **arr, int count) {
     for (int i = 0; i < count; i++) mempool_free(&level_pool, arr[i]);
     mempool_free(&level_pool, arr);
+}
+
+
+int parse_color_channels(const char *colorString, GDColorChannel **outArray) {
+    if (!colorString || !outArray) return 0;
+
+    int count = 0;
+    char **entries = split_string(colorString, '|', &count);
+    if (!entries) return 0;
+
+    GDColorChannel *channels = mempool_alloc(&level_pool, sizeof(GDColorChannel) * count);
+    if (!channels) {
+        printf("Couldn't alloc color channels\n");
+        free_string_array(entries, count);
+        return 0;
+    }
+
+    for (int i = 0; i < count; i++) {
+        GDColorChannel channel = {0};  // Zero-initialize
+        int kvCount = 0;
+        char **kvs = split_string(entries[i], '_', &kvCount);
+
+        for (int j = 0; j + 1 < kvCount; j += 2) {
+            int key = atoi(kvs[j]);
+            const char *valStr = kvs[j + 1];
+
+            switch (key) {
+                case 1:  channel.fromRed = atoi(valStr); break;
+                case 2:  channel.fromGreen = atoi(valStr); break;
+                case 3:  channel.fromBlue = atoi(valStr); break;
+                case 4:  channel.playerColor = atoi(valStr); break;
+                case 5:  channel.blending = atoi(valStr) != 0; break;
+                case 6:  channel.channelID = atoi(valStr); break;
+                case 7:  channel.fromOpacity = atof(valStr); break;
+                case 8:  channel.toggleOpacity = atoi(valStr) != 0; break;
+                case 9:  channel.inheritedChannelID = atoi(valStr); break;
+                case 10: channel.hsv = atoi(valStr); break;
+                case 11: channel.toRed = atoi(valStr); break;
+                case 12: channel.toGreen = atoi(valStr); break;
+                case 13: channel.toBlue = atoi(valStr); break;
+                case 14: channel.deltaTime = atof(valStr); break;
+                case 15: channel.toOpacity = atof(valStr); break;
+                case 16: channel.duration = atof(valStr); break;
+                case 17: channel.copyOpacity = atoi(valStr) != 0; break;
+            }
+        }
+
+        channels[i] = channel;
+        free_string_array(kvs, kvCount);
+    }
+
+    *outArray = channels;
+    free_string_array(entries, count);
+    return count;
 }
 
 GDValueType get_value_type_for_key(int key) {
@@ -688,6 +783,8 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
 
 GDTypedObjectList *objectsArrayList = NULL;
 GDObjectLayerList *layersArrayList = NULL;
+int channelCount = 0;
+GDColorChannel *colorChannels = NULL;
 
 void load_level() {
     char *level_string = decompress_level();
@@ -697,7 +794,12 @@ void load_level() {
         return;
     }
 
+    // Get colors
+    char *metaStr = get_metadata_value(level_string, "kS38");
+    channelCount = parse_color_channels(metaStr, &colorChannels);
+
     GDObjectList *objectsList = parse_string(level_string);
+
     mempool_free(&level_pool, level_string);
 
     if (objectsList == NULL) {
@@ -724,10 +826,38 @@ void load_level() {
     }
 
     sort_layers_by_layer(layersArrayList);
+    
+    set_color_channels();
+    memset(trigger_buffer, 0, sizeof(trigger_buffer));
 
     printf("Finished loading level\n");
 }
 
 void unload_level() {
     mempool_init(&level_pool, level_pool_buffer, LEVEL_POOL_SIZE);
+}
+
+void set_color_channels() {
+    for (int i = 0; i < channelCount; i++) {
+        GDColorChannel colorChannel = colorChannels[i];
+        
+        switch (colorChannel.channelID) {
+            case 1000:
+                channels[BG].color.r = colorChannel.fromRed;
+                channels[BG].color.g = colorChannel.fromGreen;
+                channels[BG].color.b = colorChannel.fromBlue;
+                break;
+
+            case 1001:
+                channels[GROUND].color.r = colorChannel.fromRed;
+                channels[GROUND].color.g = colorChannel.fromGreen;
+                channels[GROUND].color.b = colorChannel.fromBlue;
+                break;
+        }
+    }
+}
+
+void reload_level() {
+    memset(trigger_buffer, 0, sizeof(trigger_buffer));
+    set_color_channels();
 }
