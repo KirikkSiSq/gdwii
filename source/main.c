@@ -140,17 +140,14 @@ void *gameplay_thread(void *arg) {
         return NULL;
     }
 
-    u64 lastTicks = gettime();  // Initial time in ticks
     while (1) {
         WPAD_ScanPads();
 
         u64 frameStart = gettime();
-        dt = ticks_to_secs_float(frameStart - lastTicks) / 4; // 4 because it has to be 1/240 for gameplay 
-        lastTicks = frameStart;
+        dt = 1 / 240.f; // 4 because it has to be 1/240 for gameplay 
 
         LWP_MutexLock(state_mutex);
 
-        
         for (int i = 0; i < 4; i++) {
             gameplay_state->old_player = gameplay_state->player;
             handle_player();
@@ -160,16 +157,13 @@ void *gameplay_thread(void *arg) {
         }
         
         LWP_MutexUnlock(state_mutex);
-        
+                      
         if (gameplay_state->player.dead) {
             StopOgg();
             handle_death();
             PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
-            lastTicks = frameStart = gettime();
-            dt = 1 / 240.f;
         }
-
-
+        
         if (should_exit) {
             break;
         }

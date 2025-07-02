@@ -24,6 +24,7 @@ typedef struct {
     int gamemode;
 
     bool on_ground;
+    bool on_ceiling;
     bool mini;
     bool upside_down;
     bool dead;

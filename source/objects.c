@@ -967,8 +967,11 @@ void draw_all_object_layers() {
         int obj_id = obj->id;
 
         if (obj_id == PLAYER_OBJECT) {
-            draw_particles();
+            draw_particles(CUBE_DRAG);
+            draw_particles(SHIP_TRAIL);
+            draw_particles(HOLDING_SHIP_TRAIL);
             draw_player();
+            draw_particles(SHIP_DRAG);
         } else if (obj_id < OBJECT_COUNT) {
             float calc_x = ((obj->x - render_state->camera_x) * SCALE);
             float calc_y = screenHeight - ((obj->y - render_state->camera_y) * SCALE);

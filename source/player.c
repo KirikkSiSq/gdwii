@@ -110,7 +110,7 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
                 if (player->gamemode == GAMEMODE_SHIP) {
                     if (gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) {
                         player->vel_y = 0;
-                        player->on_ground = TRUE;
+                        player->on_ceiling = TRUE;
                         player->time_since_ground = 0;
                         player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
                     }
@@ -169,7 +169,7 @@ void cube_gamemode(Player *player) {
         color.b = p1.b;
         color.a = 255;
 
-        spawn_particle(player->x, (player->upside_down ? getTop(player) : getBottom(player)), vx, vy, 0.01f, -0.025f * mult, scale, -0.005f, color, 200 + random_float(-20, 20));
+        spawn_particle(CUBE_DRAG, player->x, (player->upside_down ? getTop(player) : getBottom(player)), vx, vy, 0.01f, -0.025f * mult, scale, -0.005f, color, 200 + random_float(-20, 20), TRUE);
     }
 
     if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
@@ -184,6 +184,61 @@ void cube_gamemode(Player *player) {
         player->vel_y = 603.72;
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
+
+        if (!(WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
+            player->vel_y -= player->gravity * dt * mult;
+            printf("Second jump\n");
+        } else {
+            printf("First jump\n");
+        }
+    }
+}
+
+void ship_particles(Player *player) {
+    int mult = (player->upside_down ? -1 : 1);
+    // Particle trail
+    if ((frame_counter & 0b11) == 0) {
+        float vx = -random_float(0.1f, 0.5f);
+        float vy = random_float(0.3f, 0.8f) * mult * 0.2f;
+        float ay = -0.025f * mult * 0.2f;
+        float scale = random_float(0.1f, 0.4f);
+        ColorAlpha color;
+        color.r = 255;
+        color.g = 50;
+        color.b = 0;
+        color.a = 255;
+
+        spawn_particle(SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), vx, vy, 0.01f, ay, scale, -0.005f, color, 200 + random_float(-20, 20), TRUE);
+        
+        // Holding particles
+        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
+            float vx = -random_float(0.1f, 0.5f) * 2.f;
+            float vy = random_float(0.3f, 0.8f) * mult * 0.2f;
+            float ay = -0.025f * mult * 0.2f;
+            float scale = random_float(0.1f, 0.4f);
+            ColorAlpha color;
+            color.r = 255;
+            color.g = 127;
+            color.b = 0;
+            color.a = 255;
+
+            spawn_particle(HOLDING_SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), vx, vy, 0.01f, ay, scale, -0.005f, color, 200 + random_float(-20, 20), TRUE);
+        }
+
+        if (player->on_ground) {
+            float vx = 1.f;
+            float vy = random_float(0.2f, 0.5f) * mult;
+            float ax = -0.01f;
+            float ay = -0.025f * mult * 0.2f;
+            float scale = random_float(0.1f, 0.4f);
+            ColorAlpha color;
+            color.r = 255;
+            color.g = 255;
+            color.b = 255;
+            color.a = 255;
+
+            spawn_particle(SHIP_DRAG, player->x + random_float(-15.f, 15.f), (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), vx, vy, ax, ay, scale, -0.01f, color, 200 + random_float(-20, 20), FALSE);
+        }
     }
 }
 
@@ -199,6 +254,8 @@ void ship_gamemode(Player *player) {
         else
             player->gravity = player->mini ? -1051.8984 : -894.11464;
     }
+
+    ship_particles(player);
 
     player->rotation = atan2f(player->vel_y, player->vel_x) * (180.0f / M_PI) * (player->upside_down ? 1 : -1);
     
@@ -263,12 +320,18 @@ void run_player() {
     player->x += player->vel_x * dt;
     
     player->on_ground = FALSE;
+    player->on_ceiling = FALSE;
     
     // Ground
     if (getBottom(player) < player->ground_y) {
         player->vel_y = 0;
         player->y = player->ground_y + (player->height / 2);
-        player->on_ground = TRUE;
+        
+        if (player->upside_down) {
+            player->on_ceiling = TRUE;
+        } else {
+            player->on_ground = TRUE;           
+        }
         player->time_since_ground = 0;
     } 
 
@@ -276,7 +339,11 @@ void run_player() {
     if (getTop(player) > player->ceiling_y) {
         player->vel_y = 0;
         player->y = player->ceiling_y - (player->height / 2);
-        player->on_ground = TRUE;
+        if (player->upside_down) {
+            player->on_ground = TRUE;
+        } else {
+            player->on_ceiling = TRUE;           
+        }
         player->time_since_ground = 0;  
     } 
     
@@ -309,6 +376,7 @@ void init_variables() {
     player->ceiling_y = 999999;
     player->gamemode = GAMEMODE_CUBE;
     player->on_ground = TRUE;
+    player->on_ceiling = FALSE;
     player->upside_down = FALSE;
     player->dead = FALSE;
 }

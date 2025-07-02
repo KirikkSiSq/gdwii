@@ -6,10 +6,11 @@
 
 GRRLIB_texImg *particleTex = NULL;
 
-void spawn_particle(float x, float y, float vx, float vy, float ax, float ay, float scale, float vscale, ColorAlpha color, float life) {
+void spawn_particle(int group_id, float x, float y, float vx, float vy, float ax, float ay, float scale, float vscale, ColorAlpha color, float life, bool blending) {
     Particle *particles = gameplay_state->particles;
     for (int i = 0; i < MAX_PARTICLES; i++) {
         if (!gameplay_state->particles[i].active) {
+            particles[i].group_id = group_id;
             particles[i].x = x;
             particles[i].y = y;
             particles[i].vx = vx / dt;
@@ -20,6 +21,7 @@ void spawn_particle(float x, float y, float vx, float vy, float ax, float ay, fl
             particles[i].scale = scale;
             particles[i].vscale = vscale / dt;
             particles[i].color = color;
+            particles[i].blending = blending;
             particles[i].active = true;
             break;
         }
@@ -44,25 +46,29 @@ void update_particles() {
 }
 
 // Call this in your render loop
-void draw_particles() {
-    GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
+void draw_particles(int group_id) {
     for (int i = 0; i < MAX_PARTICLES; i++) {
         Particle *particles = render_state->particles;
+        if (particles[i].group_id == group_id) {
+            float calc_x = ((particles[i].x - render_state->camera_x) * SCALE);
+            float calc_y = screenHeight - ((particles[i].y - render_state->camera_y) * SCALE);
+            
+            if (particles[i].active) {
+                if (particles[i].blending) {
+                    GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
+                }
 
-        float calc_x = ((particles[i].x - render_state->camera_x) * SCALE);
-        float calc_y = screenHeight - ((particles[i].y - render_state->camera_y) * SCALE);
-        
-        if (particles[i].active) {
-            GRRLIB_DrawImg(
-                calc_x,
-                calc_y,
-                particleTex,
-                0,
-                particles[i].scale,
-                particles[i].scale,
-                RGBA(particles[i].color.r, particles[i].color.g, particles[i].color.b, particles[i].color.a)
-            );
+                GRRLIB_DrawImg(
+                    calc_x,
+                    calc_y,
+                    particleTex,
+                    0,
+                    particles[i].scale,
+                    particles[i].scale,
+                    RGBA(particles[i].color.r, particles[i].color.g, particles[i].color.b, particles[i].color.a)
+                );
+                GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
+            }
         }
     }
-    GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
 }
