@@ -1,13 +1,11 @@
 #pragma once
 
 #include "objects.h"
-#include "mem_pool.h"
 
 typedef enum {
     GD_VAL_INT,
     GD_VAL_FLOAT,
     GD_VAL_BOOL,
-    GD_VAL_STRING,
     GD_VAL_UNKNOWN
 } GDValueType;
 
@@ -94,11 +92,6 @@ typedef struct {
 
 extern GDTypedObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;
-
-#define LEVEL_POOL_SIZE 16 * 1024 * 1024
-
-extern MemPool level_pool;
-extern char level_pool_buffer[LEVEL_POOL_SIZE];
 
 void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GDObjectTyped **array, int count);

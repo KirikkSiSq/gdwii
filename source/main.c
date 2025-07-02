@@ -99,15 +99,9 @@ void *graphics_thread(void *arg) {
         char fpsText[64];
         snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
         GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White text
-
-        // Render mem
-        char memText[64];
-        snprintf(memText, sizeof(memText), "Level pool: %0.2f KB / %d KB", mempool_bytes_used(&level_pool) / 1024.f, mempool_bytes_total(&level_pool) / 1024);
-        GRRLIB_PrintfTTF(20, 50, font, memText, 20, 0xFFFFFFFF);
-        
         char layerText[64];
         snprintf(layerText, sizeof(layerText), "Drawn layers: %d", layersDrawn);
-        GRRLIB_PrintfTTF(20, 110, font, layerText, 20, 0xFFFFFFFF);
+        GRRLIB_PrintfTTF(20, 50, font, layerText, 20, 0xFFFFFFFF);
 
         GRRLIB_Render();
 
@@ -119,7 +113,7 @@ void *graphics_thread(void *arg) {
 #define ticks_to_secs_float(ticks) (((float)(ticks)/(float)(TB_TIMER_CLOCK*1000)))
 
 void *gameplay_thread(void *arg) {
-    
+    WPAD_ScanPads();
     printf("Gameplay thread started\n");
     load_level();
     
@@ -162,8 +156,9 @@ void *gameplay_thread(void *arg) {
             StopOgg();
             handle_death();
             PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
+            WPAD_ScanPads();
         }
-        
+
         if (should_exit) {
             break;
         }
@@ -186,8 +181,6 @@ int main() {
     WPAD_Init();
     WPAD_SetIdleTimeout( 60 * 10 );
     WPAD_SetDataFormat( WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR );
-
-    mempool_init(&level_pool, level_pool_buffer, LEVEL_POOL_SIZE);
 
     LWP_MutexInit(&state_mutex, false);
 

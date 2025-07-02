@@ -53,7 +53,9 @@
         "asndlib.h": "c",
         "random": "c",
         "limits": "c",
-        "main.h": "c"
+        "main.h": "c",
+        "lwp.h": "c",
+        "test_gmd.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

@@ -188,14 +188,14 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
-                .texture = square_02_001_png
+                .texture = square_02_glow_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
-                .texture = square_02_glow_001_png
+                .texture = square_02_001_png
             }
         },
         .hitbox = {
