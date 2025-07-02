@@ -186,7 +186,7 @@ void cube_gamemode(Player *player) {
         player->buffering_state = BUFFER_END;
 
         if (!(WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
-            player->vel_y -= player->gravity * dt * mult;
+            player->vel_y -= player->gravity * dt;
             printf("Second jump\n");
         } else {
             printf("First jump\n");
