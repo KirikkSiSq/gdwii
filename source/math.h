@@ -18,4 +18,6 @@ void rotate_point_around_center(
     float rotation_deg,             // rotation angle in degrees
     float *output_x, float *output_y // output screen position
 );
+
+float randomf();
 float random_float(float min, float max);

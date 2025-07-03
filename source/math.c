@@ -73,6 +73,10 @@ void rotate_point_around_center(
     *output_y = y + (center_y - (height / 2.0f)) + rotated_y;
 }
 
+float randomf() {
+    return (float)rand() / RAND_MAX;
+}
+
 float random_float(float min, float max) {
     return ((max - min) * ((float)rand() / RAND_MAX)) + min;
 }

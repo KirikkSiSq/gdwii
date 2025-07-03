@@ -160,16 +160,9 @@ void cube_gamemode(Player *player) {
     }
 
     if ((player->time_since_ground < 0.05f)&& (frame_counter & 0b11) == 0) {
-        float vx = -random_float(0.1f, 0.5f);
-        float vy = random_float(0.3f, 0.8f) * mult;
-        float scale = random_float(0.1f, 0.4f);
-        ColorAlpha color;
-        color.r = p1.r;
-        color.g = p1.g;
-        color.b = p1.b;
-        color.a = 255;
-
-        spawn_particle(CUBE_DRAG, player->x, (player->upside_down ? getTop(player) : getBottom(player)), vx, vy, 0.01f, -0.025f * mult, scale, -0.005f, color, 200 + random_float(-20, 20), TRUE);
+        particle_templates[CUBE_DRAG].speed = 75 * mult;
+        particle_templates[CUBE_DRAG].gravity_y = (player->upside_down ? 100 : -300);
+        spawn_particle(CUBE_DRAG, player->x, (player->upside_down ? getTop(player) : getBottom(player)), NULL);
     }
 
     if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
@@ -196,48 +189,20 @@ void cube_gamemode(Player *player) {
 
 void ship_particles(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
-    // Particle trail
     if ((frame_counter & 0b11) == 0) {
-        float vx = -random_float(0.1f, 0.5f);
-        float vy = random_float(0.3f, 0.8f) * mult * 0.2f;
-        float ay = -0.025f * mult * 0.2f;
-        float scale = random_float(0.1f, 0.4f);
-        ColorAlpha color;
-        color.r = 255;
-        color.g = 50;
-        color.b = 0;
-        color.a = 255;
-
-        spawn_particle(SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), vx, vy, 0.01f, ay, scale, -0.005f, color, 200 + random_float(-20, 20), TRUE);
+        // Particle trail
+        spawn_particle(SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), NULL);
         
         // Holding particles
         if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
-            float vx = -random_float(0.1f, 0.5f) * 2.f;
-            float vy = random_float(0.3f, 0.8f) * mult * 0.2f;
-            float ay = -0.025f * mult * 0.2f;
-            float scale = random_float(0.1f, 0.4f);
-            ColorAlpha color;
-            color.r = 255;
-            color.g = 127;
-            color.b = 0;
-            color.a = 255;
-
-            spawn_particle(HOLDING_SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), vx, vy, 0.01f, ay, scale, -0.005f, color, 200 + random_float(-20, 20), TRUE);
+            spawn_particle(HOLDING_SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), NULL);
         }
 
+        // Ground drag effectr
         if (player->on_ground) {
-            float vx = 1.f;
-            float vy = random_float(0.2f, 0.5f) * mult;
-            float ax = -0.01f;
-            float ay = -0.025f * mult * 0.2f;
-            float scale = random_float(0.1f, 0.4f);
-            ColorAlpha color;
-            color.r = 255;
-            color.g = 255;
-            color.b = 255;
-            color.a = 255;
-
-            spawn_particle(SHIP_DRAG, player->x + random_float(-15.f, 15.f), (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), vx, vy, ax, ay, scale, -0.01f, color, 200 + random_float(-20, 20), FALSE);
+            particle_templates[SHIP_DRAG].speed = 95 * mult;
+            particle_templates[SHIP_DRAG].gravity_y = (player->upside_down ? 100 : -300);
+            spawn_particle(SHIP_DRAG, player->x, (player->upside_down ? getTop(player) : getBottom(player)), NULL);
         }
     }
 }
@@ -379,6 +344,14 @@ void init_variables() {
     player->on_ceiling = FALSE;
     player->upside_down = FALSE;
     player->dead = FALSE;
+
+    particle_templates[CUBE_DRAG].start_color.r = p1.r;
+    particle_templates[CUBE_DRAG].start_color.g = p1.g;
+    particle_templates[CUBE_DRAG].start_color.b = p1.b;
+    
+    particle_templates[CUBE_DRAG].end_color.r = p1.r;
+    particle_templates[CUBE_DRAG].end_color.g = p1.g;
+    particle_templates[CUBE_DRAG].end_color.b = p1.b;
 }
 
 void handle_death() {

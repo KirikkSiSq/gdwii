@@ -101,8 +101,8 @@ typedef struct {
 
 typedef struct {
     u8 r;
-    u8 b;
     u8 g;
+    u8 b;
     u8 a;
 } ColorAlpha;
 
@@ -167,6 +167,9 @@ extern GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS];
 extern struct TriggerBuffer trigger_buffer[COL_CHANNEL_COUNT];
 
 extern int layersDrawn;
+
+void get_fade_vars(float x, int *fade_x, int *fade_y, float *fade_scale);
+int get_fade_value(float x, int right_edge);
 
 void draw_all_object_layers();
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer);

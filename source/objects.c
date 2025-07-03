@@ -769,6 +769,15 @@ void unload_spritesheet() {
     unload_icons();
 }
 
+void handle_object_particles(GDObjectTyped *obj) {
+    switch (obj->id) {
+        case YELLOW_ORB:
+            spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
+            draw_obj_particles(ORB_PARTICLES, obj);
+            break;
+    }
+}
+
 int get_fade_value(float x, int right_edge) {
     #define FADE_WIDTH 60
     if (x < 0 || x > right_edge)
@@ -795,6 +804,32 @@ float get_out_scale_fade(float x, int right_edge) {
     int fade = 255 - get_fade_value(x, right_edge);
     return 1 + ((fade / 255.f) / 2);
 }
+
+void get_fade_vars(float x, int *fade_x, int *fade_y, float *fade_scale) {
+    switch (current_fading_effect) {
+        case FADE_NONE:
+            break;
+        case FADE_UP:
+            *fade_y = get_xy_fade_offset(x, screenWidth);
+            break;
+        case FADE_DOWN:
+            *fade_y = -get_xy_fade_offset(x, screenWidth);
+            break;
+        case FADE_RIGHT:
+            *fade_x = get_xy_fade_offset(x, screenWidth);
+            break;
+        case FADE_LEFT:
+            *fade_x = -get_xy_fade_offset(x, screenWidth);
+            break;
+        case FADE_SCALE_IN:
+            *fade_scale = get_in_scale_fade(x, screenWidth);
+            break;
+        case FADE_SCALE_OUT:
+            *fade_scale = get_out_scale_fade(x, screenWidth);
+            break;
+    }
+}
+
 
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
     int obj_id = obj->id;
@@ -837,28 +872,7 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
 
     float fade_scale = 1.f;
 
-    switch (current_fading_effect) {
-        case FADE_NONE:
-            break;
-        case FADE_UP:
-            fade_y = get_xy_fade_offset(x, screenWidth);
-            break;
-        case FADE_DOWN:
-            fade_y = -get_xy_fade_offset(x, screenWidth);
-            break;
-        case FADE_RIGHT:
-            fade_x = get_xy_fade_offset(x, screenWidth);
-            break;
-        case FADE_LEFT:
-            fade_x = -get_xy_fade_offset(x, screenWidth);
-            break;
-        case FADE_SCALE_IN:
-            fade_scale = get_in_scale_fade(x, screenWidth);
-            break;
-        case FADE_SCALE_OUT:
-            fade_scale = get_out_scale_fade(x, screenWidth);
-            break;
-    }
+    get_fade_vars(x, &fade_x, &fade_y, &fade_scale);
 
     GRRLIB_SetHandle(image, (width/2), (height/2));
     GRRLIB_DrawImg(
@@ -979,8 +993,8 @@ void draw_all_object_layers() {
             if (calc_x > -90 && calc_x < screen_x_max) {        
                 if (calc_y > -90 && calc_y < screen_y_max) {        
                     layersDrawn++;
-                    
                     GDObjectLayer *layer = layersArrayList->layers[i];
+                    if (!gameplay_state->player.dead && layer->layerNum == 0) handle_object_particles(obj);
                     put_object_layer(obj, calc_x, calc_y, layer);
                 }
             }
