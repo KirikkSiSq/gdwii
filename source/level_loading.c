@@ -773,15 +773,10 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     return layerList;
 }
 
-// Frees a GDObjectLayerList and all underlying GDObjectLayer arrays
 void free_layer_list(GDObjectLayerList *list) {
     if (!list) return;
     if (list->layers) {
-        // Free the underlying GDObjectLayer array only once
-        if (list->count > 0 && list->layers[0]) {
-            // The first pointer in the array points to the malloc'd block
-            free(list->layers[0]);
-        }
+        // No need to free each layer as it has been allocated as the layer list
         free(list->layers);
     }
     free(list);
