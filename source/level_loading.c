@@ -750,6 +750,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     
     if (layerList == NULL) {
         printf("Couldn't allocate layer list\n");
+        free(obj);
         free(layers);
         return NULL;
     }
