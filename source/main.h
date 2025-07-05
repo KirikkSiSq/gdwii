@@ -27,11 +27,11 @@ enum ThreadIndex {
     THREAD_COUNT
 };
 
-extern float dt;
+#define STEPS_DT (1.0f / 240.0f) // 1/240 seconds per physics step
+
 extern int frame_counter;
 
-extern GameState state_buffers[THREAD_COUNT];
-extern GameState *gameplay_state;
-extern GameState *render_state;
+extern GameState state;
 
+void draw_game();
 void print_debug(GRRLIB_ttfFont *font);

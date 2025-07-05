@@ -112,7 +112,7 @@ ParticleTemplate particle_templates[] = {
 
 void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
     ParticleTemplate *tpl = &particle_templates[group_id];
-    Particle *particles = gameplay_state->particles;
+    Particle *particles = state.particles;
     for (int i = 0; i < MAX_PARTICLES; i++) {
         if (!particles[i].active) {
             float angle = tpl->angle + tpl->angleVar * random_float(-1, 1);
@@ -183,26 +183,26 @@ void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
 
 void update_particles() {
     for (int i = 0; i < MAX_PARTICLES; i++) {
-        Particle *p = &gameplay_state->particles[i];
+        Particle *p = &state.particles[i];
         if (p->active) {
-            p->vx += p->gravity_x * dt;
-            p->vy += p->gravity_y * dt;
+            p->vx += p->gravity_x * STEPS_DT;
+            p->vy += p->gravity_y * STEPS_DT;
 
             if (p->rotate_per_second != 0) {
-                float dtheta = DegToRad(p->rotate_per_second) * dt;
+                float dtheta = DegToRad(p->rotate_per_second) * STEPS_DT;
                 float old_vx = p->vx, old_vy = p->vy;
                 p->vx = old_vx * cosf(dtheta) - old_vy * sinf(dtheta);
                 p->vy = old_vx * sinf(dtheta) + old_vy * cosf(dtheta);
             }
 
-            p->x += p->vx * dt;
-            p->y += p->vy * dt;
-            p->scale += p->scale_delta * dt;
-            p->color.r += p->color_delta.r * dt;
-            p->color.g += p->color_delta.g * dt;
-            p->color.b += p->color_delta.b * dt;
-            p->color.a += p->color_delta.a * dt;
-            p->life -= dt;
+            p->x += p->vx * STEPS_DT;
+            p->y += p->vy * STEPS_DT;
+            p->scale += p->scale_delta * STEPS_DT;
+            p->color.r += p->color_delta.r * STEPS_DT;
+            p->color.g += p->color_delta.g * STEPS_DT;
+            p->color.b += p->color_delta.b * STEPS_DT;
+            p->color.a += p->color_delta.a * STEPS_DT;
+            p->life -= STEPS_DT;
             if (p->life <= 0 || p->scale <= 0) {
                 p->active = FALSE;
             }
@@ -212,11 +212,11 @@ void update_particles() {
 
 void draw_particles(int group_id) {
     for (int i = 0; i < MAX_PARTICLES; i++) {
-        Particle *p = &render_state->particles[i];
+        Particle *p = &state.particles[i];
 
         if (p->group_id == group_id && p->active) {
-            float calc_x = ((p->x - render_state->camera_x) * SCALE);
-            float calc_y = screenHeight - ((p->y - render_state->camera_y) * SCALE);
+            float calc_x = ((p->x - state.camera_x) * SCALE);
+            float calc_y = screenHeight - ((p->y - state.camera_y) * SCALE);
 
             if (p->blending) {
                 GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
@@ -246,17 +246,17 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
 
     float fade_scale = 1.f;
     
-    float x = ((parent_obj->x - render_state->camera_x) * SCALE);
+    float x = ((parent_obj->x - state.camera_x) * SCALE);
     get_fade_vars(x, &fade_x, &fade_y, &fade_scale);
 
     for (int i = 0; i < MAX_PARTICLES; i++) {
-        Particle *p = &render_state->particles[i];
+        Particle *p = &state.particles[i];
 
         bool condition = (parent_obj == NULL ? TRUE : parent_obj == p->parent_obj);
 
         if (p->group_id == group_id && condition && p->active) {
-            float calc_x = ((p->x - render_state->camera_x) * SCALE);
-            float calc_y = screenHeight - ((p->y - render_state->camera_y) * SCALE);
+            float calc_x = ((p->x - state.camera_x) * SCALE);
+            float calc_y = screenHeight - ((p->y - state.camera_y) * SCALE);
 
             if (p->blending) {
                 GRRLIB_SetBlend(GRRLIB_BLEND_ADD);

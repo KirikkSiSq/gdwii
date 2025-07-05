@@ -772,7 +772,7 @@ void unload_spritesheet() {
 void handle_object_particles(GDObjectTyped *obj) {
     switch (obj->id) {
         case YELLOW_ORB:
-            spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
+            if (!state.player.dead)spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
             break;
     }
@@ -935,8 +935,8 @@ void draw_background(f32 x, f32 y) {
 void draw_ground(f32 y, bool is_ceiling) {
     int mult = (is_ceiling ? -1 : 1);
 
-    float calc_x = 0 - positive_fmod(render_state->camera_x * SCALE, GROUND_SIZE);
-    float calc_y = screenHeight - ((y - render_state->camera_y) * SCALE);
+    float calc_x = 0 - positive_fmod(state.camera_x * SCALE, GROUND_SIZE);
+    float calc_y = screenHeight - ((y - state.camera_y) * SCALE);
 
     for (float i = -GROUND_SIZE; i < screenWidth + GROUND_SIZE; i += GROUND_SIZE) {
         GRRLIB_DrawImg(
@@ -987,14 +987,14 @@ void draw_all_object_layers() {
             draw_player();
             draw_particles(SHIP_DRAG);
         } else if (obj_id < OBJECT_COUNT) {
-            float calc_x = ((obj->x - render_state->camera_x) * SCALE);
-            float calc_y = screenHeight - ((obj->y - render_state->camera_y) * SCALE);
+            float calc_x = ((obj->x - state.camera_x) * SCALE);
+            float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);
 
             if (calc_x > -90 && calc_x < screen_x_max) {        
                 if (calc_y > -90 && calc_y < screen_y_max) {        
                     layersDrawn++;
                     GDObjectLayer *layer = layersArrayList->layers[i];
-                    if (!gameplay_state->player.dead && layer->layerNum == 0) handle_object_particles(obj);
+                    if (layer->layerNum == 0) handle_object_particles(obj);
                     put_object_layer(obj, calc_x, calc_y, layer);
                 }
             }
@@ -1018,7 +1018,7 @@ void handle_col_triggers() {
 
             channels[chan].color = lerped_color;
 
-            buffer->time_run += dt;
+            buffer->time_run += STEPS_DT;
 
             if (buffer->time_run > buffer->seconds) {
                 buffer->active = FALSE;
@@ -1035,7 +1035,7 @@ void handle_triggers(int i) {
     struct TriggerBuffer *buffer = NULL;
 
     if (objects[obj_id].is_trigger) {
-        if (obj->x < gameplay_state->player.x && obj->x > gameplay_state->old_player.x) {
+        if (obj->x < state.player.x && obj->x > state.old_player.x) {
             switch (obj_id) {
                 case TRIGGER_FADE_NONE:
                     current_fading_effect = FADE_NONE;

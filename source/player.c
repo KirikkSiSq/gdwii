@@ -37,7 +37,7 @@ inline float obj_gravTop(Player *player, GDObjectTyped *object) { return player-
 
 void set_intended_ceiling(Player *player) {
     float mid_point = (player->ground_y + player->ceiling_y) / 2;
-    gameplay_state->camera_intended_y = mid_point - (SCREEN_HEIGHT_AREA / 2);
+    state.camera_intended_y = mid_point - (SCREEN_HEIGHT_AREA / 2);
 }
 
 void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
@@ -131,7 +131,7 @@ float player_get_vel(Player *player, float vel) {
 }
 
 void collide_with_objects() {
-    Player *player = &gameplay_state->player;
+    Player *player = &state.player;
 
     for (int i = 0; i < objectsArrayList->count; i++) {
         GDObjectTyped *obj = objectsArrayList->objects[i]; 
@@ -153,7 +153,7 @@ void cube_gamemode(Player *player) {
     
     if (player->vel_y < -810) player->vel_y = -810;
 
-    player->rotation += 415.3848 * dt * mult;
+    player->rotation += 415.3848 * STEPS_DT * mult;
 
     if (player->on_ground) {
         player->rotation = round(player->rotation / 90.0f) * 90.0f;
@@ -179,7 +179,7 @@ void cube_gamemode(Player *player) {
         player->buffering_state = BUFFER_END;
 
         if (!(WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
-            player->vel_y -= player->gravity * dt;
+            player->vel_y -= player->gravity * STEPS_DT;
             printf("Second jump\n");
         } else {
             printf("First jump\n");
@@ -235,9 +235,9 @@ void ship_gamemode(Player *player) {
 }
 
 void run_camera() {
-    Player *player = &gameplay_state->player;
+    Player *player = &state.player;
 
-    gameplay_state->camera_x += 311.580093712804 * dt;
+    state.camera_x += 311.580093712804 * STEPS_DT;
 
     float upper = 240.f;
     float lower = 120.f;
@@ -248,26 +248,26 @@ void run_camera() {
     }
 
     if (player->gamemode == GAMEMODE_CUBE) {
-        if (grav(player, player->vel_y) > 0 && player->y > gameplay_state->camera_y + upper) {
-            gameplay_state->camera_y_lerp += player_get_vel(player, player->vel_y) * dt;
+        if (grav(player, player->vel_y) > 0 && player->y > state.camera_y + upper) {
+            state.camera_y_lerp += player_get_vel(player, player->vel_y) * STEPS_DT;
         }
 
-        if (grav(player, player->vel_y) < 0 && player->y < gameplay_state->camera_y + lower) {
-            gameplay_state->camera_y_lerp += player_get_vel(player, player->vel_y) * dt;
+        if (grav(player, player->vel_y) < 0 && player->y < state.camera_y + lower) {
+            state.camera_y_lerp += player_get_vel(player, player->vel_y) * STEPS_DT;
         }
 
-        if (gameplay_state->camera_y_lerp < -90.f) gameplay_state->camera_y_lerp = -90.f;
+        if (state.camera_y_lerp < -90.f) state.camera_y_lerp = -90.f;
 
-        gameplay_state->camera_y = approachf(gameplay_state->camera_y, gameplay_state->camera_y_lerp, 0.2f, 0.05f);
+        state.camera_y = approachf(state.camera_y, state.camera_y_lerp, 0.2f, 0.05f);
     } else {
-        gameplay_state->camera_y = approachf(gameplay_state->camera_y, gameplay_state->camera_intended_y, 0.1f, 0.025f);
-        gameplay_state->camera_y_lerp = gameplay_state->camera_y;
+        state.camera_y = approachf(state.camera_y, state.camera_intended_y, 0.1f, 0.025f);
+        state.camera_y_lerp = state.camera_y;
     }
 
 }
 
 void run_player() {
-    Player *player = &gameplay_state->player;
+    Player *player = &state.player;
     switch (player->gamemode) {
         case GAMEMODE_CUBE:
             cube_gamemode(player);
@@ -278,11 +278,11 @@ void run_player() {
         
     }
     
-    player->time_since_ground += dt;
+    player->time_since_ground += STEPS_DT;
     
-    player->vel_y += player->gravity * dt;
-    player->y += player_get_vel(player, player->vel_y) * dt;
-    player->x += player->vel_x * dt;
+    player->vel_y += player->gravity * STEPS_DT;
+    player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
+    player->x += player->vel_x * STEPS_DT;
     
     player->on_ground = FALSE;
     player->on_ceiling = FALSE;
@@ -321,16 +321,16 @@ void handle_player() {
 }
 
 void init_variables() {
-    gameplay_state->camera_x = -120;
-    gameplay_state->camera_x_lerp = -120;
-    gameplay_state->camera_y = -90;
-    gameplay_state->camera_y_lerp = -90;
+    state.camera_x = -120;
+    state.camera_x_lerp = -120;
+    state.camera_y = -90;
+    state.camera_y_lerp = -90;
 
     current_fading_effect = FADE_NONE;
     
-    memset(&gameplay_state->player, 0, sizeof(Player));
+    memset(&state.player, 0, sizeof(Player));
 
-    Player *player = &gameplay_state->player;
+    Player *player = &state.player;
     player->width = 30;
     player->height = 30;
     player->x = 0;
@@ -355,7 +355,9 @@ void init_variables() {
 }
 
 void handle_death() {
-    usleep(1000000);
+    for (s32 i = 0; i < 60; i++) {
+        draw_game();
+    }
     init_variables();
     reload_level();
 }
@@ -451,10 +453,10 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
 }
 
 void draw_player() {
-    Player *player = &render_state->player;
+    Player *player = &state.player;
 
-    float calc_x = ((getLeft(player) - render_state->camera_x) * SCALE);
-    float calc_y = screenHeight - ((getTop(player) - render_state->camera_y) * SCALE);
+    float calc_x = ((getLeft(player) - state.camera_x) * SCALE);
+    float calc_y = screenHeight - ((getTop(player) - state.camera_y) * SCALE);
 
     GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
 

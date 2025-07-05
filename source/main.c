@@ -45,134 +45,59 @@ u64 startTime;
 int frameCount = 0;
 float fps = 0;
 
-GameState state_buffers[THREAD_COUNT];
-GameState *gameplay_state;
-GameState *render_state;
+GameState state;
 
 GRRLIB_ttfFont *font = NULL;
 
-lwp_t state_mutex;
-
-volatile bool should_exit = 0;
-
-float dt;
-
 int frame_counter = 0;
+int old_frame_counter = 0;
 
 #define TICK_RATE  (1.0f / 60.0f)    // 60 logic updates per second
 #define TICKS_PER_SEC  (float)TB_TIMER_CLOCK   // ~81,000,000 on Wii
 
-lwp_t graphics_thread_handle;
-lwp_t gameplay_thread_handle;
+void draw_game() {
+    draw_background(state.camera_x / 8, -(state.camera_y / 8) + 512);
 
-void *graphics_thread(void *arg) {
-    printf("Graphics thread started\n");
+    draw_all_object_layers();
 
-    while (1) {
-        if (should_exit) {
-            break;
-        }
+    draw_ground(state.player.ground_y, FALSE);
+    draw_ground(state.player.ceiling_y, TRUE);
+    
+    // FPS logic
+    frameCount++;
+    u64 currentTime = gettime();
+    float elapsed = ticks_to_millisecs(currentTime - startTime) / 1000.0f;
 
-        LWP_MutexLock(state_mutex);
-        memcpy(render_state, gameplay_state, sizeof(GameState));
-        LWP_MutexUnlock(state_mutex);
-
-        draw_background(render_state->camera_x / 8, -(render_state->camera_y / 8) + 512);
-
-        draw_all_object_layers();
-
-        draw_ground(render_state->player.ground_y, FALSE);
-        draw_ground(render_state->player.ceiling_y, TRUE);
-        
-        // FPS logic
-        frameCount++;
-        u64 currentTime = gettime();
-        float elapsed = ticks_to_millisecs(currentTime - startTime) / 1000.0f;
-
-        if (elapsed >= 1.0f) {
-            fps = frameCount / elapsed;
-            frameCount = 0;
-            startTime = currentTime;
-        }
-
-        // Render FPS
-        char fpsText[64];
-        snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
-        GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White text
-        char layerText[64];
-        snprintf(layerText, sizeof(layerText), "Drawn layers: %d", layersDrawn);
-        GRRLIB_PrintfTTF(20, 50, font, layerText, 20, 0xFFFFFFFF);
-
-        GRRLIB_Render();
-
-        layersDrawn = 0;
+    if (elapsed >= 1.0f) {
+        fps = frameCount / elapsed;
+        frameCount = 0;
+        startTime = currentTime;
     }
-    return NULL;
+
+    // Render FPS
+    char fpsText[64];
+    snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
+    GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White tex
+    
+    char layerText[64];
+    snprintf(layerText, sizeof(layerText), "Drawn layers: %d (%d)", layersDrawn, frame_counter - old_frame_counter);
+    GRRLIB_PrintfTTF(20, 50, font, layerText, 20, 0xFFFFFFFF);
+    old_frame_counter = frame_counter;
+    char player_x[64];
+    snprintf(player_x, sizeof(player_x), "X: %.2f", state.player.x);
+    GRRLIB_PrintfTTF(20, 80, font, player_x, 20, 0xFFFFFFFF);
+
+    char player_y[64];
+    snprintf(player_y, sizeof(player_y), "Y: %.2f", state.player.y);
+    GRRLIB_PrintfTTF(20, 110, font, player_y, 20, 0xFFFFFFFF);
+
+    GRRLIB_Render();
+    layersDrawn = 0;
 }
 
 #define ticks_to_secs_float(ticks) (((float)(ticks)/(float)(TB_TIMER_CLOCK*1000)))
 
-void *gameplay_thread(void *arg) {
-    WPAD_ScanPads();
-    printf("Gameplay thread started\n");
-    load_level();
-    
-    PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
-
-    // Create render thread
-    int result = LWP_CreateThread(
-        &graphics_thread_handle, // Thread handle (output)
-        graphics_thread,     // Function to run
-        NULL,               // Argument to thread function
-        NULL,               // Stack (NULL = auto allocate)
-        32768,               // Stack size
-        50                  // Priority
-    );
-
-    if (result != 0) {
-        printf("Failed to create graphics thread: %d\n", result);
-        return NULL;
-    }
-
-    while (1) {
-        WPAD_ScanPads();
-
-        u64 frameStart = gettime();
-        dt = 1 / 240.f; // 4 because it has to be 1/240 for gameplay 
-
-        LWP_MutexLock(state_mutex);
-
-        for (int i = 0; i < 4; i++) {
-            gameplay_state->old_player = gameplay_state->player;
-            handle_player();
-            handle_objects();
-            update_particles();
-            frame_counter++;
-        }
-        
-        LWP_MutexUnlock(state_mutex);
-                      
-        if (gameplay_state->player.dead) {
-            StopOgg();
-            handle_death();
-            PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
-            WPAD_ScanPads();
-        }
-
-        if (should_exit) {
-            break;
-        }
-        
-        u64 frameEnd = gettime();
-        double elapsed = ticks_to_microsecs(frameEnd - frameStart);
-        double sleepTime = 16666 - elapsed;
-
-        if (sleepTime > 0) {
-            usleep((long) sleepTime);
-        }
-    }
-    return NULL;
-}
+bool fixed_dt = FALSE;
 
 int main() {
     SYS_STDIO_Report(true);
@@ -181,8 +106,6 @@ int main() {
     WPAD_Init();
     WPAD_SetIdleTimeout( 60 * 10 );
     WPAD_SetDataFormat( WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR );
-
-    LWP_MutexInit(&state_mutex, false);
 
     srand(time(NULL));
 
@@ -201,38 +124,54 @@ int main() {
 
     font = GRRLIB_LoadTTF(pusab_ttf, pusab_ttf_size);
 
-    gameplay_state = &state_buffers[GAMEPLAY_THREAD];
-    render_state = &state_buffers[RENDER_THREAD];
-
     init_variables();
+    
+    load_level();
 
-    // Create gameplay thread
-    int result = LWP_CreateThread(
-        &gameplay_thread_handle, // Thread handle (output)
-        gameplay_thread,     // Function to run
-        NULL,               // Argument to thread function
-        NULL,               // Stack (NULL = auto allocate)
-        32768,               // Stack size
-        50                  // Priority
-    );
+    PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
 
-    if (result != 0) {
-        printf("Failed to create gameplay thread: %d\n", result);
-        goto exit;
-    }
+    u64 prevTicks = gettime();
+    double accumulator = 0.0f;
 
     while(1) {
+        u64 currentTicks = gettime();
+        float frameTime = ticks_to_secs_float(currentTicks - prevTicks);
+        if (frameTime > STEPS_DT * 16) frameTime = STEPS_DT * 16; // Avoid spiral of death
+        if (fixed_dt) {
+            frameTime = STEPS_DT;
+            fixed_dt = FALSE;
+        }
+        prevTicks = currentTicks;
+
+        accumulator += frameTime;
+
+        while (accumulator >= STEPS_DT) {
+            WPAD_ScanPads();
+            state.old_player = state.player;
+            handle_player();
+            handle_objects();
+            update_particles();
+            frame_counter++;
+
+            if (state.player.dead) break;
+
+            accumulator -= STEPS_DT;
+        }
+                      
+        if (state.player.dead) {
+            StopOgg();
+            handle_death();
+            PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
+            WPAD_ScanPads();
+            fixed_dt = TRUE;
+        }
+
         if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
             break;
         }
-        VIDEO_WaitVSync();
+
+        draw_game();
     }
-exit:
-    should_exit = 1; // Signal threads to exit
-    
-    void *retval;
-    LWP_JoinThread(gameplay_thread_handle, &retval);
-    LWP_JoinThread(graphics_thread_handle, &retval);
 	StopOgg();
     ExitGame();
     return 0;
