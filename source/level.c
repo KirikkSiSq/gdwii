@@ -44,5 +44,11 @@ LevelDefinition levels[] = {
         .song_ptr  = Jumper_mp3,
         .song_size = Jumper_mp3_size,
         .data_ptr  = Jumper_gmd
+    }, 
+    {
+        .level_name = "LEVEL EASY",
+        .song_ptr  = StereoMadness_mp3,
+        .song_size = StereoMadness_mp3_size,
+        .data_ptr  = LevelEasy_gmd
     }
 };

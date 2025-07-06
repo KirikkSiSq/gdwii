@@ -92,7 +92,7 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
     strm.next_in = data;
     strm.avail_in = data_len;
 
-    if (inflateInit2(&strm, 16 + MAX_WBITS) != Z_OK) {  // 16 + MAX_WBITS enables gzip decoding
+    if (inflateInit2(&strm, 15 | 32) != Z_OK) {  // 16 + MAX_WBITS enables gzip decoding
         printf("Failed to initialize zlib stream for GZIP\n");
         return NULL;
     }
@@ -148,20 +148,13 @@ char *get_metadata_value(const char *levelString, const char *key) {
     const char *end = strchr(levelString, ';');
     if (!end) return NULL;
 
-    printf("Found metadata\n");
-
     // We'll scan only the metadata portion
     size_t metadataLen = end - levelString;
     char *metadata = malloc(metadataLen + 1);
     if (!metadata) return NULL;
 
-    printf("Allocated metadata\n");
-
     strncpy(metadata, levelString, metadataLen);
     metadata[metadataLen] = '\0';
-
-    
-    printf("Copied metadata: %s\n", metadata);
 
     // Tokenize metadata by comma
     char *token = strtok(metadata, ",");
@@ -173,11 +166,12 @@ char *get_metadata_value(const char *levelString, const char *key) {
             // Copy and return value
             char *result = strdup(value);
             free(metadata);
+            printf("%s\n", result);
             return result;
         }
         token = strtok(NULL, ",");
     }
-
+    
     free(metadata);
     return NULL;
 }
@@ -686,6 +680,8 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
         list->layers[i] = sortable[i].layer;
     }
 
+    printf("Finished sorting layer list\n");
+
     free(sortable);
 }
 
@@ -785,6 +781,42 @@ void free_layer_list(GDObjectLayerList *list) {
     free(list);
 }
 
+int parse_old_channels(char *level_string, GDColorChannel **outArray) {
+    GDColorChannel *channels = malloc(sizeof(GDColorChannel) * 2);
+    if (!channels) {
+        printf("Couldn't alloc pre 1.9 color channels\n");
+        return 0;
+    }
+
+    int bg_r = atoi(get_metadata_value(level_string, "kS1"));
+    int bg_g = atoi(get_metadata_value(level_string, "kS2"));
+    int bg_b = atoi(get_metadata_value(level_string, "kS3"));
+
+    GDColorChannel bg_channel = {0};
+    bg_channel.channelID = 1000;
+    bg_channel.fromRed = bg_r;
+    bg_channel.fromGreen = bg_g;
+    bg_channel.fromBlue = bg_b;
+
+    channels[0] = bg_channel;
+
+    int g_r = atoi(get_metadata_value(level_string, "kS4"));
+    int g_g = atoi(get_metadata_value(level_string, "kS5"));
+    int g_b = atoi(get_metadata_value(level_string, "kS6"));
+
+    GDColorChannel g_channel = {0};
+    g_channel.channelID = 1001;
+    g_channel.fromRed = g_r;
+    g_channel.fromGreen = g_g;
+    g_channel.fromBlue = g_b;
+    
+    channels[1] = g_channel;
+
+    *outArray = channels;
+
+    return 2;
+}
+
 GDTypedObjectList *objectsArrayList = NULL;
 GDObjectLayerList *layersArrayList = NULL;
 int channelCount = 0;
@@ -801,6 +833,11 @@ void load_level() {
     // Get colors
     char *metaStr = get_metadata_value(level_string, "kS38");
     channelCount = parse_color_channels(metaStr, &colorChannels);
+
+    // Fallback to pre 2.0 keys
+    if (!channelCount) {
+        channelCount = parse_old_channels(level_string, &colorChannels);
+    }
 
     GDObjectList *objectsList = parse_string(level_string);
 
