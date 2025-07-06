@@ -139,7 +139,7 @@ void collide_with_objects() {
         GDObjectTyped *obj = objectsArrayList->objects[i]; 
         ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
 
-        if (hitbox->type == HITBOX_NONE && obj->id < OBJECT_COUNT) {
+        if (hitbox->type != HITBOX_NONE && obj->id < OBJECT_COUNT) {
             if (intersect(
                 player->x, player->y, player->width, player->height, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
