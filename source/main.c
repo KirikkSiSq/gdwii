@@ -73,23 +73,24 @@ void draw_game() {
         startTime = currentTime;
     }
 
-    // Render FPS
-    char fpsText[64];
-    snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
-    GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White tex
-    
-    char layerText[64];
-    snprintf(layerText, sizeof(layerText), "Drawn layers: %d (%d)", layersDrawn, frame_counter - old_frame_counter);
-    GRRLIB_PrintfTTF(20, 50, font, layerText, 20, 0xFFFFFFFF);
-    old_frame_counter = frame_counter;
-    char player_x[64];
-    snprintf(player_x, sizeof(player_x), "X: %.2f", state.player.x);
-    GRRLIB_PrintfTTF(20, 80, font, player_x, 20, 0xFFFFFFFF);
+    if (enable_info) {
+        // Render FPS
+        char fpsText[64];
+        snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
+        GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White tex
+        
+        char layerText[64];
+        snprintf(layerText, sizeof(layerText), "Drawn layers: %d (%d)", layersDrawn, frame_counter - old_frame_counter);
+        GRRLIB_PrintfTTF(20, 50, font, layerText, 20, 0xFFFFFFFF);
+        old_frame_counter = frame_counter;
+        char player_x[64];
+        snprintf(player_x, sizeof(player_x), "X: %.2f", state.player.x);
+        GRRLIB_PrintfTTF(20, 80, font, player_x, 20, 0xFFFFFFFF);
 
-    char player_y[64];
-    snprintf(player_y, sizeof(player_y), "Y: %.2f", state.player.y);
-    GRRLIB_PrintfTTF(20, 110, font, player_y, 20, 0xFFFFFFFF);
-
+        char player_y[64];
+        snprintf(player_y, sizeof(player_y), "Y: %.2f", state.player.y);
+        GRRLIB_PrintfTTF(20, 110, font, player_y, 20, 0xFFFFFFFF);
+    }
     GRRLIB_Render();
     layersDrawn = 0;
 }

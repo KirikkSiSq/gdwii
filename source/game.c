@@ -7,6 +7,7 @@
 #include "level.h"
 
 bool fixed_dt = FALSE;
+bool enable_info = FALSE;
 
 int game_loop() {
     u64 prevTicks = gettime();
@@ -17,6 +18,7 @@ int game_loop() {
     MP3Player_PlayBuffer(levels[level_id].song_ptr, levels[level_id].song_size, NULL);
 
     while (1) {
+        WPAD_ScanPads();
         u64 currentTicks = gettime();
         float frameTime = ticks_to_secs_float(currentTicks - prevTicks);
         if (frameTime > STEPS_DT * 16) frameTime = STEPS_DT * 16; // Avoid spiral of death
@@ -29,7 +31,6 @@ int game_loop() {
         accumulator += frameTime;
 
         while (accumulator >= STEPS_DT) {
-            WPAD_ScanPads();
             state.old_player = state.player;
             handle_player();
             handle_objects();
@@ -49,15 +50,19 @@ int game_loop() {
             fixed_dt = TRUE;
         }
 
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
+        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
             unload_level();
             return TRUE;
         }
 
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_MINUS) {
+        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_MINUS) {
             MP3Player_Stop();
             gameRoutine = ROUTINE_MENU;
             break;
+        }
+        
+        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_PLUS) {
+            enable_info ^= 1;
         }
 
         draw_game();
