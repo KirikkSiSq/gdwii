@@ -20,13 +20,11 @@
 
 #include <unistd.h>
 
-
 #include "main.h"
 
-#include "oggplayer.h"
+#include <mp3player.h>
 
 // include generated header
-#include "Jumper_ogg.h"
 #include "level_loading.h"
 #include "objects.h"
 
@@ -34,12 +32,16 @@
 
 #include "player.h"
 
+#include "game.h"
+#include "menu.h"
 
 // Declare Static Functions
 static void ExitGame(void);
 
 int screenWidth = 0;
 int screenHeight = 0;
+
+int gameRoutine = ROUTINE_MENU;
 
 u64 startTime;
 int frameCount = 0;
@@ -51,9 +53,6 @@ GRRLIB_ttfFont *font = NULL;
 
 int frame_counter = 0;
 int old_frame_counter = 0;
-
-#define TICK_RATE  (1.0f / 60.0f)    // 60 logic updates per second
-#define TICKS_PER_SEC  (float)TB_TIMER_CLOCK   // ~81,000,000 on Wii
 
 void draw_game() {
     draw_background(state.camera_x / 8, -(state.camera_y / 8) + 512);
@@ -95,10 +94,6 @@ void draw_game() {
     layersDrawn = 0;
 }
 
-#define ticks_to_secs_float(ticks) (((float)(ticks)/(float)(TB_TIMER_CLOCK*1000)))
-
-bool fixed_dt = FALSE;
-
 int main() {
     SYS_STDIO_Report(true);
     // Init GRRLIB & WiiUse
@@ -111,6 +106,8 @@ int main() {
 
     // Initialise the audio subsystem
 	ASND_Init();
+    MP3Player_Init();
+
 
     load_spritesheet();
 
@@ -125,54 +122,19 @@ int main() {
     font = GRRLIB_LoadTTF(pusab_ttf, pusab_ttf_size);
 
     init_variables();
-    
-    load_level();
-
-    PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
-
-    u64 prevTicks = gettime();
-    double accumulator = 0.0f;
 
     while(1) {
-        u64 currentTicks = gettime();
-        float frameTime = ticks_to_secs_float(currentTicks - prevTicks);
-        if (frameTime > STEPS_DT * 16) frameTime = STEPS_DT * 16; // Avoid spiral of death
-        if (fixed_dt) {
-            frameTime = STEPS_DT;
-            fixed_dt = FALSE;
+        switch (gameRoutine) {
+            case ROUTINE_MENU:
+                if (menu_loop()) goto Exit;
+                break;
+            case ROUTINE_GAME:
+                if(game_loop()) goto Exit;
+                break;
         }
-        prevTicks = currentTicks;
-
-        accumulator += frameTime;
-
-        while (accumulator >= STEPS_DT) {
-            WPAD_ScanPads();
-            state.old_player = state.player;
-            handle_player();
-            handle_objects();
-            update_particles();
-            frame_counter++;
-
-            if (state.player.dead) break;
-
-            accumulator -= STEPS_DT;
-        }
-                      
-        if (state.player.dead) {
-            StopOgg();
-            handle_death();
-            PlayOgg(Jumper_ogg, Jumper_ogg_size, 0, OGG_ONE_TIME);
-            WPAD_ScanPads();
-            fixed_dt = TRUE;
-        }
-
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
-            break;
-        }
-
-        draw_game();
     }
-	StopOgg();
+Exit:
+	MP3Player_Stop();
     ExitGame();
     return 0;
 }

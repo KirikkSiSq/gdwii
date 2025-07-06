@@ -7,7 +7,9 @@
 #include "objects.h"
 #include "level_loading.h"
 
-#include "test_gmd.h"
+
+#include "level.h"
+#include "player.h"
 
 char *extract_base64(const char *data) {
     const char *start_tag = "<k>k4</k><s>";
@@ -183,7 +185,7 @@ char *get_metadata_value(const char *levelString, const char *key) {
 char *decompress_level() {
     printf("Loading level data...\n");
 
-    char *b64 = extract_base64((const char *) test_gmd);
+    char *b64 = extract_base64((const char *) levels[level_id].data_ptr);
     if (!b64) {
         printf("Could not extract base64 data\n");
         return NULL;
@@ -769,7 +771,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
         layerList->layers[i] = &layers[i];
     }
 
-    layerList->count = layerCount - 1;
+    layerList->count = layerCount;
 
     return layerList;
 }
@@ -845,6 +847,7 @@ void unload_level() {
         colorChannels = NULL;
     }
     channelCount = 0;
+    init_variables();
 }
 
 void set_color_channels() {

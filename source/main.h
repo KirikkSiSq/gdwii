@@ -21,17 +21,18 @@ typedef struct {
     Particle particles[MAX_PARTICLES];
 } GameState;
 
-enum ThreadIndex {
-    GAMEPLAY_THREAD,
-    RENDER_THREAD,
-    THREAD_COUNT
+enum GameRoutine {
+    ROUTINE_MENU,
+    ROUTINE_GAME
 };
 
-#define STEPS_DT (1.0f / 240.0f) // 1/240 seconds per physics step
+extern int gameRoutine;
 
 extern int frame_counter;
 
 extern GameState state;
+
+extern GRRLIB_ttfFont *font;
 
 void draw_game();
 void print_debug(GRRLIB_ttfFont *font);

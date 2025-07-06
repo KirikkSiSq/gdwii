@@ -18,7 +18,7 @@ include $(DEVKITPPC)/wii_rules
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
 SOURCES		:=	source
-DATA		:=	data data/objects data/portals data/glow data/icons
+DATA		:=	data data/objects data/portals data/glow data/icons data/levels data/songs data/sfx
 INCLUDES	:=
 
 #---------------------------------------------------------------------------------
@@ -33,7 +33,7 @@ LDFLAGS	=	-g $(MACHDEP) -Wl,-Map,$(notdir $@).map
 #---------------------------------------------------------------------------------
 # any extra libraries we wish to link with the project
 #---------------------------------------------------------------------------------
-LIBS	:=	-lgrrlib -lpngu -lwiiuse -lfat -lbte -lvorbisidec -logg -lasnd -logc -lm -lz `$(PREFIX)pkg-config freetype2 libpng libjpeg --libs` 
+LIBS	:=	-lgrrlib -lpngu -lwiiuse -lfat -lbte -lvorbisidec -lmad -logg -lasnd -logc -lm -lz `$(PREFIX)pkg-config freetype2 libpng libjpeg --libs` 
 
 #---------------------------------------------------------------------------------
 # list of directories containing libraries, this must be the top level containing
@@ -143,6 +143,14 @@ $(OFILES_SOURCES) : $(HFILES)
 # This rule links in binary data with the .ogg extension
 #---------------------------------------------------------------------------------
 %.ogg.o	%_ogg.h :	%.ogg
+#---------------------------------------------------------------------------------
+	@echo $(notdir $<)
+	$(bin2o)
+
+#---------------------------------------------------------------------------------
+# This rule links in binary data with the .mp3 extension
+#---------------------------------------------------------------------------------
+%.mp3.o	%_mp3.h :	%.mp3
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	$(bin2o)

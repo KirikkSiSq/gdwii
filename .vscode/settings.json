@@ -55,7 +55,18 @@
         "limits": "c",
         "main.h": "c",
         "lwp.h": "c",
-        "test_gmd.h": "c"
+        "test_gmd.h": "c",
+        "game.h": "c",
+        "unistd.h": "c",
+        "particles.h": "c",
+        "cstdint": "c",
+        "mp3player.h": "c",
+        "level.h": "c",
+        "level_includes.h": "c",
+        "cantletgo_mp3.h": "c",
+        "cantletgo_gmd.h": "c",
+        "oggplayer.h": "c",
+        "playsound_01_ogg.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

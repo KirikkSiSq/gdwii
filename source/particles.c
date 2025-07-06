@@ -4,6 +4,7 @@
 #include "main.h"
 #include "particles.h"
 #include "math.h"
+#include "game.h"
 
 GRRLIB_texImg *particleTex = NULL;
 

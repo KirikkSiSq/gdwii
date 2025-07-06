@@ -9,6 +9,7 @@
 #include "main.h"
 #include "math.h"
 #include <math.h>
+#include "game.h"
 
 #include "particles.h"
 #include "particle_png.h"
