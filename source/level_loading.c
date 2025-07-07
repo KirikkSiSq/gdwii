@@ -7,6 +7,7 @@
 #include "objects.h"
 #include "level_loading.h"
 
+#include "main.h"
 
 #include "level.h"
 #include "player.h"
@@ -884,6 +885,7 @@ void unload_level() {
         colorChannels = NULL;
     }
     channelCount = 0;
+    memset(&state.particles, 0, sizeof(state.particles));
     init_variables();
 }
 
@@ -909,5 +911,6 @@ void set_color_channels() {
 
 void reload_level() {
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
+    memset(&state.particles, 0, sizeof(state.particles));
     set_color_channels();
 }

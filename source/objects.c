@@ -770,11 +770,89 @@ void unload_spritesheet() {
     unload_icons();
 }
 
-void handle_object_particles(GDObjectTyped *obj) {
+void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
     switch (obj->id) {
         case YELLOW_ORB:
-            if (!state.player.dead)spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
+            if (!state.player.dead) spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
+            break;
+        
+        case YELLOW_PAD:
+            particle_templates[PAD_PARTICLES].angle = obj->rotation + 90;
+            if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
+            draw_obj_particles(PAD_PARTICLES, obj);
+            break;
+            
+        case YELLOW_GRAVITY_PORTAL:
+            if (layer->layerNum == 1) {
+                particle_templates[PORTAL_PARTICLES].angle = obj->rotation + 180;
+
+                particle_templates[PORTAL_PARTICLES].start_color.r = 255;
+                particle_templates[PORTAL_PARTICLES].start_color.g = 255;
+                particle_templates[PORTAL_PARTICLES].start_color.b = 0;
+                particle_templates[PORTAL_PARTICLES].start_color.a = 127;
+
+                particle_templates[PORTAL_PARTICLES].end_color.r = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.g = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.b = 0;
+                particle_templates[PORTAL_PARTICLES].end_color.a = 255;
+                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                draw_obj_particles(PORTAL_PARTICLES, obj);
+            }
+            break;
+
+        case BLUE_GRAVITY_PORTAL:
+            if (layer->layerNum == 1) {
+                particle_templates[PORTAL_PARTICLES].angle = obj->rotation + 180;
+
+                particle_templates[PORTAL_PARTICLES].start_color.r = 56;
+                particle_templates[PORTAL_PARTICLES].start_color.g = 200;
+                particle_templates[PORTAL_PARTICLES].start_color.b = 255;
+                particle_templates[PORTAL_PARTICLES].start_color.a = 127;
+
+                particle_templates[PORTAL_PARTICLES].end_color.r = 56;
+                particle_templates[PORTAL_PARTICLES].end_color.g = 200;
+                particle_templates[PORTAL_PARTICLES].end_color.b = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.a = 255;
+                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                draw_obj_particles(PORTAL_PARTICLES, obj);
+            }
+            break;
+        
+        case CUBE_PORTAL:
+            if (layer->layerNum == 1) {
+                particle_templates[PORTAL_PARTICLES].angle = obj->rotation + 180;
+
+                particle_templates[PORTAL_PARTICLES].start_color.r = 0;
+                particle_templates[PORTAL_PARTICLES].start_color.g = 255;
+                particle_templates[PORTAL_PARTICLES].start_color.b = 50;
+                particle_templates[PORTAL_PARTICLES].start_color.a = 127;
+
+                particle_templates[PORTAL_PARTICLES].end_color.r = 0;
+                particle_templates[PORTAL_PARTICLES].end_color.g = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.b = 50;
+                particle_templates[PORTAL_PARTICLES].end_color.a = 255;
+                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                draw_obj_particles(PORTAL_PARTICLES, obj);
+            }
+            break;
+
+        case SHIP_PORTAL:
+            if (layer->layerNum == 1) {
+                particle_templates[PORTAL_PARTICLES].angle = obj->rotation + 180;
+
+                particle_templates[PORTAL_PARTICLES].start_color.r = 255;
+                particle_templates[PORTAL_PARTICLES].start_color.g = 31;
+                particle_templates[PORTAL_PARTICLES].start_color.b = 255;
+                particle_templates[PORTAL_PARTICLES].start_color.a = 127;
+
+                particle_templates[PORTAL_PARTICLES].end_color.r = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.g = 31;
+                particle_templates[PORTAL_PARTICLES].end_color.b = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.a = 255;
+                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                draw_obj_particles(PORTAL_PARTICLES, obj);
+            }
             break;
     }
 }
@@ -995,7 +1073,7 @@ void draw_all_object_layers() {
                 if (calc_y > -90 && calc_y < screen_y_max) {        
                     layersDrawn++;
                     GDObjectLayer *layer = layersArrayList->layers[i];
-                    if (layer->layerNum == 0) handle_object_particles(obj);
+                    handle_object_particles(obj, layer);
                     put_object_layer(obj, calc_x, calc_y, layer);
                 }
             }

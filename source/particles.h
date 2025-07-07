@@ -51,7 +51,10 @@ enum ParticleGroupID {
     SHIP_TRAIL,
     HOLDING_SHIP_TRAIL,
     SHIP_DRAG,
-    ORB_PARTICLES
+    ORB_PARTICLES,
+    PAD_PARTICLES,
+    GLITTER_EFFECT,
+    PORTAL_PARTICLES,
 };
 
 extern ParticleTemplate particle_templates[];

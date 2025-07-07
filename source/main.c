@@ -57,6 +57,8 @@ int old_frame_counter = 0;
 void draw_game() {
     draw_background(state.camera_x / 8, -(state.camera_y / 8) + 512);
 
+    draw_particles(GLITTER_EFFECT);
+
     draw_all_object_layers();
 
     draw_ground(state.player.ground_y, FALSE);

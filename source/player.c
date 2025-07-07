@@ -166,7 +166,7 @@ void cube_gamemode(Player *player) {
     if ((player->time_since_ground < 0.05f)&& (frame_counter & 0b11) == 0) {
         particle_templates[CUBE_DRAG].speed = 75 * mult;
         particle_templates[CUBE_DRAG].gravity_y = (player->upside_down ? 100 : -300);
-        spawn_particle(CUBE_DRAG, player->x, (player->upside_down ? getTop(player) : getBottom(player)), NULL);
+        spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
 
     if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
@@ -195,11 +195,11 @@ void ship_particles(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
     if ((frame_counter & 0b11) == 0) {
         // Particle trail
-        spawn_particle(SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), NULL);
+        spawn_particle(SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 6), NULL);
         
         // Holding particles
         if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
-            spawn_particle(HOLDING_SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 4), NULL);
+            spawn_particle(HOLDING_SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 6), NULL);
         }
 
         // Ground drag effectr
@@ -270,6 +270,13 @@ void run_camera() {
 
 }
 
+void spawn_glitter_particles() {
+    if ((frame_counter & 0b111) == 0) {
+        particle_templates[GLITTER_EFFECT].angle = random_float(0, 360);
+        spawn_particle(GLITTER_EFFECT, state.camera_x + 240, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
+    }
+}
+
 void run_player() {
     Player *player = &state.player;
     switch (player->gamemode) {
@@ -277,6 +284,7 @@ void run_player() {
             cube_gamemode(player);
             break;
         case GAMEMODE_SHIP:
+            spawn_glitter_particles();
             ship_gamemode(player);
             break;
         
@@ -356,6 +364,15 @@ void init_variables() {
     particle_templates[CUBE_DRAG].end_color.r = p1.r;
     particle_templates[CUBE_DRAG].end_color.g = p1.g;
     particle_templates[CUBE_DRAG].end_color.b = p1.b;
+
+    
+    particle_templates[GLITTER_EFFECT].start_color.r = p1.r;
+    particle_templates[GLITTER_EFFECT].start_color.g = p1.g;
+    particle_templates[GLITTER_EFFECT].start_color.b = p1.b;
+    
+    particle_templates[GLITTER_EFFECT].end_color.r = p1.r;
+    particle_templates[GLITTER_EFFECT].end_color.g = p1.g;
+    particle_templates[GLITTER_EFFECT].end_color.b = p1.b;
 }
 
 void handle_death() {
