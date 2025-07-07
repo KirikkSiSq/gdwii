@@ -778,14 +778,14 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             break;
         
         case YELLOW_PAD:
-            particle_templates[PAD_PARTICLES].angle = obj->rotation + 90;
+            particle_templates[PAD_PARTICLES].angle = adjust_angle(obj->rotation + 90, obj->flippedH, obj->flippedV);;
             if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
             break;
             
         case YELLOW_GRAVITY_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = obj->rotation + 180;
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 255;
@@ -803,7 +803,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
 
         case BLUE_GRAVITY_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = obj->rotation + 180;
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 56;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 200;
@@ -821,7 +821,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         
         case CUBE_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = obj->rotation + 180;
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 0;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 255;
@@ -839,7 +839,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
 
         case SHIP_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = obj->rotation + 180;
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 31;

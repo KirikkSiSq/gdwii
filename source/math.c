@@ -80,3 +80,23 @@ float randomf() {
 float random_float(float min, float max) {
     return ((max - min) * ((float)rand() / RAND_MAX)) + min;
 }
+
+float adjust_angle(float angle, int flipX, int flipY) {
+    // Normalize angle to [0, 360)
+    while (angle < 0) angle += 360;
+    while (angle >= 360) angle -= 360;
+
+    if (flipX && flipY) {
+        angle = positive_fmod(angle + 180.0f, 360.0f);
+    } else if (flipX) {
+        angle = 180.0f - angle;
+    } else if (flipY) {
+        angle = -angle;
+    }
+
+    // Normalize again after transformation
+    while (angle < 0) angle += 360;
+    while (angle >= 360) angle -= 360;
+
+    return angle;
+}
