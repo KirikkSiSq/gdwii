@@ -158,8 +158,8 @@ ParticleTemplate particle_templates[] = {
     [PORTAL_PARTICLES] = {
         .angle = 0, .angleVar = 80,
         .speed = -75, .speedVar = 0,
-        .gravity_x = 0, .gravity_y = -300,
-        .life = 0.35f, .lifeVar = 0,
+        .gravity_x = 0, .gravity_y = -100,
+        .life = 0.48f, .lifeVar = 0,
         .start_scale = 0.3, .start_scaleVar = 0.1,
         .end_scale = 0.05, .end_scaleVar = 0,
         .start_color = {255,255,0,127},
