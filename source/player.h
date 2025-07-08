@@ -14,6 +14,7 @@ typedef struct {
     float gravity;
 
     float rotation;
+    float lerp_rotation;
     
     float width;
     float height;

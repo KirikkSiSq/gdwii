@@ -10,7 +10,7 @@ float maxf(float a, float b);
 float positive_fmod(float n, float divisor);
 Color color_lerp(Color color1, Color color2, float fraction);
 float approachf(float current, float target, float speed, float smoothing);
-void rotate_point_around_center(
+void rotate_point_around_center_gfx(
     float x, float y,               // anchor position on screen
     float offset_x, float offset_y, // object position (pre-rotation)
     float center_x, float center_y, // pivot center in the object
@@ -18,6 +18,17 @@ void rotate_point_around_center(
     float rotation_deg,             // rotation angle in degrees
     float *output_x, float *output_y // output screen position
 );
+
+void rotate_point_around_center(float cx, float cy, float angle, float x, float y, float *out_x, float *out_y);
+
 float adjust_angle(float angle, int flipX, int flipY);
 float randomf();
 float random_float(float min, float max);
+
+float square_distance(float xa, float ya, float xb, float yb);
+
+float clampf(float d, float min, float max);
+float slerp(float a, float b, float ratio);
+float lerp(float from, float to, float alpha);
+float iLerp(float a, float b, float ratio, float dt);
+float iSlerp(float a, float b, float ratio, float dt);

@@ -11,7 +11,7 @@ typedef struct {
     float vx, vy;
     float ax, ay;
     float gravity_x, gravity_y;
-    float life, max_life;
+    float life;
     bool active;
     ColorAlpha color, start_color, end_color;
     ColorAlpha color_delta;

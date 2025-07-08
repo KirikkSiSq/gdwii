@@ -858,7 +858,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
 }
 
 int get_fade_value(float x, int right_edge) {
-    #define FADE_WIDTH 60
+    #define FADE_WIDTH 75
     if (x < 0 || x > right_edge)
         return 0;
     else if (x < FADE_WIDTH)

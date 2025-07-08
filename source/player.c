@@ -163,9 +163,10 @@ void cube_gamemode(Player *player) {
         player->rotation = round(player->rotation / 90.0f) * 90.0f;
     }
 
+    player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
+
     if ((player->time_since_ground < 0.05f)&& (frame_counter & 0b11) == 0) {
-        particle_templates[CUBE_DRAG].speed = 75 * mult;
-        particle_templates[CUBE_DRAG].gravity_y = (player->upside_down ? 100 : -300);
+        particle_templates[CUBE_DRAG].angle = (player->upside_down ? -90 : 90);
         spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
 
@@ -193,13 +194,21 @@ void cube_gamemode(Player *player) {
 
 void ship_particles(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
-    if ((frame_counter & 0b11) == 0) {
+    if ((frame_counter & 0b11) == 0) {   
+        float x, y;
+        rotate_point_around_center(
+            player->x, player->y,
+            player->rotation,
+            player->x - 12, player->y + (player->upside_down ? 10 : -10),
+            &x, &y
+        );
+        
         // Particle trail
-        spawn_particle(SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 6), NULL);
+        spawn_particle(SHIP_TRAIL, x, y, NULL);
         
         // Holding particles
         if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
-            spawn_particle(HOLDING_SHIP_TRAIL, player->x - 4, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 6), NULL);
+            spawn_particle(HOLDING_SHIP_TRAIL, x, y, NULL);
         }
 
         // Ground drag effectr
@@ -208,6 +217,16 @@ void ship_particles(Player *player) {
             particle_templates[SHIP_DRAG].gravity_y = (player->upside_down ? 100 : -300);
             spawn_particle(SHIP_DRAG, player->x, (player->upside_down ? getTop(player) : getBottom(player)), NULL);
         }
+    }
+}
+
+void update_ship_rotation(Player *player) {
+    float diff_x = (player->x - state.old_player.x);
+    float diff_y = (player->y - state.old_player.y);
+
+    if (square_distance(0, 0, diff_x, -diff_y) >= 1.2f) {
+        float angle_rad = atan2f(-diff_y, diff_x);
+        player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.15f, STEPS_DT);
     }
 }
 
@@ -225,8 +244,6 @@ void ship_gamemode(Player *player) {
     }
 
     ship_particles(player);
-
-    player->rotation = atan2f(player->vel_y, player->vel_x) * (180.0f / M_PI) * (player->upside_down ? 1 : -1);
     
     float min = player->mini ? -406.566 : -345.6;
     float max = player->mini ? 508.248 : 432.0;
@@ -241,7 +258,7 @@ void ship_gamemode(Player *player) {
 void run_camera() {
     Player *player = &state.player;
 
-    state.camera_x += 311.580093712804 * STEPS_DT;
+    state.camera_x += player->vel_x * STEPS_DT;
 
     float upper = 240.f;
     float lower = 120.f;
@@ -271,7 +288,7 @@ void run_camera() {
 }
 
 void spawn_glitter_particles() {
-    if ((frame_counter & 0b111) == 0) {
+    if ((frame_counter & 0b1111) == 0) {
         particle_templates[GLITTER_EFFECT].angle = random_float(0, 360);
         spawn_particle(GLITTER_EFFECT, state.camera_x + 240, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
     }
@@ -295,6 +312,8 @@ void run_player() {
     player->vel_y += player->gravity * STEPS_DT;
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
     player->x += player->vel_x * STEPS_DT;
+
+    if (player->gamemode == GAMEMODE_SHIP) update_ship_rotation(player);
     
     player->on_ground = FALSE;
     player->on_ceiling = FALSE;
@@ -347,7 +366,7 @@ void init_variables() {
     player->height = 30;
     player->x = 0;
     player->y = player->height / 2;
-    player->vel_x = 311.580093712804;
+    player->vel_x = 311.580093712804;  
     player->vel_y = 0;
     player->ground_y = 0;
     player->ceiling_y = 999999;
@@ -417,10 +436,10 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
 
     #define CUBE_DIVISOR 1.8
 
-    rotate_point_around_center(
+    rotate_point_around_center_gfx(
         calc_x, calc_y,
         7, (player->upside_down) ? 5 : -9,
-        30, 30,
+        38, 30,
         60, 60,
         player->rotation,
         &x, &y
@@ -445,10 +464,10 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         RGBA(p2.r, p2.g, p2.b, 255)
     );
 
-    rotate_point_around_center(
+    rotate_point_around_center_gfx(
         calc_x, calc_y,
         0, (player->upside_down) ? -4 : 12,
-        30, 30,
+        38, 30,
         76, 48,
         player->rotation,
         &x, &y
@@ -489,7 +508,7 @@ void draw_player() {
             GRRLIB_DrawImg(
                 calc_x, calc_y - 2,
                 icon_l1,
-                player->rotation,
+                player->lerp_rotation,
                 0.73333333333333333333333333333333,
                 0.73333333333333333333333333333333,
                 RGBA(p1.r, p1.g, p1.b, 255)
@@ -498,7 +517,7 @@ void draw_player() {
             GRRLIB_DrawImg(
                 calc_x, calc_y - 2,
                 icon_l2,
-                player->rotation,
+                player->lerp_rotation,
                 0.73333333333333333333333333333333,
                 0.73333333333333333333333333333333,
                 RGBA(p2.r, p2.g, p2.b, 255)

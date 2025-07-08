@@ -14,7 +14,7 @@ ParticleTemplate particle_templates[] = {
         .speed = 75, .speedVar = 20,
         .gravity_x = 0, .gravity_y = -300,
         .life = 0.3f, .lifeVar = 0.15f,
-        .start_scale = 0.2, .start_scaleVar = 0.2,
+        .start_scale = 0.3, .start_scaleVar = 0.1,
         .end_scale = 0, .end_scaleVar = 0,
         .start_color = {0,0,0,255},
         .start_colorVar = {0,0,0,0},
@@ -89,13 +89,13 @@ ParticleTemplate particle_templates[] = {
     [ORB_PARTICLES] = {
         .angle = 0, .angleVar = 360,
         .speed = -75, .speedVar = 20,
-        .gravity_x = 0, .gravity_y = -300,
+        .gravity_x = 0, .gravity_y = -100,
         .life = 0.3f, .lifeVar = 0.15f,
         .start_scale = 0.3, .start_scaleVar = 0.1,
         .end_scale = 0, .end_scaleVar = 0,
         .start_color = {255,255,0,255},
         .start_colorVar = {0,0,0,0},
-        .end_color = {0,0,0,0},
+        .end_color = {255,255,0,127},
         .end_colorVar = {0,0,0,0},
         .blending = TRUE,
         .sourcePosVarX = 3, .sourcePosVarY = 3,
@@ -157,14 +157,14 @@ ParticleTemplate particle_templates[] = {
     },
     [PORTAL_PARTICLES] = {
         .angle = 0, .angleVar = 80,
-        .speed = -75, .speedVar = 20,
-        .gravity_x = 0, .gravity_y = 0,
-        .life = 0.6f, .lifeVar = 0,
+        .speed = -75, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = -300,
+        .life = 0.35f, .lifeVar = 0,
         .start_scale = 0.3, .start_scaleVar = 0.1,
-        .end_scale = 0, .end_scaleVar = 0,
-        .start_color = {255,255,0,255},
+        .end_scale = 0.05, .end_scaleVar = 0,
+        .start_color = {255,255,0,127},
         .start_colorVar = {0,0,0,0},
-        .end_color = {0,0,0,0},
+        .end_color = {0,0,0,255},
         .end_colorVar = {0,0,0,0},
         .blending = TRUE,
         .sourcePosVarX = 0, .sourcePosVarY = 0,
@@ -219,7 +219,6 @@ void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
             particles[i].gravity_x = tpl->gravity_x;
             particles[i].gravity_y = tpl->gravity_y;
             particles[i].life = life;
-            particles[i].max_life = life;
 
             // Color interpolation
             particles[i].start_color.r = sc.r + scv.r * random_float(-1, 1);
@@ -255,15 +254,9 @@ void update_particles() {
     for (int i = 0; i < MAX_PARTICLES; i++) {
         Particle *p = &state.particles[i];
         if (p->active) {
-            p->vx += p->gravity_x * STEPS_DT;
-            p->vy += p->gravity_y * STEPS_DT;
-
-            if (p->rotate_per_second != 0) {
-                float dtheta = DegToRad(p->rotate_per_second) * STEPS_DT;
-                float old_vx = p->vx, old_vy = p->vy;
-                p->vx = old_vx * cosf(dtheta) - old_vy * sinf(dtheta);
-                p->vy = old_vx * sinf(dtheta) + old_vy * cosf(dtheta);
-            }
+            p->velocity_angle += p->rotate_per_second * STEPS_DT;
+            p->vx += (p->gravity_y * cosf(DegToRad(p->velocity_angle)) - p->gravity_x * sinf(DegToRad(p->velocity_angle))) * STEPS_DT;
+            p->vy += (p->gravity_y * sinf(DegToRad(p->velocity_angle)) + p->gravity_x * cosf(DegToRad(p->velocity_angle))) * STEPS_DT;
 
             p->x += p->vx * STEPS_DT;
             p->y += p->vy * STEPS_DT;

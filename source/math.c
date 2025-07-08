@@ -2,6 +2,7 @@
 #include "math.h"
 #include "objects.h"
 #include <stdlib.h>
+#include "game.h"
 
 float positive_fmod(float n, float divisor) {
     float value = fmod(n, divisor);
@@ -48,7 +49,9 @@ float approachf(float current, float target, float speed, float smoothing) {
     return current + step + (diff > 0 ? speed : -speed);
 }
 
-void rotate_point_around_center(
+
+// This one only works for drawing
+void rotate_point_around_center_gfx(
     float x, float y,               // anchor position on screen
     float offset_x, float offset_y, // object position (pre-rotation)
     float center_x, float center_y, // pivot center in the object
@@ -71,6 +74,20 @@ void rotate_point_around_center(
     // Final screen position
     *output_x = x + (center_x - (width / 2.0f)) + rotated_x;
     *output_y = y + (center_y - (height / 2.0f)) + rotated_y;
+}
+
+void rotate_point_around_center(float cx, float cy, float angle, float x, float y, float *out_x, float *out_y) {
+    float s = sinf(DegToRad(-angle));
+    float c = cosf(DegToRad(-angle));
+
+    x -= cx;
+    y -= cy;
+
+    float xnew = x * c - y * s;
+    float ynew = x * s + y * c;
+
+    *out_x = xnew + cx;
+    *out_y = ynew + cy;
 }
 
 float randomf() {
@@ -99,4 +116,46 @@ float adjust_angle(float angle, int flipX, int flipY) {
     while (angle >= 360) angle -= 360;
 
     return angle;
+}
+
+float square_distance(float xa, float ya, float xb, float yb) {
+	return ((xb - xa) * (xb - xa)) + ((yb - ya) * (yb - ya));
+}
+
+float clampf(float d, float min, float max) {
+    const float t = d < min ? min : d;
+    return t > max ? max : t;
+}
+
+float repeat(float a, float length) {
+	return clampf(a - floorf(a / length) * length, 0.0f, length);
+}
+
+float slerp(float a, float b, float ratio) {
+	float delta = repeat((b - a), 360.f);
+	if (delta > 180.f)
+		delta -= 360.f;
+	return a + delta * clampf(ratio, 0.f, 1.f);
+}
+
+float lerp(float from, float to, float alpha) {
+    return from * (1.0f - alpha) + to * alpha;
+}
+
+float iLerp(float a, float b, float ratio, float dt) {
+	const float rDelta = dt / STEPS_DT;
+	const float s	  = 1.f - ratio;
+
+	float iRatio = 1.f - powf(s, rDelta);
+
+	return lerp(a, b, iRatio);
+}
+
+float iSlerp(float a, float b, float ratio, float dt) {
+	const float rDelta = dt / STEPS_DT;
+	const float s	  = 1.f - ratio;
+
+	float iRatio = 1.f - powf(s, rDelta);
+
+	return slerp(a, b, iRatio);
 }
