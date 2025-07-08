@@ -30,6 +30,7 @@ typedef struct {
     int zsheetlayer; // no key has this, but used internally
     int zlayer;      // key 24
     int zorder;      // key 25
+    int random; // random number assigned to this object
 } GDObjectTyped;
 
 typedef struct {
@@ -80,7 +81,7 @@ typedef struct {
     float fromOpacity;
     bool toggleOpacity;
     int inheritedChannelID;
-    int hsv; // or a struct if you support HSV
+    int hsv; // convert to struct
     int toRed;
     int toGreen;
     int toBlue;
@@ -89,6 +90,8 @@ typedef struct {
     float duration;
     bool copyOpacity;
 } GDColorChannel;
+
+extern int pulsing_type;
 
 extern GDTypedObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;

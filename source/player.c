@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include "icons_includes.h"
 #include "game.h"
-#include <mp3player.h>
+#include "custom_mp3player.h"
 
 GRRLIB_texImg *icon_l1;
 GRRLIB_texImg *icon_l2;

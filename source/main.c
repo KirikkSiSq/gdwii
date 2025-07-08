@@ -22,7 +22,7 @@
 
 #include "main.h"
 
-#include <mp3player.h>
+#include "custom_mp3player.h"
 
 // include generated header
 #include "level_loading.h"
@@ -82,7 +82,7 @@ void draw_game() {
         GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White tex
         
         char layerText[64];
-        snprintf(layerText, sizeof(layerText), "Drawn layers: %d (%d)", layersDrawn, frame_counter - old_frame_counter);
+        snprintf(layerText, sizeof(layerText), "Drawn layers: %d (%.2f) (%d)", layersDrawn, MP3Player_GetAmplitude(), frame_counter - old_frame_counter);
         GRRLIB_PrintfTTF(20, 50, font, layerText, 20, 0xFFFFFFFF);
         old_frame_counter = frame_counter;
         char player_x[64];
@@ -96,6 +96,8 @@ void draw_game() {
     GRRLIB_Render();
     layersDrawn = 0;
 }
+
+#include <mad.h>
 
 int main() {
     SYS_STDIO_Report(true);
@@ -125,7 +127,6 @@ int main() {
     font = GRRLIB_LoadTTF(pusab_ttf, pusab_ttf_size);
 
     init_variables();
-
     while(1) {
         switch (gameRoutine) {
             case ROUTINE_MENU:

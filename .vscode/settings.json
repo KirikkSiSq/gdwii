@@ -66,7 +66,13 @@
         "cantletgo_mp3.h": "c",
         "cantletgo_gmd.h": "c",
         "oggplayer.h": "c",
-        "playsound_01_ogg.h": "c"
+        "playsound_01_ogg.h": "c",
+        "menuloop_mp3.h": "c",
+        "processor.h": "c",
+        "asm.h": "c",
+        "d_spikes_01_001_png.h": "c",
+        "rod_ball_03_001_png.h": "c",
+        "pit_04_001_png.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

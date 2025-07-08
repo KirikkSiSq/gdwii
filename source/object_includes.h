@@ -20,6 +20,9 @@
 
 #include "spike_01_001_png.h"
 #include "pit_01_001_png.h"
+#include "pit_02_001_png.h"
+#include "pit_03_001_png.h"
+#include "pit_04_001_png.h"
 
 #include "portal_01_back_001_png.h"
 #include "portal_01_front_001_png.h"
@@ -37,6 +40,10 @@
 #include "rod_02_001_png.h"
 #include "rod_03_001_png.h"
 
+#include "rod_ball_01_001_png.h"
+#include "rod_ball_02_001_png.h"
+#include "rod_ball_03_001_png.h"
+
 #include "d_spikes_01_001_png.h"
 #include "d_spikes_02_001_png.h"
 #include "d_spikes_03_001_png.h"
@@ -51,3 +58,4 @@
 #include "plank_01_color_001_png.h"
 
 #include "chain_01_001_png.h"
+

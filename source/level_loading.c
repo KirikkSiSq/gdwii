@@ -8,9 +8,12 @@
 #include "level_loading.h"
 
 #include "main.h"
+#include "math.h"
 
 #include "level.h"
 #include "player.h"
+
+int pulsing_type = 0;
 
 char *extract_base64(const char *data) {
     const char *start_tag = "<k>k4</k><s>";
@@ -405,6 +408,8 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
     typed->zsheetlayer = objects[typed->id].spritesheet_layer;
     typed->zlayer = objects[typed->id].def_zlayer;
     typed->zorder = objects[typed->id].def_zorder;
+
+    typed->random = rand();
 
     for (int i = 2; i < obj->propCount; i++) {
         int key = obj->keys[i];
@@ -871,6 +876,8 @@ void load_level() {
     
     set_color_channels();
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
+
+    pulsing_type = random_int(0,2);
 
     printf("Finished loading level\n");
 }

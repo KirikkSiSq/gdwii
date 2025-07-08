@@ -2,7 +2,7 @@
 #include <grrlib.h>
 #include <wiiuse/wpad.h>
 #include "level.h"
-#include <mp3player.h>
+#include "custom_mp3player.h"
 #include "oggplayer.h"
 #include "playSound_01_ogg.h"
 #include "menuLoop_mp3.h"

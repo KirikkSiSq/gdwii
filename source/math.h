@@ -24,6 +24,7 @@ void rotate_point_around_center(float cx, float cy, float angle, float x, float 
 float adjust_angle(float angle, int flipX, int flipY);
 float randomf();
 float random_float(float min, float max);
+int random_int(int min, int max);
 
 float square_distance(float xa, float ya, float xb, float yb);
 

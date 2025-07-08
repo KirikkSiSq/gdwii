@@ -10,6 +10,7 @@
 #include "math.h"
 #include <math.h>
 #include "game.h"
+#include "custom_mp3player.h"
 
 #include "particles.h"
 #include "particle_png.h"
@@ -368,6 +369,20 @@ const ObjectDefinition objects[] = {
                 .col_channel = BLACK,
                 .zlayer_offset = 0,
                 .texture = pit_01_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = BLACK,
+                .zlayer_offset = 0,
+                .texture = pit_02_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = BLACK,
+                .zlayer_offset = 0,
+                .texture = pit_03_001_png
             }
         },
         .hitbox = {
@@ -481,13 +496,34 @@ const ObjectDefinition objects[] = {
                 .col_channel = UNMODIFIABLE,
                 .zlayer_offset = 0,
                 .texture = rod_01_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = -50,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = rod_ball_01_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = -50,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = rod_ball_02_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = -50,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = rod_ball_03_001_png
             }
         },
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
         .def_zorder = -6,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Medium rod
         .layers = {
@@ -497,13 +533,20 @@ const ObjectDefinition objects[] = {
                 .col_channel = UNMODIFIABLE,
                 .zlayer_offset = 0,
                 .texture = rod_02_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = -40,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = rod_ball_01_001_png
             }
         },
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
         .def_zorder = -6,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Small rod
         .layers = {
@@ -513,13 +556,20 @@ const ObjectDefinition objects[] = {
                 .col_channel = UNMODIFIABLE,
                 .zlayer_offset = 0,
                 .texture = rod_03_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = -30,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = rod_ball_01_001_png
             }
         },
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
         .def_zorder = -6,
-        .num_layers = 1
+        .num_layers = 2
     },
     { // Deco Spikes big 
         .layers = {
@@ -738,14 +788,17 @@ void load_spritesheet() {
     particleTex = GRRLIB_LoadTexturePNG(particle_png);
 
     for (s32 object = 1; object < OBJECT_COUNT; object++) {
-        for (s32 layer = 0; layer < objects[object].num_layers; layer++) {
+        for (s32 layer = 0; layer < MAX_OBJECT_LAYERS; layer++) {
             printf("Loading texture of object %d layer %d\n", object, layer);
 
+            // Skip unused layers
+            if (!objects[object].layers[layer].texture) continue;
             
             GRRLIB_texImg *image = GRRLIB_LoadTexturePNG((const u8 *) objects[object].layers[layer].texture);
             if (image == NULL || image->data == NULL) {
                 printf("Couldn't load texture of object %d layer %d\n", object, layer);
             } else {
+                GRRLIB_SetHandle(image, (image->w/2), (image->h/2));
                 object_images[object][layer] = image;
             }
         }
@@ -909,6 +962,46 @@ void get_fade_vars(float x, int *fade_x, int *fade_y, float *fade_scale) {
     }
 }
 
+int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
+    switch (obj->id) {
+        case YELLOW_ORB:
+            return 1;
+        case ROD_BIG:
+        case ROD_MEDIUM:
+        case ROD_SMALL:
+            if (layer->layerNum == 1) {
+                return 1;
+            }
+            break;
+    }
+
+    return 0;
+}
+
+float get_object_pulse(float amplitude, GDObjectTyped *obj) {
+    switch (obj->id) {
+        case YELLOW_ORB:
+            return (amplitude * 0.6) + 0.6f;
+    }
+    return amplitude;
+}
+
+GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GDObjectTyped *obj, GDObjectLayer *layer) {
+    switch (obj->id) {
+        case GROUND_SPIKE:
+            return object_images[GROUND_SPIKE][obj->random % 3];
+        case ROD_BIG:
+        case ROD_MEDIUM:
+        case ROD_SMALL:
+            if (layer->layerNum == 1) {
+                return object_images[ROD_BIG][pulsing_type + 1]; // balls start at 1
+            }
+            break;
+            
+    }
+
+    return image;
+}
 
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
     int obj_id = obj->id;
@@ -953,12 +1046,28 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
 
     get_fade_vars(x, &fade_x, &fade_y, &fade_scale);
 
-    GRRLIB_SetHandle(image, (width/2), (height/2));
+    if (layer_pulses(obj, layer)) {
+        fade_scale *= get_object_pulse(amplitude, obj);
+    }
+
+    float rotation = obj->rotation;
+
+    switch(obj->id) {
+        case ROD_BIG:
+        case ROD_MEDIUM:
+        case ROD_SMALL:
+            if (layer->layerNum == 1) {
+                rotation = 0.f;
+                x_flip_mult = 1.f;
+                y_flip_mult = 1.f;
+            }
+    }
+
     GRRLIB_DrawImg(
         /* X        */ x + 6 - (width/2) + x_off_rot + fade_x,
         /* Y        */ y + 6 - (height/2) + y_off_rot + fade_y,
-        /* Texture  */ image, 
-        /* Rotation */ obj->rotation, 
+        /* Texture  */ get_randomized_texture(image, obj, layer), 
+        /* Rotation */ rotation, 
         /* Scale X  */ 0.73333333333333333333333333333333 * x_flip_mult * fade_scale, 
         /* Scale Y  */ 0.73333333333333333333333333333333 * y_flip_mult * fade_scale, 
         /* Color    */ color

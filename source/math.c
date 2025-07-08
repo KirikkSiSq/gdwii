@@ -98,6 +98,10 @@ float random_float(float min, float max) {
     return ((max - min) * ((float)rand() / RAND_MAX)) + min;
 }
 
+int random_int(int min, int max) {
+    return rand() % (max + 1 - min) + min;
+}
+
 float adjust_angle(float angle, int flipX, int flipY) {
     // Normalize angle to [0, 360)
     while (angle < 0) angle += 360;

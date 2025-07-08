@@ -9,5 +9,6 @@
 #define ticks_to_secs_float(ticks) (((float)(ticks)/(float)(TB_TIMER_CLOCK*1000)))
 
 extern bool enable_info;
+extern float amplitude;
 
 int game_loop();

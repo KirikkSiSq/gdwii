@@ -3,11 +3,13 @@
 
 #include "game.h"
 #include "main.h"
-#include <mp3player.h>
+#include "custom_mp3player.h"
 #include "level.h"
+#include "math.h"
 
 bool fixed_dt = FALSE;
 bool enable_info = FALSE;
+float amplitude = 0.0f;
 
 int game_loop() {
     u64 prevTicks = gettime();
@@ -29,9 +31,10 @@ int game_loop() {
         prevTicks = currentTicks;
 
         accumulator += frameTime;
-
+        
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;
+            amplitude = iSlerp(amplitude, clampf(MP3Player_GetAmplitude() * 2.f, 0.1f, 0.8f), 0.2f, STEPS_DT);
             handle_player();
             handle_objects();
             update_particles();
