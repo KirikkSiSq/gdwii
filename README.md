@@ -10,5 +10,6 @@ Geometry Dash and its respective resources are by RobTop Games.
 ## Useful resources
 [GDClone](https://github.com/opstic/gdclone) by opstic\
 [GDRender](https://github.com/maxnut/gdrender/) by maxnut\
-[pathfinder](https://github.com/camila314/pathfinder) by camila314
+[pathfinder](https://github.com/camila314/pathfinder) by camila314\
+[OpenGD](https://github.com/Open-GD/OpenGD/) by Open-GD
 
