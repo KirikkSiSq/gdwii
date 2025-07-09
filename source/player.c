@@ -47,6 +47,23 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         case YELLOW_PAD:
             player->vel_y = 864;
             player->on_ground = FALSE;
+            
+            particle_templates[USE_EFFECT].start_scale = 0;
+            particle_templates[USE_EFFECT].end_scale = 60;
+
+            particle_templates[USE_EFFECT].start_color.r = 255;
+            particle_templates[USE_EFFECT].start_color.g = 255;
+            particle_templates[USE_EFFECT].start_color.b = 0;
+            particle_templates[USE_EFFECT].start_color.a = 255;
+
+            particle_templates[USE_EFFECT].end_color.r = 255;
+            particle_templates[USE_EFFECT].end_color.g = 255;
+            particle_templates[USE_EFFECT].end_color.b = 0;
+            particle_templates[USE_EFFECT].end_color.a = 0;
+
+            spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+            obj->activated = TRUE;
             break;
         
         case YELLOW_ORB:
@@ -54,7 +71,25 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 player->vel_y = 603.72;
                 player->on_ground = FALSE;
                 player->buffering_state = BUFFER_END;
-            }
+
+                particle_templates[USE_EFFECT].start_scale = 50;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 255;
+                particle_templates[USE_EFFECT].start_color.b = 0;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 255;
+                particle_templates[USE_EFFECT].end_color.b = 0;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+                obj->activated = TRUE;
+            } 
+            if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
             break;
 
         case CUBE_PORTAL: 
@@ -64,7 +99,23 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 
                 player->vel_y /= 2;
                 player->gamemode = GAMEMODE_CUBE;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 0;
+                particle_templates[USE_EFFECT].start_color.g = 255;
+                particle_templates[USE_EFFECT].start_color.b = 50;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 0;
+                particle_templates[USE_EFFECT].end_color.g = 255;
+                particle_templates[USE_EFFECT].end_color.b = 50;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
             }
+            obj->activated = TRUE;
             break;
             
         case SHIP_PORTAL: 
@@ -76,20 +127,68 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 
                 player->vel_y /= 2;
                 player->gamemode = GAMEMODE_SHIP;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 31;
+                particle_templates[USE_EFFECT].start_color.b = 255;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 31;
+                particle_templates[USE_EFFECT].end_color.b = 255;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
             }
+            obj->activated = TRUE;
             break;
         
         case BLUE_GRAVITY_PORTAL:
             if (player->upside_down) {
                 player->vel_y /= -2;
                 player->upside_down = FALSE;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 56;
+                particle_templates[USE_EFFECT].start_color.g = 200;
+                particle_templates[USE_EFFECT].start_color.b = 255;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 56;
+                particle_templates[USE_EFFECT].end_color.g = 200;
+                particle_templates[USE_EFFECT].end_color.b = 255;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+                
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
             }
+            obj->activated = TRUE;
             break;
         case YELLOW_GRAVITY_PORTAL:
             if (!player->upside_down) {
                 player->vel_y /= -2;
                 player->upside_down = TRUE;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 255;
+                particle_templates[USE_EFFECT].start_color.b = 0;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 255;
+                particle_templates[USE_EFFECT].end_color.b = 0;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+                
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
             }
+            obj->activated = TRUE;
             break;
     }
 }
@@ -139,13 +238,18 @@ void collide_with_objects() {
         GDObjectTyped *obj = objectsArrayList->objects[i]; 
         ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
 
-        if (hitbox->type != HITBOX_NONE && obj->id < OBJECT_COUNT) {
+        if (hitbox->type != HITBOX_NONE && !obj->activated && obj->id < OBJECT_COUNT) {
             if (intersect(
                 player->x, player->y, player->width, player->height, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 handle_collision(player, obj, hitbox);
+                obj->collided = TRUE;
+            } else {
+                obj->collided = FALSE;
             }
+        } else {
+            obj->collided = FALSE;
         }
     }
 }
@@ -320,6 +424,11 @@ void run_player() {
     
     // Ground
     if (getBottom(player) < player->ground_y) {
+        if (player->upside_down) {
+            player->dead = TRUE;
+            return;
+        }
+
         player->vel_y = 0;
         player->y = player->ground_y + (player->height / 2);
         

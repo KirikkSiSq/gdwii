@@ -19,7 +19,8 @@ typedef struct {
     float vscale;
     float velocity_angle; 
     float velocity_magnitude;
-    float rotate_per_second; 
+    float rotate_per_second;
+    int texture_id;
     bool blending;
 } Particle;
 
@@ -42,9 +43,15 @@ typedef struct {
     float rotationEndVariance;
     float minRadius;
     float maxRadius;
+    int texture_id;
     int maxParticles;
 } ParticleTemplate;
 
+enum ParticleTextures {
+    PARTICLE_SQUARE,
+    PARTICLE_CIRCLE,
+    PARTICLE_CIRCUNFERENCE,
+};
 
 enum ParticleGroupID {
     CUBE_DRAG,
@@ -55,9 +62,12 @@ enum ParticleGroupID {
     PAD_PARTICLES,
     GLITTER_EFFECT,
     PORTAL_PARTICLES,
+    USE_EFFECT,
+    ORB_HITBOX_EFFECT,
 };
 
 extern ParticleTemplate particle_templates[];
+extern GRRLIB_texImg *particleCircleTex;
 extern GRRLIB_texImg *particleTex;
 
 void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj);

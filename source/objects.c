@@ -828,12 +828,15 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         case YELLOW_ORB:
             if (!state.player.dead) spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
+            draw_obj_particles(USE_EFFECT, obj);
+            draw_obj_particles(ORB_HITBOX_EFFECT, obj);
             break;
         
         case YELLOW_PAD:
             particle_templates[PAD_PARTICLES].angle = adjust_angle(obj->rotation + 90, obj->flippedH, obj->flippedV);;
             if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
+            draw_obj_particles(USE_EFFECT, obj);
             break;
             
         case YELLOW_GRAVITY_PORTAL:
@@ -851,6 +854,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
+                draw_obj_particles(USE_EFFECT, obj);
             }
             break;
 
@@ -869,6 +873,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
+                draw_obj_particles(USE_EFFECT, obj);
             }
             break;
         
@@ -887,6 +892,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
+                draw_obj_particles(USE_EFFECT, obj);
             }
             break;
 
@@ -905,6 +911,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
+                draw_obj_particles(USE_EFFECT, obj);
             }
             break;
     }
@@ -981,7 +988,11 @@ int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
 float get_object_pulse(float amplitude, GDObjectTyped *obj) {
     switch (obj->id) {
         case YELLOW_ORB:
-            return (amplitude * 0.6) + 0.6f;
+            return map_range(amplitude, 0.f, 1.f, 0.5f, 1.2f);
+        case ROD_BIG:
+        case ROD_MEDIUM:
+        case ROD_SMALL:
+            return map_range(amplitude, 0.f, 1.f, 0.2f, 1.0f);
     }
     return amplitude;
 }
@@ -1047,7 +1058,8 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     get_fade_vars(x, &fade_x, &fade_y, &fade_scale);
 
     if (layer_pulses(obj, layer)) {
-        fade_scale *= get_object_pulse(amplitude, obj);
+        obj->ampl_scaling = iSlerp(obj->ampl_scaling, get_object_pulse(amplitude, obj), 0.2f, STEPS_DT);
+        fade_scale *= obj->ampl_scaling;
     }
 
     float rotation = obj->rotation;

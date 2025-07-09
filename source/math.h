@@ -25,6 +25,7 @@ float adjust_angle(float angle, int flipX, int flipY);
 float randomf();
 float random_float(float min, float max);
 int random_int(int min, int max);
+float map_range(float val, float min1, float max1, float min2, float max2);
 
 float square_distance(float xa, float ya, float xb, float yb);
 

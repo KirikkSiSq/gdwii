@@ -34,7 +34,7 @@ int game_loop() {
         
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;
-            amplitude = iSlerp(amplitude, clampf(MP3Player_GetAmplitude() * 2.f, 0.1f, 0.8f), 0.2f, STEPS_DT);
+            amplitude = MP3Player_GetAmplitude();
             handle_player();
             handle_objects();
             update_particles();

@@ -5,7 +5,7 @@
 #include "particles.h"
 #include "math.h"
 #include "game.h"
-
+#include <stdio.h>
 GRRLIB_texImg *particleTex = NULL;
 
 ParticleTemplate particle_templates[] = {
@@ -25,6 +25,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE,
         .maxParticles = 30
     },
     [SHIP_TRAIL] = {
@@ -43,6 +44,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE,
         .maxParticles = 30
     },
     [HOLDING_SHIP_TRAIL] = {
@@ -61,6 +63,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE,
         .maxParticles = 30
     },
     [SHIP_DRAG] = {
@@ -84,6 +87,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE,
         .maxParticles = 40
     }, 
     [ORB_PARTICLES] = {
@@ -107,6 +111,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 20,
         .maxRadius = 20,
+        .texture_id = PARTICLE_SQUARE,
         .maxParticles = 30
     }, 
     [PAD_PARTICLES] = {
@@ -130,6 +135,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE,
         .maxParticles = 30
     }, 
     [GLITTER_EFFECT] = {
@@ -153,6 +159,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE,
         .maxParticles = 30
     },
     [PORTAL_PARTICLES] = {
@@ -176,6 +183,55 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 45,
         .maxRadius = 45,
+        .texture_id = PARTICLE_SQUARE,
+        .maxParticles = 30
+    },
+    [USE_EFFECT] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 0, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = 0,
+        .life = 0.3f, .lifeVar = 0,
+        .start_scale = 40, .start_scaleVar = 0,
+        .end_scale = 0.0, .end_scaleVar = 0,
+        .start_color = {255,255,0,63},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {255,255,0,255},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_CIRCLE,
+        .maxParticles = 30
+    },
+    [ORB_HITBOX_EFFECT] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 0, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = 0,
+        .life = 0.3f, .lifeVar = 0,
+        .start_scale = 0, .start_scaleVar = 0,
+        .end_scale = 90, .end_scaleVar = 0,
+        .start_color = {200,200,200,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {200,200,200,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_CIRCUNFERENCE,
         .maxParticles = 30
     }
 };
@@ -245,6 +301,9 @@ void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
             particles[i].blending = tpl->blending;
             particles[i].active = TRUE;
             particles[i].parent_obj = parent_obj;
+
+            particles[i].texture_id = tpl->texture_id;
+
             break;
         }
     }
@@ -284,20 +343,60 @@ void draw_particles(int group_id) {
             if (p->blending) {
                 GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
             }
-            GRRLIB_DrawImg(
-                calc_x,
-                calc_y,
-                particleTex,
-                0,
-                p->scale,
-                p->scale,
-                RGBA(
-                    p->color.r,
-                    p->color.g,
-                    p->color.b,
-                    p->color.a
-                )
-            );
+            switch(p->texture_id) { 
+                case PARTICLE_SQUARE:
+                    GRRLIB_DrawImg(
+                        calc_x, calc_y,
+                        particleTex,
+                        0,
+                        p->scale, p->scale,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a
+                        )
+                    );
+                    break;
+                case PARTICLE_CIRCLE:
+                    GRRLIB_Circle(
+                        calc_x, calc_y,
+                        p->scale,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a
+                        ),
+                        TRUE
+                    );
+                    break;
+                case PARTICLE_CIRCUNFERENCE:
+                    GRRLIB_Circle(
+                        calc_x, calc_y,
+                        p->scale,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a
+                        ),
+                        FALSE
+                    );
+                    GRRLIB_Circle(
+                        calc_x, calc_y,
+                        p->scale-1,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a
+                        ),
+                        FALSE
+                    );
+                    break;
+            }
+            
             GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
         }
     }
@@ -324,20 +423,59 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
             if (p->blending) {
                 GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
             }
-            GRRLIB_DrawImg(
-                calc_x + fade_x,
-                calc_y + fade_y,
-                particleTex,
-                0,
-                p->scale,
-                p->scale,
-                RGBA(
-                    p->color.r,
-                    p->color.g,
-                    p->color.b,
-                    p->color.a * (get_fade_value(x, screenWidth) / 255.f)
-                )
-            );
+            switch(p->texture_id) { 
+                case PARTICLE_SQUARE:
+                    GRRLIB_DrawImg(
+                        calc_x + 6 + fade_x, calc_y + 6 + fade_y,
+                        particleTex,
+                        0,
+                        p->scale, p->scale,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a * (get_fade_value(x, screenWidth) / 255.f)
+                        )
+                    );
+                    break;
+                case PARTICLE_CIRCLE:
+                    GRRLIB_Circle(
+                        calc_x + 6 + fade_x, calc_y + 6 + fade_y,
+                        p->scale,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a * (get_fade_value(x, screenWidth) / 255.f)
+                        ),
+                        TRUE
+                    );
+                    break;
+                case PARTICLE_CIRCUNFERENCE:
+                    GRRLIB_Circle(
+                        calc_x + 6 + fade_x, calc_y + 6 + fade_y,
+                        p->scale,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a * (get_fade_value(x, screenWidth) / 255.f)
+                        ),
+                        FALSE
+                    );
+                    GRRLIB_Circle(
+                        calc_x + 6 + fade_x, calc_y + 6 + fade_y,
+                        p->scale - 1,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a * (get_fade_value(x, screenWidth) / 255.f)
+                        ),
+                        FALSE
+                    );
+                    break;
+            }
             GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
         }
     }

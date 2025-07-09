@@ -31,6 +31,9 @@ typedef struct {
     int zlayer;      // key 24
     int zorder;      // key 25
     int random; // random number assigned to this object
+    bool activated; // if it has been activated
+    bool collided; // if the object just started being touched
+    float ampl_scaling; // the amplitude scaling for pulsing objects
 } GDObjectTyped;
 
 typedef struct {
