@@ -2,7 +2,7 @@
 
 #include <stdbool.h>
 
-#define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30)
+#define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
 
 typedef struct {
     float x;

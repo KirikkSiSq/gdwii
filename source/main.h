@@ -17,6 +17,8 @@ typedef struct {
     
     Player player;
     Player old_player;
+
+    float ground_y_gfx;
     
     Particle particles[MAX_PARTICLES];
 } GameState;

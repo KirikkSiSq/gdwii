@@ -371,6 +371,15 @@ void run_camera() {
         upper = 210.f;
         lower = 90.f;
     }
+    
+    float playable_height = state.player.ceiling_y - state.player.ground_y;
+    float calc_height = 0;
+
+    if (state.player.gamemode != GAMEMODE_CUBE) {
+        calc_height = (SCREEN_HEIGHT_AREA - playable_height) / 2;
+    }
+
+    state.ground_y_gfx = iSlerp(state.ground_y_gfx, calc_height, 0.02f, STEPS_DT);
 
     if (player->gamemode == GAMEMODE_CUBE) {
         if (grav(player, player->vel_y) > 0 && player->y > state.camera_y + upper) {
@@ -385,7 +394,7 @@ void run_camera() {
 
         state.camera_y = approachf(state.camera_y, state.camera_y_lerp, 0.2f, 0.05f);
     } else {
-        state.camera_y = approachf(state.camera_y, state.camera_intended_y, 0.1f, 0.025f);
+        state.camera_y = iSlerp(state.camera_y, state.camera_intended_y, 0.02f, STEPS_DT);
         state.camera_y_lerp = state.camera_y;
     }
 

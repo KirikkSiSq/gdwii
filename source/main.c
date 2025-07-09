@@ -31,6 +31,7 @@
 #include "pusab_ttf.h"
 
 #include "player.h"
+#include "math.h"
 
 #include "game.h"
 #include "menu.h"
@@ -62,7 +63,9 @@ void draw_game() {
     draw_all_object_layers();
 
     draw_ground(state.player.ground_y, FALSE);
-    draw_ground(state.player.ceiling_y, TRUE);
+    
+    if (state.player.ground_y > 0) draw_ground(state.camera_y + state.ground_y_gfx, FALSE);
+    draw_ground(state.camera_y + SCREEN_HEIGHT_AREA - state.ground_y_gfx, TRUE);
     
     // FPS logic
     frameCount++;
