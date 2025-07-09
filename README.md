@@ -5,7 +5,7 @@ Port made by AleFunky.\
 Geometry Dash and its respective resources are by RobTop Games.
 
 ## Screenshots
-![imagen](https://github.com/user-attachments/assets/890a69c5-71f8-4f3e-a0d2-f1a72a50aff2)![imagen](https://github.com/user-attachments/assets/f6cf6295-dc0e-4cba-b268-8b5003fd635b)
+![imagen](https://github.com/user-attachments/assets/890a69c5-71f8-4f3e-a0d2-f1a72a50aff2)![imagen](https://github.com/user-attachments/assets/3c0a640f-a2d7-4d56-829b-830bc5c7d675)
 
 ## Useful resources
 [GDClone](https://github.com/opstic/gdclone) by opstic\
