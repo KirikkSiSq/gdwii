@@ -310,7 +310,7 @@ void run_player() {
     
     // Ground
     if (getBottom(player) < player->ground_y) {
-        if (player->upside_down) {
+        if (player->gamemode == GAMEMODE_CUBE && player->upside_down) {
             player->dead = TRUE;
             return;
         }
