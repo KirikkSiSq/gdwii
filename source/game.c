@@ -31,6 +31,8 @@ int game_loop() {
         prevTicks = currentTicks;
 
         accumulator += frameTime;
+
+        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_1) state.noclip ^= 1;
         
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;

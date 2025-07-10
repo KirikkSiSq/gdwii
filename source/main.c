@@ -62,7 +62,7 @@ void draw_game() {
 
     draw_all_object_layers();
 
-    draw_ground(state.player.ground_y, FALSE);
+    draw_ground(0, FALSE);
     
     if (state.player.ground_y > 0) draw_ground(state.camera_y + state.ground_y_gfx, FALSE);
     draw_ground(state.camera_y + SCREEN_HEIGHT_AREA - state.ground_y_gfx, TRUE);
@@ -96,6 +96,11 @@ void draw_game() {
         snprintf(player_y, sizeof(player_y), "Y: %.2f", state.player.y);
         GRRLIB_PrintfTTF(20, 110, font, player_y, 20, 0xFFFFFFFF);
     }
+
+    if (state.noclip) {
+        GRRLIB_PrintfTTF(400, 20, font, "Noclip activated", 20, 0xFFFFFFFF);
+    }
+
     GRRLIB_Render();
     layersDrawn = 0;
 }

@@ -62,5 +62,17 @@ LevelDefinition levels[] = {
         .song_ptr  = StereoMadness_mp3,
         .song_size = StereoMadness_mp3_size,
         .data_ptr  = LevelEasy_gmd
+    },
+    {
+        .level_name = "THE NIGHTMARE",
+        .song_ptr  = Polargeist_mp3,
+        .song_size = Polargeist_mp3_size,
+        .data_ptr  = TheNightmare_gmd
+    },
+    {
+        .level_name = "DEMON PARK",
+        .song_ptr  = TimeMachine_mp3,
+        .song_size = TimeMachine_mp3_size,
+        .data_ptr  = DemonPark_gmd
     }
 };

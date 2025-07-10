@@ -119,14 +119,6 @@ void cube_gamemode(Player *player) {
         spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
 
-    if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
-        if (player->buffering_state == BUFFER_NONE) {
-            player->buffering_state = BUFFER_READY;
-        }
-    } else {
-        player->buffering_state = BUFFER_NONE;
-    }
-
     if (player->on_ground && WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
         player->vel_y = 603.72;
         player->on_ground = FALSE;
@@ -207,16 +199,7 @@ void ship_gamemode(Player *player) {
 void ball_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
 
-    player->gravity = -1676.46672f;
-
-    if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
-        if (player->buffering_state == BUFFER_NONE) {
-            player->buffering_state = BUFFER_READY;
-        }
-    } else {
-        player->buffering_state = BUFFER_NONE;
-    }
-    
+    player->gravity = -1676.46672f;  
     
     if (player->on_ground || player->on_ceiling) {
         player->ball_rotation_speed = 2.3;
@@ -368,10 +351,21 @@ void handle_mirror_transition() {
 }
 
 void handle_player() {
+    Player *player = &state.player;
+    if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
+        if (player->buffering_state == BUFFER_NONE) {
+            player->buffering_state = BUFFER_READY;
+        }
+    } else {
+        player->buffering_state = BUFFER_NONE;
+    }
+    
+    collide_with_objects();
     run_player();
     run_camera();
     handle_mirror_transition();
-    collide_with_objects();
+
+    if (state.noclip) state.player.dead = FALSE;
 }
 
 void init_variables() {

@@ -255,8 +255,12 @@ void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
             if (tpl->maxRadius > tpl->minRadius) {
                 radius += (tpl->maxRadius - tpl->minRadius) * random_float(0, 1);
             }
-            float px = x + radius * cosf(DegToRad(angle)) + tpl->sourcePosVarX * random_float(-1, 1);
-            float py = y + radius * sinf(DegToRad(angle)) + tpl->sourcePosVarY * random_float(-1, 1);
+
+            float angled_var_x = tpl->sourcePosVarY * cosf(DegToRad(angle)) - tpl->sourcePosVarX * sinf(DegToRad(angle));
+            float angled_var_y = tpl->sourcePosVarY * sinf(DegToRad(angle)) + tpl->sourcePosVarX * cosf(DegToRad(angle));
+
+            float px = x + radius * cosf(DegToRad(angle)) + angled_var_x * random_float(-1, 1);
+            float py = y + radius * sinf(DegToRad(angle)) + angled_var_y * random_float(-1, 1);
 
             float life = tpl->life + tpl->lifeVar * random_float(-1, 1);
 

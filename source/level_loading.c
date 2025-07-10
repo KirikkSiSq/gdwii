@@ -255,6 +255,40 @@ void free_string_array(char **arr, int count) {
     free(arr);
 }
 
+void parse_color_channel(GDColorChannel *channels, int i, char *channel_string) {
+    GDColorChannel channel = {0};  // Zero-initialize
+    int kvCount = 0;
+    char **kvs = split_string(channel_string, '_', &kvCount);
+
+    for (int j = 0; j + 1 < kvCount; j += 2) {
+        int key = atoi(kvs[j]);
+        const char *valStr = kvs[j + 1];
+
+        switch (key) {
+            case 1:  channel.fromRed = atoi(valStr); break;
+            case 2:  channel.fromGreen = atoi(valStr); break;
+            case 3:  channel.fromBlue = atoi(valStr); break;
+            case 4:  channel.playerColor = atoi(valStr); break;
+            case 5:  channel.blending = atoi(valStr) != 0; break;
+            case 6:  channel.channelID = atoi(valStr); break;
+            case 7:  channel.fromOpacity = atof(valStr); break;
+            case 8:  channel.toggleOpacity = atoi(valStr) != 0; break;
+            case 9:  channel.inheritedChannelID = atoi(valStr); break;
+            case 10: channel.hsv = atoi(valStr); break;
+            case 11: channel.toRed = atoi(valStr); break;
+            case 12: channel.toGreen = atoi(valStr); break;
+            case 13: channel.toBlue = atoi(valStr); break;
+            case 14: channel.deltaTime = atof(valStr); break;
+            case 15: channel.toOpacity = atof(valStr); break;
+            case 16: channel.duration = atof(valStr); break;
+            case 17: channel.copyOpacity = atoi(valStr) != 0; break;
+        }
+    }
+
+    channels[i] = channel;
+    free_string_array(kvs, kvCount);
+}
+
 
 int parse_color_channels(const char *colorString, GDColorChannel **outArray) {
     if (!colorString || !outArray) return 0;
@@ -271,37 +305,7 @@ int parse_color_channels(const char *colorString, GDColorChannel **outArray) {
     }
 
     for (int i = 0; i < count; i++) {
-        GDColorChannel channel = {0};  // Zero-initialize
-        int kvCount = 0;
-        char **kvs = split_string(entries[i], '_', &kvCount);
-
-        for (int j = 0; j + 1 < kvCount; j += 2) {
-            int key = atoi(kvs[j]);
-            const char *valStr = kvs[j + 1];
-
-            switch (key) {
-                case 1:  channel.fromRed = atoi(valStr); break;
-                case 2:  channel.fromGreen = atoi(valStr); break;
-                case 3:  channel.fromBlue = atoi(valStr); break;
-                case 4:  channel.playerColor = atoi(valStr); break;
-                case 5:  channel.blending = atoi(valStr) != 0; break;
-                case 6:  channel.channelID = atoi(valStr); break;
-                case 7:  channel.fromOpacity = atof(valStr); break;
-                case 8:  channel.toggleOpacity = atoi(valStr) != 0; break;
-                case 9:  channel.inheritedChannelID = atoi(valStr); break;
-                case 10: channel.hsv = atoi(valStr); break;
-                case 11: channel.toRed = atoi(valStr); break;
-                case 12: channel.toGreen = atoi(valStr); break;
-                case 13: channel.toBlue = atoi(valStr); break;
-                case 14: channel.deltaTime = atof(valStr); break;
-                case 15: channel.toOpacity = atof(valStr); break;
-                case 16: channel.duration = atof(valStr); break;
-                case 17: channel.copyOpacity = atoi(valStr) != 0; break;
-            }
-        }
-
-        channels[i] = channel;
-        free_string_array(kvs, kvCount);
+        parse_color_channel(channels, i, entries[i]);
     }
 
     *outArray = channels;
@@ -733,7 +737,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
 
     // Fill array
     int count = 1;
-    for (int i = 1; i < objList->count; i++) {
+    for (int i = 0; i < objList->count; i++) {
         GDObjectTyped *obj = objList->objects[i];
 
         int obj_id = obj->id;
@@ -794,7 +798,19 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
         return 0;
     }
 
-    int bg_r = atoi(get_metadata_value(level_string, "kS1"));
+    char *red_bg = get_metadata_value(level_string, "kS1");
+
+    if (!red_bg) { // 1.9 only
+        parse_color_channel(channels, 0, get_metadata_value(level_string, "kS29"));
+        channels[0].channelID = 1000;
+        parse_color_channel(channels, 1, get_metadata_value(level_string, "kS30"));
+        channels[1].channelID = 1001;
+        
+        *outArray = channels;
+        return 2;
+    }
+
+    int bg_r = atoi(red_bg);
     int bg_g = atoi(get_metadata_value(level_string, "kS2"));
     int bg_b = atoi(get_metadata_value(level_string, "kS3"));
 

@@ -28,6 +28,8 @@ typedef struct {
     float mirror_factor;
 
     float ground_y_gfx;
+
+    bool noclip;
     
     Particle particles[MAX_PARTICLES];
 } GameState;
