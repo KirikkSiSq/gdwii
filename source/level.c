@@ -46,6 +46,12 @@ LevelDefinition levels[] = {
         .data_ptr  = Jumper_gmd
     }, 
     {
+        .level_name = "TIME MACHINE",
+        .song_ptr  = TimeMachine_mp3,
+        .song_size = TimeMachine_mp3_size,
+        .data_ptr  = TimeMachine_gmd
+    }, 
+    {
         .level_name = "LEVEL EASY",
         .song_ptr  = StereoMadness_mp3,
         .song_size = StereoMadness_mp3_size,

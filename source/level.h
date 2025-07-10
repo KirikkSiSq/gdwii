@@ -7,7 +7,7 @@ typedef struct {
     const unsigned char *data_ptr;
 } LevelDefinition;
 
-#define LEVEL_NUM 8
+#define LEVEL_NUM 9
 
 extern int level_id;
 

@@ -19,4 +19,7 @@
 #include "Jumper_gmd.h"
 #include "Jumper_mp3.h"
 
+#include "TimeMachine_gmd.h"
+#include "TimeMachine_mp3.h"
+
 #include "LevelEasy_gmd.h"

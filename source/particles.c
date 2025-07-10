@@ -346,7 +346,7 @@ void draw_particles(int group_id) {
             switch(p->texture_id) { 
                 case PARTICLE_SQUARE:
                     GRRLIB_DrawImg(
-                        calc_x, calc_y,
+                        get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         particleTex,
                         0,
                         p->scale, p->scale,
@@ -360,7 +360,7 @@ void draw_particles(int group_id) {
                     break;
                 case PARTICLE_CIRCLE:
                     GRRLIB_Circle(
-                        calc_x, calc_y,
+                        get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         p->scale,
                         RGBA(
                             p->color.r,
@@ -373,7 +373,7 @@ void draw_particles(int group_id) {
                     break;
                 case PARTICLE_CIRCUNFERENCE:
                     GRRLIB_Circle(
-                        calc_x, calc_y,
+                        get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         p->scale,
                         RGBA(
                             p->color.r,
@@ -384,7 +384,7 @@ void draw_particles(int group_id) {
                         FALSE
                     );
                     GRRLIB_Circle(
-                        calc_x, calc_y,
+                        get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         p->scale-1,
                         RGBA(
                             p->color.r,
@@ -426,7 +426,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
             switch(p->texture_id) { 
                 case PARTICLE_SQUARE:
                     GRRLIB_DrawImg(
-                        calc_x + 6 + fade_x, calc_y + 6 + fade_y,
+                        get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         particleTex,
                         0,
                         p->scale, p->scale,
@@ -440,7 +440,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
                     break;
                 case PARTICLE_CIRCLE:
                     GRRLIB_Circle(
-                        calc_x + 6 + fade_x, calc_y + 6 + fade_y,
+                        get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         p->scale,
                         RGBA(
                             p->color.r,
@@ -453,7 +453,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
                     break;
                 case PARTICLE_CIRCUNFERENCE:
                     GRRLIB_Circle(
-                        calc_x + 6 + fade_x, calc_y + 6 + fade_y,
+                        get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         p->scale,
                         RGBA(
                             p->color.r,
@@ -464,7 +464,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
                         FALSE
                     );
                     GRRLIB_Circle(
-                        calc_x + 6 + fade_x, calc_y + 6 + fade_y,
+                        get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         p->scale - 1,
                         RGBA(
                             p->color.r,

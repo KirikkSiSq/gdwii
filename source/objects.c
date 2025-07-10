@@ -11,7 +11,9 @@
 #include <math.h>
 #include "game.h"
 #include "custom_mp3player.h"
+#include "player.h"
 
+#include <wiiuse/wpad.h>
 #include "particles.h"
 #include "particle_png.h"
 
@@ -99,676 +101,6 @@ struct ColorChannel channels[COL_CHANNEL_COUNT] = {
     }
 };
 
-
-const ObjectHitbox gamemode_portal_hitbox = {
-    .width = 34,
-    .height = 86,
-    .type = HITBOX_SPECIAL
-};
-
-const ObjectHitbox gravity_portal_hitbox = {
-    .width = 25,
-    .height = 75,
-    .type = HITBOX_SPECIAL
-};
-
-const ObjectHitbox no_hitbox = {
-    .width = 0,
-    .height = 0,
-    .type = HITBOX_NONE
-};
-
-const ObjectDefinition unknown = {
-    .layers = {},
-    .hitbox = no_hitbox,
-    .spritesheet_layer = SHEET_BLOCKS,
-    .def_zlayer = 0,
-    .def_zorder = 0,
-    .num_layers = 0,  
-};
-
-const ObjectDefinition trigger = {
-    .layers = {},
-    .hitbox = no_hitbox,
-    .spritesheet_layer = SHEET_BLOCKS,
-    .def_zlayer = 0,
-    .def_zorder = 0,
-    .num_layers = 0,  
-    .is_trigger = TRUE
-};
-
-
-const struct ObjectLayer player_layer = {
-    .col_channel = UNMODIFIABLE,
-    .zlayer_offset = 0,
-    .texture = NULL
-};
-
-const ObjectDefinition player_object = {
-    .layers = { player_layer },
-    .hitbox = no_hitbox,
-    .spritesheet_layer = SHEET_BLOCKS,
-    .def_zlayer = LAYER_T1-1,
-    .def_zorder = 9999999,
-    .num_layers = 1,  
-    .is_trigger = TRUE
-};
-
-const ObjectDefinition objects[] = {
-    player_object,
-    { // Basic block
-        .layers = {
-            {
-                .x_offset = 0.5,
-                .y_offset = 0.5,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_01_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_01_001_png
-            }
-        },
-        .hitbox = {
-            .width = 30,
-            .height = 30,
-            .type = HITBOX_SOLID
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 2
-    },
-    { // Checker edge
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_02_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_02_001_png
-            }
-        },
-        .hitbox = {
-            .width = 30,
-            .height = 30,
-            .type = HITBOX_SOLID
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 2
-    },
-    { // Checker corner
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_03_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_03_001_png
-            }
-        },
-        .hitbox = {
-            .width = 30,
-            .height = 30,
-            .type = HITBOX_SOLID
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 2
-    },
-    { // Checker inside corner
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_04_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_04_001_png
-            }
-        },
-        .hitbox = {
-            .width = 30,
-            .height = 30,
-            .type = HITBOX_SOLID
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 2
-    },
-    { // Checker filler
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_05_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
-        .num_layers = 1
-    },
-    { // Checker pillar end
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_06_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_06_001_png
-            }
-        },
-        .hitbox = {
-            .width = 30,
-            .height = 30,
-            .type = HITBOX_SOLID
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 2
-    },
-    { // Checker pillar
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_07_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_07_001_png
-            }
-        },
-        .hitbox = {
-            .width = 30,
-            .height = 30,
-            .type = HITBOX_SOLID
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 2
-    },
-    { // Spike
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 1,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = spike_01_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = spike_01_001_png
-            }
-        },
-        .hitbox = {
-            .width = 6,
-            .height = 12,
-            .type = HITBOX_SPIKE
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 2
-    },
-    { // Ground spike
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = BLACK,
-                .zlayer_offset = 0,
-                .texture = pit_01_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = BLACK,
-                .zlayer_offset = 0,
-                .texture = pit_02_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = BLACK,
-                .zlayer_offset = 0,
-                .texture = pit_03_001_png
-            }
-        },
-        .hitbox = {
-            .width = 9,
-            .height = 10.8,
-            .type = HITBOX_SPIKE
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 1
-    },
-    { // Blue portal
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = -1,
-                .texture = portal_01_back_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = portal_01_front_001_png
-            }
-        },
-        .hitbox = gravity_portal_hitbox,
-        .spritesheet_layer = SHEET_PORTALS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 10,
-        .num_layers = 2
-    },
-    { // Yellow portal
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = -1,
-                .texture = portal_02_back_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = portal_02_front_001_png
-            }
-        },
-        .hitbox = gravity_portal_hitbox,
-        .spritesheet_layer = SHEET_PORTALS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 10,
-        .num_layers = 2
-    },
-    { // Cube portal
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = -1,
-                .texture = portal_03_back_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = portal_03_front_001_png
-            }
-        },
-        .hitbox = gamemode_portal_hitbox,
-        .spritesheet_layer = SHEET_PORTALS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 10,
-        .num_layers = 2
-    },
-    { // Ship portal
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = -1,
-                .texture = portal_04_back_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = portal_04_front_001_png
-            }
-        },
-        .hitbox = gamemode_portal_hitbox,
-        .spritesheet_layer = SHEET_PORTALS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 10,
-        .num_layers = 2
-    },
-    unknown, // 14
-    { // Big rod
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = rod_01_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = -50,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = rod_ball_01_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = -50,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = rod_ball_02_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = -50,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = rod_ball_03_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B2,
-        .def_zorder = -6,
-        .num_layers = 2
-    },
-    { // Medium rod
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = rod_02_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = -40,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = rod_ball_01_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B2,
-        .def_zorder = -6,
-        .num_layers = 2
-    },
-    { // Small rod
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = rod_03_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = -30,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = rod_ball_01_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B2,
-        .def_zorder = -6,
-        .num_layers = 2
-    },
-    { // Deco Spikes big 
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = d_spikes_01_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
-        .num_layers = 1
-    },
-    { // Deco Spikes medium 
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = d_spikes_02_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
-        .num_layers = 1
-    },
-    { // Deco Spikes small 
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = d_spikes_03_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
-        .num_layers = 1
-    },
-    { // Deco Spikes tiny 
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = d_spikes_04_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
-        .num_layers = 1
-    },
-    // 1.0 TRIGGERS -- add later
-    trigger, // 22
-    trigger, // 23
-    trigger, // 24
-    trigger, // 25
-    trigger, // 26
-    trigger, // 27
-    trigger, // 28
-    trigger, // 29
-    trigger, // 30
-    unknown, // 31
-    unknown, // 32
-    unknown, // 33
-    unknown, // 34
-    { // Yellow pad
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = bump_01_001_png
-            }
-        },
-        .hitbox = {
-            .width = 25,
-            .height = 4,
-            .type = HITBOX_SPECIAL
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 12,
-        .num_layers = 1
-    },
-    { // Yellow orb
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
-                .zlayer_offset = 0,
-                .texture = ring_01_001_png
-            }
-        },
-        .hitbox = {
-            .width = 36,
-            .height = 36,
-            .type = HITBOX_SPECIAL
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 12,
-        .num_layers = 1
-    },
-    unknown, // 37
-    unknown, // 38
-    { // Half spike
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = spike_02_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = spike_02_001_png
-            }
-        },
-        .hitbox = {
-            .width = 6,
-            .height = 5.6,
-            .type = HITBOX_SPIKE
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 2
-    },
-    { // Slab
-        .layers = {
-            {
-                .x_offset = 0.5,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = square_h_01_glow_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = BLACK,
-                .zlayer_offset = 0,
-                .texture = plank_01_color_001_png
-            },
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = OBJ,
-                .zlayer_offset = 0,
-                .texture = plank_01_001_png
-            }
-        },
-        .hitbox = {
-            .width = 30,
-            .height = 14,
-            .type = HITBOX_SOLID
-        },
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
-        .num_layers = 3
-    },
-    { // Chains
-        .layers = {
-            {
-                .x_offset = 0,
-                .y_offset = 0,
-                .col_channel = P1,
-                .zlayer_offset = 0,
-                .texture = chain_01_001_png
-            }
-        },
-        .hitbox = no_hitbox,
-        .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
-        .num_layers = 1
-    },
-};
 
 // Prepare Graphics
 GRRLIB_texImg *bg;
@@ -859,6 +191,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             break;
 
         case BLUE_GRAVITY_PORTAL:
+        case BLUE_MIRROR_PORTAL:
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
 
@@ -908,6 +241,25 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].end_color.g = 31;
                 particle_templates[PORTAL_PARTICLES].end_color.b = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.a = 255;
+                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                draw_obj_particles(PORTAL_PARTICLES, obj);
+                draw_obj_particles(USE_EFFECT, obj);
+            }
+            break;
+
+        case ORANGE_MIRROR_PORTAL:
+            if (layer->layerNum == 1) {
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
+
+                particle_templates[PORTAL_PARTICLES].start_color.r = 255;
+                particle_templates[PORTAL_PARTICLES].start_color.g = 91;
+                particle_templates[PORTAL_PARTICLES].start_color.b = 0;
+                particle_templates[PORTAL_PARTICLES].start_color.a = 127;
+
+                particle_templates[PORTAL_PARTICLES].end_color.r = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.g = 91;
+                particle_templates[PORTAL_PARTICLES].end_color.b = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
@@ -1047,7 +399,7 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     float cos_a = cosf(angle_rad);
     float sin_a = sinf(angle_rad);
 
-    float x_off_rot = x_offset * cos_a - y_offset * sin_a;
+    float x_off_rot = (x_offset * cos_a - y_offset * sin_a) * state.mirror_mult;
     float y_off_rot = x_offset * sin_a + y_offset * cos_a;
 
     int fade_x = 0;
@@ -1062,7 +414,7 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
         fade_scale *= obj->ampl_scaling;
     }
 
-    float rotation = obj->rotation;
+    float rotation = adjust_angle(obj->rotation, 0, state.mirror_mult < 0);
 
     switch(obj->id) {
         case ROD_BIG:
@@ -1076,11 +428,11 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     }
 
     GRRLIB_DrawImg(
-        /* X        */ x + 6 - (width/2) + x_off_rot + fade_x,
+        /* X        */ get_mirror_x(x, state.mirror_factor) + 6 - (width/2) + x_off_rot + fade_x,
         /* Y        */ y + 6 - (height/2) + y_off_rot + fade_y,
         /* Texture  */ get_randomized_texture(image, obj, layer), 
         /* Rotation */ rotation, 
-        /* Scale X  */ 0.73333333333333333333333333333333 * x_flip_mult * fade_scale, 
+        /* Scale X  */ 0.73333333333333333333333333333333 * x_flip_mult * fade_scale * state.mirror_mult, 
         /* Scale Y  */ 0.73333333333333333333333333333333 * y_flip_mult * fade_scale, 
         /* Color    */ color
     );
@@ -1135,7 +487,7 @@ void draw_background(f32 x, f32 y) {
 void draw_ground(f32 y, bool is_ceiling) {
     int mult = (is_ceiling ? -1 : 1);
 
-    float calc_x = 0 - positive_fmod(state.camera_x * SCALE, GROUND_SIZE);
+    float calc_x = 0 - positive_fmod(state.ground_x * SCALE, GROUND_SIZE);
     float calc_y = screenHeight - ((y - state.camera_y) * SCALE);
 
     for (float i = -GROUND_SIZE; i < screenWidth + GROUND_SIZE; i += GROUND_SIZE) {
@@ -1288,6 +640,206 @@ void handle_triggers(int i) {
                     break;
             }
         }
+    }
+}
+
+float get_mirror_x(float x, float factor) {
+    return x + factor * (screenWidth - 2.0f * x);
+}
+
+void set_intended_ceiling(Player *player) {
+    float mid_point = (player->ground_y + player->ceiling_y) / 2;
+    state.camera_intended_y = mid_point - (SCREEN_HEIGHT_AREA / 2);
+}
+
+void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
+    switch (obj->id) {
+        case YELLOW_PAD:
+            player->vel_y = 864;
+            player->on_ground = FALSE;
+            
+            particle_templates[USE_EFFECT].start_scale = 0;
+            particle_templates[USE_EFFECT].end_scale = 60;
+
+            particle_templates[USE_EFFECT].start_color.r = 255;
+            particle_templates[USE_EFFECT].start_color.g = 255;
+            particle_templates[USE_EFFECT].start_color.b = 0;
+            particle_templates[USE_EFFECT].start_color.a = 255;
+
+            particle_templates[USE_EFFECT].end_color.r = 255;
+            particle_templates[USE_EFFECT].end_color.g = 255;
+            particle_templates[USE_EFFECT].end_color.b = 0;
+            particle_templates[USE_EFFECT].end_color.a = 0;
+
+            spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+            obj->activated = TRUE;
+            break;
+        
+        case YELLOW_ORB:
+            if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
+                player->vel_y = 603.72;
+                player->on_ground = FALSE;
+                player->buffering_state = BUFFER_END;
+
+                particle_templates[USE_EFFECT].start_scale = 50;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 255;
+                particle_templates[USE_EFFECT].start_color.b = 0;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 255;
+                particle_templates[USE_EFFECT].end_color.b = 0;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+                obj->activated = TRUE;
+            } 
+            if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+            break;
+
+        case CUBE_PORTAL: 
+            if (player->gamemode != GAMEMODE_CUBE) {
+                player->ground_y = 0;
+                player->ceiling_y = 999999;
+
+                player->vel_y /= 2;
+                player->gamemode = GAMEMODE_CUBE;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 0;
+                particle_templates[USE_EFFECT].start_color.g = 255;
+                particle_templates[USE_EFFECT].start_color.b = 50;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 0;
+                particle_templates[USE_EFFECT].end_color.g = 255;
+                particle_templates[USE_EFFECT].end_color.b = 50;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+            }
+            obj->activated = TRUE;
+            break;
+            
+        case SHIP_PORTAL: 
+            if (player->gamemode != GAMEMODE_SHIP) {
+                player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
+                player->ceiling_y = player->ground_y + 300;
+                
+                set_intended_ceiling(player);
+
+                player->vel_y /= 2;
+                player->gamemode = GAMEMODE_SHIP;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 31;
+                particle_templates[USE_EFFECT].start_color.b = 255;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 31;
+                particle_templates[USE_EFFECT].end_color.b = 255;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+            }
+            obj->activated = TRUE;
+            break;
+        
+        case BLUE_GRAVITY_PORTAL:
+            if (player->upside_down) {
+                player->vel_y /= -2;
+                player->upside_down = FALSE;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 56;
+                particle_templates[USE_EFFECT].start_color.g = 200;
+                particle_templates[USE_EFFECT].start_color.b = 255;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 56;
+                particle_templates[USE_EFFECT].end_color.g = 200;
+                particle_templates[USE_EFFECT].end_color.b = 255;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+                
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+            }
+            obj->activated = TRUE;
+            break;
+        case YELLOW_GRAVITY_PORTAL:
+            if (!player->upside_down) {
+                player->vel_y /= -2;
+                player->upside_down = TRUE;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 255;
+                particle_templates[USE_EFFECT].start_color.b = 0;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 255;
+                particle_templates[USE_EFFECT].end_color.b = 0;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+                
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+            }
+            obj->activated = TRUE;
+            break;
+        case ORANGE_MIRROR_PORTAL:
+            particle_templates[USE_EFFECT].start_scale = 80;
+            particle_templates[USE_EFFECT].end_scale = 0;
+
+            particle_templates[USE_EFFECT].start_color.r = 255;
+            particle_templates[USE_EFFECT].start_color.g = 94;
+            particle_templates[USE_EFFECT].start_color.b = 0;
+            particle_templates[USE_EFFECT].start_color.a = 0;
+
+            particle_templates[USE_EFFECT].end_color.r = 255;
+            particle_templates[USE_EFFECT].end_color.g = 94;
+            particle_templates[USE_EFFECT].end_color.b = 0;
+            particle_templates[USE_EFFECT].end_color.a = 255;
+            
+            spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+            state.intended_mirror_factor = 1.f;
+            state.intended_mirror_speed_factor = -1.f;
+            obj->activated = TRUE;
+            break;
+        case BLUE_MIRROR_PORTAL:
+            particle_templates[USE_EFFECT].start_scale = 80;
+            particle_templates[USE_EFFECT].end_scale = 0;
+
+            particle_templates[USE_EFFECT].start_color.r = 56;
+            particle_templates[USE_EFFECT].start_color.g = 200;
+            particle_templates[USE_EFFECT].start_color.b = 255;
+            particle_templates[USE_EFFECT].start_color.a = 0;
+
+            particle_templates[USE_EFFECT].end_color.r = 56;
+            particle_templates[USE_EFFECT].end_color.g = 200;
+            particle_templates[USE_EFFECT].end_color.b = 255;
+            particle_templates[USE_EFFECT].end_color.a = 255;
+            
+            spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+            state.intended_mirror_factor = 0.f;
+            state.intended_mirror_speed_factor = 1.f;
+            obj->activated = TRUE;
+            break;
     }
 }
 

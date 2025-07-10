@@ -2,6 +2,7 @@
 
 #include <grrlib.h>
 #include "level_loading.h"
+#include "player.h"
 
 #define MAX_OBJECT_LAYERS 4
 #define BG_DIMENSIONS 4
@@ -50,6 +51,11 @@ enum Objects {
     HALF_SPIKE,
     SLAB,
     CHAINS,
+    UNKNOWN_42,
+    UNKNOWN_43,
+    UNKNOWN_44,
+    ORANGE_MIRROR_PORTAL,
+    BLUE_MIRROR_PORTAL,
     OBJECT_COUNT
 };
 
@@ -170,6 +176,9 @@ extern int layersDrawn;
 
 void get_fade_vars(float x, int *fade_x, int *fade_y, float *fade_scale);
 int get_fade_value(float x, int right_edge);
+
+void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox);
+float get_mirror_x(float x, float factor);
 
 void draw_all_object_layers();
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer);

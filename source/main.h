@@ -14,9 +14,18 @@ typedef struct {
 
     float camera_x_lerp;
     float camera_y_lerp;
+
+    float ground_x;
+    float background_x;
     
     Player player;
     Player old_player;
+
+    int mirror_mult;
+    float intended_mirror_factor;
+    float intended_mirror_speed_factor;
+    float mirror_speed_factor;
+    float mirror_factor;
 
     float ground_y_gfx;
     

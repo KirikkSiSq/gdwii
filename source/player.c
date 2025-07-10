@@ -36,163 +36,6 @@ inline float obj_getLeft(GDObjectTyped *object)  { return object->x - objects[ob
 inline float obj_gravBottom(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
 inline float obj_gravTop(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
 
-
-void set_intended_ceiling(Player *player) {
-    float mid_point = (player->ground_y + player->ceiling_y) / 2;
-    state.camera_intended_y = mid_point - (SCREEN_HEIGHT_AREA / 2);
-}
-
-void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
-    switch (obj->id) {
-        case YELLOW_PAD:
-            player->vel_y = 864;
-            player->on_ground = FALSE;
-            
-            particle_templates[USE_EFFECT].start_scale = 0;
-            particle_templates[USE_EFFECT].end_scale = 60;
-
-            particle_templates[USE_EFFECT].start_color.r = 255;
-            particle_templates[USE_EFFECT].start_color.g = 255;
-            particle_templates[USE_EFFECT].start_color.b = 0;
-            particle_templates[USE_EFFECT].start_color.a = 255;
-
-            particle_templates[USE_EFFECT].end_color.r = 255;
-            particle_templates[USE_EFFECT].end_color.g = 255;
-            particle_templates[USE_EFFECT].end_color.b = 0;
-            particle_templates[USE_EFFECT].end_color.a = 0;
-
-            spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
-
-            obj->activated = TRUE;
-            break;
-        
-        case YELLOW_ORB:
-            if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
-                player->vel_y = 603.72;
-                player->on_ground = FALSE;
-                player->buffering_state = BUFFER_END;
-
-                particle_templates[USE_EFFECT].start_scale = 50;
-                particle_templates[USE_EFFECT].end_scale = 0;
-
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 255;
-                particle_templates[USE_EFFECT].start_color.b = 0;
-                particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 255;
-                particle_templates[USE_EFFECT].end_color.b = 0;
-                particle_templates[USE_EFFECT].end_color.a = 255;
-
-                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
-
-                obj->activated = TRUE;
-            } 
-            if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
-            break;
-
-        case CUBE_PORTAL: 
-            if (player->gamemode != GAMEMODE_CUBE) {
-                player->ground_y = 0;
-                player->ceiling_y = 999999;
-
-                player->vel_y /= 2;
-                player->gamemode = GAMEMODE_CUBE;
-
-                particle_templates[USE_EFFECT].start_scale = 80;
-                particle_templates[USE_EFFECT].end_scale = 0;
-
-                particle_templates[USE_EFFECT].start_color.r = 0;
-                particle_templates[USE_EFFECT].start_color.g = 255;
-                particle_templates[USE_EFFECT].start_color.b = 50;
-                particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 0;
-                particle_templates[USE_EFFECT].end_color.g = 255;
-                particle_templates[USE_EFFECT].end_color.b = 50;
-                particle_templates[USE_EFFECT].end_color.a = 255;
-
-                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
-            }
-            obj->activated = TRUE;
-            break;
-            
-        case SHIP_PORTAL: 
-            if (player->gamemode != GAMEMODE_SHIP) {
-                player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
-                player->ceiling_y = player->ground_y + 300;
-                
-                set_intended_ceiling(player);
-
-                player->vel_y /= 2;
-                player->gamemode = GAMEMODE_SHIP;
-
-                particle_templates[USE_EFFECT].start_scale = 80;
-                particle_templates[USE_EFFECT].end_scale = 0;
-
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 31;
-                particle_templates[USE_EFFECT].start_color.b = 255;
-                particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 31;
-                particle_templates[USE_EFFECT].end_color.b = 255;
-                particle_templates[USE_EFFECT].end_color.a = 255;
-
-                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
-            }
-            obj->activated = TRUE;
-            break;
-        
-        case BLUE_GRAVITY_PORTAL:
-            if (player->upside_down) {
-                player->vel_y /= -2;
-                player->upside_down = FALSE;
-
-                particle_templates[USE_EFFECT].start_scale = 80;
-                particle_templates[USE_EFFECT].end_scale = 0;
-
-                particle_templates[USE_EFFECT].start_color.r = 56;
-                particle_templates[USE_EFFECT].start_color.g = 200;
-                particle_templates[USE_EFFECT].start_color.b = 255;
-                particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 56;
-                particle_templates[USE_EFFECT].end_color.g = 200;
-                particle_templates[USE_EFFECT].end_color.b = 255;
-                particle_templates[USE_EFFECT].end_color.a = 255;
-                
-                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
-            }
-            obj->activated = TRUE;
-            break;
-        case YELLOW_GRAVITY_PORTAL:
-            if (!player->upside_down) {
-                player->vel_y /= -2;
-                player->upside_down = TRUE;
-
-                particle_templates[USE_EFFECT].start_scale = 80;
-                particle_templates[USE_EFFECT].end_scale = 0;
-
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 255;
-                particle_templates[USE_EFFECT].start_color.b = 0;
-                particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 255;
-                particle_templates[USE_EFFECT].end_color.b = 0;
-                particle_templates[USE_EFFECT].end_color.a = 255;
-                
-                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
-            }
-            obj->activated = TRUE;
-            break;
-    }
-}
-
 void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
     int clip = 10;
     switch (hitbox->type) {
@@ -363,6 +206,8 @@ void run_camera() {
     Player *player = &state.player;
 
     state.camera_x += player->vel_x * STEPS_DT;
+    state.ground_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
+    state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
 
     float upper = 240.f;
     float lower = 120.f;
@@ -463,9 +308,20 @@ void run_player() {
     
 }
 
+void handle_mirror_transition() {
+    state.mirror_factor = approachf(state.mirror_factor, state.intended_mirror_factor, 0.01f, 0.002f);
+    state.mirror_speed_factor = approachf(state.mirror_speed_factor, state.intended_mirror_speed_factor, 0.01f, 0.002f);
+    if (state.mirror_factor >= 0.5f) {
+        state.mirror_mult = -1;
+    } else {
+        state.mirror_mult = 1;
+    }
+}
+
 void handle_player() {
     run_player();
     run_camera();
+    handle_mirror_transition();
     collide_with_objects();
 }
 
@@ -474,6 +330,15 @@ void init_variables() {
     state.camera_x_lerp = -120;
     state.camera_y = -90;
     state.camera_y_lerp = -90;
+
+    state.ground_x = 0;
+    state.background_x = 0;
+
+    state.ground_y_gfx = 0;
+    state.mirror_factor = 0;
+    state.mirror_speed_factor = 1.f;
+    state.intended_mirror_factor = 0;
+    state.intended_mirror_speed_factor = 1.f;
 
     current_fading_effect = FADE_NONE;
     
@@ -552,61 +417,60 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
     float x;
     float y;
 
+    float calculated_scale = 0.733f * state.mirror_mult;
+    float calculated_rotation = player->rotation * state.mirror_mult;
+
     #define CUBE_DIVISOR 1.8
 
     rotate_point_around_center_gfx(
-        calc_x, calc_y,
+        get_mirror_x(calc_x, state.mirror_factor), calc_y,
         7, (player->upside_down) ? 5 : -9,
         38, 30,
         60, 60,
-        player->rotation,
+        calculated_rotation,
         &x, &y
     );
 
     // Top (icon)
     GRRLIB_DrawImg(
-        x,
-        y,
+        x + 6 - (30), y + 6 - (30),
         icon_l1,
-        player->rotation,
-        0.733f / CUBE_DIVISOR, 0.733f / CUBE_DIVISOR,
+        calculated_rotation,
+        calculated_scale / CUBE_DIVISOR, 0.733f / CUBE_DIVISOR,
         RGBA(p1.r, p1.g, p1.b, 255)
     );
 
     GRRLIB_DrawImg(
-        x,
-        y,
+        x + 6 - (30), y + 6 - (30),
         icon_l2,
-        player->rotation,
-        0.733f / CUBE_DIVISOR, 0.733f / CUBE_DIVISOR,
+        calculated_rotation,
+        calculated_scale / CUBE_DIVISOR, 0.733f / CUBE_DIVISOR,
         RGBA(p2.r, p2.g, p2.b, 255)
     );
 
     rotate_point_around_center_gfx(
-        calc_x, calc_y,
+        get_mirror_x(calc_x, state.mirror_factor), calc_y,
         0, (player->upside_down) ? -4 : 12,
         38, 30,
         76, 48,
-        player->rotation,
+        calculated_rotation,
         &x, &y
     );
 
     // Bottom (ship)
     GRRLIB_DrawImg(
-        x,
-        y,
+        x + 6 - (30), y + 6 - (30),
         ship_l1,
-        player->rotation,
-        0.733f, 0.733f * mult,
+        calculated_rotation,
+        calculated_scale, 0.733f * mult,
         RGBA(p1.r, p1.g, p1.b, 255)
     );
 
     GRRLIB_DrawImg(
-        x,
-        y,
+        x + 6 - (30), y + 6 - (30),
         ship_l2,
-        player->rotation,
-        0.733f, 0.733f * mult,
+        calculated_rotation,
+        calculated_scale, 0.733f * mult,
         RGBA(p2.r, p2.g, p2.b, 255)
     );
 }
@@ -614,8 +478,8 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
 void draw_player() {
     Player *player = &state.player;
 
-    float calc_x = ((getLeft(player) - state.camera_x) * SCALE);
-    float calc_y = screenHeight - ((getTop(player) - state.camera_y) * SCALE);
+    float calc_x = ((player->x - state.camera_x) * SCALE);
+    float calc_y = screenHeight - ((player->y - state.camera_y) * SCALE);
 
     GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
 
@@ -624,25 +488,25 @@ void draw_player() {
             GRRLIB_SetHandle(icon_l1, 30, 30);
             GRRLIB_SetHandle(icon_l2, 30, 30);
             GRRLIB_DrawImg(
-                calc_x, calc_y - 2,
+                get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l1,
-                player->lerp_rotation,
-                0.73333333333333333333333333333333,
+                player->lerp_rotation * state.mirror_mult,
+                0.73333333333333333333333333333333 * state.mirror_mult,
                 0.73333333333333333333333333333333,
                 RGBA(p1.r, p1.g, p1.b, 255)
             );
 
             GRRLIB_DrawImg(
-                calc_x, calc_y - 2,
+                get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l2,
-                player->lerp_rotation,
-                0.73333333333333333333333333333333,
+                player->lerp_rotation * state.mirror_mult,
+                0.73333333333333333333333333333333 * state.mirror_mult,
                 0.73333333333333333333333333333333,
                 RGBA(p2.r, p2.g, p2.b, 255)
             );
             break;
         case GAMEMODE_SHIP:
-            draw_ship(player, calc_x - 8, calc_y);
+            draw_ship(player, calc_x - 8 * state.mirror_mult, calc_y);
             break;
     }
 
