@@ -310,7 +310,7 @@ void run_player() {
 
 void handle_mirror_transition() {
     state.mirror_factor = approachf(state.mirror_factor, state.intended_mirror_factor, 0.01f, 0.002f);
-    state.mirror_speed_factor = approachf(state.mirror_speed_factor, state.intended_mirror_speed_factor, 0.01f, 0.002f);
+    state.mirror_speed_factor = approachf(state.mirror_speed_factor, state.intended_mirror_speed_factor, 0.02f, 0.004f);
     if (state.mirror_factor >= 0.5f) {
         state.mirror_mult = -1;
     } else {
