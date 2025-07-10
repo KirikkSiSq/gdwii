@@ -760,7 +760,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     }
 
     // Allocate array of pointers to GDObjectLayer
-    layerList->layers = malloc(sizeof(GDObjectLayer *) * layerCount);
+    layerList->layers = malloc(sizeof(GDObjectLayer *) * count);
 
     if (layerList->layers == NULL) {
         printf("Couldn't allocate layer pointers\n");
@@ -769,11 +769,11 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
         return NULL;
     }
 
-    for (int i = 0; i < layerCount; i++) {
+    for (int i = 0; i < count; i++) {
         layerList->layers[i] = &layers[i];
     }
 
-    layerList->count = layerCount;
+    layerList->count = count;
 
     return layerList;
 }
