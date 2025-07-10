@@ -106,6 +106,8 @@ void cube_gamemode(Player *player) {
     
     if (player->vel_y < -810) player->vel_y = -810;
 
+    if (player->y > 2794.f) player->dead = TRUE;
+
     player->rotation += 415.3848 * STEPS_DT * mult;
 
     if (player->on_ground) {
@@ -278,6 +280,7 @@ void run_camera() {
         }
 
         if (state.camera_y_lerp < -90.f) state.camera_y_lerp = -90.f;
+        if (state.camera_y_lerp > 2400.f) state.camera_y_lerp = 2400.f;
 
         state.camera_y = approachf(state.camera_y, state.camera_y_lerp, 0.2f, 0.05f);
     } else {
