@@ -56,6 +56,7 @@ enum Objects {
     UNKNOWN_44,
     ORANGE_MIRROR_PORTAL,
     BLUE_MIRROR_PORTAL,
+    BALL_PORTAL,
     OBJECT_COUNT
 };
 
@@ -67,6 +68,11 @@ enum ZLayers {
     LAYER_T2 = 7,
     LAYER_T3 = 9,
     LAYER_MAX
+};
+
+enum JumpType {
+    JUMP_YELLOW_PAD,
+    JUMP_YELLOW_ORB
 };
 
 enum ColChannels {

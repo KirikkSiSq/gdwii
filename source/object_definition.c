@@ -723,5 +723,28 @@ const ObjectDefinition objects[] = {
         .def_zlayer = LAYER_T1,
         .def_zorder = 10,
         .num_layers = 2
+    },
+    { // Ball portal
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = UNMODIFIABLE,
+                .zlayer_offset = -1,
+                .texture = portal_07_back_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = UNMODIFIABLE,
+                .zlayer_offset = 0,
+                .texture = portal_07_front_001_png
+            }
+        },
+        .hitbox = gamemode_portal_hitbox,
+        .spritesheet_layer = SHEET_PORTALS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 10,
+        .num_layers = 2
     }
 };

@@ -52,6 +52,12 @@ LevelDefinition levels[] = {
         .data_ptr  = TimeMachine_gmd
     }, 
     {
+        .level_name = "CYCLES",
+        .song_ptr  = Cycles_mp3,
+        .song_size = Cycles_mp3_size,
+        .data_ptr  = Cycles_gmd
+    }, 
+    {
         .level_name = "LEVEL EASY",
         .song_ptr  = StereoMadness_mp3,
         .song_size = StereoMadness_mp3_size,

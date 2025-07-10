@@ -30,6 +30,8 @@ typedef struct {
     bool upside_down;
     bool dead;
 
+    float ball_rotation_speed;
+
     int buffering_state;
 
     float time_since_ground;
@@ -44,6 +46,7 @@ enum BufferingState {
 enum PlayerGamemode {
     GAMEMODE_CUBE,
     GAMEMODE_SHIP,
+    GAMEMODE_BALL,
     GAMEMODE_COUNT
 };
 

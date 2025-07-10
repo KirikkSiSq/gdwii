@@ -22,4 +22,7 @@
 #include "TimeMachine_gmd.h"
 #include "TimeMachine_mp3.h"
 
+#include "Cycles_gmd.h"
+#include "Cycles_mp3.h"
+
 #include "LevelEasy_gmd.h"

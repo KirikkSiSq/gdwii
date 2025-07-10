@@ -65,3 +65,6 @@
 #include "portal_06_back_001_png.h"
 #include "portal_06_front_001_png.h"
 
+#include "portal_07_back_001_png.h"
+#include "portal_07_front_001_png.h"
+

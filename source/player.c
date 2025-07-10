@@ -17,6 +17,8 @@ GRRLIB_texImg *icon_l1;
 GRRLIB_texImg *icon_l2;
 GRRLIB_texImg *ship_l1;
 GRRLIB_texImg *ship_l2;
+GRRLIB_texImg *ball_l1;
+GRRLIB_texImg *ball_l2;
 
 Color p1;
 Color p2;
@@ -110,9 +112,7 @@ void cube_gamemode(Player *player) {
         player->rotation = round(player->rotation / 90.0f) * 90.0f;
     }
 
-    player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
-
-    if ((player->time_since_ground < 0.05f)&& (frame_counter & 0b11) == 0) {
+    if ((player->time_since_ground < 0.05f) && (frame_counter & 0b11) == 0) {
         particle_templates[CUBE_DRAG].angle = (player->upside_down ? -90 : 90);
         spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
@@ -179,26 +179,68 @@ void update_ship_rotation(Player *player) {
 
 void ship_gamemode(Player *player) {
     if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
-        if (player->vel_y <= grav(player, 103.485492))
-            player->gravity = player->mini ? 1643.5872 : 1397.0491;
+        if (player->vel_y <= grav(player, 103.485492f))
+            player->gravity = player->mini ? 1643.5872f : 1397.0491f;
         else
-            player->gravity = player->mini ? 1314.86976 : 1117.64328;
+            player->gravity = player->mini ? 1314.86976f : 1117.64328f;
     } else {
-        if (player->vel_y >= grav(player, 103.485492))
-            player->gravity = player->mini ? -1577.85408 : -1341.1719;
+        if (player->vel_y >= grav(player, 103.485492f))
+            player->gravity = player->mini ? -1577.85408f : -1341.1719f;
         else
-            player->gravity = player->mini ? -1051.8984 : -894.11464;
+            player->gravity = player->mini ? -1051.8984f : -894.11464f;
     }
 
     ship_particles(player);
     
-    float min = player->mini ? -406.566 : -345.6;
-    float max = player->mini ? 508.248 : 432.0;
+    float min = player->mini ? -406.566f : -345.6f;
+    float max = player->mini ? 508.248f : 432.0f;
 
     if (player->vel_y < min) {
         player->vel_y = min;
     } else if (player->vel_y > max) {
         player->vel_y = max;
+    }
+}
+
+void ball_gamemode(Player *player) {
+    int mult = (player->upside_down ? -1 : 1);
+
+    player->gravity = -1676.46672f;
+
+    if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
+        if (player->buffering_state == BUFFER_NONE) {
+            player->buffering_state = BUFFER_READY;
+        }
+    } else {
+        player->buffering_state = BUFFER_NONE;
+    }
+    
+    
+    if (player->on_ground || player->on_ceiling) {
+        player->ball_rotation_speed = 2.3;
+
+        if ((frame_counter & 0b11) == 0) {
+            particle_templates[CUBE_DRAG].angle = (player->upside_down ? -90 : 90);
+            spawn_particle(CUBE_DRAG, player->x, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
+        }
+    }
+
+    // Jump
+    if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && (player->on_ground || player->on_ceiling) && player->buffering_state == BUFFER_READY) {
+        player->upside_down ^= 1;
+        player->vel_y = -181.11601;
+
+        player->buffering_state = BUFFER_END;
+        
+        player->ball_rotation_speed = -1.f;
+    }
+    
+    player->rotation += player->ball_rotation_speed * mult;
+
+    if (player->vel_y < -810) {
+        player->vel_y = -810;
+    } else if (player->vel_y > 810) {
+        player->vel_y = 810;
     }
 }
 
@@ -262,10 +304,14 @@ void run_player() {
             spawn_glitter_particles();
             ship_gamemode(player);
             break;
+        case GAMEMODE_BALL:
+            ball_gamemode(player);
+            break;
         
     }
     
     player->time_since_ground += STEPS_DT;
+    player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
     
     player->vel_y += player->gravity * STEPS_DT;
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
@@ -391,6 +437,8 @@ void load_icons() {
     icon_l2 = GRRLIB_LoadTexturePNG(player_01_2_001_png);
     ship_l1 = GRRLIB_LoadTexturePNG(ship_01_001_png);
     ship_l2 = GRRLIB_LoadTexturePNG(ship_01_2_001_png);
+    ball_l1 = GRRLIB_LoadTexturePNG(player_ball_01_001_png);
+    ball_l2 = GRRLIB_LoadTexturePNG(player_ball_01_2_001_png);
 
     p1.r = 0;
     p1.g = 255;
@@ -507,6 +555,28 @@ void draw_player() {
             break;
         case GAMEMODE_SHIP:
             draw_ship(player, calc_x - 8 * state.mirror_mult, calc_y);
+            break;
+        case GAMEMODE_BALL:
+            GRRLIB_SetHandle(ball_l1, 36, 36);
+            GRRLIB_SetHandle(ball_l2, 36, 36);
+            GRRLIB_DrawImg(
+                get_mirror_x(calc_x, state.mirror_factor) + 6 - (36), calc_y + 6 - (36),
+                ball_l1,
+                player->lerp_rotation * state.mirror_mult,
+                0.73333333333333333333333333333333 * state.mirror_mult,
+                0.73333333333333333333333333333333,
+                RGBA(p1.r, p1.g, p1.b, 255)
+            );
+
+            GRRLIB_DrawImg(
+                get_mirror_x(calc_x, state.mirror_factor) + 6 - (36), calc_y + 6 - (36),
+                ball_l2,
+                player->lerp_rotation * state.mirror_mult,
+                0.73333333333333333333333333333333 * state.mirror_mult,
+                0.73333333333333333333333333333333,
+                RGBA(p2.r, p2.g, p2.b, 255)
+            );
+            break;
             break;
     }
 

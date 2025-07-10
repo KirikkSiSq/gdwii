@@ -75,7 +75,10 @@
         "pit_04_001_png.h": "c",
         "stdbool.h": "c",
         "spike_02_001_png.h": "c",
-        "timemachine_mp3.h": "c"
+        "timemachine_mp3.h": "c",
+        "leveleasy_gmd.h": "c",
+        "ship_01_2_001_png.h": "c",
+        "particle_png.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

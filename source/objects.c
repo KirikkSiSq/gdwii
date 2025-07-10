@@ -17,6 +17,11 @@
 #include "particles.h"
 #include "particle_png.h"
 
+float jump_heights_table[2][GAMEMODE_COUNT] = {
+    /* YELLOW PAD */ {864,    432,    518.4},
+    /* YELLOW ORB */ {573.48, 573.48, 401.435993}
+};
+
 struct ColorChannel channels[COL_CHANNEL_COUNT] = {
     // BG
     {
@@ -173,7 +178,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             
         case YELLOW_GRAVITY_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 255;
@@ -193,7 +198,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         case BLUE_GRAVITY_PORTAL:
         case BLUE_MIRROR_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 56;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 200;
@@ -212,7 +217,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         
         case CUBE_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 0;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 255;
@@ -231,7 +236,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
 
         case SHIP_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 31;
@@ -250,7 +255,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
 
         case ORANGE_MIRROR_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(obj->rotation + 180, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 91;
@@ -259,6 +264,25 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
 
                 particle_templates[PORTAL_PARTICLES].end_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].end_color.g = 91;
+                particle_templates[PORTAL_PARTICLES].end_color.b = 0;
+                particle_templates[PORTAL_PARTICLES].end_color.a = 255;
+                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                draw_obj_particles(PORTAL_PARTICLES, obj);
+                draw_obj_particles(USE_EFFECT, obj);
+            }
+            break;
+        
+        case BALL_PORTAL:
+            if (layer->layerNum == 1) {
+                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
+
+                particle_templates[PORTAL_PARTICLES].start_color.r = 255;
+                particle_templates[PORTAL_PARTICLES].start_color.g = 0;
+                particle_templates[PORTAL_PARTICLES].start_color.b = 0;
+                particle_templates[PORTAL_PARTICLES].start_color.a = 127;
+
+                particle_templates[PORTAL_PARTICLES].end_color.r = 255;
+                particle_templates[PORTAL_PARTICLES].end_color.g = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.b = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
@@ -307,10 +331,10 @@ void get_fade_vars(float x, int *fade_x, int *fade_y, float *fade_scale) {
             *fade_y = -get_xy_fade_offset(x, screenWidth);
             break;
         case FADE_RIGHT:
-            *fade_x = get_xy_fade_offset(x, screenWidth);
+            *fade_x = get_xy_fade_offset(x, screenWidth) * state.mirror_mult;
             break;
         case FADE_LEFT:
-            *fade_x = -get_xy_fade_offset(x, screenWidth);
+            *fade_x = -get_xy_fade_offset(x, screenWidth) * state.mirror_mult;
             break;
         case FADE_SCALE_IN:
             *fade_scale = get_in_scale_fade(x, screenWidth);
@@ -655,7 +679,7 @@ void set_intended_ceiling(Player *player) {
 void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
     switch (obj->id) {
         case YELLOW_PAD:
-            player->vel_y = 864;
+            player->vel_y = jump_heights_table[JUMP_YELLOW_PAD][player->gamemode];
             player->on_ground = FALSE;
             
             particle_templates[USE_EFFECT].start_scale = 0;
@@ -678,7 +702,10 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         
         case YELLOW_ORB:
             if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
-                player->vel_y = 603.72;
+                player->vel_y = jump_heights_table[JUMP_YELLOW_ORB][player->gamemode];
+                
+                player->ball_rotation_speed = -1.f;
+                
                 player->on_ground = FALSE;
                 player->buffering_state = BUFFER_END;
 
@@ -707,7 +734,8 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 player->ground_y = 0;
                 player->ceiling_y = 999999;
 
-                player->vel_y /= 2;
+                if (player->gamemode != GAMEMODE_BALL) player->vel_y /= 2;
+
                 player->gamemode = GAMEMODE_CUBE;
 
                 particle_templates[USE_EFFECT].start_scale = 80;
@@ -838,6 +866,35 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 
             state.intended_mirror_factor = 0.f;
             state.intended_mirror_speed_factor = 1.f;
+            obj->activated = TRUE;
+        
+        case BALL_PORTAL: 
+            if (player->gamemode != GAMEMODE_BALL) {
+                player->ground_y = maxf(0, ceilf((obj->y - 150) / 30.f)) * 30;
+                player->ceiling_y = player->ground_y + 240;
+
+                player->ball_rotation_speed = -1.f;
+                set_intended_ceiling(player);
+
+                if (player->gamemode == GAMEMODE_SHIP) player->vel_y /= 2;
+                
+                player->gamemode = GAMEMODE_BALL;
+
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 0;
+                particle_templates[USE_EFFECT].start_color.b = 0;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 0;
+                particle_templates[USE_EFFECT].end_color.b = 0;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+            }
             obj->activated = TRUE;
             break;
     }
