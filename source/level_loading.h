@@ -34,6 +34,7 @@ typedef struct {
     bool activated; // if it has been activated
     bool collided; // if the object just started being touched
     float ampl_scaling; // the amplitude scaling for pulsing objects
+    u8 transition_applied;
 } GDObjectTyped;
 
 typedef struct {

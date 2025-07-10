@@ -939,6 +939,7 @@ void reload_level() {
         GDObjectTyped *obj = objectsArrayList->objects[i];
         obj->activated = FALSE;
         obj->collided = FALSE;
+        obj->transition_applied = FADE_NONE;
     }
     set_color_channels();
 }

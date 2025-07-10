@@ -413,7 +413,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
     float fade_scale = 1.f;
     
     float x = ((parent_obj->x - state.camera_x) * SCALE);
-    get_fade_vars(x, &fade_x, &fade_y, &fade_scale);
+    get_fade_vars(parent_obj, x, &fade_x, &fade_y, &fade_scale);
 
     for (int i = 0; i < MAX_PARTICLES; i++) {
         Particle *p = &state.particles[i];

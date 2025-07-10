@@ -199,6 +199,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         case SHIP_PORTAL: 
             if (player->gamemode != GAMEMODE_SHIP) {
                 player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
+                player->portal_ground_y = player->ground_y;
                 player->ceiling_y = player->ground_y + 300;
                 
                 set_intended_ceiling(player);
@@ -312,6 +313,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         case BALL_PORTAL: 
             if (player->gamemode != GAMEMODE_BALL) {
                 player->ground_y = maxf(0, ceilf((obj->y - 150) / 30.f)) * 30;
+                player->portal_ground_y = player->ground_y;
                 player->ceiling_y = player->ground_y + 240;
 
                 player->ball_rotation_speed = -1.f;
@@ -554,8 +556,8 @@ float get_out_scale_fade(float x, int right_edge) {
     return 1 + ((fade / 255.f) / 2);
 }
 
-void get_fade_vars(float x, int *fade_x, int *fade_y, float *fade_scale) {
-    switch (current_fading_effect) {
+void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float *fade_scale) {
+    switch (obj->transition_applied) {
         case FADE_NONE:
             break;
         case FADE_UP:
@@ -665,7 +667,7 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
 
     float fade_scale = 1.f;
 
-    get_fade_vars(x, &fade_x, &fade_y, &fade_scale);
+    get_fade_vars(obj, x, &fade_x, &fade_y, &fade_scale);
 
     if (layer_pulses(obj, layer)) {
         obj->ampl_scaling = iSlerp(obj->ampl_scaling, get_object_pulse(amplitude, obj), 0.2f, STEPS_DT);
@@ -801,9 +803,15 @@ void draw_all_object_layers() {
             float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);
 
             if (calc_x > -90 && calc_x < screen_x_max) {        
-                if (calc_y > -90 && calc_y < screen_y_max) {        
+                if (calc_y > -90 && calc_y < screen_y_max) {      
                     layersDrawn++;
                     GDObjectLayer *layer = layersArrayList->layers[i];
+
+                    int fade_val = get_fade_value(calc_x, screenWidth);
+                    if (layer->layerNum == 0 && (fade_val == 255 || fade_val == 0)) {
+                        obj->transition_applied = current_fading_effect;  
+                    }
+
                     handle_object_particles(obj, layer);
                     put_object_layer(obj, calc_x, calc_y, layer);
                 }

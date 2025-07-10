@@ -180,7 +180,7 @@ extern struct TriggerBuffer trigger_buffer[COL_CHANNEL_COUNT];
 
 extern int layersDrawn;
 
-void get_fade_vars(float x, int *fade_x, int *fade_y, float *fade_scale);
+void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float *fade_scale);
 int get_fade_value(float x, int right_edge);
 
 void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox);
