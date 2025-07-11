@@ -95,7 +95,12 @@ typedef struct {
     bool copyOpacity;
 } GDColorChannel;
 
+struct LoadedLevelInfo {
+
+};
+
 extern int pulsing_type;
+extern int song_id;
 
 extern GDTypedObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;

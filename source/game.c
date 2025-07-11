@@ -17,7 +17,7 @@ int game_loop() {
 
     load_level();
 
-    MP3Player_PlayBuffer(levels[level_id].song_ptr, levels[level_id].song_size, NULL);
+    MP3Player_PlayBuffer(songs[song_id].song_ptr, songs[song_id].song_size, NULL);
 
     while (1) {
         WPAD_ScanPads();
@@ -36,10 +36,11 @@ int game_loop() {
         
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;
-            amplitude = MP3Player_GetAmplitude();
+            amplitude = (beat_pulse ? 0.8f : 0.1f);
             handle_player();
             handle_objects();
             update_particles();
+            update_beat();
             frame_counter++;
 
             if (state.player.dead) break;
@@ -50,7 +51,7 @@ int game_loop() {
         if (state.player.dead) {
             draw_game();
             handle_death();
-            MP3Player_PlayBuffer(levels[level_id].song_ptr, levels[level_id].song_size, NULL);
+            MP3Player_PlayBuffer(songs[song_id].song_ptr, songs[song_id].song_size, NULL);
             WPAD_ScanPads();
             fixed_dt = TRUE;
         }

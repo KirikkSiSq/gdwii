@@ -417,7 +417,7 @@ static void Resample(struct mad_pcm *Pcm,EQState eqs[2],u32 stereo,u32 src_sampl
 	if (sample_count > 0) {
 		// RMS amplitude normalized to 0.0–1.0 (16-bit audio)
 		float rms = sqrtf((float)sum_squares / sample_count) / 32768.0f;
-		mp3_amplitude = clampf(rms * 3.f, 0.f, 1.f);
+		mp3_amplitude = clampf(rms, 0.f, 1.f);
 	}
 }
 

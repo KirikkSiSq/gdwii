@@ -13,10 +13,12 @@
 #include "custom_mp3player.h"
 #include "player.h"
 #include "trail.h"
+#include "level.h"
 
 #include <wiiuse/wpad.h>
 #include "particles.h"
 #include "particle_png.h"
+#include <ogc/lwp_watchdog.h>
 
 float jump_heights_table[2][GAMEMODE_COUNT] = {
     /* YELLOW PAD */ {864,    432,    518.4},
@@ -613,7 +615,7 @@ float get_object_pulse(float amplitude, GDObjectTyped *obj) {
         case ROD_BIG:
         case ROD_MEDIUM:
         case ROD_SMALL:
-            return map_range(amplitude, 0.f, 1.f, 0.2f, 1.0f);
+            return amplitude;
     }
     return amplitude;
 }
@@ -926,6 +928,35 @@ void handle_triggers(int i) {
     }
 }
 
+u64 last_beat_time = 0;
+int pulse_frames_left = 0;
+int beat_pulse = 0;
+
+void update_beat() {
+    const float beat_interval_ms = 60000.f / songs[song_id].tempo;
+
+    u64 now = gettime();
+    u64 elapsed_ms = ticks_to_millisecs(now - last_beat_time);
+
+    // Check if we've hit the next beat
+    if (elapsed_ms >= beat_interval_ms) {
+        last_beat_time = now;
+        pulse_frames_left = 20;
+        beat_pulse = true;
+    }
+
+    // Countdown pulse frames
+    if (pulse_frames_left > 0) {
+        pulse_frames_left--;
+        beat_pulse = true;
+    } else {
+        beat_pulse = false;
+    }
+
+    if (MP3Player_GetAmplitude() < 0.05f) {
+        beat_pulse = false;
+    }
+}
 
 void handle_objects() {
     for (int i = 0; i < objectsArrayList->count; i++) {

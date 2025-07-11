@@ -14,12 +14,15 @@
 #include "player.h"
 
 int pulsing_type = 0;
+int song_id = 0;
 
-char *extract_base64(const char *data) {
-    const char *start_tag = "<k>k4</k><s>";
-    const char *end_tag = "</s>";
+char *extract_gmd_key(const char *data, const char *key, const char *type) {
+    char start_tag[32];
+    snprintf(start_tag, sizeof(start_tag), "<k>%s</k><%s>", key, type);
+    char end_tag[32];
+    snprintf(end_tag, sizeof(end_tag), "</%s>", type);
 
-    printf("Searching for base64 data in input...\n");
+    printf("Searching for key '%s' in input...\n", key);
     char *start = strstr(data, start_tag);
     if (!start) {
         printf("Could not find start tag '%s'\n", start_tag);
@@ -34,10 +37,10 @@ char *extract_base64(const char *data) {
     }
 
     int len = end - start;
-    char *b64 = malloc(len + 1);
-    strncpy(b64, start, len);
-    b64[len] = '\0';
-    return b64;
+    char *value = malloc(len + 1);
+    strncpy(value, start, len);
+    value[len] = '\0';
+    return value;
 }
 
 int b64_char(char c) {
@@ -183,7 +186,7 @@ char *get_metadata_value(const char *levelString, const char *key) {
 char *decompress_level() {
     printf("Loading level data...\n");
 
-    char *b64 = extract_base64((const char *) levels[level_id].data_ptr);
+    char *b64 = extract_gmd_key((const char *) levels[level_id].data_ptr, "k4", "s");
     if (!b64) {
         printf("Could not extract base64 data\n");
         return NULL;
@@ -855,6 +858,13 @@ void load_level() {
     // Get colors
     char *metaStr = get_metadata_value(level_string, "kS38");
     channelCount = parse_color_channels(metaStr, &colorChannels);
+
+    char *gmd_song_id = extract_gmd_key((const char *) levels[level_id].data_ptr, "k8", "i");
+    if (!gmd_song_id) {
+        song_id = 0;
+    } else {
+        song_id = atoi(gmd_song_id); // Official song id
+    }
 
     // Fallback to pre 2.0 keys
     if (!channelCount) {
