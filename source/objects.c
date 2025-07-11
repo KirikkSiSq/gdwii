@@ -12,6 +12,7 @@
 #include "game.h"
 #include "custom_mp3player.h"
 #include "player.h"
+#include "trail.h"
 
 #include <wiiuse/wpad.h>
 #include "particles.h"
@@ -118,6 +119,7 @@ void set_intended_ceiling(Player *player) {
 void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
     switch (obj->id) {
         case YELLOW_PAD:
+            MotionTrail_ResumeStroke(&trail);
             player->vel_y = jump_heights_table[JUMP_YELLOW_PAD][player->gamemode];
             player->on_ground = FALSE;
             
@@ -141,6 +143,8 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         
         case YELLOW_ORB:
             if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
+                MotionTrail_ResumeStroke(&trail);
+                
                 player->vel_y = jump_heights_table[JUMP_YELLOW_ORB][player->gamemode];
                 
                 player->ball_rotation_speed = -1.f;
@@ -227,6 +231,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         
         case BLUE_GRAVITY_PORTAL:
             if (player->upside_down) {
+                if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                 player->vel_y /= -2;
                 player->upside_down = FALSE;
 
@@ -249,6 +254,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             break;
         case YELLOW_GRAVITY_PORTAL:
             if (!player->upside_down) {
+                if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                 player->vel_y /= -2;
                 player->upside_down = TRUE;
 

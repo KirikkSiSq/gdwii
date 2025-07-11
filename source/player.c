@@ -12,6 +12,7 @@
 #include "icons_includes.h"
 #include "game.h"
 #include "custom_mp3player.h"
+#include "trail.h"
 
 GRRLIB_texImg *icon_l1;
 GRRLIB_texImg *icon_l2;
@@ -19,6 +20,10 @@ GRRLIB_texImg *ship_l1;
 GRRLIB_texImg *ship_l2;
 GRRLIB_texImg *ball_l1;
 GRRLIB_texImg *ball_l2;
+
+GRRLIB_texImg *trail_tex;
+
+MotionTrail trail;
 
 Color p1;
 Color p2;
@@ -101,6 +106,9 @@ void collide_with_objects() {
 
 void cube_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
+    
+    trail.positionR = (Vec2){player->x, player->y};  
+    trail.startingPositionInitialized = TRUE;
 
     player->gravity = -2794.1082;
     
@@ -111,6 +119,7 @@ void cube_gamemode(Player *player) {
     player->rotation += 415.3848 * STEPS_DT * mult;
 
     if (player->on_ground) {
+        MotionTrail_StopStroke(&trail);
         player->rotation = round(player->rotation / 90.0f) * 90.0f;
     }
 
@@ -135,14 +144,20 @@ void cube_gamemode(Player *player) {
 
 void ship_particles(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
+
+    float x, y;
+    rotate_point_around_center(
+        player->x, player->y,
+        player->rotation,
+        player->x - 12, player->y + (player->upside_down ? 10 : -10),
+        &x, &y
+    );
+    
+    trail.positionR = (Vec2){x, y};  
+    trail.startingPositionInitialized = TRUE;
+
     if ((frame_counter & 0b11) == 0) {   
-        float x, y;
-        rotate_point_around_center(
-            player->x, player->y,
-            player->rotation,
-            player->x - 12, player->y + (player->upside_down ? 10 : -10),
-            &x, &y
-        );
+        
         
         // Particle trail
         spawn_particle(SHIP_TRAIL, x, y, NULL);
@@ -198,11 +213,15 @@ void ship_gamemode(Player *player) {
 
 void ball_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
+    
+    trail.positionR = (Vec2){player->x, player->y};  
+    trail.startingPositionInitialized = TRUE;
 
     player->gravity = -1676.46672f;  
     
     if (player->on_ground || player->on_ceiling) {
         player->ball_rotation_speed = 2.3;
+        MotionTrail_StopStroke(&trail);
 
         if ((frame_counter & 0b11) == 0) {
             particle_templates[CUBE_DRAG].angle = (player->upside_down ? -90 : 90);
@@ -293,6 +312,7 @@ void run_player() {
             }
             break;
         case GAMEMODE_SHIP:
+            MotionTrail_ResumeStroke(&trail);
             spawn_glitter_particles();
             ship_gamemode(player);
 
@@ -386,6 +406,9 @@ void handle_player() {
 }
 
 void init_variables() {
+    MotionTrail_Init(&trail, 0.3f, 3, 10.0f, p2, trail_tex);
+    MotionTrail_StopStroke(&trail);
+
     state.camera_x = -120;
     state.camera_x_lerp = -120;
     state.camera_y = -90;
@@ -462,6 +485,7 @@ void load_icons() {
     ship_l2 = GRRLIB_LoadTexturePNG(ship_01_2_001_png);
     ball_l1 = GRRLIB_LoadTexturePNG(player_ball_01_001_png);
     ball_l2 = GRRLIB_LoadTexturePNG(player_ball_01_2_001_png);
+    trail_tex = GRRLIB_LoadTexturePNG(trail_png);
 
     p1.r = 0;
     p1.g = 255;
@@ -475,6 +499,11 @@ void load_icons() {
 void unload_icons() {
     GRRLIB_FreeTexture(icon_l1);
     GRRLIB_FreeTexture(icon_l2);
+    GRRLIB_FreeTexture(ship_l1);
+    GRRLIB_FreeTexture(ship_l2);
+    GRRLIB_FreeTexture(ball_l1);
+    GRRLIB_FreeTexture(ball_l2);
+    GRRLIB_FreeTexture(trail_tex);
 }
 
 void draw_ship(Player *player, float calc_x, float calc_y) {
@@ -551,9 +580,15 @@ void draw_player() {
 
     float calc_x = ((player->x - state.camera_x) * SCALE);
     float calc_y = screenHeight - ((player->y - state.camera_y) * SCALE);
+    
+    GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
+
+    MotionTrail_Update(&trail, 1.f/60);
+    // Draw if not mirroring
+    MotionTrail_Draw(&trail);
 
     GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
-    
+
     draw_particles(P1_TRAIL);
 
     switch (player->gamemode) {
