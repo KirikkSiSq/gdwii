@@ -170,6 +170,7 @@ typedef struct {
 
 extern const struct ObjectLayer player_layer;
 extern int current_fading_effect;
+extern bool p1_trail;
 
 extern struct ColorChannel channels[COL_CHANNEL_COUNT];
 extern const ObjectDefinition objects[];

@@ -11,6 +11,7 @@ typedef struct {
     float vx, vy;
     float ax, ay;
     float gravity_x, gravity_y;
+    float rotation;
     float life;
     bool active;
     ColorAlpha color, start_color, end_color;
@@ -44,13 +45,13 @@ typedef struct {
     float minRadius;
     float maxRadius;
     int texture_id;
-    int maxParticles;
 } ParticleTemplate;
 
 enum ParticleTextures {
     PARTICLE_SQUARE,
     PARTICLE_CIRCLE,
     PARTICLE_CIRCUNFERENCE,
+    PARTICLE_P1_TRAIL,
 };
 
 enum ParticleGroupID {
@@ -64,6 +65,7 @@ enum ParticleGroupID {
     PORTAL_PARTICLES,
     USE_EFFECT,
     ORB_HITBOX_EFFECT,
+    P1_TRAIL,
 };
 
 extern ParticleTemplate particle_templates[];

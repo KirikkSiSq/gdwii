@@ -351,6 +351,8 @@ GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS];
 
 int current_fading_effect = FADE_NONE;
 
+bool p1_trail = FALSE;
+
 struct TriggerBuffer trigger_buffer[COL_CHANNEL_COUNT];
 
 void load_spritesheet() {
@@ -903,6 +905,14 @@ void handle_triggers(int i) {
                     buffer->new_color.b = obj->trig_colorB;
                     buffer->seconds = obj->trig_duration;
                     buffer->time_run = 0;
+                    break;
+                
+                case ENABLE_TRAIL:
+                    p1_trail = TRUE;
+                    break;
+                
+                case DISABLE_TRAIL:
+                    p1_trail = FALSE;
                     break;
             }
         }

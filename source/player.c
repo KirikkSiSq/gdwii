@@ -285,13 +285,30 @@ void run_player() {
     switch (player->gamemode) {
         case GAMEMODE_CUBE:
             cube_gamemode(player);
+
+            if (p1_trail && (frame_counter & 0b1111) == 0) {
+                particle_templates[P1_TRAIL].start_scale = 0.73333f;
+                particle_templates[P1_TRAIL].end_scale = 0.73333f;
+                spawn_particle(P1_TRAIL, player->x, player->y, NULL);
+            }
             break;
         case GAMEMODE_SHIP:
             spawn_glitter_particles();
             ship_gamemode(player);
+
+            if (p1_trail && (frame_counter & 0b1111) == 0) {
+                particle_templates[P1_TRAIL].start_scale = 0.73333f / 1.8;
+                particle_templates[P1_TRAIL].end_scale = 0.73333f / 1.8;
+                spawn_particle(P1_TRAIL, player->x, player->y, NULL);
+            }
             break;
         case GAMEMODE_BALL:
             ball_gamemode(player);
+            if (p1_trail && (frame_counter & 0b1111) == 0) {
+                particle_templates[P1_TRAIL].start_scale = 0.73333f;
+                particle_templates[P1_TRAIL].end_scale = 0.73333f;
+                spawn_particle(P1_TRAIL, player->x, player->y, NULL);
+            }
             break;
         
     }
@@ -384,6 +401,7 @@ void init_variables() {
     state.intended_mirror_speed_factor = 1.f;
 
     current_fading_effect = FADE_NONE;
+    p1_trail = FALSE;
     
     memset(&state.player, 0, sizeof(Player));
 
@@ -411,7 +429,6 @@ void init_variables() {
     particle_templates[CUBE_DRAG].end_color.g = p1.g;
     particle_templates[CUBE_DRAG].end_color.b = p1.b;
 
-    
     particle_templates[GLITTER_EFFECT].start_color.r = p1.r;
     particle_templates[GLITTER_EFFECT].start_color.g = p1.g;
     particle_templates[GLITTER_EFFECT].start_color.b = p1.b;
@@ -419,6 +436,14 @@ void init_variables() {
     particle_templates[GLITTER_EFFECT].end_color.r = p1.r;
     particle_templates[GLITTER_EFFECT].end_color.g = p1.g;
     particle_templates[GLITTER_EFFECT].end_color.b = p1.b;
+
+    particle_templates[P1_TRAIL].start_color.r = p1.r;
+    particle_templates[P1_TRAIL].start_color.g = p1.g;
+    particle_templates[P1_TRAIL].start_color.b = p1.b;
+    
+    particle_templates[P1_TRAIL].end_color.r = p1.r;
+    particle_templates[P1_TRAIL].end_color.g = p1.g;
+    particle_templates[P1_TRAIL].end_color.b = p1.b;
 }
 
 void handle_death() {
@@ -528,11 +553,14 @@ void draw_player() {
     float calc_y = screenHeight - ((player->y - state.camera_y) * SCALE);
 
     GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
+    
+    draw_particles(P1_TRAIL);
 
     switch (player->gamemode) {
         case GAMEMODE_CUBE:
             GRRLIB_SetHandle(icon_l1, 30, 30);
             GRRLIB_SetHandle(icon_l2, 30, 30);
+
             GRRLIB_DrawImg(
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l1,
@@ -575,7 +603,19 @@ void draw_player() {
                 RGBA(p2.r, p2.g, p2.b, 255)
             );
             break;
-            break;
     }
+}
 
+GRRLIB_texImg *get_p1_trail_tex() {
+    switch (state.player.gamemode) {
+        case GAMEMODE_CUBE:
+            return icon_l1;
+        
+        case GAMEMODE_SHIP:
+            return icon_l1;
+        
+        case GAMEMODE_BALL:
+            return ball_l1;
+    }
+    return icon_l1;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <grrlib.h>
 
 #define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
 
@@ -57,3 +58,4 @@ void load_icons();
 void unload_icons();
 void draw_player();
 void handle_player();
+GRRLIB_texImg *get_p1_trail_tex();

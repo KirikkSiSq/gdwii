@@ -553,8 +553,8 @@ const ObjectDefinition objects[] = {
     trigger, // 29
     trigger, // 30
     unknown, // 31
-    unknown, // 32
-    unknown, // 33
+    trigger, // 32
+    trigger, // 33
     unknown, // 34
     { // Yellow pad
         .layers = {

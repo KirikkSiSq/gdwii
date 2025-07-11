@@ -25,8 +25,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
-        .texture_id = PARTICLE_SQUARE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_SQUARE
     },
     [SHIP_TRAIL] = {
         .angle = 90, .angleVar = 45,
@@ -44,8 +43,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
-        .texture_id = PARTICLE_SQUARE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_SQUARE
     },
     [HOLDING_SHIP_TRAIL] = {
         .angle = 90, .angleVar = 90,
@@ -63,8 +61,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
-        .texture_id = PARTICLE_SQUARE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_SQUARE
     },
     [SHIP_DRAG] = {
         .angle = 110, .angleVar = 45,
@@ -87,8 +84,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
-        .texture_id = PARTICLE_SQUARE,
-        .maxParticles = 40
+        .texture_id = PARTICLE_SQUARE
     }, 
     [ORB_PARTICLES] = {
         .angle = 0, .angleVar = 360,
@@ -111,8 +107,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 20,
         .maxRadius = 20,
-        .texture_id = PARTICLE_SQUARE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_SQUARE
     }, 
     [PAD_PARTICLES] = {
         .angle = 90, .angleVar = 0,
@@ -135,8 +130,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
-        .texture_id = PARTICLE_SQUARE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_SQUARE
     }, 
     [GLITTER_EFFECT] = {
         .angle = 270, .angleVar = 0,
@@ -159,8 +153,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
-        .texture_id = PARTICLE_SQUARE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_SQUARE
     },
     [PORTAL_PARTICLES] = {
         .angle = 0, .angleVar = 80,
@@ -183,8 +176,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 45,
         .maxRadius = 45,
-        .texture_id = PARTICLE_SQUARE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_SQUARE
     },
     [USE_EFFECT] = {
         .angle = 0, .angleVar = 0,
@@ -207,8 +199,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
-        .texture_id = PARTICLE_CIRCLE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_CIRCLE
     },
     [ORB_HITBOX_EFFECT] = {
         .angle = 0, .angleVar = 0,
@@ -231,8 +222,30 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
-        .texture_id = PARTICLE_CIRCUNFERENCE,
-        .maxParticles = 30
+        .texture_id = PARTICLE_CIRCUNFERENCE
+    },
+    [P1_TRAIL] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 0, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = 0,
+        .life = 0.3f, .lifeVar = 0,
+        .start_scale = 0.733333f, .start_scaleVar = 0,
+        .end_scale = 0.733333f, .end_scaleVar = 0,
+        .start_color = {0,0,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {0,0,0,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_P1_TRAIL
     }
 };
 
@@ -307,6 +320,10 @@ void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
             particles[i].parent_obj = parent_obj;
 
             particles[i].texture_id = tpl->texture_id;
+
+            particles[i].rotation = 0;
+
+            if (group_id == P1_TRAIL) particles[i].rotation = state.player.lerp_rotation;
 
             break;
         }
@@ -397,6 +414,22 @@ void draw_particles(int group_id) {
                             p->color.a
                         ),
                         FALSE
+                    );
+                    break;
+                case PARTICLE_P1_TRAIL:
+                    GRRLIB_texImg *p1TrailTex = get_p1_trail_tex();
+
+                    GRRLIB_DrawImg(
+                        get_mirror_x(calc_x, state.mirror_factor) + 6 - (p1TrailTex->w/2), calc_y + 6 - (p1TrailTex->h/2),
+                        p1TrailTex,
+                        p->rotation * state.mirror_mult,
+                        p->scale * state.mirror_mult, p->scale,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a
+                        )
                     );
                     break;
             }
