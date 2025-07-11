@@ -84,6 +84,8 @@ static u8 StreamPlay_Stack[STACKSIZE];
 static lwp_t hStreamPlay;
 static lwpq_t thQueue;
 
+static int mp3_voice = 1;  // Default voice is 1, but changeable
+
 static s32 (*mp3read)(void*,void *,s32);
 static void (*mp3filterfunc)(struct mad_stream *,struct mad_frame *);
 
@@ -97,6 +99,11 @@ struct _rambuffer
 	const void *buf_addr;
 	s32 len,pos;
 } rambuffer;
+
+void MP3Player_SetVoice(int voice) {
+    if (voice < 0 || voice >= MAX_SND_VOICES) return; // or clamp, or log error
+    mp3_voice = voice;
+}
 
 static __inline__ s16 FixedToShort(mad_fixed_t Fixed)
 {
@@ -194,7 +201,7 @@ static __inline__ s32 buf_put(struct _outbuffer_s *buf,void *data,s32 len)
 		AUDIO_StartDMA();
 #else
 		have_samples = 0;
-		SND_SetVoice(0,VOICE_STEREO_16BIT,48000,0,(void*)OutputBuffer[CurrentBuffer],ADMA_BUFFERSIZE,mp3_volume,mp3_volume,DataTransferCallback);
+		SND_SetVoice(mp3_voice,VOICE_STEREO_16BIT,48000,0,(void*)OutputBuffer[CurrentBuffer],ADMA_BUFFERSIZE,mp3_volume,mp3_volume,DataTransferCallback);
 #endif
 
 		CurrentBuffer = (CurrentBuffer+1)%3;
@@ -228,7 +235,7 @@ void MP3Player_Init(void)
 		AUDIO_SetDSPSampleRate(AI_SAMPLERATE_48KHZ);
 #else
 		SND_Pause(0);
-		SND_StopVoice(0);
+		SND_StopVoice(mp3_voice);
 #endif
 	}
 }
@@ -368,7 +375,7 @@ static void *StreamPlay(void *arg)
 	AUDIO_StopDMA();
 	AUDIO_RegisterDMACallback(NULL);
 #else
-	SND_StopVoice(0);
+	SND_StopVoice(mp3_voice);
 #endif
 
 	LWP_CloseQueue(thQueue);
@@ -475,12 +482,12 @@ static void DataTransferCallback(s32 voice)
 		return;
 	}
 	if(have_samples==1) {
-		if(SND_AddVoice(0,(void*)OutputBuffer[CurrentBuffer],ADMA_BUFFERSIZE)==SND_OK) {
+		if(SND_AddVoice(mp3_voice,(void*)OutputBuffer[CurrentBuffer],ADMA_BUFFERSIZE)==SND_OK) {
 			have_samples = 0;
 			CurrentBuffer = (CurrentBuffer+1)%3;
 		}
 	}
-	if(!(SND_TestPointer(0,(void*)OutputBuffer[CurrentBuffer]) && SND_StatusVoice(0)!=SND_UNUSED)) {
+	if(!(SND_TestPointer(mp3_voice,(void*)OutputBuffer[CurrentBuffer]) && SND_StatusVoice(mp3_voice)!=SND_UNUSED)) {
 		if(have_samples==0) {
 			MP3Playing = (buf_get(&OutputRingBuffer,OutputBuffer[CurrentBuffer],ADMA_BUFFERSIZE)>0);
 			have_samples = 1;
@@ -500,6 +507,6 @@ void MP3Player_Volume(u32 volume)
 
 	mp3_volume = volume;
 #ifdef __SNDLIB_H__
-	SND_ChangeVolumeVoice(0,volume,volume);
+	SND_ChangeVolumeVoice(mp3_voice,volume,volume);
 #endif
 }

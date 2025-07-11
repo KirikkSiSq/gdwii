@@ -184,6 +184,7 @@ extern int layersDrawn;
 extern int beat_pulse;
 
 void update_beat();
+void draw_end_wall();
 
 void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float *fade_scale);
 int get_fade_value(float x, int right_edge);

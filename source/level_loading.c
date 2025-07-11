@@ -13,8 +13,7 @@
 #include "level.h"
 #include "player.h"
 
-int pulsing_type = 0;
-int song_id = 0;
+struct LoadedLevelInfo level_info;
 
 char *extract_gmd_key(const char *data, const char *key, const char *type) {
     char start_tag[32];
@@ -417,6 +416,10 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
     typed->zorder = objects[typed->id].def_zorder;
 
     typed->random = rand();
+
+    if (typed->x > level_info.last_obj_x) {
+        level_info.last_obj_x = typed->x;
+    }
 
     for (int i = 2; i < obj->propCount; i++) {
         int key = obj->keys[i];
@@ -861,9 +864,9 @@ void load_level() {
 
     char *gmd_song_id = extract_gmd_key((const char *) levels[level_id].data_ptr, "k8", "i");
     if (!gmd_song_id) {
-        song_id = 0;
+        level_info.song_id = 0;
     } else {
-        song_id = atoi(gmd_song_id); // Official song id
+        level_info.song_id = atoi(gmd_song_id); // Official song id
     }
 
     // Fallback to pre 2.0 keys
@@ -903,7 +906,10 @@ void load_level() {
     set_color_channels();
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
 
-    pulsing_type = random_int(0,2);
+    level_info.pulsing_type = random_int(0,2);
+
+    int rounded_last_obj_x = (int) (level_info.last_obj_x / 30) * 30 + 15;
+    level_info.wall_x = (rounded_last_obj_x) + (9.f * 30.f);
 
     printf("Finished loading level\n");
 }

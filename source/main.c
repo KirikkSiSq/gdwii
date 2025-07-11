@@ -62,6 +62,8 @@ void draw_game() {
 
     draw_all_object_layers();
 
+    draw_end_wall();
+
     draw_ground(0, FALSE);
     
     if (state.player.portal_ground_y > 0) draw_ground(state.camera_y + state.ground_y_gfx, FALSE);

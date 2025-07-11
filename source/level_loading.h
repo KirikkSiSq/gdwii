@@ -96,11 +96,14 @@ typedef struct {
 } GDColorChannel;
 
 struct LoadedLevelInfo {
-
+    float last_obj_x;
+    float wall_x;
+    int pulsing_type;
+    int song_id;
+    bool completing;
 };
 
-extern int pulsing_type;
-extern int song_id;
+extern struct LoadedLevelInfo level_info;
 
 extern GDTypedObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;

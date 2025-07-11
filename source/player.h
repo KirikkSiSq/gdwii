@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <grrlib.h>
 
+#define SCREEN_WIDTH_AREA ((screenWidth / BLOCK_SIZE_PX) * 30) 
 #define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
 
 typedef struct {
@@ -58,4 +59,5 @@ void load_icons();
 void unload_icons();
 void draw_player();
 void handle_player();
+void handle_completion();
 GRRLIB_texImg *get_p1_trail_tex();

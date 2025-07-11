@@ -628,7 +628,7 @@ GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GDObjectTyped *obj, 
         case ROD_MEDIUM:
         case ROD_SMALL:
             if (layer->layerNum == 1) {
-                return object_images[ROD_BIG][pulsing_type + 1]; // balls start at 1
+                return object_images[ROD_BIG][level_info.pulsing_type + 1]; // balls start at 1
             }
             break;
             
@@ -754,6 +754,28 @@ void draw_background(f32 x, f32 y) {
 
 #define GROUND_SIZE 176 // pixels
 #define LINE_SCALE 0.5f
+
+void draw_end_wall() {
+    float calc_x = ((level_info.wall_x - state.camera_x) * SCALE);
+    float calc_y = screenHeight - ((15 - state.camera_y) * SCALE);
+    
+    for (s32 j = 0; j < objects[CHECKER_EDGE].num_layers; j++) {
+        GRRLIB_texImg *image = object_images[CHECKER_EDGE][j];
+        int width = image->w;
+        int height = image->h;
+
+        for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX; i += BLOCK_SIZE_PX) {
+            GRRLIB_DrawImg(
+                calc_x + 6 - (width/2), 
+                calc_y + 6 - i - (height/2),    
+                image,
+                270, 
+                0.73333333333333333333333333333333 * state.mirror_mult, 0.73333333333333333333333333333333,
+                RGBA(255, 255, 255, 255) 
+            );
+        }
+    }
+}
 
 void draw_ground(f32 y, bool is_ceiling) {
     int mult = (is_ceiling ? -1 : 1);
@@ -933,7 +955,7 @@ int pulse_frames_left = 0;
 int beat_pulse = 0;
 
 void update_beat() {
-    const float beat_interval_ms = 60000.f / songs[song_id].tempo;
+    const float beat_interval_ms = 60000.f / songs[level_info.song_id].tempo;
 
     u64 now = gettime();
     u64 elapsed_ms = ticks_to_millisecs(now - last_beat_time);

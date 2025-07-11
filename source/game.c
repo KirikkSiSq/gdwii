@@ -7,6 +7,9 @@
 #include "level.h"
 #include "math.h"
 
+#include "oggplayer.h"
+#include "endStart_02_ogg.h"
+
 bool fixed_dt = FALSE;
 bool enable_info = FALSE;
 float amplitude = 0.0f;
@@ -17,7 +20,7 @@ int game_loop() {
 
     load_level();
 
-    MP3Player_PlayBuffer(songs[song_id].song_ptr, songs[song_id].song_size, NULL);
+    MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
 
     while (1) {
         WPAD_ScanPads();
@@ -47,11 +50,19 @@ int game_loop() {
 
             accumulator -= STEPS_DT;
         }
-                      
+        
+        if (level_info.completing) {
+            PlayOgg(endStart_02_ogg, endStart_02_ogg_size, 0, OGG_ONE_TIME);
+            handle_completion();
+            MP3Player_Stop();
+            gameRoutine = ROUTINE_MENU;
+            break;
+        }
+
         if (state.player.dead) {
             draw_game();
             handle_death();
-            MP3Player_PlayBuffer(songs[song_id].song_ptr, songs[song_id].song_size, NULL);
+            MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
             WPAD_ScanPads();
             fixed_dt = TRUE;
         }

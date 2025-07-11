@@ -251,9 +251,14 @@ void ball_gamemode(Player *player) {
 void run_camera() {
     Player *player = &state.player;
 
-    state.camera_x += player->vel_x * STEPS_DT;
-    state.ground_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
-    state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
+    // Cap at camera_x
+    if (state.camera_x + SCREEN_WIDTH_AREA >= level_info.wall_x) {
+        state.camera_x = level_info.wall_x - SCREEN_WIDTH_AREA;
+    } else {
+        state.camera_x += player->vel_x * STEPS_DT;
+        state.ground_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
+        state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
+    }
 
     float upper = 240.f;
     float lower = 120.f;
@@ -289,7 +294,6 @@ void run_camera() {
         state.camera_y = iSlerp(state.camera_y, state.camera_intended_y, 0.02f, STEPS_DT);
         state.camera_y_lerp = state.camera_y;
     }
-
 }
 
 void spawn_glitter_particles() {
@@ -375,6 +379,10 @@ void run_player() {
         player->time_since_ground = 0;  
     } 
     
+    // End level
+    if (player->x > level_info.wall_x + 30) {
+        level_info.completing = TRUE;
+    }
 }
 
 void handle_mirror_transition() {
@@ -425,6 +433,8 @@ void init_variables() {
 
     current_fading_effect = FADE_NONE;
     p1_trail = FALSE;
+
+    level_info.completing = FALSE;
     
     memset(&state.player, 0, sizeof(Player));
 
@@ -476,6 +486,12 @@ void handle_death() {
     }
     init_variables();
     reload_level();
+}
+
+void handle_completion() {
+    for (s32 i = 0; i < 240; i++) {
+        draw_game();
+    }
 }
 
 void load_icons() {
