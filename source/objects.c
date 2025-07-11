@@ -175,6 +175,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 
         case CUBE_PORTAL: 
             if (player->gamemode != GAMEMODE_CUBE) {
+                if (player->gamemode != GAMEMODE_BALL) MotionTrail_StopStroke(&trail);
                 player->ground_y = 0;
                 player->ceiling_y = 999999;
 
