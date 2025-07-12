@@ -759,20 +759,22 @@ void draw_end_wall() {
     float calc_x = ((level_info.wall_x - state.camera_x) * SCALE);
     float calc_y = screenHeight - ((15 - state.camera_y) * SCALE);
     
-    for (s32 j = 0; j < objects[CHECKER_EDGE].num_layers; j++) {
-        GRRLIB_texImg *image = object_images[CHECKER_EDGE][j];
-        int width = image->w;
-        int height = image->h;
+    if (calc_x < screenWidth + 20) {
+        for (s32 j = 0; j < objects[CHECKER_EDGE].num_layers; j++) {
+            GRRLIB_texImg *image = object_images[CHECKER_EDGE][j];
+            int width = image->w;
+            int height = image->h;
 
-        for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX; i += BLOCK_SIZE_PX) {
-            GRRLIB_DrawImg(
-                calc_x + 6 - (width/2), 
-                calc_y + 6 - i - (height/2),    
-                image,
-                270, 
-                0.73333333333333333333333333333333 * state.mirror_mult, 0.73333333333333333333333333333333,
-                RGBA(255, 255, 255, 255) 
-            );
+            for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX; i += BLOCK_SIZE_PX) {
+                GRRLIB_DrawImg(
+                    get_mirror_x(calc_x + 6, state.mirror_factor)- (width/2), 
+                    calc_y + 6 - i - (height/2),    
+                    image,
+                    adjust_angle(270, 0, state.mirror_mult < 0),
+                    0.73333333333333333333333333333333 * state.mirror_mult, 0.73333333333333333333333333333333,
+                    RGBA(255, 255, 255, 255) 
+                );
+            }
         }
     }
 }

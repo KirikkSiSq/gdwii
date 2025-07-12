@@ -858,6 +858,8 @@ void load_level() {
         return;
     }
 
+    level_info.last_obj_x = 545.f;
+
     // Get colors
     char *metaStr = get_metadata_value(level_string, "kS38");
     channelCount = parse_color_channels(metaStr, &colorChannels);
