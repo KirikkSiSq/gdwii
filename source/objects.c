@@ -270,13 +270,12 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             break;
             
         case SHIP_PORTAL: 
-            if (player->gamemode != GAMEMODE_SHIP) {
-                player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
-                player->portal_ground_y = player->ground_y;
-                player->ceiling_y = player->ground_y + 300;
-                
-                set_intended_ceiling(player);
+            player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
+            player->portal_ground_y = player->ground_y;
+            player->ceiling_y = player->ground_y + 300;
+            set_intended_ceiling(player);
 
+            if (player->gamemode != GAMEMODE_SHIP) {
                 player->vel_y /= 2;
                 player->gamemode = GAMEMODE_SHIP;
 
@@ -386,13 +385,13 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             break;
         
         case BALL_PORTAL: 
-            if (player->gamemode != GAMEMODE_BALL) {
-                player->ground_y = maxf(0, ceilf((obj->y - 150) / 30.f)) * 30;
-                player->portal_ground_y = player->ground_y;
-                player->ceiling_y = player->ground_y + 240;
+            player->ground_y = maxf(0, ceilf((obj->y - 150) / 30.f)) * 30;
+            player->portal_ground_y = player->ground_y;
+            player->ceiling_y = player->ground_y + 240;
+            set_intended_ceiling(player);
 
+            if (player->gamemode != GAMEMODE_BALL) {
                 player->ball_rotation_speed = -1.f;
-                set_intended_ceiling(player);
 
                 if (player->gamemode == GAMEMODE_SHIP) player->vel_y /= 2;
                 

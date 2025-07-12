@@ -54,6 +54,10 @@ LevelDefinition levels[] = {
     {
         .level_name = "DEMON PARK",
         .data_ptr  = DemonPark_gmd
+    },
+    {
+        .level_name = "AUTO JUMPER",
+        .data_ptr  = AutoJumper_gmd
     }
 };
 

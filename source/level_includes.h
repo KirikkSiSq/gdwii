@@ -31,3 +31,4 @@
 #include "LevelEasy_gmd.h"
 #include "DemonPark_gmd.h"
 #include "TheNightmare_gmd.h"
+#include "AutoJumper_gmd.h"
