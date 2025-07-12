@@ -40,6 +40,10 @@ LevelDefinition levels[] = {
         .data_ptr  = Cycles_gmd
     }, 
     {
+        .level_name = "XSTEP",
+        .data_ptr = xStep_gmd
+    },
+    {
         .level_name = "LEVEL EASY",
         .data_ptr  = LevelEasy_gmd
     },
@@ -98,6 +102,11 @@ SongDefinition songs[] = {
         .song_ptr = Cycles_mp3,
         .song_size = Cycles_mp3_size,
         .tempo = 140
+    },
+    {
+        .song_ptr = xStep_mp3,
+        .song_size = xStep_mp3_size,
+        .tempo = 130
     }
 };
 

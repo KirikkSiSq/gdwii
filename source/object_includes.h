@@ -17,6 +17,7 @@
 #include "square_05_001_png.h"
 #include "square_06_001_png.h"
 #include "square_07_001_png.h"
+#include "square_08_001_png.h"
 
 #include "spike_01_001_png.h"
 #include "pit_01_001_png.h"
@@ -67,4 +68,39 @@
 
 #include "portal_07_back_001_png.h"
 #include "portal_07_front_001_png.h"
+
+#include "d_cloud_01_001_png.h"
+#include "d_cloud_02_001_png.h"
+
+#include "d_ball_01_001_png.h"
+#include "d_ball_02_001_png.h"
+#include "d_ball_03_001_png.h"
+#include "d_ball_04_001_png.h"
+#include "d_ball_05_001_png.h"
+#include "d_ball_06_001_png.h"
+
+#include "pit_04_001_png.h"
+
+#include "square_b_01_001_png.h"
+#include "square_b_02_001_png.h"
+#include "square_b_03_001_png.h"
+#include "square_b_04_001_png.h"
+#include "square_b_05_001_png.h"
+#include "square_b_06_001_png.h"
+
+#include "blockOutline_01_001_png.h"
+#include "blockOutline_02_001_png.h"
+#include "blockOutline_03_001_png.h"
+#include "blockOutline_04_001_png.h"
+#include "blockOutline_05_001_png.h"
+#include "blockOutline_05b_001_png.h"
+#include "blockOutline_06_001_png.h"
+
+#include "gravbump_01_001_png.h"
+#include "gravring_01_001_png.h"
+
+#include "square_c_05_001_png.h"
+
+
+
 

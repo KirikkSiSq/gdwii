@@ -20,9 +20,11 @@
 #include "particle_png.h"
 #include <ogc/lwp_watchdog.h>
 
-float jump_heights_table[2][GAMEMODE_COUNT] = {
+float jump_heights_table[JUMP_TYPES_COUNT][GAMEMODE_COUNT] = {
     /* YELLOW PAD */ {864,    432,    518.4},
-    /* YELLOW ORB */ {603.72, 603.72, 422.60399}
+    /* YELLOW ORB */ {603.72, 603.72, 422.60399},
+    /* BLUE PAD   */ {-345.6, -345.6, -207.36001},
+    /* BLUE ORB   */ {-241.488, -241.488, -169.04160},
 };
 
 struct ColorChannel channels[COL_CHANNEL_COUNT] = {
@@ -142,6 +144,37 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 
             obj->activated = TRUE;
             break;
+
+        case BLUE_PAD:
+            float rotation = adjust_angle(obj->rotation, obj->flippedV, obj->flippedH);
+            if ((rotation < 90 || rotation > 270) && player->upside_down)
+			    break;
+                
+            if ((rotation > 90 && rotation < 270) && !player->upside_down)
+			    break;
+
+            MotionTrail_ResumeStroke(&trail);
+            player->vel_y = jump_heights_table[JUMP_BLUE_PAD][player->gamemode];
+            player->upside_down ^= 1;
+            player->on_ground = FALSE;
+            
+            particle_templates[USE_EFFECT].start_scale = 0;
+            particle_templates[USE_EFFECT].end_scale = 60;
+
+            particle_templates[USE_EFFECT].start_color.r = 56;
+            particle_templates[USE_EFFECT].start_color.g = 200;
+            particle_templates[USE_EFFECT].start_color.b = 255;
+            particle_templates[USE_EFFECT].start_color.a = 255;
+
+            particle_templates[USE_EFFECT].end_color.r = 56;
+            particle_templates[USE_EFFECT].end_color.g = 200;
+            particle_templates[USE_EFFECT].end_color.b = 255;
+            particle_templates[USE_EFFECT].end_color.a = 0;
+
+            spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+            obj->activated = TRUE;
+            break;
         
         case YELLOW_ORB:
             if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
@@ -166,6 +199,39 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 particle_templates[USE_EFFECT].end_color.r = 255;
                 particle_templates[USE_EFFECT].end_color.g = 255;
                 particle_templates[USE_EFFECT].end_color.b = 0;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+                obj->activated = TRUE;
+            } 
+            if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+            break;
+        
+        case BLUE_ORB:
+            if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
+                MotionTrail_ResumeStroke(&trail);
+                
+                player->vel_y = jump_heights_table[JUMP_BLUE_ORB][player->gamemode];
+                player->upside_down ^= 1;
+                
+                player->ball_rotation_speed = -1.f;
+                
+                player->on_ground = FALSE;
+                player->on_ceiling = FALSE;
+                player->buffering_state = BUFFER_END;
+
+                particle_templates[USE_EFFECT].start_scale = 50;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 56;
+                particle_templates[USE_EFFECT].start_color.g = 200;
+                particle_templates[USE_EFFECT].start_color.b = 255;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 56;
+                particle_templates[USE_EFFECT].end_color.g = 200;
+                particle_templates[USE_EFFECT].end_color.b = 255;
                 particle_templates[USE_EFFECT].end_color.a = 255;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -373,15 +439,16 @@ void load_spritesheet() {
 
     for (s32 object = 1; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < MAX_OBJECT_LAYERS; layer++) {
-            printf("Loading texture of object %d layer %d\n", object, layer);
-
             // Skip unused layers
             if (!objects[object].layers[layer].texture) continue;
+
+            printf("Loading texture of object %d layer %d\n", object, layer);
             
             GRRLIB_texImg *image = GRRLIB_LoadTexturePNG((const u8 *) objects[object].layers[layer].texture);
             if (image == NULL || image->data == NULL) {
                 printf("Couldn't load texture of object %d layer %d\n", object, layer);
             } else {
+                printf("Loaded texture of object %d layer %d\n", object, layer);
                 GRRLIB_SetHandle(image, (image->w/2), (image->h/2));
                 object_images[object][layer] = image;
             }
@@ -410,6 +477,13 @@ void unload_spritesheet() {
 void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
     switch (obj->id) {
         case YELLOW_ORB:
+            particle_templates[ORB_PARTICLES].start_color.r = 255;
+            particle_templates[ORB_PARTICLES].start_color.g = 255;
+            particle_templates[ORB_PARTICLES].start_color.b = 0;
+
+            particle_templates[ORB_PARTICLES].end_color.r = 255;
+            particle_templates[ORB_PARTICLES].end_color.g = 255;
+            particle_templates[ORB_PARTICLES].end_color.b = 0;
             if (!state.player.dead) spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
@@ -417,11 +491,50 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             break;
         
         case YELLOW_PAD:
-            particle_templates[PAD_PARTICLES].angle = adjust_angle(180.f - (obj->rotation + 90), obj->flippedH, obj->flippedV);;
+            particle_templates[PAD_PARTICLES].angle = adjust_angle(180.f - (obj->rotation + 90), obj->flippedH, obj->flippedV);
+
+            particle_templates[PAD_PARTICLES].start_color.r = 255;
+            particle_templates[PAD_PARTICLES].start_color.g = 255;
+            particle_templates[PAD_PARTICLES].start_color.b = 0;
+
+            particle_templates[PAD_PARTICLES].end_color.r = 255;
+            particle_templates[PAD_PARTICLES].end_color.g = 255;
+            particle_templates[PAD_PARTICLES].end_color.b = 0;
+
             if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             break;
+
+        case BLUE_ORB:
+            particle_templates[ORB_PARTICLES].start_color.r = 56;
+            particle_templates[ORB_PARTICLES].start_color.g = 200;
+            particle_templates[ORB_PARTICLES].start_color.b = 255;
+
+            particle_templates[ORB_PARTICLES].end_color.r = 56;
+            particle_templates[ORB_PARTICLES].end_color.g = 200;
+            particle_templates[ORB_PARTICLES].end_color.b = 255;
+            if (!state.player.dead) spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
+            draw_obj_particles(ORB_PARTICLES, obj);
+            draw_obj_particles(USE_EFFECT, obj);
+            draw_obj_particles(ORB_HITBOX_EFFECT, obj);
+            break;
+        
+        case BLUE_PAD:
+            particle_templates[PAD_PARTICLES].angle = adjust_angle(180.f - (obj->rotation + 90), obj->flippedH, obj->flippedV);
+            
+            particle_templates[PAD_PARTICLES].start_color.r = 56;
+            particle_templates[PAD_PARTICLES].start_color.g = 200;
+            particle_templates[PAD_PARTICLES].start_color.b = 255;
+
+            particle_templates[PAD_PARTICLES].end_color.r = 56;
+            particle_templates[PAD_PARTICLES].end_color.g = 200;
+            particle_templates[PAD_PARTICLES].end_color.b = 255;
+            if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
+            draw_obj_particles(PAD_PARTICLES, obj);
+            draw_obj_particles(USE_EFFECT, obj);
+            break;
+            
             
         case YELLOW_GRAVITY_PORTAL:
             if (layer->layerNum == 1) {
@@ -595,6 +708,12 @@ void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float 
 int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
     switch (obj->id) {
         case YELLOW_ORB:
+        case BLUE_ORB:
+        case PULSING_CIRCLE:
+        case PULSING_CIRCUNFERENCE:
+        case PULSING_HEART:
+        case PULSING_DIAMOND:
+        case PULSING_STAR:
             return 1;
         case ROD_BIG:
         case ROD_MEDIUM:
@@ -611,6 +730,12 @@ int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
 float get_object_pulse(float amplitude, GDObjectTyped *obj) {
     switch (obj->id) {
         case YELLOW_ORB:
+        case BLUE_ORB:
+        case PULSING_CIRCLE:
+        case PULSING_CIRCUNFERENCE:
+        case PULSING_HEART:
+        case PULSING_DIAMOND:
+        case PULSING_STAR:
             return map_range(amplitude, 0.f, 1.f, 0.5f, 1.2f);
         case ROD_BIG:
         case ROD_MEDIUM:
@@ -844,7 +969,25 @@ void draw_all_object_layers() {
 
                     int fade_val = get_fade_value(calc_x, screenWidth);
                     if (layer->layerNum == 0 && (fade_val == 255 || fade_val == 0)) {
-                        obj->transition_applied = current_fading_effect;  
+                        switch (current_fading_effect) {
+                            case FADE_INWARDS:
+                                if (calc_y > (screenHeight / 2)) {
+                                    obj->transition_applied = FADE_UP;
+                                } else {
+                                    obj->transition_applied = FADE_DOWN;
+                                }
+                                break;
+                            case FADE_OUTWARDS:
+                                if (calc_y > (screenHeight / 2)) {
+                                    obj->transition_applied = FADE_DOWN;
+                                } else {
+                                    obj->transition_applied = FADE_UP;
+                                }
+                                break;
+                            default:
+                                obj->transition_applied = current_fading_effect;  
+                        }
+                            
                     }
 
                     handle_object_particles(obj, layer);
@@ -915,7 +1058,15 @@ void handle_triggers(int i) {
                     break;
                     
                 case TRIGGER_FADE_SCALE_OUT:
-                    current_fading_effect = FADE_DOWN;
+                    current_fading_effect = FADE_SCALE_OUT;
+                    break;
+                
+                case TRIGGER_FADE_INWARDS:
+                    current_fading_effect = FADE_INWARDS;
+                    break;
+
+                case TRIGGER_FADE_OUTWARDS:
+                    current_fading_effect = FADE_OUTWARDS;
                     break;
 
                 case BG_TRIGGER:
