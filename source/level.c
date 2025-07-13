@@ -48,6 +48,10 @@ LevelDefinition levels[] = {
         .data_ptr  = LevelEasy_gmd
     },
     {
+        .level_name = "THE LIGHTNING ROAD",
+        .data_ptr  = TheLightningRoad_gmd
+    },
+    {
         .level_name = "THE NIGHTMARE",
         .data_ptr  = TheNightmare_gmd
     },
@@ -58,6 +62,10 @@ LevelDefinition levels[] = {
     {
         .level_name = "AUTO JUMPER",
         .data_ptr  = AutoJumper_gmd
+    },
+    {
+        .level_name = "TEST",
+        .data_ptr = Test_gmd
     }
 };
 

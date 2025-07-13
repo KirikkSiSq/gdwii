@@ -32,3 +32,5 @@
 #include "DemonPark_gmd.h"
 #include "TheNightmare_gmd.h"
 #include "AutoJumper_gmd.h"
+#include "TheLightningRoad_gmd.h"
+#include "Test_gmd.h"

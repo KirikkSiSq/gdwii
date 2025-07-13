@@ -701,6 +701,14 @@ void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float 
         case FADE_SCALE_OUT:
             *fade_scale = get_out_scale_fade(x, screenWidth);
             break;
+        case FADE_UP_SLOW:
+        case FADE_UP_STATIONARY:
+            *fade_y = get_xy_fade_offset(x, screenWidth) / 3;
+            break;
+        case FADE_DOWN_SLOW:
+        case FADE_DOWN_STATIONARY:
+            *fade_y = -get_xy_fade_offset(x, screenWidth) / 3;
+            break;
     }
 }
 
@@ -822,6 +830,16 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
             }
     }
 
+    if (obj->transition_applied == FADE_DOWN_STATIONARY || obj->transition_applied == FADE_UP_STATIONARY) {
+        if (opacity < 255) {
+            if (x > screenWidth / 2) {
+                x = screenWidth - FADE_WIDTH;
+            } else {
+                x = FADE_WIDTH;
+            }
+        }
+    }
+
     GRRLIB_DrawImg(
         /* X        */ get_mirror_x(x, state.mirror_factor) + 6 - (width/2) + x_off_rot + fade_x,
         /* Y        */ y + 6 - (height/2) + y_off_rot + fade_y,
@@ -881,7 +899,7 @@ void draw_background(f32 x, f32 y) {
 
 void draw_end_wall() {
     float calc_x = ((level_info.wall_x - state.camera_x) * SCALE);
-    float calc_y = screenHeight - ((15 - state.camera_y) * SCALE);
+    float calc_y =  positive_fmod(state.camera_y * SCALE, BLOCK_SIZE_PX) + screenHeight;    
     
     if (calc_x < screenWidth + 20) {
         for (s32 j = 0; j < objects[CHECKER_EDGE].num_layers; j++) {
@@ -889,9 +907,9 @@ void draw_end_wall() {
             int width = image->w;
             int height = image->h;
 
-            for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX; i += BLOCK_SIZE_PX) {
+            for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX * 2; i += BLOCK_SIZE_PX) {
                 GRRLIB_DrawImg(
-                    get_mirror_x(calc_x + 6, state.mirror_factor)- (width/2), 
+                    get_mirror_x(calc_x + 6, state.mirror_factor) - (width/2), 
                     calc_y + 6 - i - (height/2),    
                     image,
                     adjust_angle(270, 0, state.mirror_mult < 0),
@@ -983,6 +1001,36 @@ void draw_all_object_layers() {
                                     obj->transition_applied = FADE_UP;
                                 }
                                 break;
+                            case FADE_CIRCLE_LEFT:
+                                if (calc_x > (screenWidth / 2)) {
+                                    if (calc_y > (screenHeight / 2)) {
+                                        obj->transition_applied = FADE_UP_STATIONARY;
+                                    } else {
+                                        obj->transition_applied = FADE_DOWN_STATIONARY;
+                                    }
+                                } else {
+                                    if (calc_y > (screenHeight / 2)) {
+                                        obj->transition_applied = FADE_UP_SLOW;
+                                    } else {
+                                        obj->transition_applied = FADE_DOWN_SLOW;
+                                    }
+                                }
+                                break;
+                            case FADE_CIRCLE_RIGHT:
+                                if (calc_x > (screenWidth / 2)) {
+                                    if (calc_y > (screenHeight / 2)) {
+                                        obj->transition_applied = FADE_UP_SLOW;
+                                    } else {
+                                        obj->transition_applied = FADE_DOWN_SLOW;
+                                    }
+                                } else {
+                                    if (calc_y > (screenHeight / 2)) {
+                                        obj->transition_applied = FADE_UP_STATIONARY;
+                                    } else {
+                                        obj->transition_applied = FADE_DOWN_STATIONARY;
+                                    }
+                                }
+                                break;
                             default:
                                 obj->transition_applied = current_fading_effect;  
                         }
@@ -1066,6 +1114,14 @@ void handle_triggers(int i) {
 
                 case TRIGGER_FADE_OUTWARDS:
                     current_fading_effect = FADE_OUTWARDS;
+                    break;
+                
+                case TRIGGER_FADE_LEFT_SEMICIRCLE:
+                    current_fading_effect = FADE_CIRCLE_LEFT;
+                    break;
+
+                case TRIGGER_FADE_RIGHT_SEMICIRCLE:
+                    current_fading_effect = FADE_CIRCLE_RIGHT;
                     break;
 
                 case BG_TRIGGER:
