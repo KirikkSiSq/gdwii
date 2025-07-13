@@ -66,8 +66,10 @@ void draw_game() {
 
     draw_ground(0, FALSE);
     
-    if (state.camera_y + state.ground_y_gfx > 0) draw_ground(state.camera_y + state.ground_y_gfx, FALSE);
-    draw_ground(state.camera_y + SCREEN_HEIGHT_AREA - state.ground_y_gfx, TRUE);
+    if (state.ground_y_gfx > 0) {
+        if (state.camera_y + state.ground_y_gfx > 0) draw_ground(state.camera_y + state.ground_y_gfx, FALSE);
+        draw_ground(state.camera_y + SCREEN_HEIGHT_AREA - state.ground_y_gfx, TRUE);
+    }
     
     // FPS logic
     frameCount++;
