@@ -22,7 +22,6 @@ typedef struct {
     float height;
 
     float ground_y;
-    float portal_ground_y;
     float ceiling_y;
 
     int gamemode;

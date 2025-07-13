@@ -66,7 +66,7 @@ void draw_game() {
 
     draw_ground(0, FALSE);
     
-    if (state.player.portal_ground_y > 0) draw_ground(state.camera_y + state.ground_y_gfx, FALSE);
+    if (state.camera_y + state.ground_y_gfx > 0) draw_ground(state.camera_y + state.ground_y_gfx, FALSE);
     draw_ground(state.camera_y + SCREEN_HEIGHT_AREA - state.ground_y_gfx, TRUE);
     
     // FPS logic

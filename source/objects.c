@@ -271,7 +271,6 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             
         case SHIP_PORTAL: 
             player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
-            player->portal_ground_y = player->ground_y;
             player->ceiling_y = player->ground_y + 300;
             set_intended_ceiling(player);
 
@@ -386,7 +385,6 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         
         case BALL_PORTAL: 
             player->ground_y = maxf(0, ceilf((obj->y - 150) / 30.f)) * 30;
-            player->portal_ground_y = player->ground_y;
             player->ceiling_y = player->ground_y + 240;
             set_intended_ceiling(player);
 

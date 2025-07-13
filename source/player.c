@@ -446,7 +446,6 @@ void init_variables() {
     player->vel_x = 311.580093712804;  
     player->vel_y = 0;
     player->ground_y = 0;
-    player->portal_ground_y = 0;
     player->ceiling_y = 999999;
     player->gamemode = GAMEMODE_CUBE;
     player->on_ground = TRUE;
