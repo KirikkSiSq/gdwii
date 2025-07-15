@@ -9,6 +9,7 @@
 #include "objects.h"
 
 #define MAX_TRAIL_POINTS 64
+#define TRAIL_CLEAR_DISTANCE 30.f
 
 typedef struct {
     float x, y;
@@ -41,6 +42,9 @@ typedef struct {
     Vec2 vertices[MAX_TRAIL_POINTS * 2];
     u8 colorPointer[MAX_TRAIL_POINTS * 8]; // RGBA * 2 per point
     Tex2F texCoords[MAX_TRAIL_POINTS * 2];
+
+    Vec2 lastStopPosition;
+    bool wasStopped;
 
 } MotionTrail;
 

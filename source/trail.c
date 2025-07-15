@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "math.h"
 #include "trail.h"
 
 #include "main.h"
@@ -67,10 +68,22 @@ void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke
 }
 
 void MotionTrail_ResumeStroke(MotionTrail* trail) {
+    if (!trail->appendNewPoints && trail->wasStopped) {
+        float dx = trail->positionR.x - trail->lastStopPosition.x;
+        float dy = trail->positionR.y - trail->lastStopPosition.y;
+
+        if (square_distance(0, 0, dx, dy) > (TRAIL_CLEAR_DISTANCE * TRAIL_CLEAR_DISTANCE)) {
+            trail->nuPoints = 0;
+            trail->previousNuPoints = 0;
+        }
+        trail->wasStopped = false;
+    }
     trail->appendNewPoints = true;
 }
 
 void MotionTrail_StopStroke(MotionTrail* trail) {
+    trail->lastStopPosition = trail->positionR;
+    trail->wasStopped = true;
     trail->appendNewPoints = false;
 }
 
