@@ -182,10 +182,10 @@ char *get_metadata_value(const char *levelString, const char *key) {
     return NULL;
 }
 
-char *decompress_level() {
+char *decompress_level(char *data) {
     printf("Loading level data...\n");
 
-    char *b64 = extract_gmd_key((const char *) levels[level_id].data_ptr, "k4", "s");
+    char *b64 = extract_gmd_key((const char *) data, "k4", "s");
     if (!b64) {
         printf("Could not extract base64 data\n");
         return NULL;
@@ -850,8 +850,8 @@ GDObjectLayerList *layersArrayList = NULL;
 int channelCount = 0;
 GDColorChannel *colorChannels = NULL;
 
-void load_level() {
-    char *level_string = decompress_level();
+void load_level(char *data) {
+    char *level_string = decompress_level(data);
 
     if (level_string == NULL) {
         printf("Failed decompressing the level.\n");
@@ -864,7 +864,7 @@ void load_level() {
     char *metaStr = get_metadata_value(level_string, "kS38");
     channelCount = parse_color_channels(metaStr, &colorChannels);
 
-    char *gmd_song_id = extract_gmd_key((const char *) levels[level_id].data_ptr, "k8", "i");
+    char *gmd_song_id = extract_gmd_key((const char *) data, "k8", "i");
     if (!gmd_song_id) {
         level_info.song_id = 0;
     } else {
@@ -948,6 +948,10 @@ void set_color_channels() {
                 break;
         }
     }
+}
+
+char *get_level_name(char *data_ptr) {
+    return extract_gmd_key((const char *) data_ptr, "k2", "s");
 }
 
 void reload_level() {

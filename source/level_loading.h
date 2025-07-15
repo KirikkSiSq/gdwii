@@ -103,6 +103,8 @@ struct LoadedLevelInfo {
     bool completing;
 };
 
+char *get_level_name(char *data_ptr);
+
 extern struct LoadedLevelInfo level_info;
 
 extern GDTypedObjectList *objectsArrayList;
@@ -110,7 +112,7 @@ extern GDObjectLayerList *layersArrayList;
 
 void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GDObjectTyped **array, int count);
-void load_level();
+void load_level(char *data);
 void unload_level();
 void reload_level();
 void set_color_channels();

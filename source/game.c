@@ -18,8 +18,6 @@ int game_loop() {
     u64 prevTicks = gettime();
     double accumulator = 0.0f;
 
-    load_level();
-
     MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
 
     while (1) {
