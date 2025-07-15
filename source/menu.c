@@ -43,7 +43,8 @@ int menu_loop() {
 	if (!pdir){
 		printf("opendir() failure; terminating\n");
 	}
-
+    
+    sd_level_count = 0;
 	while ((pent=readdir(pdir))!=NULL) {
 		
         stat(pent->d_name,&statbuf);
