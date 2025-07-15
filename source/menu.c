@@ -106,7 +106,9 @@ int sdcard_levels() {
     GRRLIB_PrintfTTF(0, 400, font, "Press 1 to switch to main levels.", 30, RGBA(255,255,255,255));
     
     if (sd_level_count > 0) {
-        GRRLIB_PrintfTTF(0, 20, font, current_level_name, 30, RGBA(255,255,255,255));
+        char text[269];
+        snprintf(text, 269, "%d - %s", level_id + 1, current_level_name);
+        GRRLIB_PrintfTTF(0, 20, font, text, 30, RGBA(255,255,255,255));
 
         if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
             level_id--;
@@ -163,7 +165,9 @@ int main_levels() {
             
     GRRLIB_PrintfTTF(0, 400, font, "Press 1 to switch to SD card levels.", 30, RGBA(255,255,255,255));
     
-    GRRLIB_PrintfTTF(0, 20, font, levels[level_id].level_name, 30, RGBA(255,255,255,255));
+    char text[255];
+    snprintf(text, 255, "%d - %s", level_id + 1, levels[level_id].level_name);
+    GRRLIB_PrintfTTF(0, 20, font, text, 30, RGBA(255,255,255,255));
 
     if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
         level_id--;

@@ -700,10 +700,12 @@ void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float 
             *fade_scale = get_out_scale_fade(x, screenWidth);
             break;
         case FADE_UP_SLOW:
+            *fade_x = get_xy_fade_offset(x, screenWidth) * state.mirror_mult * ((current_fading_effect == FADE_CIRCLE_RIGHT) ? 1 : -1);
         case FADE_UP_STATIONARY:
             *fade_y = get_xy_fade_offset(x, screenWidth) / 3;
             break;
         case FADE_DOWN_SLOW:
+            *fade_x = get_xy_fade_offset(x, screenWidth) * state.mirror_mult * ((current_fading_effect == FADE_CIRCLE_RIGHT) ? 1 : -1);
         case FADE_DOWN_STATIONARY:
             *fade_y = -get_xy_fade_offset(x, screenWidth) / 3;
             break;
