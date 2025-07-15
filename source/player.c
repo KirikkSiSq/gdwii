@@ -180,10 +180,8 @@ void update_ship_rotation(Player *player) {
     float diff_x = (player->x - state.old_player.x);
     float diff_y = (player->y - state.old_player.y);
 
-    if (square_distance(0, 0, diff_x, -diff_y) >= 1.2f) {
-        float angle_rad = atan2f(-diff_y, diff_x);
-        player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.15f, STEPS_DT);
-    }
+    float angle_rad = atan2f(-diff_y, diff_x);
+    player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.05f, STEPS_DT);
 }
 
 void ship_gamemode(Player *player) {
