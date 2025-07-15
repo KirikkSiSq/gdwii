@@ -151,9 +151,9 @@ int sdcard_levels() {
         }
     } else {
         GRRLIB_PrintfTTF(0, 20, font, "Put levels in a folder called \"levels\"", 30, RGBA(255,255,255,255));
-        GRRLIB_PrintfTTF(0, 40, font, "in the root folder of the sdcard", 30, RGBA(255,255,255,255));
-        GRRLIB_PrintfTTF(0, 60, font, "and put levels exported with", 30, RGBA(255,255,255,255));
-        GRRLIB_PrintfTTF(0, 80, font, "the mod \"GDShare\" in that folder.", 30, RGBA(255,255,255,255));
+        GRRLIB_PrintfTTF(0, 45, font, "in the root folder of the sdcard", 30, RGBA(255,255,255,255));
+        GRRLIB_PrintfTTF(0, 70, font, "and put levels exported with", 30, RGBA(255,255,255,255));
+        GRRLIB_PrintfTTF(0, 95, font, "the mod \"GDShare\" in that folder.", 30, RGBA(255,255,255,255));
     }
     return 0;
 }

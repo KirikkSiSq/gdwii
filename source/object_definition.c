@@ -1079,7 +1079,7 @@ const ObjectDefinition objects[] = {
         .layers = {
             {
                 .x_offset = 0.5,
-                .y_offset = 0,
+                .y_offset = 10,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
@@ -1093,7 +1093,7 @@ const ObjectDefinition objects[] = {
             },
             {
                 .x_offset = 0,
-                .y_offset = 0,
+                .y_offset = 10,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
                 .texture = blockOutline_02_001_png
