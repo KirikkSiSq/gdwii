@@ -721,6 +721,7 @@ int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
         case PULSING_HEART:
         case PULSING_DIAMOND:
         case PULSING_STAR:
+        case PULSING_NOTE:
             return 1;
         case ROD_BIG:
         case ROD_MEDIUM:
@@ -738,12 +739,13 @@ float get_object_pulse(float amplitude, GDObjectTyped *obj) {
     switch (obj->id) {
         case YELLOW_ORB:
         case BLUE_ORB:
+            return map_range(amplitude, 0.f, 1.f, 0.3f, 1.2f);
         case PULSING_CIRCLE:
         case PULSING_CIRCUNFERENCE:
         case PULSING_HEART:
         case PULSING_DIAMOND:
         case PULSING_STAR:
-            return map_range(amplitude, 0.f, 1.f, 0.5f, 1.2f);
+        case PULSING_NOTE:
         case ROD_BIG:
         case ROD_MEDIUM:
         case ROD_SMALL:

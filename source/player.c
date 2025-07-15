@@ -181,7 +181,7 @@ void update_ship_rotation(Player *player) {
     float diff_y = (player->y - state.old_player.y);
 
     float angle_rad = atan2f(-diff_y, diff_x);
-    player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.05f, STEPS_DT);
+    player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.07f, STEPS_DT);
 }
 
 void ship_gamemode(Player *player) {
@@ -287,7 +287,7 @@ void run_camera() {
         if (state.camera_y_lerp < -90.f) state.camera_y_lerp = -90.f;
         if (state.camera_y_lerp > 2400.f) state.camera_y_lerp = 2400.f;
 
-        state.camera_y = approachf(state.camera_y, state.camera_y_lerp, 0.2f, 0.05f);
+        state.camera_y = iSlerp(state.camera_y, state.camera_y_lerp, 0.05f, STEPS_DT);
     } else {
         state.camera_y = iSlerp(state.camera_y, state.camera_intended_y, 0.02f, STEPS_DT);
         state.camera_y_lerp = state.camera_y;
