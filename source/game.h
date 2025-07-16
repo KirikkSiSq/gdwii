@@ -10,5 +10,6 @@
 
 extern bool enable_info;
 extern float amplitude;
+extern float dt;
 
 int game_loop();

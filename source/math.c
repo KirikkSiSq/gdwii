@@ -107,21 +107,43 @@ float map_range(float val, float min1, float max1, float min2, float max2) {
 }
 
 float adjust_angle(float angle, int flipX, int flipY) {
-    // Normalize angle to [0, 360)
-    while (angle < 0) angle += 360;
-    while (angle >= 360) angle -= 360;
+    // Normalize to [0, 360)
+    angle = positive_fmod(angle, 360);
 
     if (flipX && flipY) {
-        angle = positive_fmod(angle + 180.0f, 360.0f);
+        angle = fmodf(angle + 180.0f, 360.0f);
     } else if (flipX) {
         angle = 180.0f - angle;
     } else if (flipY) {
         angle = -angle;
     }
 
-    // Normalize again after transformation
-    while (angle < 0) angle += 360;
-    while (angle >= 360) angle -= 360;
+    // Normalize again
+    angle = positive_fmod(angle, 360);
+
+    return angle;
+}
+
+float adjust_angle_x(float angle, int flipX) {
+    angle = positive_fmod(angle, 360);
+
+    if (flipX) {
+        angle = 180.0f - angle;
+    } 
+
+    angle = positive_fmod(angle, 360);
+
+    return angle;
+}
+
+float adjust_angle_y(float angle, int flipY) {
+    angle = positive_fmod(angle, 360);
+
+    if (flipY) {
+        angle = angle + 180;
+    }
+
+    angle = positive_fmod(angle, 360);
 
     return angle;
 }

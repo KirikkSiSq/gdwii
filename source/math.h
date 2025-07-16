@@ -22,6 +22,8 @@ void rotate_point_around_center_gfx(
 void rotate_point_around_center(float cx, float cy, float angle, float x, float y, float *out_x, float *out_y);
 
 float adjust_angle(float angle, int flipX, int flipY);
+float adjust_angle_x(float angle, int flipX);
+float adjust_angle_y(float angle, int flipY);
 float randomf();
 float random_float(float min, float max);
 int random_int(int min, int max);

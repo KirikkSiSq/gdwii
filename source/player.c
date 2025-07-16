@@ -43,6 +43,10 @@ inline float obj_getLeft(GDObjectTyped *object)  { return object->x - objects[ob
 inline float obj_gravBottom(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
 inline float obj_gravTop(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
 
+void set_p_velocity(Player *player, float vel) {
+    player->vel_y = vel * ((player->mini) ? 0.8 : 1);
+}
+
 void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
     int clip = 10;
     switch (hitbox->type) {
@@ -89,14 +93,27 @@ void collide_with_objects() {
         ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
 
         if (hitbox->type != HITBOX_NONE && !obj->activated && obj->id < OBJECT_COUNT) {
-            if (intersect(
-                player->x, player->y, player->width, player->height, 0, 
-                obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
-            )) {
-                handle_collision(player, obj, hitbox);
-                obj->collided = TRUE;
+            if (hitbox->is_circular) {
+                if (intersect_rect_circle(
+                    player->x, player->y, player->width, player->height, player->rotation, 
+                    obj->x, obj->y, hitbox->radius
+                )) {
+                    handle_collision(player, obj, hitbox);
+                    obj->collided = TRUE;
+                } else {
+                    obj->collided = FALSE;
+                }
             } else {
-                obj->collided = FALSE;
+                float rotation = (obj->rotation == 0 || obj->rotation == 90 || obj->rotation == 180 || obj->rotation == 270) ? 0 : player->rotation;
+                if (intersect(
+                    player->x, player->y, player->width, player->height, rotation, 
+                    obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
+                )) {
+                    handle_collision(player, obj, hitbox);
+                    obj->collided = TRUE;
+                } else {
+                    obj->collided = FALSE;
+                }
             }
         } else {
             obj->collided = FALSE;
@@ -129,7 +146,7 @@ void cube_gamemode(Player *player) {
     }
 
     if (player->on_ground && WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
-        player->vel_y = 603.72;
+        set_p_velocity(player, 603.72);
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
 
@@ -144,12 +161,13 @@ void cube_gamemode(Player *player) {
 
 void ship_particles(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
-
+    float scale = (player->mini) ? 0.6f : 1.f;
+    
     float x, y;
     rotate_point_around_center(
         player->x, player->y,
         player->rotation,
-        player->x - 12, player->y + (player->upside_down ? 10 : -10),
+        player->x - 12 * scale, player->y + (player->upside_down ? 10 : -10) * scale,
         &x, &y
     );
     
@@ -157,8 +175,6 @@ void ship_particles(Player *player) {
     trail.startingPositionInitialized = TRUE;
 
     if ((frame_counter & 0b11) == 0) {   
-        
-        
         // Particle trail
         spawn_particle(SHIP_TRAIL, x, y, NULL);
         
@@ -230,7 +246,7 @@ void ball_gamemode(Player *player) {
     // Jump
     if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && (player->on_ground || player->on_ceiling) && player->buffering_state == BUFFER_READY) {
         player->upside_down ^= 1;
-        player->vel_y = -181.11601;
+        set_p_velocity(player, -181.11601);
 
         player->buffering_state = BUFFER_END;
         
@@ -258,11 +274,11 @@ void run_camera() {
         state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
     }
 
-    float upper = 240.f;
+    float upper = 90.f;
     float lower = 120.f;
 
     if (player->upside_down) {
-        upper = 210.f;
+        upper = 120.f;
         lower = 90.f;
     }
     
@@ -276,12 +292,12 @@ void run_camera() {
     state.ground_y_gfx = iSlerp(state.ground_y_gfx, calc_height, 0.02f, STEPS_DT);
 
     if (player->gamemode == GAMEMODE_CUBE) {
-        if (grav(player, player->vel_y) > 0 && player->y > state.camera_y + upper) {
-            state.camera_y_lerp += player_get_vel(player, player->vel_y) * STEPS_DT;
-        }
-
-        if (grav(player, player->vel_y) < 0 && player->y < state.camera_y + lower) {
-            state.camera_y_lerp += player_get_vel(player, player->vel_y) * STEPS_DT;
+        if (player->y <= SCREEN_HEIGHT_AREA + state.camera_y_lerp - upper) {
+            if (player->y < lower + state.camera_y_lerp){
+                state.camera_y_lerp = player->y - lower;
+            }
+        } else {
+            state.camera_y_lerp = player->y - SCREEN_HEIGHT_AREA + upper;
         }
 
         if (state.camera_y_lerp < -90.f) state.camera_y_lerp = -90.f;
@@ -303,13 +319,20 @@ void spawn_glitter_particles() {
 
 void run_player() {
     Player *player = &state.player;
+    float scale = (player->mini) ? 0.6f : 1.f;
+
+    player->height = 30 * scale;
+    player->width = 30 * scale;
+
+    trail.stroke = 10.f * scale;
+
     switch (player->gamemode) {
         case GAMEMODE_CUBE:
             cube_gamemode(player);
 
             if (p1_trail && (frame_counter & 0b1111) == 0) {
-                particle_templates[P1_TRAIL].start_scale = 0.73333f;
-                particle_templates[P1_TRAIL].end_scale = 0.73333f;
+                particle_templates[P1_TRAIL].start_scale = 0.73333f * scale;
+                particle_templates[P1_TRAIL].end_scale = 0.73333f * scale;
                 spawn_particle(P1_TRAIL, player->x, player->y, NULL);
             }
             break;
@@ -319,16 +342,16 @@ void run_player() {
             ship_gamemode(player);
 
             if (p1_trail && (frame_counter & 0b1111) == 0) {
-                particle_templates[P1_TRAIL].start_scale = 0.73333f / 1.8;
-                particle_templates[P1_TRAIL].end_scale = 0.73333f / 1.8;
+                particle_templates[P1_TRAIL].start_scale = 0.73333f * scale / 1.8;
+                particle_templates[P1_TRAIL].end_scale = 0.73333f * scale / 1.8;
                 spawn_particle(P1_TRAIL, player->x, player->y, NULL);
             }
             break;
         case GAMEMODE_BALL:
             ball_gamemode(player);
             if (p1_trail && (frame_counter & 0b1111) == 0) {
-                particle_templates[P1_TRAIL].start_scale = 0.73333f;
-                particle_templates[P1_TRAIL].end_scale = 0.73333f;
+                particle_templates[P1_TRAIL].start_scale = 0.73333f * scale;
+                particle_templates[P1_TRAIL].end_scale = 0.73333f * scale;
                 spawn_particle(P1_TRAIL, player->x, player->y, NULL);
             }
             break;
@@ -524,20 +547,22 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
     GRRLIB_SetHandle(icon_l2, 30, 30);
     GRRLIB_SetHandle(ship_l1, 38, 24);  // 76x48
     GRRLIB_SetHandle(ship_l2, 38, 24);
+    
+    float scale = (player->mini) ? 0.6f : 1.f;
 
     int mult = (player->upside_down ? -1 : 1);
 
     float x;
     float y;
 
-    float calculated_scale = 0.733f * state.mirror_mult;
+    float calculated_scale = 0.733f * state.mirror_mult * scale;
     float calculated_rotation = player->rotation * state.mirror_mult;
 
     #define CUBE_DIVISOR 1.8
 
     rotate_point_around_center_gfx(
         get_mirror_x(calc_x, state.mirror_factor), calc_y,
-        7, (player->upside_down) ? 5 : -9,
+        7, ((player->upside_down) ? 5 : -9) * scale,
         38, 30,
         60, 60,
         calculated_rotation,
@@ -549,7 +574,7 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         x + 6 - (30), y + 6 - (30),
         icon_l1,
         calculated_rotation,
-        calculated_scale / CUBE_DIVISOR, 0.733f / CUBE_DIVISOR,
+        calculated_scale / CUBE_DIVISOR, (0.733f * scale) / CUBE_DIVISOR,
         RGBA(p1.r, p1.g, p1.b, 255)
     );
 
@@ -557,13 +582,13 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         x + 6 - (30), y + 6 - (30),
         icon_l2,
         calculated_rotation,
-        calculated_scale / CUBE_DIVISOR, 0.733f / CUBE_DIVISOR,
+        calculated_scale / CUBE_DIVISOR, (0.733f * scale) / CUBE_DIVISOR,
         RGBA(p2.r, p2.g, p2.b, 255)
     );
 
     rotate_point_around_center_gfx(
         get_mirror_x(calc_x, state.mirror_factor), calc_y,
-        0, (player->upside_down) ? -4 : 12,
+        0, ((player->upside_down) ? -4 : 12) * (player->mini ? 0.8 : 1),
         38, 30,
         76, 48,
         calculated_rotation,
@@ -575,7 +600,7 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         x + 6 - (30), y + 6 - (30),
         ship_l1,
         calculated_rotation,
-        calculated_scale, 0.733f * mult,
+        calculated_scale, (0.733f * scale) * mult,
         RGBA(p1.r, p1.g, p1.b, 255)
     );
 
@@ -583,7 +608,7 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         x + 6 - (30), y + 6 - (30),
         ship_l2,
         calculated_rotation,
-        calculated_scale, 0.733f * mult,
+        calculated_scale, (0.733f * scale) * mult,
         RGBA(p2.r, p2.g, p2.b, 255)
     );
 }
@@ -604,6 +629,8 @@ void draw_player() {
 
     draw_particles(P1_TRAIL);
 
+    float scale = (player->mini) ? 0.6f : 1.f;
+
     switch (player->gamemode) {
         case GAMEMODE_CUBE:
             GRRLIB_SetHandle(icon_l1, 30, 30);
@@ -613,8 +640,8 @@ void draw_player() {
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l1,
                 player->lerp_rotation * state.mirror_mult,
-                0.73333333333333333333333333333333 * state.mirror_mult,
-                0.73333333333333333333333333333333,
+                0.73333333333333333333333333333333 * state.mirror_mult * scale,
+                0.73333333333333333333333333333333 * scale,
                 RGBA(p1.r, p1.g, p1.b, 255)
             );
 
@@ -622,8 +649,8 @@ void draw_player() {
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l2,
                 player->lerp_rotation * state.mirror_mult,
-                0.73333333333333333333333333333333 * state.mirror_mult,
-                0.73333333333333333333333333333333,
+                0.73333333333333333333333333333333 * state.mirror_mult * scale,
+                0.73333333333333333333333333333333 * scale,
                 RGBA(p2.r, p2.g, p2.b, 255)
             );
             break;
@@ -637,8 +664,8 @@ void draw_player() {
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (36), calc_y + 6 - (36),
                 ball_l1,
                 player->lerp_rotation * state.mirror_mult,
-                0.73333333333333333333333333333333 * state.mirror_mult,
-                0.73333333333333333333333333333333,
+                0.73333333333333333333333333333333 * state.mirror_mult * scale,
+                0.73333333333333333333333333333333 * scale,
                 RGBA(p1.r, p1.g, p1.b, 255)
             );
 
@@ -646,8 +673,8 @@ void draw_player() {
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (36), calc_y + 6 - (36),
                 ball_l2,
                 player->lerp_rotation * state.mirror_mult,
-                0.73333333333333333333333333333333 * state.mirror_mult,
-                0.73333333333333333333333333333333,
+                0.73333333333333333333333333333333 * state.mirror_mult * scale,
+                0.73333333333333333333333333333333 * scale,
                 RGBA(p2.r, p2.g, p2.b, 255)
             );
             break;

@@ -257,6 +257,8 @@ void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
             float angle = tpl->angle + tpl->angleVar * random_float(-1, 1);
             float speed = tpl->speed + tpl->speedVar * random_float(-1, 1);
 
+            angle = positive_fmod(angle, 360);
+
             particles[i].velocity_angle = angle;
             particles[i].velocity_magnitude = speed;
             particles[i].rotate_per_second = tpl->rotatePerSecond + tpl->rotatePerSecondVariance * random_float(-1, 1);

@@ -59,4 +59,5 @@ void unload_icons();
 void draw_player();
 void handle_player();
 void handle_completion();
+void set_p_velocity(Player *player, float vel);
 GRRLIB_texImg *get_p1_trail_tex();

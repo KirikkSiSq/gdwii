@@ -124,7 +124,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
     switch (obj->id) {
         case YELLOW_PAD:
             MotionTrail_ResumeStroke(&trail);
-            player->vel_y = jump_heights_table[JUMP_YELLOW_PAD][player->gamemode];
+            set_p_velocity(player, jump_heights_table[JUMP_YELLOW_PAD][player->gamemode]);
             player->on_ground = FALSE;
             
             particle_templates[USE_EFFECT].start_scale = 0;
@@ -154,7 +154,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 			    break;
 
             MotionTrail_ResumeStroke(&trail);
-            player->vel_y = jump_heights_table[JUMP_BLUE_PAD][player->gamemode];
+            set_p_velocity(player, jump_heights_table[JUMP_BLUE_PAD][player->gamemode]);
             player->upside_down ^= 1;
             player->on_ground = FALSE;
             
@@ -180,7 +180,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
-                player->vel_y = jump_heights_table[JUMP_YELLOW_ORB][player->gamemode];
+                set_p_velocity(player, jump_heights_table[JUMP_YELLOW_ORB][player->gamemode]);
                 
                 player->ball_rotation_speed = -1.f;
                 
@@ -212,7 +212,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
-                player->vel_y = jump_heights_table[JUMP_BLUE_ORB][player->gamemode];
+                set_p_velocity(player, jump_heights_table[JUMP_BLUE_ORB][player->gamemode]);
                 player->upside_down ^= 1;
                 
                 player->ball_rotation_speed = -1.f;
@@ -412,6 +412,48 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             }
             obj->activated = TRUE;
             break;
+
+        case BIG_PORTAL:
+            player->mini = FALSE;
+
+            particle_templates[USE_EFFECT].start_scale = 80;
+            particle_templates[USE_EFFECT].end_scale = 0;
+
+            particle_templates[USE_EFFECT].start_color.r = 0;
+            particle_templates[USE_EFFECT].start_color.g = 255;
+            particle_templates[USE_EFFECT].start_color.b = 50;
+            particle_templates[USE_EFFECT].start_color.a = 0;
+
+            particle_templates[USE_EFFECT].end_color.r = 0;
+            particle_templates[USE_EFFECT].end_color.g = 255;
+            particle_templates[USE_EFFECT].end_color.b = 50;
+            particle_templates[USE_EFFECT].end_color.a = 255;
+
+            spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+            
+            obj->activated = TRUE;
+            break;        
+
+        case MINI_PORTAL:
+            player->mini = TRUE;
+
+            particle_templates[USE_EFFECT].start_scale = 80;
+            particle_templates[USE_EFFECT].end_scale = 0;
+
+            particle_templates[USE_EFFECT].start_color.r = 255;
+            particle_templates[USE_EFFECT].start_color.g = 31;
+            particle_templates[USE_EFFECT].start_color.b = 255;
+            particle_templates[USE_EFFECT].start_color.a = 0;
+
+            particle_templates[USE_EFFECT].end_color.r = 255;
+            particle_templates[USE_EFFECT].end_color.g = 31;
+            particle_templates[USE_EFFECT].end_color.b = 255;
+            particle_templates[USE_EFFECT].end_color.a = 255;
+            
+            spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+            
+            obj->activated = TRUE;
+        break;
     }
 }
 
@@ -488,8 +530,9 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             break;
         
         case YELLOW_PAD:
-            particle_templates[PAD_PARTICLES].angle = adjust_angle(180.f - (obj->rotation + 90), obj->flippedH, obj->flippedV);
+            particle_templates[PAD_PARTICLES].angle = 180.f - (adjust_angle_y(obj->rotation, obj->flippedV) + 90.f);
 
+            printf("h%i v%i r%f\n", obj->flippedH, obj->flippedV, obj->rotation);
             particle_templates[PAD_PARTICLES].start_color.r = 255;
             particle_templates[PAD_PARTICLES].start_color.g = 255;
             particle_templates[PAD_PARTICLES].start_color.b = 0;
@@ -518,7 +561,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             break;
         
         case BLUE_PAD:
-            particle_templates[PAD_PARTICLES].angle = adjust_angle(180.f - (obj->rotation + 90), obj->flippedH, obj->flippedV);
+            particle_templates[PAD_PARTICLES].angle = 180.f - (adjust_angle_y(obj->rotation, obj->flippedV) + 90.f);
             
             particle_templates[PAD_PARTICLES].start_color.r = 56;
             particle_templates[PAD_PARTICLES].start_color.g = 200;
@@ -535,7 +578,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             
         case YELLOW_GRAVITY_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 255;
@@ -555,7 +598,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         case BLUE_GRAVITY_PORTAL:
         case BLUE_MIRROR_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 56;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 200;
@@ -573,8 +616,9 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             break;
         
         case CUBE_PORTAL:
+        case BIG_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 0;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 255;
@@ -592,8 +636,9 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             break;
 
         case SHIP_PORTAL:
+        case MINI_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 31;
@@ -612,7 +657,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
 
         case ORANGE_MIRROR_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 91;
@@ -631,7 +676,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         
         case BALL_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = adjust_angle(180.f - obj->rotation, obj->flippedH, obj->flippedV);;
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 0;
@@ -771,6 +816,24 @@ GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GDObjectTyped *obj, 
     return image;
 }
 
+int get_opacity(GDObjectTyped *obj, float x) {
+    int opacity = get_fade_value(x, screenWidth);
+
+    switch (obj->id) {
+        case BLACK_FULL:
+        case BLACK_EDGE:
+        case BLACK_CORNER:
+        case BLACK_INS_CORNER:
+        case BLACK_FILLER:
+        case BLACK_PILLAR_END:
+        case BLACK_PILLAR:
+            opacity = 255;
+            break;
+    }
+
+    return opacity;
+}
+
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
     int obj_id = obj->id;
 
@@ -796,7 +859,7 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
         GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
     }
     
-    int opacity = get_fade_value(x, screenWidth);
+    int opacity = get_opacity(obj, x);
     
     u32 color = RGBA(channels[col_channel].color.r, channels[col_channel].color.g, channels[col_channel].color.b, opacity);
         
@@ -958,6 +1021,57 @@ void draw_ground(f32 y, bool is_ceiling) {
     }
 }
 
+void handle_special_fading(GDObjectTyped *obj, float calc_x, float calc_y) {
+    switch (current_fading_effect) {
+        case FADE_INWARDS:
+            if (calc_y > (screenHeight / 2)) {
+                obj->transition_applied = FADE_UP;
+            } else {
+                obj->transition_applied = FADE_DOWN;
+            }
+            break;
+        case FADE_OUTWARDS:
+            if (calc_y > (screenHeight / 2)) {
+                obj->transition_applied = FADE_DOWN;
+            } else {
+                obj->transition_applied = FADE_UP;
+            }
+            break;
+        case FADE_CIRCLE_LEFT:
+            if (calc_x > (screenWidth / 2)) {
+                if (calc_y > (screenHeight / 2)) {
+                    obj->transition_applied = FADE_UP_STATIONARY;
+                } else {
+                    obj->transition_applied = FADE_DOWN_STATIONARY;
+                }
+            } else {
+                if (calc_y > (screenHeight / 2)) {
+                    obj->transition_applied = FADE_UP_SLOW;
+                } else {
+                    obj->transition_applied = FADE_DOWN_SLOW;
+                }
+            }
+            break;
+        case FADE_CIRCLE_RIGHT:
+            if (calc_x > (screenWidth / 2)) {
+                if (calc_y > (screenHeight / 2)) {
+                    obj->transition_applied = FADE_UP_SLOW;
+                } else {
+                    obj->transition_applied = FADE_DOWN_SLOW;
+                }
+            } else {
+                if (calc_y > (screenHeight / 2)) {
+                    obj->transition_applied = FADE_UP_STATIONARY;
+                } else {
+                    obj->transition_applied = FADE_DOWN_STATIONARY;
+                }
+            }
+            break;
+        default:
+            obj->transition_applied = current_fading_effect;  
+    }   
+}
+
 int layersDrawn = 0;
 
 void draw_all_object_layers() {
@@ -987,56 +1101,12 @@ void draw_all_object_layers() {
                     GDObjectLayer *layer = layersArrayList->layers[i];
 
                     int fade_val = get_fade_value(calc_x, screenWidth);
-                    if (layer->layerNum == 0 && (fade_val == 255 || fade_val == 0)) {
-                        switch (current_fading_effect) {
-                            case FADE_INWARDS:
-                                if (calc_y > (screenHeight / 2)) {
-                                    obj->transition_applied = FADE_UP;
-                                } else {
-                                    obj->transition_applied = FADE_DOWN;
-                                }
-                                break;
-                            case FADE_OUTWARDS:
-                                if (calc_y > (screenHeight / 2)) {
-                                    obj->transition_applied = FADE_DOWN;
-                                } else {
-                                    obj->transition_applied = FADE_UP;
-                                }
-                                break;
-                            case FADE_CIRCLE_LEFT:
-                                if (calc_x > (screenWidth / 2)) {
-                                    if (calc_y > (screenHeight / 2)) {
-                                        obj->transition_applied = FADE_UP_STATIONARY;
-                                    } else {
-                                        obj->transition_applied = FADE_DOWN_STATIONARY;
-                                    }
-                                } else {
-                                    if (calc_y > (screenHeight / 2)) {
-                                        obj->transition_applied = FADE_UP_SLOW;
-                                    } else {
-                                        obj->transition_applied = FADE_DOWN_SLOW;
-                                    }
-                                }
-                                break;
-                            case FADE_CIRCLE_RIGHT:
-                                if (calc_x > (screenWidth / 2)) {
-                                    if (calc_y > (screenHeight / 2)) {
-                                        obj->transition_applied = FADE_UP_SLOW;
-                                    } else {
-                                        obj->transition_applied = FADE_DOWN_SLOW;
-                                    }
-                                } else {
-                                    if (calc_y > (screenHeight / 2)) {
-                                        obj->transition_applied = FADE_UP_STATIONARY;
-                                    } else {
-                                        obj->transition_applied = FADE_DOWN_STATIONARY;
-                                    }
-                                }
-                                break;
-                            default:
-                                obj->transition_applied = current_fading_effect;  
+                    if (layer->layerNum == 0) {
+                        if ((fade_val == 255 || fade_val == 0)) handle_special_fading(obj, calc_x, calc_y);
+
+                        if (objects[obj_id].is_saw) {
+                            obj->rotation += ((obj->random & 1) ? -300 : 300) * dt;
                         }
-                            
                     }
 
                     handle_object_particles(obj, layer);
@@ -1141,6 +1211,18 @@ void handle_triggers(int i) {
                     buffer = &trigger_buffer[GROUND];
                     buffer->active = TRUE;
                     buffer->old_color = channels[GROUND].color;
+                    buffer->new_color.r = obj->trig_colorR;
+                    buffer->new_color.g = obj->trig_colorG;
+                    buffer->new_color.b = obj->trig_colorB;
+                    buffer->seconds = obj->trig_duration;
+                    buffer->time_run = 0;
+                    break;
+                         
+                case LINE_TRIGGER:
+                case 915: // gd converts 1.4 line trigger to 2.0 one for some reason
+                    buffer = &trigger_buffer[LINE];
+                    buffer->active = TRUE;
+                    buffer->old_color = channels[LINE].color;
                     buffer->new_color.r = obj->trig_colorR;
                     buffer->new_color.g = obj->trig_colorG;
                     buffer->new_color.b = obj->trig_colorB;

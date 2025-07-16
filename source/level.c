@@ -4,19 +4,19 @@
 
 LevelDefinition levels[] = {
     {
-        .level_name = "STEREO MADNESS",
+        .level_name = "Stereo Madness",
         .data_ptr  = StereoMadness_gmd
     }, 
     {
-        .level_name = "BACK ON TRACK",
+        .level_name = "Back on Track",
         .data_ptr  = BackOnTrack_gmd
     }, 
     {
-        .level_name = "POLARGEIST",
+        .level_name = "Polargeist",
         .data_ptr  = Polargeist_gmd
     }, 
     {
-        .level_name = "DRY OUT",
+        .level_name = "Dry Out",
         .data_ptr  = DryOut_gmd
     }, 
     {
@@ -24,35 +24,39 @@ LevelDefinition levels[] = {
         .data_ptr  = BaseAfterBase_gmd
     }, 
     {
-        .level_name = "CANT LET GO",
+        .level_name = "Cant Let Go",
         .data_ptr  = CantLetGo_gmd
     }, 
     {
-        .level_name = "JUMPER",
+        .level_name = "Jumper",
         .data_ptr  = Jumper_gmd
     }, 
     {
-        .level_name = "TIME MACHINE",
+        .level_name = "Time Machine",
         .data_ptr  = TimeMachine_gmd
     }, 
     {
-        .level_name = "CYCLES",
+        .level_name = "Cycles",
         .data_ptr  = Cycles_gmd
     }, 
     {
-        .level_name = "XSTEP",
+        .level_name = "xStep",
         .data_ptr = xStep_gmd
     },
     {
-        .level_name = "LEVEL EASY",
+        .level_name = "Clutterfunk",
+        .data_ptr = Clutterfunk_gmd
+    },
+    {
+        .level_name = "Level Easy",
         .data_ptr  = LevelEasy_gmd
     },
     {
-        .level_name = "THE LIGHTNING ROAD",
+        .level_name = "The Lightning Road",
         .data_ptr  = TheLightningRoad_gmd
     },
     {
-        .level_name = "THE NIGHTMARE",
+        .level_name = "The Nightmare",
         .data_ptr  = TheNightmare_gmd
     },
     {
@@ -60,11 +64,11 @@ LevelDefinition levels[] = {
         .data_ptr  = DemonPark_gmd
     },
     {
-        .level_name = "AUTO JUMPER",
+        .level_name = "Auto Jumper",
         .data_ptr  = AutoJumper_gmd
     },
     {
-        .level_name = "TEST",
+        .level_name = "Test",
         .data_ptr = Test_gmd
     }
 };
@@ -119,6 +123,11 @@ SongDefinition songs[] = {
         .song_ptr = xStep_mp3,
         .song_size = xStep_mp3_size,
         .tempo = 130
+    },
+    {
+        .song_ptr = Clutterfunk_mp3,
+        .song_size = Clutterfunk_mp3_size,
+        .tempo = 140
     }
 };
 

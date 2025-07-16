@@ -64,3 +64,30 @@ bool intersect(float x1, float y1, float w1, float h1, float angle1,
     get_corners(x2, y2, w2, h2, angle2, rect2);
     return sat_overlap(rect1, rect2);
 }
+
+bool intersect_rect_circle(float rx, float ry, float rw, float rh, float rangle,
+                          float cx, float cy, float cradius) {
+    // 1. Transform circle center into rectangle's local space
+    float rad = -DegToRad(rangle); // negative for inverse rotation
+    float cos_a = cosf(rad), sin_a = sinf(rad);
+
+    float local_cx = cos_a * (cx - rx) - sin_a * (cy - ry) + rx;
+    float local_cy = sin_a * (cx - rx) + cos_a * (cy - ry) + ry;
+
+    // 2. Rectangle bounds
+    float left   = rx - rw / 2.0f;
+    float right  = rx + rw / 2.0f;
+    float top    = ry - rh / 2.0f;
+    float bottom = ry + rh / 2.0f;
+
+    // 3. Find closest point on rectangle to circle center
+    float closest_x = fmaxf(left, fminf(local_cx, right));
+    float closest_y = fmaxf(top,  fminf(local_cy, bottom));
+
+    // 4. Distance from circle center to closest point
+    float dx = local_cx - closest_x;
+    float dy = local_cy - closest_y;
+    float dist_sq = dx * dx + dy * dy;
+
+    return dist_sq <= cradius * cradius;
+}

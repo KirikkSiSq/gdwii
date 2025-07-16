@@ -100,7 +100,40 @@
 #include "gravring_01_001_png.h"
 
 #include "square_c_05_001_png.h"
+#include "square_d_05_001_png.h"
 
+#include "d_cogwheel_01_001_png.h"
+#include "d_cogwheel_02_001_png.h"
+#include "d_cogwheel_03_001_png.h"
+#include "d_cogwheel_04_001_png.h"
+
+#include "sawblade_01_001_png.h"
+#include "sawblade_02_001_png.h"
+#include "sawblade_03_001_png.h"
+
+#include "lightsquare_01_02_color_001_png.h"
+
+#include "portal_08_back_001_png.h"
+#include "portal_08_front_001_png.h"
+
+#include "portal_09_back_001_png.h"
+#include "portal_09_front_001_png.h"
+
+#include "spike_03_001_png.h"
+#include "spike_03_glow_001_png.h"
+
+#include "blockOutline_01_001_alt_png.h"
+#include "blockOutline_02_001_alt_png.h"
+#include "blockOutline_03_001_alt_png.h"
+#include "blockOutline_04_001_alt_png.h"
+#include "blockOutline_05_001_alt_png.h"
+#include "blockOutline_05b_001_alt_png.h"
+
+#include "square_01_glow_001_alt_png.h"
+#include "square_02_glow_001_alt_png.h"
+#include "square_03_glow_001_alt_png.h"
+#include "square_06_glow_001_alt_png.h"
+#include "square_07_glow_001_alt_png.h"
 
 
 

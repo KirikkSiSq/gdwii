@@ -108,6 +108,33 @@ enum Objects {
     CHECKER_FULL,
     BLUE_ORB,
 
+    SAW_DECO_BIG,
+    SAW_DECO_MEDIUM,
+    SAW_DECO_SMALL,
+
+    SAW_BIG,
+    SAW_MEDIUM,
+
+    BLACK_FULL,
+    BLACK_EDGE,
+    BLACK_CORNER,
+    BLACK_INS_CORNER,
+    BLACK_FILLER,
+    BLACK_PILLAR_END,
+    BLACK_PILLAR,
+
+    SAW_DECO_TINY,
+    SAW_SMALL,
+
+    BIG_PORTAL,
+    UNKNOWN_100,
+    MINI_PORTAL,
+    UNKNOWN_102,
+
+    MEDIUM_SPIKE,
+
+    LINE_TRIGGER,
+
     OBJECT_COUNT
 };
 
@@ -224,6 +251,7 @@ typedef struct {
     int def_zorder;
     u8 num_layers;
     u8 is_trigger;
+    u8 is_saw;
     ObjectHitbox hitbox;
 } ObjectDefinition;
 
