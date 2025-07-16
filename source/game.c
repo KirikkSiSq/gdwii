@@ -89,3 +89,19 @@ int game_loop() {
 
     return FALSE;
 }
+
+void render() {
+    GX_DrawDone();          // Tell the GX engine we are done drawing
+
+    GX_SetZMode      (GX_TRUE, GX_LEQUAL, GX_TRUE);
+    GX_SetColorUpdate(GX_TRUE);
+    GX_CopyDisp      (xfb[fb], GX_TRUE);
+
+    fb ^= 1;  // Toggle framebuffer index
+    VIDEO_SetNextFramebuffer(xfb[fb]);  // Select eXternal Frame Buffer
+    VIDEO_Flush();                      // Flush video buffer to screen
+    VIDEO_WaitVSync();                  // Wait for screen to update
+    
+    GX_InvVtxCache();
+    GX_InvalidateTexAll();
+}
