@@ -1073,6 +1073,22 @@ void handle_special_fading(GDObjectTyped *obj, float calc_x, float calc_y) {
 
 int layersDrawn = 0;
 
+float get_rotation_speed(GDObjectTyped *obj) {
+    switch (obj->id) {
+        case SAW_BIG: 
+        case SAW_MEDIUM:
+        case SAW_SMALL:
+            return 360.f;
+        
+        case SAW_DECO_BIG:
+        case SAW_DECO_MEDIUM:
+        case SAW_DECO_SMALL:
+        case SAW_DECO_TINY:
+            return 180.f;
+    }
+    return 0;
+}
+
 void draw_all_object_layers() {
     if (layersArrayList == NULL) return;
 
@@ -1104,7 +1120,7 @@ void draw_all_object_layers() {
                         if ((fade_val == 255 || fade_val == 0)) handle_special_fading(obj, calc_x, calc_y);
 
                         if (objects[obj_id].is_saw) {
-                            obj->rotation += ((obj->random & 1) ? -300 : 300) * dt;
+                            obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
                         }
                     }
 
