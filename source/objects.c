@@ -532,7 +532,6 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         case YELLOW_PAD:
             particle_templates[PAD_PARTICLES].angle = 180.f - (adjust_angle_y(obj->rotation, obj->flippedV) + 90.f);
 
-            printf("h%i v%i r%f\n", obj->flippedH, obj->flippedV, obj->rotation);
             particle_templates[PAD_PARTICLES].start_color.r = 255;
             particle_templates[PAD_PARTICLES].start_color.g = 255;
             particle_templates[PAD_PARTICLES].start_color.b = 0;
