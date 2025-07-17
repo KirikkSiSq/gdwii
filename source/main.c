@@ -57,6 +57,7 @@ int old_frame_counter = 0;
 
 float obj_layer_time = 0;
 float physics_time = 0;
+float collision_time = 0;
 void draw_game() {
     draw_background(state.background_x / 8, -(state.camera_y / 8) + 512);
 
@@ -114,13 +115,17 @@ void draw_game() {
         char physics[64];
         snprintf(physics, sizeof(physics), "Physics: %.2f ms", physics_time);
         GRRLIB_Printf(20, 170, font, RGBA(255,255,255,255), 0.5, physics);
+        
+        char collision[64];
+        snprintf(collision, sizeof(collision), "Collision: %.2f ms", collision_time);
+        GRRLIB_Printf(20, 200, font, RGBA(255,255,255,255), 0.5, collision);
 
         t1 = gettime();
         float text = ticks_to_microsecs(t1 - t0) / 1000.f;
         
         char text_ms[64];
         snprintf(text_ms, sizeof(text_ms), "Text: %.2f ms", text);
-        GRRLIB_Printf(20, 200, font, RGBA(255,255,255,255), 0.5, text_ms);
+        GRRLIB_Printf(20, 230, font, RGBA(255,255,255,255), 0.5, text_ms);
 
 
     }
@@ -149,10 +154,7 @@ int main() {
 	ASND_Init();
     MP3Player_Init();
 
-
     load_spritesheet();
-
-    GXRModeObj *rmode = VIDEO_GetPreferredMode(NULL);  // Auto-detects best mode
 
     // Set resolution based on mode
     screenWidth  = rmode->fbWidth;   // Framebuffer width (typically 640)

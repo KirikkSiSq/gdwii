@@ -44,6 +44,7 @@ extern int gameRoutine;
 extern int frame_counter;
 
 extern float physics_time;
+extern float collision_time;
 
 extern GameState state;
 

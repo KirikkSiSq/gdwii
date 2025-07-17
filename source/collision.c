@@ -67,6 +67,13 @@ bool intersect(float x1, float y1, float w1, float h1, float angle1,
 
 bool intersect_rect_circle(float rx, float ry, float rw, float rh, float rangle,
                           float cx, float cy, float cradius) {
+    // Quick exit: if centers are too far apart, no collision
+    float max_dim = fmaxf(rw, rh);
+    float max_dist = (max_dim / 2.0f) + cradius;
+    if (fabsf(rx - cx) > max_dist || fabsf(ry - cy) > max_dist) {
+        return false;
+    }
+
     // 1. Transform circle center into rectangle's local space
     float rad = -DegToRad(rangle); // negative for inverse rotation
     float cos_a = cosf(rad), sin_a = sinf(rad);

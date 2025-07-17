@@ -48,7 +48,7 @@ void set_p_velocity(Player *player, float vel) {
 }
 
 void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
-    int clip = 10;
+    int clip = (player->gamemode == GAMEMODE_SHIP ? 7 : 10);
     switch (hitbox->type) {
         case HITBOX_SOLID: 
             if (intersect(
@@ -88,6 +88,7 @@ float player_get_vel(Player *player, float vel) {
 void collide_with_objects() {
     Player *player = &state.player;
 
+    u32 t0 = gettime();
     for (int i = 0; i < objectsArrayList->count; i++) {
         GDObjectTyped *obj = objectsArrayList->objects[i]; 
         ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
@@ -119,6 +120,9 @@ void collide_with_objects() {
             obj->collided = FALSE;
         }
     }
+    
+    u32 t1 = gettime();
+    collision_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
 }
 
 void cube_gamemode(Player *player) {
@@ -133,7 +137,8 @@ void cube_gamemode(Player *player) {
 
     if (player->y > 2794.f) player->dead = TRUE;
 
-    player->rotation += 415.3848 * STEPS_DT * mult;
+
+    player->rotation += 415.3848f * STEPS_DT * mult * (player->mini ? 1.2f : 1.f);
 
     if (player->on_ground) {
         MotionTrail_StopStroke(&trail);

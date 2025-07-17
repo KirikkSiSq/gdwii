@@ -453,7 +453,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
             
             obj->activated = TRUE;
-        break;
+            break;
     }
 }
 

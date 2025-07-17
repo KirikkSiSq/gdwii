@@ -91,7 +91,7 @@ int menu_loop() {
         }
 
         
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
+        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
             return TRUE;
         }
 
