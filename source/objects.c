@@ -826,7 +826,7 @@ int get_opacity(GDObjectTyped *obj, float x) {
         case BLACK_FILLER:
         case BLACK_PILLAR_END:
         case BLACK_PILLAR:
-            opacity = 255;
+            if (obj->transition_applied == FADE_NONE) opacity = 255;
             break;
     }
 
