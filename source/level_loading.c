@@ -1009,6 +1009,7 @@ void load_level(char *data) {
 void unload_level() {
     free_layer_list(layersArrayList);
     free(sortable_list);
+    sortable_list = NULL;
     layersArrayList = NULL;
     free_typed_object_list(objectsArrayList);
     objectsArrayList = NULL;

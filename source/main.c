@@ -62,6 +62,7 @@ float collision_time = 0;
 float particles_time = 0;
 float triggers_time = 0;
 float player_time = 0;
+float frame_time = 0;
 
 int number_of_collisions = 0;
 int number_of_collisions_checks = 0;
@@ -135,8 +136,15 @@ void draw_game() {
         char text_ms[64];
         snprintf(text_ms, sizeof(text_ms), "Text: %.2f ms", text);
         GRRLIB_Printf(20, 230, font, RGBA(255,255,255,255), 0.5, text_ms);
-    }
 
+        u64 last_frame = gettime();
+        float cpu_time = ticks_to_microsecs(last_frame - start_frame) / 1000.f;
+        
+        char cpu_usage[64];
+        snprintf(cpu_usage, sizeof(cpu_usage), "CPU: %.2f%%", (cpu_time / 16.666666) * 100);
+        GRRLIB_Printf(20, 400, font, RGBA(255,255,255,255), 0.5, cpu_usage);
+    }
+    
     if (state.noclip) {
         GRRLIB_Printf(400, 20, font, RGBA(255,255,255,255), 0.5, "Noclip activated");
     }

@@ -12,4 +12,6 @@ extern bool enable_info;
 extern float amplitude;
 extern float dt;
 
+extern u64 start_frame;
+
 int game_loop();

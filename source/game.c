@@ -14,7 +14,7 @@ bool fixed_dt = FALSE;
 bool enable_info = FALSE;
 float amplitude = 0.0f;
 float dt = 0;
-
+u64 start_frame = 0;
 int game_loop() {
     u64 prevTicks = gettime();
     double accumulator = 0.0f;
@@ -23,6 +23,7 @@ int game_loop() {
 
     while (1) {
         WPAD_ScanPads();
+        start_frame = gettime();
         u64 currentTicks = gettime();
         float frameTime = ticks_to_secs_float(currentTicks - prevTicks);
         dt = frameTime;
