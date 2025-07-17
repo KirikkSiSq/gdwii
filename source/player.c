@@ -315,7 +315,7 @@ void run_camera() {
         }
 
         if (state.camera_y_lerp < -90.f) state.camera_y_lerp = -90.f;
-        if (state.camera_y_lerp > 2400.f) state.camera_y_lerp = 2400.f;
+        if (state.camera_y_lerp > MAX_LEVEL_HEIGHT) state.camera_y_lerp = MAX_LEVEL_HEIGHT;
 
         state.camera_y = iSlerp(state.camera_y, state.camera_y_lerp, 0.05f, STEPS_DT);
     } else {

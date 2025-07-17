@@ -103,7 +103,7 @@ struct LoadedLevelInfo {
     bool completing;
 };
 
-#define SECTION_HASH_SIZE 512
+#define SECTION_HASH_SIZE 600
 
 #define SECTION_SIZE 128
 #define GFX_SECTION_SIZE SCREEN_WIDTH_AREA

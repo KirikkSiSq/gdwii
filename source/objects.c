@@ -1095,8 +1095,8 @@ void draw_all_object_layers() {
     float screen_x_max = screenWidth + 90.0f;
     float screen_y_max = screenHeight + 90.0f;
 
-    int cam_sx = (int)(state.camera_x / GFX_SECTION_SIZE);
-    int cam_sy = (int)(state.camera_y / GFX_SECTION_SIZE);
+    int cam_sx = (int)((state.camera_x + SCREEN_WIDTH_AREA / 2) / GFX_SECTION_SIZE);
+    int cam_sy = (int)((state.camera_y + SCREEN_HEIGHT_AREA / 2) / GFX_SECTION_SIZE);
 
     GDLayerSortable *visible_layers[MAX_VISIBLE_LAYERS];
     int visible_count = 1;
@@ -1311,12 +1311,13 @@ void update_beat() {
 
 void handle_objects() {
     int sx = (int)(state.player.x / SECTION_SIZE);
-    int sy = (int)(state.player.y / SECTION_SIZE);
-    for (int dy = -32; dy <= 32; dy++) {
-        Section *sec = get_or_create_section(sx, sy + dy);
-        for (int i = 0; i < sec->object_count; i++) {
-            GDObjectTyped *obj = sec->objects[i];
-            handle_triggers(obj);
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int sy = 0; sy <= MAX_LEVEL_HEIGHT / SECTION_SIZE; sy++) {
+            Section *sec = get_or_create_section(sx + dx, sy);
+            for (int i = 0; i < sec->object_count; i++) {
+                GDObjectTyped *obj = sec->objects[i];
+                handle_triggers(obj);
+            }
         }
     }
     handle_col_triggers();

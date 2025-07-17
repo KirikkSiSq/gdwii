@@ -6,6 +6,8 @@
 #define SCREEN_WIDTH_AREA ((screenWidth / BLOCK_SIZE_PX) * 30) 
 #define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
 
+#define MAX_LEVEL_HEIGHT 2400.f
+
 typedef struct {
     float x;
     float y;
