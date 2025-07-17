@@ -16,6 +16,7 @@
 #include <stdio.h>
 #include <ogc/lwp_watchdog.h>
 #include <ogc/lwp.h>
+#include <ogc/lwp_mutex.h>
 
 #include <unistd.h>
 
@@ -104,7 +105,7 @@ void draw_game() {
         GRRLIB_PrintfTTF(400, 20, font, "Noclip activated", 20, 0xFFFFFFFF);
     }
 
-    render();
+    GRRLIB_Render();
     layersDrawn = 0;
 }
 
@@ -112,9 +113,8 @@ void draw_game() {
 
 int main() {
     SYS_STDIO_Report(true);
-    GRRLIB_Init();
     // Init GRRLIB & WiiUse
-
+    GRRLIB_Init();
     WPAD_Init();
     WPAD_SetIdleTimeout( 60 * 10 );
     WPAD_SetDataFormat( WPAD_CHAN_0, WPAD_FMT_BTNS_ACC_IR );
@@ -124,7 +124,11 @@ int main() {
     // Initialise the audio subsystem
 	ASND_Init();
     MP3Player_Init();
+
+
     load_spritesheet();
+
+    GXRModeObj *rmode = VIDEO_GetPreferredMode(NULL);  // Auto-detects best mode
 
     // Set resolution based on mode
     screenWidth  = rmode->fbWidth;   // Framebuffer width (typically 640)
@@ -141,7 +145,7 @@ int main() {
                 if (menu_loop()) goto Exit;
                 break;
             case ROUTINE_GAME:
-                if (game_loop()) goto Exit;
+                if(game_loop()) goto Exit;
                 break;
         }
     }

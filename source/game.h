@@ -2,6 +2,7 @@
 
 #include <ogc/lwp_watchdog.h>
 #include <ogc/lwp.h>
+#include <ogc/lwp_mutex.h>
 
 #define STEPS_DT (1.0f / 240.0f) // 1/240 seconds per physics step
 
@@ -12,4 +13,3 @@ extern float amplitude;
 extern float dt;
 
 int game_loop();
-void render();

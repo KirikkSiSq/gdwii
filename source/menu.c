@@ -13,7 +13,6 @@
 #include "filesystem.h"
 
 #include "menu.h"
-#include "game.h"
 
 #include <stdio.h>
 
@@ -96,9 +95,7 @@ int menu_loop() {
             return TRUE;
         }
 
-        render();
-
-        layersDrawn = 0;
+        GRRLIB_Render();
     }
 
     return FALSE;
