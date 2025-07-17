@@ -114,7 +114,8 @@ void collide_with_objects() {
                             obj->collided = FALSE;
                         }
                     } else {
-                        float rotation = (obj->rotation == 0 || obj->rotation == 90 || obj->rotation == 180 || obj->rotation == 270) ? 0 : player->rotation;
+                        float obj_rot = fabsf(obj->rotation);
+                        float rotation = (obj_rot == 0 || obj_rot == 90 || obj_rot == 180 || obj_rot == 270) ? 0 : player->rotation;
                         if (intersect(
                             player->x, player->y, player->width, player->height, rotation, 
                             obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
