@@ -37,6 +37,7 @@ int game_loop() {
 
         if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_1) state.noclip ^= 1;
         
+        u64 t0 = gettime();
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;
             amplitude = (beat_pulse ? 0.8f : 0.1f);
@@ -50,6 +51,8 @@ int game_loop() {
 
             accumulator -= STEPS_DT;
         }
+        u64 t1 = gettime();
+        physics_time = ticks_to_microsecs(t1 - t0) / 1000.f;
         
         if (level_info.completing) {
             PlayOgg(endStart_02_ogg, endStart_02_ogg_size, 0, OGG_ONE_TIME);

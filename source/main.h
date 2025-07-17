@@ -43,9 +43,10 @@ extern int gameRoutine;
 
 extern int frame_counter;
 
+extern float physics_time;
+
 extern GameState state;
 
-extern GRRLIB_ttfFont *font;
+extern GRRLIB_texImg *font;
 
 void draw_game();
-void print_debug(GRRLIB_ttfFont *font);

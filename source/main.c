@@ -28,7 +28,7 @@
 #include "level_loading.h"
 #include "objects.h"
 
-#include "pusab_ttf.h"
+#include "font_png.h"
 
 #include "player.h"
 #include "math.h"
@@ -50,17 +50,23 @@ float fps = 0;
 
 GameState state;
 
-GRRLIB_ttfFont *font = NULL;
+GRRLIB_texImg *font = NULL;
 
 int frame_counter = 0;
 int old_frame_counter = 0;
 
+float obj_layer_time = 0;
+float physics_time = 0;
 void draw_game() {
     draw_background(state.background_x / 8, -(state.camera_y / 8) + 512);
 
     draw_particles(GLITTER_EFFECT);
-
+    
+    u64 t0 = gettime();
     draw_all_object_layers();
+    u64 t1 = gettime();
+    
+    obj_layer_time = ticks_to_microsecs(t1 - t0) / 1000.f;
 
     draw_end_wall();
 
@@ -81,28 +87,46 @@ void draw_game() {
         frameCount = 0;
         startTime = currentTime;
     }
+    if (enable_info) {    
+        t0 = gettime();
 
-    if (enable_info) {
         // Render FPS
         char fpsText[64];
         snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
-        GRRLIB_PrintfTTF(20, 20, font, fpsText, 20, 0xFFFFFFFF);  // White tex
+        GRRLIB_Printf(20, 20, font, RGBA(255,255,255,255), 0.5, fpsText);  // White tex
         
         char layerText[64];
         snprintf(layerText, sizeof(layerText), "Drawn layers: %d (%d)", layersDrawn, frame_counter - old_frame_counter);
-        GRRLIB_PrintfTTF(20, 50, font, layerText, 20, 0xFFFFFFFF);
+        GRRLIB_Printf(20, 50, font, RGBA(255,255,255,255), 0.5, layerText);
         old_frame_counter = frame_counter;
         char player_x[64];
         snprintf(player_x, sizeof(player_x), "X: %.2f", state.player.x);
-        GRRLIB_PrintfTTF(20, 80, font, player_x, 20, 0xFFFFFFFF);
+        GRRLIB_Printf(20, 80, font, RGBA(255,255,255,255), 0.5, player_x);
 
         char player_y[64];
         snprintf(player_y, sizeof(player_y), "Y: %.2f", state.player.y);
-        GRRLIB_PrintfTTF(20, 110, font, player_y, 20, 0xFFFFFFFF);
+        GRRLIB_Printf(20, 110, font, RGBA(255,255,255,255), 0.5, player_y);
+        
+        char obj_layer[64];
+        snprintf(obj_layer, sizeof(obj_layer), "draw_all_object_layers: %.2f ms", obj_layer_time);
+        GRRLIB_Printf(20, 140, font, RGBA(255,255,255,255), 0.5, obj_layer);
+        
+        char physics[64];
+        snprintf(physics, sizeof(physics), "Physics: %.2f ms", physics_time);
+        GRRLIB_Printf(20, 170, font, RGBA(255,255,255,255), 0.5, physics);
+
+        t1 = gettime();
+        float text = ticks_to_microsecs(t1 - t0) / 1000.f;
+        
+        char text_ms[64];
+        snprintf(text_ms, sizeof(text_ms), "Text: %.2f ms", text);
+        GRRLIB_Printf(20, 200, font, RGBA(255,255,255,255), 0.5, text_ms);
+
+
     }
 
     if (state.noclip) {
-        GRRLIB_PrintfTTF(400, 20, font, "Noclip activated", 20, 0xFFFFFFFF);
+        GRRLIB_Printf(400, 20, font, RGBA(255,255,255,255), 0.5, "Noclip activated");
     }
 
     GRRLIB_Render();
@@ -136,7 +160,8 @@ int main() {
 
     startTime = gettime();    
 
-    font = GRRLIB_LoadTTF(pusab_ttf, pusab_ttf_size);
+    font = GRRLIB_LoadTexturePNG(font_png);
+    GRRLIB_InitTileSet(font, 24, 36, 32);
 
     init_variables();
     while(1) {

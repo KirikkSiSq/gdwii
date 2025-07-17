@@ -104,12 +104,12 @@ int menu_loop() {
 int sdcard_levels() {
     GRRLIB_FillScreen(RGBA(0, 127, 0, 255));
             
-    GRRLIB_PrintfTTF(0, 400, font, "Press 1 to switch to main levels.", 30, RGBA(255,255,255,255));
+    GRRLIB_Printf(0, 400, font, RGBA(255,255,255,255), 0.75, "Press 1 to switch to main levels.");
     
     if (sd_level_count > 0) {
         char text[269];
         snprintf(text, 269, "%d - %s", level_id + 1, current_level_name);
-        GRRLIB_PrintfTTF(0, 20, font, text, 30, RGBA(255,255,255,255));
+        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
 
         if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
             level_id--;
@@ -153,10 +153,10 @@ int sdcard_levels() {
             return 1;
         }
     } else {
-        GRRLIB_PrintfTTF(0, 20, font, "Put levels in a folder called \"levels\"", 30, RGBA(255,255,255,255));
-        GRRLIB_PrintfTTF(0, 45, font, "in the root folder of the sdcard", 30, RGBA(255,255,255,255));
-        GRRLIB_PrintfTTF(0, 70, font, "and put levels exported with", 30, RGBA(255,255,255,255));
-        GRRLIB_PrintfTTF(0, 95, font, "the mod \"GDShare\" in that folder.", 30, RGBA(255,255,255,255));
+        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, "Put levels in a folder called \"levels\"");
+        GRRLIB_Printf(0, 45, font, RGBA(255,255,255,255), 0.75, "in the root folder of the sdcard");
+        GRRLIB_Printf(0, 70, font, RGBA(255,255,255,255), 0.75, "and put levels exported with");
+        GRRLIB_Printf(0, 95, font, RGBA(255,255,255,255), 0.75, "the mod \"GDShare\" in that folder.");
     }
     return 0;
 }
@@ -164,11 +164,11 @@ int sdcard_levels() {
 int main_levels() {
     GRRLIB_FillScreen(RGBA(0, 127, 255, 255));
             
-    GRRLIB_PrintfTTF(0, 400, font, "Press 1 to switch to SD card levels.", 30, RGBA(255,255,255,255));
+    GRRLIB_Printf(0, 400, font, RGBA(255,255,255,255), 0.75, "Press 1 to switch to SD card levels.");
     
     char text[255];
     snprintf(text, 255, "%d - %s", level_id + 1, levels[level_id].level_name);
-    GRRLIB_PrintfTTF(0, 20, font, text, 30, RGBA(255,255,255,255));
+    GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
 
     if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
         level_id--;

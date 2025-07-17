@@ -946,6 +946,12 @@ void set_color_channels() {
                 channels[GROUND].color.g = colorChannel.fromGreen;
                 channels[GROUND].color.b = colorChannel.fromBlue;
                 break;
+            
+            case 1002:
+                channels[LINE].color.r = colorChannel.fromRed;
+                channels[LINE].color.g = colorChannel.fromGreen;
+                channels[LINE].color.b = colorChannel.fromBlue;
+                break;
         }
     }
 }
