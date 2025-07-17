@@ -45,6 +45,12 @@ extern int frame_counter;
 
 extern float physics_time;
 extern float collision_time;
+extern float particles_time;
+extern float triggers_time;
+extern float player_time;
+
+extern int number_of_collisions;
+extern int number_of_collisions_checks;
 
 extern GameState state;
 

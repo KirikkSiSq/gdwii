@@ -15,6 +15,98 @@
 
 struct LoadedLevelInfo level_info;
 
+Section *section_hash[SECTION_HASH_SIZE] = {0};
+GFXSection *section_gfx_hash[SECTION_HASH_SIZE] = {0};
+
+GDLayerSortable gfx_player_layer;
+
+GDLayerSortable *sortable_list;
+
+unsigned int section_hash_func(int x, int y) {
+    return ((unsigned int)x * 73856093u ^ (unsigned int)y * 19349663u) % SECTION_HASH_SIZE;
+}
+
+Section *get_or_create_section(int x, int y) {
+    unsigned int h = section_hash_func(x, y);
+    Section *sec = section_hash[h];
+    while (sec) {
+        if (sec->x == x && sec->y == y) return sec;
+        sec = sec->next;
+    }
+    sec = malloc(sizeof(Section));
+    sec->objects = malloc(sizeof(GDObjectTyped*) * 8);
+    sec->object_count = 0;
+    sec->object_capacity = 8;
+    sec->x = x;
+    sec->y = y;
+    sec->next = section_hash[h];
+    section_hash[h] = sec;
+    return sec;
+}
+
+GFXSection *get_or_create_gfx_section(int x, int y) {
+    unsigned int h = section_hash_func(x, y);
+    GFXSection *sec = section_gfx_hash[h];
+    while (sec) {
+        if (sec->x == x && sec->y == y) return sec;
+        sec = sec->next;
+    }
+    sec = malloc(sizeof(GFXSection));
+    sec->layers = malloc(sizeof(GDLayerSortable*) * 8);
+    sec->layer_count = 0;
+    sec->layer_capacity = 8;
+    sec->x = x;
+    sec->y = y;
+    sec->next = section_gfx_hash[h];
+    section_gfx_hash[h] = sec;
+    return sec;
+}
+
+void free_sections(void) {
+    for (int i = 0; i < SECTION_HASH_SIZE; i++) {
+        Section *sec = section_hash[i];
+        while (sec) {
+            Section *next = sec->next;
+            free(sec->objects);
+            free(sec);
+            sec = next;
+        }
+        section_hash[i] = NULL;
+        GFXSection *sec2 = section_gfx_hash[i];
+        while (sec2) {
+            GFXSection *next = sec2->next;
+            free(sec2->layers);
+            free(sec2);
+            sec2 = next;
+        }
+        section_gfx_hash[i] = NULL;
+    }
+}
+
+void assign_object_to_section(GDObjectTyped *obj) {
+    int sx = (int)(obj->x / SECTION_SIZE);
+    int sy = (int)(obj->y / SECTION_SIZE);
+    Section *sec = get_or_create_section(sx, sy);
+    if (sec->object_count >= sec->object_capacity) {
+        sec->object_capacity *= 2;
+        sec->objects = realloc(sec->objects, sizeof(GDObjectTyped*) * sec->object_capacity);
+    }
+    sec->objects[sec->object_count++] = obj;
+}
+
+
+void assign_layer_to_section(GDLayerSortable *layer) {
+    int sx = (int)(layer->layer->obj->x / GFX_SECTION_SIZE);
+    int sy = (int)(layer->layer->obj->y / GFX_SECTION_SIZE);
+    GFXSection *sec = get_or_create_gfx_section(sx, sy);
+    if (sec->layer_count >= sec->layer_capacity) {
+        sec->layer_capacity *= 2;
+        sec->layers = realloc(sec->layers, sizeof(GDLayerSortable*) * sec->layer_capacity);
+    }
+    sec->layers[sec->layer_count++] = layer;
+}
+
+
 char *extract_gmd_key(const char *data, const char *key, const char *type) {
     char start_tag[32];
     snprintf(start_tag, sizeof(start_tag), "<k>%s</k><%s>", key, type);
@@ -482,6 +574,7 @@ GDTypedObjectList *convert_all_to_typed(GDObjectList *objList) {
 
     for (int i = 0; i < objList->objectCount; i++) {
         typedArray[i] = convert_to_typed(&objList->objects[i]);
+        assign_object_to_section(typedArray[i]);
         if (!typedArray[i]) {
             printf("Failed to convert object %d\n", i);
             for (int j = 0; j < i; j++) {
@@ -596,8 +689,8 @@ int compare_typed_objects(const void *a, const void *b) {
 }
 
 int compare_sortable_layers(const void *a, const void *b) {
-    GDLayerSortable *layerSortA = (GDLayerSortable *)a;
-    GDLayerSortable *layerSortB = (GDLayerSortable *)b;
+    GDLayerSortable *layerSortA = *(GDLayerSortable **)a;
+    GDLayerSortable *layerSortB = *(GDLayerSortable **)b;
 
     struct ObjectLayer *layerA = layerSortA->layer->layer;
     struct ObjectLayer *layerB = layerSortB->layer->layer;
@@ -666,39 +759,30 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
     printf("Sorting layer list\n");
     
     // Wrap objects with indices
-    GDLayerSortable *sortable = malloc(sizeof(GDLayerSortable) * list->count);
+    sortable_list = malloc(sizeof(GDLayerSortable) * list->count);
 
-    if (sortable == NULL) {
+    if (sortable_list == NULL) {
         printf("Couldn't allocate sortable layer\n");
         return;
     }
     
     for (int i = 0; i < list->count; i++) {
         
-        sortable[i].layer = list->layers[i];
-        sortable[i].originalIndex = i;
+        sortable_list[i].layer = list->layers[i];
+        sortable_list[i].originalIndex = i;
         
         // GD epicness
-        if (sortable[i].layer->obj->id != PLAYER_OBJECT) {
-            int zlayer = sortable[i].layer->obj->zlayer;
-            bool blending = channels[sortable[i].layer->layer->col_channel].blending;
+        if (sortable_list[i].layer->obj->id != PLAYER_OBJECT) {
+            int zlayer = sortable_list[i].layer->obj->zlayer;
+            bool blending = channels[sortable_list[i].layer->layer->col_channel].blending;
             if (blending ^ (zlayer % 2 == 0)) {
-                sortable[i].layer->obj->zlayer--;
+                sortable_list[i].layer->obj->zlayer--;
             }
         }
+
+        assign_layer_to_section(&sortable_list[i]);
     }
-
-    // Sort
-    qsort(sortable, list->count, sizeof(GDLayerSortable), compare_sortable_layers);
-
-    // Rebuild the list
-    for (int i = 0; i < list->count; i++) {
-        list->layers[i] = sortable[i].layer;
-    }
-
-    printf("Finished sorting layer list\n");
-
-    free(sortable);
+    
 }
 
 void free_typed_object_array(GDObjectTyped **array, int count) {
@@ -711,7 +795,7 @@ void free_typed_object_array(GDObjectTyped **array, int count) {
 
 GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     // Count layers
-    int layerCount = 1; // Count player
+    int layerCount = 0;
     for (int i = 0; i < objList->count; i++) {
         GDObjectTyped *obj = objList->objects[i];
 
@@ -735,14 +819,20 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     obj->zlayer = LAYER_T1-1;
     obj->zorder = 0;
     obj->zsheetlayer = 0;
-    layers[0].obj = obj;
-    layers[0].layer = (struct ObjectLayer *) &objects[obj->id].layers[0];
-    layers[0].layerNum = 0;
+    GDObjectLayer *layer = malloc(sizeof(GDObjectLayer));
+    layer->obj = obj;
+    layer->layer = (struct ObjectLayer *) &objects[obj->id].layers[0];
+    layer->layerNum = 0;
+    GDLayerSortable sortable_layer;
+    sortable_layer.layer = layer;
+    sortable_layer.originalIndex = 0;
+
+    gfx_player_layer = sortable_layer;
 
     printf("Allocated %d layers\n", layerCount);
 
     // Fill array
-    int count = 1;
+    int count = 0;
     for (int i = 0; i < objList->count; i++) {
         GDObjectTyped *obj = objList->objects[i];
 
@@ -904,7 +994,7 @@ void load_level(char *data) {
     }
 
     sort_layers_by_layer(layersArrayList);
-    
+
     set_color_channels();
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
 
@@ -918,6 +1008,7 @@ void load_level(char *data) {
 
 void unload_level() {
     free_layer_list(layersArrayList);
+    free(sortable_list);
     layersArrayList = NULL;
     free_typed_object_list(objectsArrayList);
     objectsArrayList = NULL;
@@ -927,6 +1018,7 @@ void unload_level() {
     }
     channelCount = 0;
     memset(&state.particles, 0, sizeof(state.particles));
+    free_sections();
     init_variables();
 }
 

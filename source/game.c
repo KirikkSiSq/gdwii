@@ -42,8 +42,17 @@ int game_loop() {
             state.old_player = state.player;
             amplitude = (beat_pulse ? 0.8f : 0.1f);
             handle_player();
+            
+            u64 t2 = gettime();
             handle_objects();
+            u64 t3 = gettime();
+            triggers_time = ticks_to_microsecs(t3 - t2) / 1000.f * 4;
+
+            t2 = gettime();
             update_particles();
+            t3 = gettime();
+            particles_time = ticks_to_microsecs(t3 - t2) / 1000.f * 4;
+
             update_beat();
             frame_counter++;
 

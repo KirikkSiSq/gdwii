@@ -87,42 +87,51 @@ float player_get_vel(Player *player, float vel) {
 
 void collide_with_objects() {
     Player *player = &state.player;
+    number_of_collisions = 0;
+    number_of_collisions_checks = 0;
 
-    u32 t0 = gettime();
-    for (int i = 0; i < objectsArrayList->count; i++) {
-        GDObjectTyped *obj = objectsArrayList->objects[i]; 
-        ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
+    int sx = (int)(player->x / SECTION_SIZE);
+    int sy = (int)(player->y / SECTION_SIZE);
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            Section *sec = get_or_create_section(sx + dx, sy + dy);
+            for (int i = 0; i < sec->object_count; i++) {
+                GDObjectTyped *obj = sec->objects[i];
+                ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
 
-        if (hitbox->type != HITBOX_NONE && !obj->activated && obj->id < OBJECT_COUNT) {
-            if (hitbox->is_circular) {
-                if (intersect_rect_circle(
-                    player->x, player->y, player->width, player->height, player->rotation, 
-                    obj->x, obj->y, hitbox->radius
-                )) {
-                    handle_collision(player, obj, hitbox);
-                    obj->collided = TRUE;
-                } else {
-                    obj->collided = FALSE;
-                }
-            } else {
-                float rotation = (obj->rotation == 0 || obj->rotation == 90 || obj->rotation == 180 || obj->rotation == 270) ? 0 : player->rotation;
-                if (intersect(
-                    player->x, player->y, player->width, player->height, rotation, 
-                    obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
-                )) {
-                    handle_collision(player, obj, hitbox);
-                    obj->collided = TRUE;
+                if (hitbox->type != HITBOX_NONE && !obj->activated && obj->id < OBJECT_COUNT) {
+                    
+                    number_of_collisions_checks++;
+                    if (hitbox->is_circular) {
+                        if (intersect_rect_circle(
+                            player->x, player->y, player->width, player->height, player->rotation, 
+                            obj->x, obj->y, hitbox->radius
+                        )) {
+                            handle_collision(player, obj, hitbox);
+                            obj->collided = TRUE;
+                            number_of_collisions++;
+                        } else {
+                            obj->collided = FALSE;
+                        }
+                    } else {
+                        float rotation = (obj->rotation == 0 || obj->rotation == 90 || obj->rotation == 180 || obj->rotation == 270) ? 0 : player->rotation;
+                        if (intersect(
+                            player->x, player->y, player->width, player->height, rotation, 
+                            obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
+                        )) {
+                            handle_collision(player, obj, hitbox);
+                            obj->collided = TRUE;
+                            number_of_collisions++;
+                        } else {
+                            obj->collided = FALSE;
+                        }
+                    }
                 } else {
                     obj->collided = FALSE;
                 }
             }
-        } else {
-            obj->collided = FALSE;
         }
     }
-    
-    u32 t1 = gettime();
-    collision_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
 }
 
 void cube_gamemode(Player *player) {
@@ -431,8 +440,16 @@ void handle_player() {
         player->buffering_state = BUFFER_NONE;
     }
     
+    u32 t0 = gettime();
     collide_with_objects();
+    u32 t1 = gettime();
+    collision_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
+    
+    t0 = gettime();
     run_player();
+    t1 = gettime();
+    player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
+
     run_camera();
     handle_mirror_transition();
 

@@ -1095,8 +1095,33 @@ void draw_all_object_layers() {
     float screen_x_max = screenWidth + 90.0f;
     float screen_y_max = screenHeight + 90.0f;
 
-    for (int i = 0; i < layersArrayList->count; i++) {
-        GDObjectTyped *obj = layersArrayList->layers[i]->obj;
+    int cam_sx = (int)(state.camera_x / GFX_SECTION_SIZE);
+    int cam_sy = (int)(state.camera_y / GFX_SECTION_SIZE);
+
+    GDLayerSortable *visible_layers[MAX_VISIBLE_LAYERS];
+    int visible_count = 1;
+
+    visible_layers[0] = &gfx_player_layer;
+
+    // Gather layers from all visible sections
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            GFXSection *sec = get_or_create_gfx_section(cam_sx + dx, cam_sy + dy);
+            for (int i = 0; i < sec->layer_count; i++) {
+                if (visible_count < MAX_VISIBLE_LAYERS) {
+                    visible_layers[visible_count++] = sec->layers[i];
+                }
+            }
+        }
+    }
+
+    // Sort globally
+    qsort(visible_layers, visible_count, sizeof(GDLayerSortable*), compare_sortable_layers);
+
+    // Draw in sorted order
+    for (int i = 0; i < visible_count; i++) {
+        GDObjectLayer *layer = visible_layers[i]->layer;
+        GDObjectTyped *obj = layer->obj;
 
         int obj_id = obj->id;
 
@@ -1113,7 +1138,6 @@ void draw_all_object_layers() {
             if (calc_x > -90 && calc_x < screen_x_max) {        
                 if (calc_y > -90 && calc_y < screen_y_max) {      
                     layersDrawn++;
-                    GDObjectLayer *layer = layersArrayList->layers[i];
 
                     int fade_val = get_fade_value(calc_x, screenWidth);
                     if (layer->layerNum == 0) {
@@ -1157,9 +1181,7 @@ void handle_col_triggers() {
     }
 }
 
-void handle_triggers(int i) {
-    GDObjectTyped *obj = objectsArrayList->objects[i];
-
+void handle_triggers(GDObjectTyped *obj) {
     int obj_id = obj->id;
 
     struct TriggerBuffer *buffer = NULL;
@@ -1288,8 +1310,16 @@ void update_beat() {
 }
 
 void handle_objects() {
-    for (int i = 0; i < objectsArrayList->count; i++) {
-        handle_triggers(i);
+    int sx = (int)(state.player.x / SECTION_SIZE);
+    int sy = (int)(state.player.y / SECTION_SIZE);
+    for (int dx = -1; dx <= 1; dx++) {
+        for (int dy = -1; dy <= 1; dy++) {
+            Section *sec = get_or_create_section(sx + dx, sy + dy);
+            for (int i = 0; i < sec->object_count; i++) {
+                GDObjectTyped *obj = sec->objects[i];
+                handle_triggers(obj);
+            }
+        }
     }
     handle_col_triggers();
 }

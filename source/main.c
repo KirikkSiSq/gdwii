@@ -55,9 +55,18 @@ GRRLIB_texImg *font = NULL;
 int frame_counter = 0;
 int old_frame_counter = 0;
 
+// Profiling
 float obj_layer_time = 0;
 float physics_time = 0;
 float collision_time = 0;
+float particles_time = 0;
+float triggers_time = 0;
+float player_time = 0;
+
+int number_of_collisions = 0;
+int number_of_collisions_checks = 0;
+
+
 void draw_game() {
     draw_background(state.background_x / 8, -(state.camera_y / 8) + 512);
 
@@ -93,11 +102,11 @@ void draw_game() {
 
         // Render FPS
         char fpsText[64];
-        snprintf(fpsText, sizeof(fpsText), "FPS: %.2f", fps);
+        snprintf(fpsText, sizeof(fpsText), "FPS: %.2f Steps: %d Objs: %d", fps, frame_counter - old_frame_counter, objectsArrayList->count);
         GRRLIB_Printf(20, 20, font, RGBA(255,255,255,255), 0.5, fpsText);  // White tex
         
         char layerText[64];
-        snprintf(layerText, sizeof(layerText), "Drawn layers: %d (%d)", layersDrawn, frame_counter - old_frame_counter);
+        snprintf(layerText, sizeof(layerText), "Drawn layers: %d", layersDrawn);
         GRRLIB_Printf(20, 50, font, RGBA(255,255,255,255), 0.5, layerText);
         old_frame_counter = frame_counter;
         char player_x[64];
@@ -109,15 +118,15 @@ void draw_game() {
         GRRLIB_Printf(20, 110, font, RGBA(255,255,255,255), 0.5, player_y);
         
         char obj_layer[64];
-        snprintf(obj_layer, sizeof(obj_layer), "draw_all_object_layers: %.2f ms", obj_layer_time);
+        snprintf(obj_layer, sizeof(obj_layer), "Layers: %.2f ms", obj_layer_time);
         GRRLIB_Printf(20, 140, font, RGBA(255,255,255,255), 0.5, obj_layer);
         
-        char physics[64];
-        snprintf(physics, sizeof(physics), "Physics: %.2f ms", physics_time);
+        char physics[128];
+        snprintf(physics, sizeof(physics), "Physics: %.2f ms (P: %.2f Obj: %.2f E: %.2f)", physics_time, player_time, triggers_time, particles_time);
         GRRLIB_Printf(20, 170, font, RGBA(255,255,255,255), 0.5, physics);
-        
-        char collision[64];
-        snprintf(collision, sizeof(collision), "Collision: %.2f ms", collision_time);
+
+        char collision[128];
+        snprintf(collision, sizeof(collision), "Collision: %.2f ms (Checks: %d Succeded: %d)", collision_time, number_of_collisions_checks, number_of_collisions);
         GRRLIB_Printf(20, 200, font, RGBA(255,255,255,255), 0.5, collision);
 
         t1 = gettime();
@@ -126,8 +135,6 @@ void draw_game() {
         char text_ms[64];
         snprintf(text_ms, sizeof(text_ms), "Text: %.2f ms", text);
         GRRLIB_Printf(20, 230, font, RGBA(255,255,255,255), 0.5, text_ms);
-
-
     }
 
     if (state.noclip) {

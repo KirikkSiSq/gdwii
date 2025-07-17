@@ -108,7 +108,8 @@
         "spike_03_001_png.h": "c",
         "d_cogwheel_03_001_png.h": "c",
         "sawblade_03_001_png.h": "c",
-        "square_07_glow_001_alt_png.h": "c"
+        "square_07_glow_001_alt_png.h": "c",
+        "vector": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

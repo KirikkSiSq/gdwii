@@ -258,6 +258,8 @@ typedef struct {
 #define BLOCK_SIZE_PX 44.f
 #define SCALE (BLOCK_SIZE_PX / 30.0f)
 
+#define MAX_VISIBLE_LAYERS 4096
+
 extern const struct ObjectLayer player_layer;
 extern int current_fading_effect;
 extern bool p1_trail;

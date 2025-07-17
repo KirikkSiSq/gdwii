@@ -103,12 +103,45 @@ struct LoadedLevelInfo {
     bool completing;
 };
 
+#define SECTION_HASH_SIZE 512
+
+#define SECTION_SIZE 128
+#define GFX_SECTION_SIZE SCREEN_WIDTH_AREA
+
+typedef struct Section {
+    GDObjectTyped **objects;
+    int object_count;
+    int object_capacity;
+
+    int x, y; // Section coordinates
+    struct Section *next; // For chaining in hash map
+} Section;
+
+typedef struct GFXSection {
+    GDLayerSortable **layers;
+    int layer_count;
+    int layer_capacity;
+
+    int x, y; // Section coordinates
+    struct GFXSection *next; // For chaining in hash map
+} GFXSection;
+
+extern Section *section_hash[SECTION_HASH_SIZE];
+extern GFXSection *section_gfx_hash[SECTION_HASH_SIZE];
+unsigned int section_hash_func(int x, int y);
+Section *get_or_create_section(int x, int y);
+GFXSection *get_or_create_gfx_section(int x, int y);
+void free_sections(void);
+
 char *get_level_name(char *data_ptr);
+int compare_sortable_layers(const void *a, const void *b);
 
 extern struct LoadedLevelInfo level_info;
 
 extern GDTypedObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;
+
+extern GDLayerSortable gfx_player_layer;
 
 void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GDObjectTyped **array, int count);
