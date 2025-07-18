@@ -56,6 +56,7 @@ enum PlayerGamemode {
 
 void handle_death();
 void init_variables();
+void full_init_variables();
 void load_icons();
 void unload_icons();
 void draw_player();

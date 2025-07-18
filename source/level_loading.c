@@ -1020,7 +1020,7 @@ void unload_level() {
     channelCount = 0;
     memset(&state.particles, 0, sizeof(state.particles));
     free_sections();
-    init_variables();
+    full_init_variables();
 }
 
 void set_color_channels() {

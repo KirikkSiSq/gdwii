@@ -457,6 +457,37 @@ void handle_player() {
     if (state.noclip) state.player.dead = FALSE;
 }
 
+void full_init_variables() {
+    state.ground_x = 0;
+    state.background_x = 0;
+
+    particle_templates[CUBE_DRAG].start_color.r = p1.r;
+    particle_templates[CUBE_DRAG].start_color.g = p1.g;
+    particle_templates[CUBE_DRAG].start_color.b = p1.b;
+    
+    particle_templates[CUBE_DRAG].end_color.r = p1.r;
+    particle_templates[CUBE_DRAG].end_color.g = p1.g;
+    particle_templates[CUBE_DRAG].end_color.b = p1.b;
+
+    particle_templates[GLITTER_EFFECT].start_color.r = p1.r;
+    particle_templates[GLITTER_EFFECT].start_color.g = p1.g;
+    particle_templates[GLITTER_EFFECT].start_color.b = p1.b;
+    
+    particle_templates[GLITTER_EFFECT].end_color.r = p1.r;
+    particle_templates[GLITTER_EFFECT].end_color.g = p1.g;
+    particle_templates[GLITTER_EFFECT].end_color.b = p1.b;
+
+    particle_templates[P1_TRAIL].start_color.r = p1.r;
+    particle_templates[P1_TRAIL].start_color.g = p1.g;
+    particle_templates[P1_TRAIL].start_color.b = p1.b;
+    
+    particle_templates[P1_TRAIL].end_color.r = p1.r;
+    particle_templates[P1_TRAIL].end_color.g = p1.g;
+    particle_templates[P1_TRAIL].end_color.b = p1.b;
+
+    init_variables();
+}
+
 void init_variables() {
     MotionTrail_Init(&trail, 0.3f, 3, 10.0f, p2, trail_tex);
     MotionTrail_StopStroke(&trail);
@@ -466,8 +497,6 @@ void init_variables() {
     state.camera_y = -90;
     state.camera_y_lerp = -90;
 
-    state.ground_x = 0;
-    state.background_x = 0;
 
     state.ground_y_gfx = 0;
     state.mirror_factor = 0;
@@ -496,30 +525,6 @@ void init_variables() {
     player->on_ceiling = FALSE;
     player->upside_down = FALSE;
     player->dead = FALSE;
-
-    particle_templates[CUBE_DRAG].start_color.r = p1.r;
-    particle_templates[CUBE_DRAG].start_color.g = p1.g;
-    particle_templates[CUBE_DRAG].start_color.b = p1.b;
-    
-    particle_templates[CUBE_DRAG].end_color.r = p1.r;
-    particle_templates[CUBE_DRAG].end_color.g = p1.g;
-    particle_templates[CUBE_DRAG].end_color.b = p1.b;
-
-    particle_templates[GLITTER_EFFECT].start_color.r = p1.r;
-    particle_templates[GLITTER_EFFECT].start_color.g = p1.g;
-    particle_templates[GLITTER_EFFECT].start_color.b = p1.b;
-    
-    particle_templates[GLITTER_EFFECT].end_color.r = p1.r;
-    particle_templates[GLITTER_EFFECT].end_color.g = p1.g;
-    particle_templates[GLITTER_EFFECT].end_color.b = p1.b;
-
-    particle_templates[P1_TRAIL].start_color.r = p1.r;
-    particle_templates[P1_TRAIL].start_color.g = p1.g;
-    particle_templates[P1_TRAIL].start_color.b = p1.b;
-    
-    particle_templates[P1_TRAIL].end_color.r = p1.r;
-    particle_templates[P1_TRAIL].end_color.g = p1.g;
-    particle_templates[P1_TRAIL].end_color.b = p1.b;
 }
 
 void handle_death() {

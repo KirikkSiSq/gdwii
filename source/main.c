@@ -180,7 +180,7 @@ int main() {
     font = GRRLIB_LoadTexturePNG(font_png);
     GRRLIB_InitTileSet(font, 24, 36, 32);
 
-    init_variables();
+    full_init_variables();
     while(1) {
         switch (gameRoutine) {
             case ROUTINE_MENU:
