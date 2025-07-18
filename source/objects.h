@@ -5,8 +5,10 @@
 #include "player.h"
 
 #define MAX_OBJECT_LAYERS 4
+
+#define BACKGROUND_SCALE 0.9
 #define BG_DIMENSIONS 4
-#define BG_CHUNK (1024/BG_DIMENSIONS)
+#define BG_CHUNK ((1024/BG_DIMENSIONS) * BACKGROUND_SCALE)
 
 enum Objects {
     PLAYER_OBJECT,

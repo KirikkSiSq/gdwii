@@ -915,46 +915,45 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
     );
 }
 
+
 void draw_background_image(f32 x, f32 y, bool vflip) {
     for (s32 i = 0; i < BG_DIMENSIONS; i++) {
-        u32 calc_x = i*BG_CHUNK;
+        float calc_x = i*BG_CHUNK;
         for (s32 j = 0; j < BG_DIMENSIONS; j++) {
-            u32 calc_y = j*BG_CHUNK;
+            float calc_y = j*BG_CHUNK;
             
             GRRLIB_SetHandle(bg, 512, 512);
             GRRLIB_DrawPart(
                 x + calc_x, 
-                y + (vflip ? 768 - calc_y : calc_y), 
-                calc_x, 
-                calc_y,
-                BG_CHUNK, 
-                BG_CHUNK,
-                bg, 0, 1, (vflip ? -1 : 1), RGBA(channels[BG].color.r, channels[BG].color.g, channels[BG].color.b, 255)
+                y + (vflip ? (BG_CHUNK * 3) - calc_y : calc_y), 
+                i * 256, 
+                j * 256,
+                256, 
+                256,
+                bg, 0, 1 * BACKGROUND_SCALE, (vflip ? -1 : 1) * BACKGROUND_SCALE, RGBA(channels[BG].color.r, channels[BG].color.g, channels[BG].color.b, 255)
             );
         }
     }
 }
 
 void draw_background(f32 x, f32 y) {
-    float big_calc_y = positive_fmod(y, 2048);
+    float offset = 1024 * BACKGROUND_SCALE;
+    int tiles_x = (screenWidth / offset) + 2;
+    int tiles_y = (screenHeight / offset) + 2;
 
-    float calc_x = positive_fmod(x, 1024);
-    float calc_y = positive_fmod(y, 1024);
+    float calc_x = positive_fmod(x, offset);
+    float calc_y = positive_fmod(y, offset);
 
-    int flip = big_calc_y >= 1024;
-
-    draw_background_image(-calc_x, -calc_y, FALSE ^ flip);
-
-    if (-calc_x + 1024 < screenWidth) {
-        draw_background_image(-calc_x + 1024, -calc_y, FALSE ^ flip);
-    }
-
-    if (-calc_y + 1024 < screenHeight) {
-        draw_background_image(-calc_x, -calc_y + 1024, TRUE ^ flip);
-    }  
-
-    if (-calc_y + 1024 < screenHeight && -calc_x + 1024 < screenWidth) {
-        draw_background_image(-calc_x + 1024, -calc_y + 1024, TRUE ^ flip);
+    for (int i = -1; i < tiles_x; i++) {
+        for (int j = -1; j < tiles_y; j++) {
+            // Calculate position for each tile
+            float draw_x = -calc_x + i * offset;
+            float draw_y = -calc_y + j * offset;
+            
+            // Flip every other row
+            bool vflip = ((j % 2) != 0);
+            draw_background_image(draw_x, draw_y, vflip);
+        }
     }
 }
 
@@ -1103,9 +1102,12 @@ void draw_all_object_layers() {
 
     visible_layers[0] = &gfx_player_layer;
 
+    int width = (SCREEN_WIDTH_AREA / 2) / GFX_SECTION_SIZE + 2;
+    int height = (SCREEN_HEIGHT_AREA / 2) / GFX_SECTION_SIZE + 2;
+
     // Gather layers from all visible sections
-    for (int dx = -1; dx <= 1; dx++) {
-        for (int dy = -1; dy <= 1; dy++) {
+    for (int dx = -width; dx <= width; dx++) {
+        for (int dy = -height; dy <= height; dy++) {
             GFXSection *sec = get_or_create_gfx_section(cam_sx + dx, cam_sy + dy);
             for (int i = 0; i < sec->layer_count; i++) {
                 if (visible_count < MAX_VISIBLE_LAYERS) {

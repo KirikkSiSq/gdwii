@@ -69,7 +69,7 @@ int number_of_collisions_checks = 0;
 
 
 void draw_game() {
-    draw_background(state.background_x / 8, -(state.camera_y / 8) + 512);
+    draw_background(state.background_x / 8, -(state.camera_y / 8) + 416);
 
     draw_particles(GLITTER_EFFECT);
     
