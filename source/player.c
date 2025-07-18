@@ -649,7 +649,7 @@ void draw_player() {
     
     GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
 
-    MotionTrail_Update(&trail, 1.f/60);
+    MotionTrail_Update(&trail, dt);
     // Draw if not mirroring
     MotionTrail_Draw(&trail);
 

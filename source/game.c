@@ -27,7 +27,8 @@ int game_loop() {
         u64 currentTicks = gettime();
         float frameTime = ticks_to_secs_float(currentTicks - prevTicks);
         dt = frameTime;
-        if (frameTime > STEPS_DT * 5) frameTime = STEPS_DT * 5; // Avoid spiral of death
+
+        if (frameTime > 1) frameTime = 1; // Avoid spiral of death
         if (fixed_dt) {
             frameTime = STEPS_DT;
             fixed_dt = FALSE;

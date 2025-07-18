@@ -834,6 +834,8 @@ int get_opacity(GDObjectTyped *obj, float x) {
 }
 
 void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
+    u64 t0 = gettime();
+
     int obj_id = obj->id;
 
     int layer_index = layer->layerNum;
@@ -903,7 +905,10 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
             }
         }
     }
-
+    u64 t1 = gettime();
+    layer_calc_time += ticks_to_microsecs(t1 - t0) / 1000.f;
+    
+    t0 = gettime();
     GRRLIB_DrawImg(
         /* X        */ get_mirror_x(x, state.mirror_factor) + 6 - (width/2) + x_off_rot + fade_x,
         /* Y        */ y + 6 - (height/2) + y_off_rot + fade_y,
@@ -913,6 +918,9 @@ void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer
         /* Scale Y  */ 0.73333333333333333333333333333333 * y_flip_mult * fade_scale, 
         /* Color    */ color
     );
+    t1 = gettime();
+    
+    draw_time += ticks_to_microsecs(t1 - t0) / 1000.f;
 }
 
 
@@ -1089,8 +1097,7 @@ float get_rotation_speed(GDObjectTyped *obj) {
 }
 
 void draw_all_object_layers() {
-    if (layersArrayList == NULL) return;
-
+    u64 t0 = gettime();
     float screen_x_max = screenWidth + 90.0f;
     float screen_y_max = screenHeight + 90.0f;
 
@@ -1110,8 +1117,16 @@ void draw_all_object_layers() {
         for (int dy = -height; dy <= height; dy++) {
             GFXSection *sec = get_or_create_gfx_section(cam_sx + dx, cam_sy + dy);
             for (int i = 0; i < sec->layer_count; i++) {
-                if (visible_count < MAX_VISIBLE_LAYERS) {
-                    visible_layers[visible_count++] = sec->layers[i];
+                GDObjectTyped *obj = sec->layers[i]->layer->obj;
+
+                float calc_x = ((obj->x - state.camera_x) * SCALE);
+                float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
+                if (calc_x > -90 && calc_x < screen_x_max) {        
+                    if (calc_y > -90 && calc_y < screen_y_max) {    
+                        if (visible_count < MAX_VISIBLE_LAYERS) {
+                            visible_layers[visible_count++] = sec->layers[i];
+                        }
+                    }
                 }
             }
         }
@@ -1119,6 +1134,9 @@ void draw_all_object_layers() {
 
     // Sort globally
     qsort(visible_layers, visible_count, sizeof(GDLayerSortable*), compare_sortable_layers);
+    
+    u64 t1 = gettime();
+    layer_sorting = ticks_to_microsecs(t1 - t0) / 1000.f;
 
     // Draw in sorted order
     for (int i = 0; i < visible_count; i++) {
@@ -1133,27 +1151,23 @@ void draw_all_object_layers() {
             draw_particles(HOLDING_SHIP_TRAIL);
             draw_player();
             draw_particles(SHIP_DRAG);
-        } else if (obj_id < OBJECT_COUNT) {
+        } else if (obj_id - 1 < OBJECT_COUNT) {
             float calc_x = ((obj->x - state.camera_x) * SCALE);
-            float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);
+            float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
+            layersDrawn++;
 
-            if (calc_x > -90 && calc_x < screen_x_max) {        
-                if (calc_y > -90 && calc_y < screen_y_max) {      
-                    layersDrawn++;
+            int fade_val = get_fade_value(calc_x, screenWidth);
+            bool fade_edge = (fade_val == 255 || fade_val == 0);
+            bool is_layer0 = (layer->layerNum == 0);
 
-                    int fade_val = get_fade_value(calc_x, screenWidth);
-                    if (layer->layerNum == 0) {
-                        if ((fade_val == 255 || fade_val == 0)) handle_special_fading(obj, calc_x, calc_y);
-
-                        if (objects[obj_id].is_saw) {
-                            obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
-                        }
-                    }
-
-                    handle_object_particles(obj, layer);
-                    put_object_layer(obj, calc_x, calc_y, layer);
-                }
+            if (is_layer0 && fade_edge) handle_special_fading(obj, calc_x, calc_y);
+            
+            if (is_layer0 && objects[obj_id].is_saw) {
+                obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
             }
+
+            handle_object_particles(obj, layer);
+            put_object_layer(obj, calc_x, calc_y, layer);
         }
     }
 }
