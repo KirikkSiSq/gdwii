@@ -833,7 +833,7 @@ int get_opacity(GDObjectTyped *obj, float x) {
     return opacity;
 }
 
-void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
+static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
     u64 t0 = gettime();
 
     int obj_id = obj->id;

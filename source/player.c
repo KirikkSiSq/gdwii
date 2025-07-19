@@ -36,10 +36,34 @@ inline float gravBottom(Player *player) { return player->upside_down ? -getTop(p
 inline float gravTop(Player *player) { return player->upside_down ? -getBottom(player) : getTop(player); }
 inline float grav(Player *player, float val) { return player->upside_down ? -val : val; }
 
-inline float obj_getTop(GDObjectTyped *object)  { return object->y + (objects[object->id].hitbox.height / 2); }
-inline float obj_getBottom(GDObjectTyped *object)  { return object->y - (objects[object->id].hitbox.height / 2); }
-inline float obj_getRight(GDObjectTyped *object)  { return object->x + objects[object->id].hitbox.width / 2; }
-inline float obj_getLeft(GDObjectTyped *object)  { return object->x - objects[object->id].hitbox.width / 2; }
+inline float obj_getTop(GDObjectTyped *object)  { 
+    if (positive_fmod(object->rotation, 180.f) >= 90.f) {
+        return object->y + (objects[object->id].hitbox.width / 2); 
+    } else {
+        return object->y + (objects[object->id].hitbox.height / 2); 
+    }
+}
+inline float obj_getBottom(GDObjectTyped *object)  { 
+    if (positive_fmod(object->rotation, 180.f) >= 90.f) {
+        return object->y - (objects[object->id].hitbox.width / 2); 
+    } else {
+        return object->y - (objects[object->id].hitbox.height / 2);
+    }
+}
+inline float obj_getRight(GDObjectTyped *object)  { 
+    if (positive_fmod(object->rotation, 180.f) >= 90.f) {
+        return object->x + objects[object->id].hitbox.height / 2;
+    } else {
+        return object->x + objects[object->id].hitbox.width / 2; 
+    }
+}
+inline float obj_getLeft(GDObjectTyped *object)  { 
+    if (positive_fmod(object->rotation, 180.f) >= 90.f) {
+        return object->x - objects[object->id].hitbox.height / 2; 
+    } else {
+        return object->x - objects[object->id].hitbox.width / 2; 
+    }
+}
 inline float obj_gravBottom(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
 inline float obj_gravTop(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
 

@@ -287,7 +287,6 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 float get_mirror_x(float x, float factor);
 
 void draw_all_object_layers();
-void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer);
 void draw_background(f32 x, f32 y);
 void draw_ground(f32 x, bool is_ceiling);
 void load_spritesheet();
