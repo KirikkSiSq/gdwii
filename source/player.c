@@ -28,44 +28,44 @@ MotionTrail trail;
 Color p1;
 Color p2;
 
-inline float getTop(Player *player)  { return player->y + player->height / 2; }
-inline float getBottom(Player *player)  { return player->y - player->height / 2; }
-inline float getRight(Player *player)  { return player->x + player->width / 2; }
-inline float getLeft(Player *player)  { return player->x - player->width / 2; }
-inline float gravBottom(Player *player) { return player->upside_down ? -getTop(player) : getBottom(player); }
-inline float gravTop(Player *player) { return player->upside_down ? -getBottom(player) : getTop(player); }
-inline float grav(Player *player, float val) { return player->upside_down ? -val : val; }
+inline static float getTop(Player *player)  { return player->y + player->height / 2; }
+inline static float getBottom(Player *player)  { return player->y - player->height / 2; }
+inline static float getRight(Player *player)  { return player->x + player->width / 2; }
+inline static float getLeft(Player *player)  { return player->x - player->width / 2; }
+inline static float gravBottom(Player *player) { return player->upside_down ? -getTop(player) : getBottom(player); }
+inline static float gravTop(Player *player) { return player->upside_down ? -getBottom(player) : getTop(player); }
+inline static float grav(Player *player, float val) { return player->upside_down ? -val : val; }
 
-inline float obj_getTop(GDObjectTyped *object)  { 
+inline static float obj_getTop(GDObjectTyped *object)  { 
     if (positive_fmod(object->rotation, 180.f) >= 90.f) {
         return object->y + (objects[object->id].hitbox.width / 2); 
     } else {
         return object->y + (objects[object->id].hitbox.height / 2); 
     }
 }
-inline float obj_getBottom(GDObjectTyped *object)  { 
+inline static float obj_getBottom(GDObjectTyped *object)  { 
     if (positive_fmod(object->rotation, 180.f) >= 90.f) {
         return object->y - (objects[object->id].hitbox.width / 2); 
     } else {
         return object->y - (objects[object->id].hitbox.height / 2);
     }
 }
-inline float obj_getRight(GDObjectTyped *object)  { 
+inline static float obj_getRight(GDObjectTyped *object)  { 
     if (positive_fmod(object->rotation, 180.f) >= 90.f) {
         return object->x + objects[object->id].hitbox.height / 2;
     } else {
         return object->x + objects[object->id].hitbox.width / 2; 
     }
 }
-inline float obj_getLeft(GDObjectTyped *object)  { 
+inline static float obj_getLeft(GDObjectTyped *object)  { 
     if (positive_fmod(object->rotation, 180.f) >= 90.f) {
         return object->x - objects[object->id].hitbox.height / 2; 
     } else {
         return object->x - objects[object->id].hitbox.width / 2; 
     }
 }
-inline float obj_gravBottom(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
-inline float obj_gravTop(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
+inline static float obj_gravBottom(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
+inline static float obj_gravTop(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
 
 void set_p_velocity(Player *player, float vel) {
     player->vel_y = vel * ((player->mini) ? 0.8 : 1);
@@ -75,18 +75,23 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
     int clip = (player->gamemode == GAMEMODE_SHIP ? 7 : 10);
     switch (hitbox->type) {
         case HITBOX_SOLID: 
+
+            if (player->upside_down != state.old_player.upside_down) return;
+
+            bool padHitBefore = (!state.old_player.on_ground && state.old_player.vel_y <= 0 && player->vel_y > 0);
+
             if (intersect(
                 player->x, player->y, 9, 9, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 player->dead = TRUE;
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0) {
-                player->vel_y = 0;
-                player->on_ground = TRUE;
-                player->time_since_ground = 0;
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0 || padHitBefore)) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
+                player->vel_y = 0;
+                if (!padHitBefore) player->on_ground = TRUE;
+                player->time_since_ground = 0;
             } else {
-                if (player->gamemode != GAMEMODE_CUBE) {
+                if (player->gamemode == GAMEMODE_SHIP) {
                     if (gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) {
                         player->vel_y = 0;
                         player->on_ceiling = TRUE;

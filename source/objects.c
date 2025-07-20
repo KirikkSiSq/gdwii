@@ -20,11 +20,11 @@
 #include "particle_png.h"
 #include <ogc/lwp_watchdog.h>
 
-float jump_heights_table[JUMP_TYPES_COUNT][GAMEMODE_COUNT] = {
-    /* YELLOW PAD */ {864,    432,    518.4},
-    /* YELLOW ORB */ {603.72, 603.72, 422.60399},
-    /* BLUE PAD   */ {-345.6, -345.6, -207.36001},
-    /* BLUE ORB   */ {-241.488, -241.488, -169.04160},
+float jump_heights_table[JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},   {518.4,      414.72002}},
+    /* YELLOW ORB */ {{603.72,   482.976},  {603.72,   482.976}, {422.60399,  338.08319}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48}, {-207.36001, -165.88801}},
+    /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18}, {-169.04160, -135.2295}},
 };
 
 struct ColorChannel channels[COL_CHANNEL_COUNT] = {
@@ -124,7 +124,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
     switch (obj->id) {
         case YELLOW_PAD:
             MotionTrail_ResumeStroke(&trail);
-            set_p_velocity(player, jump_heights_table[JUMP_YELLOW_PAD][player->gamemode]);
+            player->vel_y = jump_heights_table[JUMP_YELLOW_PAD][player->gamemode][player->mini];
             player->on_ground = FALSE;
             
             particle_templates[USE_EFFECT].start_scale = 0;
@@ -154,7 +154,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 			    break;
 
             MotionTrail_ResumeStroke(&trail);
-            set_p_velocity(player, jump_heights_table[JUMP_BLUE_PAD][player->gamemode]);
+            player->vel_y = jump_heights_table[JUMP_BLUE_PAD][player->gamemode][player->mini];
             player->upside_down ^= 1;
             player->on_ground = FALSE;
             
@@ -180,7 +180,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
-                set_p_velocity(player, jump_heights_table[JUMP_YELLOW_ORB][player->gamemode]);
+                player->vel_y = jump_heights_table[JUMP_YELLOW_ORB][player->gamemode][player->mini];
                 
                 player->ball_rotation_speed = -1.f;
                 
@@ -212,7 +212,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
-                set_p_velocity(player, jump_heights_table[JUMP_BLUE_ORB][player->gamemode]);
+                player->vel_y = jump_heights_table[JUMP_BLUE_ORB][player->gamemode][player->mini];
                 player->upside_down ^= 1;
                 
                 player->ball_rotation_speed = -1.f;

@@ -264,7 +264,6 @@ char *get_metadata_value(const char *levelString, const char *key) {
             // Copy and return value
             char *result = strdup(value);
             free(metadata);
-            printf("%s\n", result);
             return result;
         }
         token = strtok(NULL, ",");
@@ -723,36 +722,6 @@ int compare_sortable_layers(const void *a, const void *b) {
 }
 
 // Me when this is like Java (using Comparable interface)
-void sort_typed_objects_by_layer(GDTypedObjectList *list) {
-    if (!list || list->count <= 1) return;
-
-    printf("Sorting object list\n");
-
-    // Wrap objects with indices
-    GDObjectSortable *sortable = malloc(sizeof(GDObjectSortable) * list->count);
-
-    if (sortable == NULL) {
-        printf("Couldn't allocate sortable object\n");
-        return;
-    }
-
-    for (int i = 0; i < list->count; i++) {
-        sortable[i].obj = list->objects[i];
-        sortable[i].originalIndex = i;
-    }
-
-    // Sort
-    qsort(sortable, list->count, sizeof(GDObjectSortable), compare_typed_objects);
-
-    // Rebuild the list
-    for (int i = 0; i < list->count; i++) {
-        list->objects[i] = sortable[i].obj;
-    }
-
-    free(sortable);
-}
-
-// Me when this is like Java (using Comparable interface)
 void sort_layers_by_layer(GDObjectLayerList *list) {
     if (!list || list->count <= 1) return;
 
@@ -982,8 +951,6 @@ void load_level(char *data) {
         printf("Failed converting objects to typed structs.\n");
         return;
     }
-    
-    sort_typed_objects_by_layer(objectsArrayList);
 
     layersArrayList = fill_layers_array(objectsArrayList);
 
