@@ -291,3 +291,55 @@ void  custom_circle (const f32 x, const f32 y, const f32 radius,
                      const u32 color, const u8 filled) {
     custom_ellipse(x, y, radius, radius, color, filled);
 }
+
+void  custom_drawPart (const f32 xpos, const f32 ypos, const f32 partx, const f32 party, const f32 partw, const f32 parth, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color) {
+    Mtx       m, m1, m2, mv;
+
+    if (tex == NULL || tex->data == NULL)
+        return;
+
+    // The 0.001f/x is the frame correction formula by spiffen
+    const f32 s1 = (partx / tex->w) + (0.001f / tex->w);
+    const f32 s2 = ((partx + partw) / tex->w) - (0.001f / tex->w);
+    const f32 t1 = (party / tex->h) + (0.001f / tex->h);
+    const f32 t2 = ((party + parth) / tex->h) - (0.001f / tex->h);
+
+    const f32 width  = partw * 0.5f;
+    const f32 height = parth * 0.5f;
+
+    guMtxIdentity  (m1);
+    guMtxScaleApply(m1, m1, scaleX, scaleY, 1.0f);
+    guMtxRotAxisDeg(m2, &axis, degrees);
+    guMtxConcat    (m2, m1, m);
+
+    guMtxTransApply(m, m,
+        xpos +width  +tex->handlex
+            -tex->offsetx +( scaleX *(-tex->handley *sin(-DegToRad(degrees))
+                                      -tex->handlex *cos(-DegToRad(degrees))) ),
+        ypos +height +tex->handley
+            -tex->offsety +( scaleY *(-tex->handley *cos(-DegToRad(degrees))
+                                      +tex->handlex *sin(-DegToRad(degrees))) ),
+        0);
+
+    guMtxConcat(GXmodelView2D, m, mv);
+
+    GX_LoadPosMtxImm(mv, GX_PNMTX0);
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+        GX_Position3f32(-width, -height, 0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(s1, t1);
+
+        GX_Position3f32(width, -height,  0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(s2, t1);
+
+        GX_Position3f32(width, height,  0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(s2, t2);
+
+        GX_Position3f32(-width, height,  0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(s1, t2);
+    GX_End();
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
+}

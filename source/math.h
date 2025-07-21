@@ -37,6 +37,7 @@ float lerp(float from, float to, float alpha);
 float iLerp(float a, float b, float ratio, float dt);
 float iSlerp(float a, float b, float ratio, float dt);
 void  custom_drawImg (const f32 xpos, const f32 ypos, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color);
+void  custom_drawPart (const f32 xpos, const f32 ypos, const f32 partx, const f32 party, const f32 partw, const f32 parth, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color);
 void  custom_circle (const f32 x, const f32 y, const f32 radius,
                      const u32 color, const u8 filled);
 void set_texture(const GRRLIB_texImg *tex);

@@ -967,7 +967,7 @@ void draw_background_image(f32 x, f32 y, bool vflip) {
             float calc_y = j*BG_CHUNK;
             
             GRRLIB_SetHandle(bg, 512, 512);
-            GRRLIB_DrawPart(
+            custom_drawPart(
                 x + calc_x, 
                 y + (vflip ? (BG_CHUNK * 3) - calc_y : calc_y), 
                 i * 256, 
@@ -981,6 +981,10 @@ void draw_background_image(f32 x, f32 y, bool vflip) {
 }
 
 void draw_background(f32 x, f32 y) {
+    GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+    set_texture(bg);
+
     float offset = 1024 * BACKGROUND_SCALE;
     int tiles_x = (screenWidth / offset) + 2;
     int tiles_y = (screenHeight / offset) + 2;
@@ -1008,14 +1012,18 @@ void draw_end_wall() {
     float calc_x = ((level_info.wall_x - state.camera_x) * SCALE);
     float calc_y =  positive_fmod(state.camera_y * SCALE, BLOCK_SIZE_PX) + screenHeight;    
     
+    GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+
     if (calc_x < screenWidth + 20) {
         for (s32 j = 0; j < objects[CHECKER_EDGE].num_layers; j++) {
             GRRLIB_texImg *image = object_images[CHECKER_EDGE][j];
             int width = image->w;
             int height = image->h;
+            set_texture(image);
 
             for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX * 2; i += BLOCK_SIZE_PX) {
-                GRRLIB_DrawImg(
+                custom_drawImg(
                     get_mirror_x(calc_x + 6, state.mirror_factor) - (width/2), 
                     calc_y + 6 - i - (height/2),    
                     image,
@@ -1026,6 +1034,9 @@ void draw_end_wall() {
             }
         }
     }
+    
+    GX_SetTevOp  (GX_TEVSTAGE0, GX_PASSCLR);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
 }
 
 void draw_ground(f32 y, bool is_ceiling) {
@@ -1143,9 +1154,6 @@ int compare_by_layer_index(const void *a, const void *b) {
 
 void draw_all_object_layers() {
     u64 t0 = gettime();
-    GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
-    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
-
     if (GRRLIB_Settings.antialias == false) {
         GX_SetCopyFilter(GX_FALSE, rmode->sample_pattern, GX_FALSE, rmode->vfilter);
     } else {
@@ -1262,8 +1270,6 @@ void draw_all_object_layers() {
     draw_time = ticks_to_microsecs(draw_time) / 1000.f;
     obj_particles_time = ticks_to_microsecs(obj_particles_time) / 1000.f;
     
-    GX_SetTevOp  (GX_TEVSTAGE0, GX_PASSCLR);
-    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
     prev_tex = NULL;
     prev_blending = GRRLIB_BLEND_ALPHA;
     GRRLIB_SetBlend(prev_blending);
