@@ -2,7 +2,7 @@
 
 #include "objects.h"
 
-#define MAX_PARTICLES 256
+#define MAX_PARTICLES 512
 
 typedef struct {
     int group_id;

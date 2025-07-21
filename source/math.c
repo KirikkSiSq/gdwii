@@ -259,7 +259,6 @@ void  custom_gxengine (const guVector v[], const u32 color[], const u16 n,
     for (u16 i = 0; i < n; i++) {
         GX_Position3f32(v[i].x, v[i].y, v[i].z);
         GX_Color1u32(color[i]);
-        GX_TexCoord2f32(0, 1);
     }
     GX_End();
 }
@@ -342,4 +341,38 @@ void  custom_drawPart (const f32 xpos, const f32 ypos, const f32 partx, const f3
         GX_TexCoord2f32(s1, t2);
     GX_End();
     GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
+}
+
+void  custom_rectangle (const f32 x,      const f32 y,
+                        const f32 width,  const f32 height,
+                        const u32 color, const bool filled) {
+    const f32 x2 = x + width;
+    const f32 y2 = y + height;
+
+    if (filled == true) {
+        GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+            GX_Position3f32(x, y, 0.0f);
+            GX_Color1u32(color);
+            GX_Position3f32(x2, y, 0.0f);
+            GX_Color1u32(color);
+            GX_Position3f32(x2, y2, 0.0f);
+            GX_Color1u32(color);
+            GX_Position3f32(x, y2, 0.0f);
+            GX_Color1u32(color);
+        GX_End();
+    }
+    else {
+        GX_Begin(GX_LINESTRIP, GX_VTXFMT0, 5);
+            GX_Position3f32(x, y, 0.0f);
+            GX_Color1u32(color);
+            GX_Position3f32(x2, y, 0.0f);
+            GX_Color1u32(color);
+            GX_Position3f32(x2, y2, 0.0f);
+            GX_Color1u32(color);
+            GX_Position3f32(x, y2, 0.0f);
+            GX_Color1u32(color);
+            GX_Position3f32(x, y, 0.0f);
+            GX_Color1u32(color);
+        GX_End();
+    }
 }

@@ -356,7 +356,12 @@ void update_particles() {
 }
 
 void draw_particles(int group_id) {
-    set_texture(particleTex);
+    GRRLIB_texImg *p1TrailTex = get_p1_trail_tex();
+    set_texture(p1TrailTex);
+
+    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
+
     for (int i = 0; i < MAX_PARTICLES; i++) {
         Particle *p = &state.particles[i];
 
@@ -369,17 +374,16 @@ void draw_particles(int group_id) {
             }
             switch(p->texture_id) { 
                 case PARTICLE_SQUARE:
-                    custom_drawImg(
+                    custom_rectangle(
                         get_mirror_x(calc_x, state.mirror_factor), calc_y,
-                        particleTex,
-                        0,
-                        p->scale, p->scale,
+                        p->scale * 32, p->scale * 32,
                         RGBA(
                             p->color.r,
                             p->color.g,
                             p->color.b,
                             p->color.a
-                        )
+                        ),
+                        TRUE
                     );
                     break;
                 case PARTICLE_CIRCLE:
@@ -420,9 +424,8 @@ void draw_particles(int group_id) {
                     );
                     break;
                 case PARTICLE_P1_TRAIL:
-                    GRRLIB_texImg *p1TrailTex = get_p1_trail_tex();
-                    
-                    set_texture(p1TrailTex);
+                    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+                    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
                     custom_drawImg(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 - (p1TrailTex->w/2), calc_y + 6 - (p1TrailTex->h/2),
                         p1TrailTex,
@@ -434,8 +437,10 @@ void draw_particles(int group_id) {
                             p->color.b,
                             p->color.a
                         )
+                    
                     );
-                    set_texture(particleTex);
+                    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+                    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
                     break;
             }
             
@@ -443,6 +448,8 @@ void draw_particles(int group_id) {
         }
     }
     set_texture(prev_tex);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 }
 
 void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
@@ -453,7 +460,9 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
     
     float x = ((parent_obj->x - state.camera_x) * SCALE);
     get_fade_vars(parent_obj, x, &fade_x, &fade_y, &fade_scale);
-    set_texture(particleTex);
+
+    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
     for (int i = 0; i < MAX_PARTICLES; i++) {
         Particle *p = &state.particles[i];
 
@@ -469,17 +478,15 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
 
             switch(p->texture_id) { 
                 case PARTICLE_SQUARE:
-                    custom_drawImg(
+                    custom_rectangle(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
-                        particleTex,
-                        0,
-                        p->scale, p->scale,
+                        p->scale * 32, p->scale * 32,
                         RGBA(
                             p->color.r,
                             p->color.g,
                             p->color.b,
                             p->color.a * (get_fade_value(x, screenWidth) / 255.f)
-                        )
+                        ), TRUE
                     );
                     break;
                 case PARTICLE_CIRCLE:
@@ -523,5 +530,6 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
             GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
         }
     }
-    set_texture(prev_tex);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 }
