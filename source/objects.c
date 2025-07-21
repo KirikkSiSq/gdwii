@@ -154,6 +154,8 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 			    break;
 
             MotionTrail_ResumeStroke(&trail);
+            player->gravity_change = TRUE;
+
             player->vel_y = jump_heights_table[JUMP_BLUE_PAD][player->gamemode][player->mini];
             player->upside_down ^= 1;
             player->on_ground = FALSE;
@@ -211,6 +213,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         case BLUE_ORB:
             if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
+                player->gravity_change = TRUE;
                 
                 player->vel_y = jump_heights_table[JUMP_BLUE_ORB][player->gamemode][player->mini];
                 player->upside_down ^= 1;
@@ -301,6 +304,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                 player->vel_y /= -2;
                 player->upside_down = FALSE;
+                player->gravity_change = TRUE;
 
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
@@ -324,6 +328,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                 player->vel_y /= -2;
                 player->upside_down = TRUE;
+                player->gravity_change = TRUE;
 
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
@@ -833,9 +838,10 @@ int get_opacity(GDObjectTyped *obj, float x) {
     return opacity;
 }
 
-static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
-    u64 t0 = gettime();
+GRRLIB_texImg *prev_tex = NULL;
+int prev_blending = GRRLIB_BLEND_ALPHA;
 
+static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
     int obj_id = obj->id;
 
     int layer_index = layer->layerNum;
@@ -854,12 +860,13 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
 
     int col_channel = objectLayer->col_channel;
 
+    int blending;
     if (channels[col_channel].blending) {
-        GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
+        blending = GRRLIB_BLEND_ADD;
     } else {
-        GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
+        blending = GRRLIB_BLEND_ALPHA;
     }
-    
+
     int opacity = get_opacity(obj, x);
     
     u32 color = RGBA(channels[col_channel].color.r, channels[col_channel].color.g, channels[col_channel].color.b, opacity);
@@ -905,20 +912,31 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
             }
         }
     }
-    u64 t1 = gettime();
-    layer_calc_time += ticks_to_microsecs(t1 - t0) / 1000.f;
     
-    t0 = gettime();
-    GRRLIB_DrawImg(
+    u64 t0 = gettime();
+    GRRLIB_texImg *tex = get_randomized_texture(image, obj, layer);
+    if (prev_tex != tex) {
+        prev_tex = tex;
+        set_texture(tex);
+    }
+    
+
+    if (blending != prev_blending) {
+        GRRLIB_SetBlend(blending);
+        prev_blending = blending;
+    }
+    
+
+    custom_drawImg(
         /* X        */ get_mirror_x(x, state.mirror_factor) + 6 - (width/2) + x_off_rot + fade_x,
         /* Y        */ y + 6 - (height/2) + y_off_rot + fade_y,
-        /* Texture  */ get_randomized_texture(image, obj, layer), 
+        /* Texture  */ tex, 
         /* Rotation */ rotation, 
         /* Scale X  */ 0.73333333333333333333333333333333 * x_flip_mult * fade_scale * state.mirror_mult, 
         /* Scale Y  */ 0.73333333333333333333333333333333 * y_flip_mult * fade_scale, 
         /* Color    */ color
     );
-    t1 = gettime();
+    u64 t1 = gettime();
     
     draw_time += ticks_to_microsecs(t1 - t0) / 1000.f;
 }
@@ -1097,6 +1115,16 @@ float get_rotation_speed(GDObjectTyped *obj) {
 }
 
 void draw_all_object_layers() {
+    
+    GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+
+    if (GRRLIB_Settings.antialias == false) {
+        GX_SetCopyFilter(GX_FALSE, rmode->sample_pattern, GX_FALSE, rmode->vfilter);
+    } else {
+        GX_SetCopyFilter(rmode->aa, rmode->sample_pattern, GX_TRUE, rmode->vfilter);
+    }
+    
     u64 t0 = gettime();
     float screen_x_max = screenWidth + 90.0f;
     float screen_y_max = screenHeight + 90.0f;
@@ -1151,6 +1179,9 @@ void draw_all_object_layers() {
             draw_particles(HOLDING_SHIP_TRAIL);
             draw_player();
             draw_particles(SHIP_DRAG);
+                    
+            GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
+            GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
         } else if (obj_id - 1 < OBJECT_COUNT) {
             float calc_x = ((obj->x - state.camera_x) * SCALE);
             float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
@@ -1165,11 +1196,20 @@ void draw_all_object_layers() {
             if (is_layer0 && objects[obj_id].is_saw) {
                 obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
             }
+            u64 t0 = gettime();
+            handle_object_particles(obj, layer); 
+            u64 t1 = gettime();
+            obj_particles_time += ticks_to_microsecs(t1 - t0) / 1000.f;
 
-            handle_object_particles(obj, layer);
             put_object_layer(obj, calc_x, calc_y, layer);
         }
     }
+    
+    GX_SetTevOp  (GX_TEVSTAGE0, GX_PASSCLR);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
+    prev_tex = NULL;
+    prev_blending = GRRLIB_BLEND_ALPHA;
+    GRRLIB_SetBlend(prev_blending);
 }
 
 void handle_col_triggers() {

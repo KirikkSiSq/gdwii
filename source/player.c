@@ -76,19 +76,15 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
     switch (hitbox->type) {
         case HITBOX_SOLID: 
 
-            if (player->upside_down != state.old_player.upside_down) return;
-
-            bool padHitBefore = (!state.old_player.on_ground && state.old_player.vel_y <= 0 && player->vel_y > 0);
-
-            if (intersect(
+            if (obj_gravTop(player, obj) - gravBottom(player) > clip && intersect(
                 player->x, player->y, 9, 9, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 player->dead = TRUE;
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0 || padHitBefore)) {
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0 || player->gravity_change)) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
-                if (!padHitBefore) player->on_ground = TRUE;
+                if (!player->gravity_change) player->on_ground = TRUE;
                 player->time_since_ground = 0;
             } else {
                 if (player->gamemode == GAMEMODE_SHIP) {
@@ -114,6 +110,48 @@ float player_get_vel(Player *player, float vel) {
     return vel * (player->upside_down ? -1 : 1);
 }
 
+void collide_with_obj(GDObjectTyped *obj) {
+    Player *player = &state.player;
+    ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
+
+    if (hitbox->type != HITBOX_NONE && !obj->activated && obj->id < OBJECT_COUNT) {
+        number_of_collisions_checks++;
+        if (hitbox->is_circular) {
+            if (intersect_rect_circle(
+                player->x, player->y, player->width, player->height, player->rotation, 
+                obj->x, obj->y, hitbox->radius
+            )) {
+                handle_collision(player, obj, hitbox);
+                obj->collided = TRUE;
+                number_of_collisions++;
+            } else {
+                obj->collided = FALSE;
+            }
+        } else {
+            float obj_rot = fabsf(obj->rotation);
+            float rotation = (obj_rot == 0 || obj_rot == 90 || obj_rot == 180 || obj_rot == 270) ? 0 : player->rotation;
+            if (intersect(
+                player->x, player->y, player->width, player->height, rotation, 
+                obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
+            )) {
+                handle_collision(player, obj, hitbox);
+                obj->collided = TRUE;
+                number_of_collisions++;
+            } else {
+                obj->collided = FALSE;
+            }
+        }
+    } else {
+        obj->collided = FALSE;
+    }
+}
+
+GDObjectTyped *block_buffer[MAX_COLLIDED_OBJECTS];
+int block_count = 0;
+
+GDObjectTyped *hazard_buffer[MAX_COLLIDED_OBJECTS];
+int hazard_count = 0;
+
 void collide_with_objects() {
     Player *player = &state.player;
     number_of_collisions = 0;
@@ -121,47 +159,37 @@ void collide_with_objects() {
 
     int sx = (int)(player->x / SECTION_SIZE);
     int sy = (int)(player->y / SECTION_SIZE);
+    
     for (int dx = -1; dx <= 1; dx++) {
         for (int dy = -1; dy <= 1; dy++) {
             Section *sec = get_or_create_section(sx + dx, sy + dy);
             for (int i = 0; i < sec->object_count; i++) {
                 GDObjectTyped *obj = sec->objects[i];
                 ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
-
-                if (hitbox->type != HITBOX_NONE && !obj->activated && obj->id < OBJECT_COUNT) {
-                    
-                    number_of_collisions_checks++;
-                    if (hitbox->is_circular) {
-                        if (intersect_rect_circle(
-                            player->x, player->y, player->width, player->height, player->rotation, 
-                            obj->x, obj->y, hitbox->radius
-                        )) {
-                            handle_collision(player, obj, hitbox);
-                            obj->collided = TRUE;
-                            number_of_collisions++;
-                        } else {
-                            obj->collided = FALSE;
-                        }
-                    } else {
-                        float obj_rot = fabsf(obj->rotation);
-                        float rotation = (obj_rot == 0 || obj_rot == 90 || obj_rot == 180 || obj_rot == 270) ? 0 : player->rotation;
-                        if (intersect(
-                            player->x, player->y, player->width, player->height, rotation, 
-                            obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
-                        )) {
-                            handle_collision(player, obj, hitbox);
-                            obj->collided = TRUE;
-                            number_of_collisions++;
-                        } else {
-                            obj->collided = FALSE;
-                        }
-                    }
-                } else {
-                    obj->collided = FALSE;
+                
+                if (hitbox->type == HITBOX_SOLID) {
+                    block_buffer[block_count++] = obj;
+                } else if (hitbox->type == HITBOX_SPIKE) {
+                    hazard_buffer[hazard_count++] = obj;
+                } else { // HITBOX_SPECIAL
+                    collide_with_obj(obj);
                 }
             }
         }
     }
+
+    for (int i = 0; i < block_count; i++) {
+        GDObjectTyped *obj = block_buffer[i];
+        collide_with_obj(obj);
+    }
+    
+    for (int i = 0; i < hazard_count; i++) {
+        GDObjectTyped *obj = hazard_buffer[i];
+        collide_with_obj(obj);
+    }
+
+    block_count = 0;
+    hazard_count = 0;
 }
 
 void cube_gamemode(Player *player) {
@@ -411,6 +439,7 @@ void run_player() {
 
     if (player->gamemode == GAMEMODE_SHIP) update_ship_rotation(player);
     
+    player->gravity_change = FALSE;
     player->on_ground = FALSE;
     player->on_ceiling = FALSE;
     

@@ -189,3 +189,106 @@ float iSlerp(float a, float b, float ratio, float dt) {
 
 	return slerp(a, b, iRatio);
 }
+
+extern Mtx                 GXmodelView2D;
+
+static guVector axis = (guVector){0.0f, 0.0f, 1.0f};
+
+void set_texture(const GRRLIB_texImg *tex) {
+    
+    if (tex == NULL || tex->data == NULL)
+        return;
+
+    GXTexObj  texObj;
+    GX_InitTexObj(&texObj, tex->data, tex->w, tex->h,
+                  tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+
+    if (GRRLIB_Settings.antialias == false) {
+        GX_InitTexObjLOD(&texObj, GX_NEAR, GX_NEAR,
+                         0.0f, 0.0f, 0.0f, 0, 0, GX_ANISO_1);
+    }
+
+    GX_LoadTexObj(&texObj,      GX_TEXMAP0);
+}
+
+void  custom_drawImg (const f32 xpos, const f32 ypos, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color) {
+    GXTexObj  texObj;
+    Mtx       m, m1, m2, mv;
+
+    guMtxIdentity  (m1);
+    guMtxScaleApply(m1, m1, scaleX, scaleY, 1.0f);
+    guMtxRotAxisDeg(m2, &axis, degrees);
+    guMtxConcat    (m2, m1, m);
+
+    const f32 width  = tex->w * 0.5f;
+    const f32 height = tex->h * 0.5f;
+
+    guMtxTransApply(m, m,
+        xpos +width  +tex->handlex
+            -tex->offsetx +( scaleX *(-tex->handley *sin(-DegToRad(degrees))
+                                      -tex->handlex *cos(-DegToRad(degrees))) ),
+        ypos +height +tex->handley
+            -tex->offsety +( scaleY *(-tex->handley *cos(-DegToRad(degrees))
+                                      +tex->handlex *sin(-DegToRad(degrees))) ),
+        0);
+    guMtxConcat(GXmodelView2D, m, mv);
+
+    GX_LoadPosMtxImm(mv, GX_PNMTX0);
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+        GX_Position3f32(-width, -height, 0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(0, 0);
+
+        GX_Position3f32(width, -height, 0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(1, 0);
+
+        GX_Position3f32(width, height, 0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(1, 1);
+
+        GX_Position3f32(-width, height, 0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(0, 1);
+    GX_End();
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
+}
+
+void  custom_gxengine (const guVector v[], const u32 color[], const u16 n,
+                       const u8 fmt) {
+    GX_Begin(fmt, GX_VTXFMT0, n);
+    for (u16 i = 0; i < n; i++) {
+        GX_Position3f32(v[i].x, v[i].y, v[i].z);
+        GX_Color1u32(color[i]);
+        GX_TexCoord2f32(0, 1);
+    }
+    GX_End();
+}
+
+void  custom_ellipse (const f32 x, const f32 y, const f32 radiusX,
+                      const f32 radiusY, const u32 color, const u8 filled) {
+    guVector v[36];
+    u32 ncolor[36];
+    const f32 G_DTOR = M_DTOR * 10;
+
+    for (u32 a = 0; a < 36; a++) {
+        const f32 ra = a * G_DTOR;
+
+        v[a].x = cos(ra) * radiusX + x;
+        v[a].y = sin(ra) * radiusY + y;
+        v[a].z = 0.0f;
+        ncolor[a] = color;
+    }
+
+    if (filled == false) {
+        custom_gxengine(v, ncolor, 36, GX_LINESTRIP  );
+    }
+    else {
+        custom_gxengine(v, ncolor, 36, GX_TRIANGLEFAN);
+    }
+}
+
+void  custom_circle (const f32 x, const f32 y, const f32 radius,
+                     const u32 color, const u8 filled) {
+    custom_ellipse(x, y, radius, radius, color, filled);
+}

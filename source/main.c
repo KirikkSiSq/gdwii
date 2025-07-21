@@ -64,7 +64,7 @@ float triggers_time = 0;
 float player_time = 0;
 float frame_time = 0;
 
-float layer_calc_time = 0;
+float obj_particles_time = 0;
 float draw_time = 0;
 float layer_sorting = 0;
 
@@ -126,7 +126,7 @@ void draw_game() {
         GRRLIB_Printf(20, 110, font, RGBA(255,255,255,255), 0.5, player_y);
         
         char obj_layer[64];
-        snprintf(obj_layer, sizeof(obj_layer), "Layers: %.2f ms (C: %.2f, Sort: %.2f, D: %.2f)", obj_layer_time, layer_calc_time, layer_sorting, draw_time);
+        snprintf(obj_layer, sizeof(obj_layer), "Layers: %.2f ms (P: %.2f, Sort: %.2f, D: %.2f)", obj_layer_time, obj_particles_time, layer_sorting, draw_time);
         GRRLIB_Printf(20, 140, font, RGBA(255,255,255,255), 0.5, obj_layer);
         
         char physics[128];
@@ -154,7 +154,7 @@ void draw_game() {
     }
     
     draw_time = 0;
-    layer_calc_time = 0;
+    obj_particles_time = 0;
 
     if (state.noclip) {
         GRRLIB_Printf(400, 20, font, RGBA(255,255,255,255), 0.5, "Noclip activated");

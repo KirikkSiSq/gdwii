@@ -449,7 +449,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
     
     float x = ((parent_obj->x - state.camera_x) * SCALE);
     get_fade_vars(parent_obj, x, &fade_x, &fade_y, &fade_scale);
-
+    set_texture(particleTex);
     for (int i = 0; i < MAX_PARTICLES; i++) {
         Particle *p = &state.particles[i];
 
@@ -462,9 +462,10 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
             if (p->blending) {
                 GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
             }
+
             switch(p->texture_id) { 
                 case PARTICLE_SQUARE:
-                    GRRLIB_DrawImg(
+                    custom_drawImg(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         particleTex,
                         0,
@@ -478,7 +479,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
                     );
                     break;
                 case PARTICLE_CIRCLE:
-                    GRRLIB_Circle(
+                    custom_circle(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         p->scale,
                         RGBA(
@@ -491,7 +492,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
                     );
                     break;
                 case PARTICLE_CIRCUNFERENCE:
-                    GRRLIB_Circle(
+                    custom_circle(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         p->scale,
                         RGBA(
@@ -502,7 +503,7 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
                         ),
                         FALSE
                     );
-                    GRRLIB_Circle(
+                    custom_circle(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         p->scale - 1,
                         RGBA(
@@ -518,4 +519,5 @@ void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
             GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
         }
     }
+    set_texture(prev_tex);
 }

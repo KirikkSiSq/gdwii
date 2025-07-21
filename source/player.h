@@ -8,6 +8,8 @@
 
 #define MAX_LEVEL_HEIGHT 2400.f
 
+#define MAX_COLLIDED_OBJECTS 4096
+
 typedef struct {
     float x;
     float y;
@@ -33,6 +35,8 @@ typedef struct {
     bool mini;
     bool upside_down;
     bool dead;
+
+    bool gravity_change;
 
     float ball_rotation_speed;
 

@@ -277,6 +277,8 @@ extern int layersDrawn;
 
 extern int beat_pulse;
 
+extern GRRLIB_texImg *prev_tex;
+
 void update_beat();
 void draw_end_wall();
 
