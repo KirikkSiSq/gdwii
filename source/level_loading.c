@@ -692,13 +692,6 @@ int compare_sortable_layers(const void *a, const void *b) {
 
     if (zorderA != zorderB)
         return zorderA - zorderB; // Ascending
-    
-    int layer_numA = layerSortA->layerNum;
-    int layer_numB = layerSortB->layerNum;
-
-    if (layer_numA != layer_numB) {
-        return layer_numA - layer_numB; // Ascending
-    } 
 
     return layerSortA->originalIndex - layerSortB->originalIndex; // Stable fallback
 }
@@ -734,7 +727,6 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
 
         assign_layer_to_section(&sortable_list[i]);
     }
-    
 }
 
 void free_typed_object_array(GDObjectTyped **array, int count) {

@@ -22,10 +22,9 @@ int game_loop() {
     MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
 
     while (1) {
-        WPAD_ScanPads();
         start_frame = gettime();
-        u64 currentTicks = gettime();
-        float frameTime = ticks_to_secs_float(currentTicks - prevTicks);
+        WPAD_ScanPads();
+        float frameTime = ticks_to_secs_float(start_frame - prevTicks);
         dt = frameTime;
 
         if (frameTime > 1) frameTime = 1; // Avoid spiral of death
@@ -33,7 +32,7 @@ int game_loop() {
             frameTime = STEPS_DT;
             fixed_dt = FALSE;
         }
-        prevTicks = currentTicks;
+        prevTicks = start_frame;
 
         accumulator += frameTime;
 

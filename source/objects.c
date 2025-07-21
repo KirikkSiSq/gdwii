@@ -474,6 +474,18 @@ bool p1_trail = FALSE;
 
 struct TriggerBuffer trigger_buffer[COL_CHANNEL_COUNT];
 
+int find_existing_texture(int curr_object, const unsigned char *texture) {
+    for (s32 object = 1; object < curr_object; object++) {
+        for (s32 layer = 0; layer < MAX_OBJECT_LAYERS; layer++) {
+            const unsigned char *loaded_texture = objects[object].layers[layer].texture;
+            if (loaded_texture == texture) {
+                return (object * MAX_OBJECT_LAYERS) + layer;
+            }
+        }
+    }
+    return -1;
+}
+
 void load_spritesheet() {
     // Load Textures 
     bg = GRRLIB_LoadTexturePNG(game_bg_png);
@@ -484,17 +496,27 @@ void load_spritesheet() {
     for (s32 object = 1; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < MAX_OBJECT_LAYERS; layer++) {
             // Skip unused layers
-            if (!objects[object].layers[layer].texture) continue;
+            const unsigned char *texture = objects[object].layers[layer].texture;
+            if (!texture) continue;
 
             printf("Loading texture of object %d layer %d\n", object, layer);
             
-            GRRLIB_texImg *image = GRRLIB_LoadTexturePNG((const u8 *) objects[object].layers[layer].texture);
-            if (image == NULL || image->data == NULL) {
-                printf("Couldn't load texture of object %d layer %d\n", object, layer);
+            int existing = find_existing_texture(object, texture);
+            if (existing < 0) {
+                GRRLIB_texImg *image = GRRLIB_LoadTexturePNG((const u8 *) texture);
+                if (image == NULL || image->data == NULL) {
+                    printf("Couldn't load texture of object %d layer %d\n", object, layer);
+                } else {
+                    printf("Loaded texture of object %d layer %d\n", object, layer);
+                    GRRLIB_SetHandle(image, (image->w/2), (image->h/2));
+                    object_images[object][layer] = image;
+                }
             } else {
-                printf("Loaded texture of object %d layer %d\n", object, layer);
-                GRRLIB_SetHandle(image, (image->w/2), (image->h/2));
-                object_images[object][layer] = image;
+                int object_found = existing / MAX_OBJECT_LAYERS;
+                int layer_found = existing % MAX_OBJECT_LAYERS;
+
+                printf("Texture already loaded in object %d layer %d\n", object_found, layer_found);
+                object_images[object][layer] = object_images[object_found][layer_found];
             }
         }
     }
@@ -1110,6 +1132,15 @@ float get_rotation_speed(GDObjectTyped *obj) {
     return 0;
 }
 
+int compare_by_layer_index(const void *a, const void *b) {
+    GDLayerSortable *la = *(GDLayerSortable **)a;
+    GDLayerSortable *lb = *(GDLayerSortable **)b;
+
+    int layerA = la->layer->layerNum;
+    int layerB = lb->layer->layerNum;
+    return layerA - layerB;
+}
+
 void draw_all_object_layers() {
     u64 t0 = gettime();
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
@@ -1157,6 +1188,24 @@ void draw_all_object_layers() {
 
     // Sort globally
     qsort(visible_layers, visible_count, sizeof(GDLayerSortable*), compare_sortable_layers);
+    int i = 0;
+    while (i < visible_count) {
+        int obj_id = visible_layers[i]->layer->obj->id;
+        int j = i + 1;
+
+        // Find run of same object
+        while (j < visible_count &&
+            visible_layers[j]->layer->obj->id == obj_id) {
+            j++;
+        }
+
+        // Reorder [i, j) to group layers by increasing layer index
+        if (j - i > 1) {
+            qsort(&visible_layers[i], j - i, sizeof(GDLayerSortable*), compare_by_layer_index);
+        }
+
+        i = j;
+    }
     
     u64 t1 = gettime();
     layer_sorting = ticks_to_microsecs(t1 - t0) / 1000.f;
