@@ -1273,6 +1273,8 @@ void draw_all_object_layers() {
     prev_tex = NULL;
     prev_blending = GRRLIB_BLEND_ALPHA;
     GRRLIB_SetBlend(prev_blending);
+    
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
 }
 
 void handle_col_triggers() {

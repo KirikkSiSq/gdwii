@@ -356,6 +356,7 @@ void update_particles() {
 }
 
 void draw_particles(int group_id) {
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
     GRRLIB_texImg *p1TrailTex = get_p1_trail_tex();
     set_texture(p1TrailTex);
 
@@ -453,6 +454,7 @@ void draw_particles(int group_id) {
 }
 
 void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
     int fade_x = 0;
     int fade_y = 0;
 

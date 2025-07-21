@@ -190,8 +190,6 @@ float iSlerp(float a, float b, float ratio, float dt) {
 	return slerp(a, b, iRatio);
 }
 
-extern Mtx                 GXmodelView2D;
-
 static guVector axis = (guVector){0.0f, 0.0f, 1.0f};
 
 void set_texture(const GRRLIB_texImg *tex) {
@@ -250,7 +248,6 @@ void  custom_drawImg (const f32 xpos, const f32 ypos, const GRRLIB_texImg *tex, 
         GX_Color1u32   (color);
         GX_TexCoord2f32(0, 1);
     GX_End();
-    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
 }
 
 void  custom_gxengine (const guVector v[], const u32 color[], const u16 n,
