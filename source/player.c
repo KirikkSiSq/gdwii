@@ -673,9 +673,13 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         RGBA(p2.r, p2.g, p2.b, 255)
     );
 
+    float y_rot = (player->upside_down) ? -4 : 12;
+    if (player->mini) {
+        y_rot = (player->upside_down) ? 0 : 9.6;
+    }
     rotate_point_around_center_gfx(
         get_mirror_x(calc_x, state.mirror_factor), calc_y,
-        0, ((player->upside_down) ? -4 : 12) * (player->mini ? 0.8 : 1),
+        0, y_rot,
         38, 30,
         76, 48,
         calculated_rotation,
@@ -712,7 +716,7 @@ void draw_player() {
 
     MotionTrail_Update(&trail, dt);
     MotionTrail_Draw(&trail);
-    
+
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
 
