@@ -1116,6 +1116,7 @@ float get_rotation_speed(GDObjectTyped *obj) {
 
 void draw_all_object_layers() {
     
+    u64 t0 = gettime();
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
 
@@ -1125,7 +1126,6 @@ void draw_all_object_layers() {
         GX_SetCopyFilter(rmode->aa, rmode->sample_pattern, GX_TRUE, rmode->vfilter);
     }
     
-    u64 t0 = gettime();
     float screen_x_max = screenWidth + 90.0f;
     float screen_y_max = screenHeight + 90.0f;
 
@@ -1179,13 +1179,15 @@ void draw_all_object_layers() {
             draw_particles(HOLDING_SHIP_TRAIL);
             draw_player();
             draw_particles(SHIP_DRAG);
-                    
+            
+            // Restore variables
             GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
             GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+            set_texture(prev_tex);
+            GRRLIB_SetBlend(prev_blending);
         } else if (obj_id - 1 < OBJECT_COUNT) {
             float calc_x = ((obj->x - state.camera_x) * SCALE);
             float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
-            layersDrawn++;
 
             int fade_val = get_fade_value(calc_x, screenWidth);
             bool fade_edge = (fade_val == 255 || fade_val == 0);
@@ -1196,12 +1198,14 @@ void draw_all_object_layers() {
             if (is_layer0 && objects[obj_id].is_saw) {
                 obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
             }
+
             u64 t0 = gettime();
             handle_object_particles(obj, layer); 
             u64 t1 = gettime();
             obj_particles_time += ticks_to_microsecs(t1 - t0) / 1000.f;
 
             put_object_layer(obj, calc_x, calc_y, layer);
+            layersDrawn++;
         }
     }
     
