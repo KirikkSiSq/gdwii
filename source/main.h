@@ -52,6 +52,7 @@ extern float player_time;
 extern float draw_time;
 extern float layer_sorting;
 extern float obj_particles_time;
+extern float player_draw_time;
 
 extern int number_of_collisions;
 extern int number_of_collisions_checks;

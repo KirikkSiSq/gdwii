@@ -67,6 +67,7 @@ float frame_time = 0;
 float obj_particles_time = 0;
 float draw_time = 0;
 float layer_sorting = 0;
+float player_draw_time = 0;
 
 
 
@@ -77,8 +78,6 @@ int number_of_collisions_checks = 0;
 void draw_game() {
     draw_background(state.background_x / 8, -(state.camera_y / 8) + 416);
 
-    draw_particles(GLITTER_EFFECT);
-    
     u64 t0 = gettime();
     draw_all_object_layers();
     u64 t1 = gettime();
@@ -126,7 +125,7 @@ void draw_game() {
         GRRLIB_Printf(20, 110, font, RGBA(255,255,255,255), 0.5, player_y);
         
         char obj_layer[64];
-        snprintf(obj_layer, sizeof(obj_layer), "Layers: %.2f ms (P: %.2f, Sort: %.2f, D: %.2f)", obj_layer_time, obj_particles_time, layer_sorting, draw_time);
+        snprintf(obj_layer, sizeof(obj_layer), "GFX: %.2f ms (Pl: %.2f Pt: %.2f, St: %.2f, D: %.2f)", obj_layer_time, player_draw_time, obj_particles_time, layer_sorting, draw_time);
         GRRLIB_Printf(20, 140, font, RGBA(255,255,255,255), 0.5, obj_layer);
         
         char physics[128];

@@ -654,9 +654,9 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         calculated_rotation,
         &x, &y
     );
-
+    set_texture(icon_l1);
     // Top (icon)
-    GRRLIB_DrawImg(
+    custom_drawImg(
         x + 6 - (30), y + 6 - (30),
         icon_l1,
         calculated_rotation,
@@ -664,7 +664,8 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         RGBA(p1.r, p1.g, p1.b, 255)
     );
 
-    GRRLIB_DrawImg(
+    set_texture(icon_l2);
+    custom_drawImg(
         x + 6 - (30), y + 6 - (30),
         icon_l2,
         calculated_rotation,
@@ -681,8 +682,9 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         &x, &y
     );
 
+    set_texture(ship_l1);
     // Bottom (ship)
-    GRRLIB_DrawImg(
+    custom_drawImg(
         x + 6 - (30), y + 6 - (30),
         ship_l1,
         calculated_rotation,
@@ -690,7 +692,8 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
         RGBA(p1.r, p1.g, p1.b, 255)
     );
 
-    GRRLIB_DrawImg(
+    set_texture(ship_l2);
+    custom_drawImg(
         x + 6 - (30), y + 6 - (30),
         ship_l2,
         calculated_rotation,
@@ -708,8 +711,10 @@ void draw_player() {
     GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
 
     MotionTrail_Update(&trail, dt);
-    // Draw if not mirroring
     MotionTrail_Draw(&trail);
+    
+    GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
 
     GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
 
@@ -721,8 +726,9 @@ void draw_player() {
         case GAMEMODE_CUBE:
             GRRLIB_SetHandle(icon_l1, 30, 30);
             GRRLIB_SetHandle(icon_l2, 30, 30);
-
-            GRRLIB_DrawImg(
+        
+            set_texture(icon_l1);
+            custom_drawImg(
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l1,
                 player->lerp_rotation * state.mirror_mult,
@@ -731,7 +737,8 @@ void draw_player() {
                 RGBA(p1.r, p1.g, p1.b, 255)
             );
 
-            GRRLIB_DrawImg(
+            set_texture(icon_l2);
+            custom_drawImg(
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l2,
                 player->lerp_rotation * state.mirror_mult,
@@ -746,7 +753,8 @@ void draw_player() {
         case GAMEMODE_BALL:
             GRRLIB_SetHandle(ball_l1, 36, 36);
             GRRLIB_SetHandle(ball_l2, 36, 36);
-            GRRLIB_DrawImg(
+            set_texture(ball_l1);
+            custom_drawImg(
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (36), calc_y + 6 - (36),
                 ball_l1,
                 player->lerp_rotation * state.mirror_mult,
@@ -755,7 +763,8 @@ void draw_player() {
                 RGBA(p1.r, p1.g, p1.b, 255)
             );
 
-            GRRLIB_DrawImg(
+            set_texture(ball_l2);
+            custom_drawImg(
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (36), calc_y + 6 - (36),
                 ball_l2,
                 player->lerp_rotation * state.mirror_mult,
@@ -765,6 +774,7 @@ void draw_player() {
             );
             break;
     }
+    set_texture(prev_tex);
 }
 
 GRRLIB_texImg *get_p1_trail_tex() {

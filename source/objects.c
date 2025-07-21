@@ -913,7 +913,6 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
         }
     }
     
-    u64 t0 = gettime();
     GRRLIB_texImg *tex = get_randomized_texture(image, obj, layer);
     if (prev_tex != tex) {
         prev_tex = tex;
@@ -936,9 +935,6 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
         /* Scale Y  */ 0.73333333333333333333333333333333 * y_flip_mult * fade_scale, 
         /* Color    */ color
     );
-    u64 t1 = gettime();
-    
-    draw_time += ticks_to_microsecs(t1 - t0) / 1000.f;
 }
 
 
@@ -1115,7 +1111,6 @@ float get_rotation_speed(GDObjectTyped *obj) {
 }
 
 void draw_all_object_layers() {
-    
     u64 t0 = gettime();
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
@@ -1165,6 +1160,9 @@ void draw_all_object_layers() {
     
     u64 t1 = gettime();
     layer_sorting = ticks_to_microsecs(t1 - t0) / 1000.f;
+    
+    draw_particles(GLITTER_EFFECT);
+    layersDrawn = visible_count;
 
     // Draw in sorted order
     for (int i = 0; i < visible_count; i++) {
@@ -1174,18 +1172,20 @@ void draw_all_object_layers() {
         int obj_id = obj->id;
 
         if (obj_id == PLAYER_OBJECT) {
+            u64 t2 = gettime();
             draw_particles(CUBE_DRAG);
             draw_particles(SHIP_TRAIL);
             draw_particles(HOLDING_SHIP_TRAIL);
             draw_player();
             draw_particles(SHIP_DRAG);
-            
+            u64 t3 = gettime();
+            player_draw_time = ticks_to_microsecs(t3 - t2) / 1000.f;
+
             // Restore variables
-            GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
-            GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
             set_texture(prev_tex);
             GRRLIB_SetBlend(prev_blending);
-        } else if (obj_id - 1 < OBJECT_COUNT) {
+        } else if (obj_id < OBJECT_COUNT) {
+            u64 t0 = gettime();
             float calc_x = ((obj->x - state.camera_x) * SCALE);
             float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
 
@@ -1199,15 +1199,19 @@ void draw_all_object_layers() {
                 obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
             }
 
-            u64 t0 = gettime();
             handle_object_particles(obj, layer); 
             u64 t1 = gettime();
-            obj_particles_time += ticks_to_microsecs(t1 - t0) / 1000.f;
-
+            obj_particles_time += t1 - t0;
+            
+            t0 = gettime();
             put_object_layer(obj, calc_x, calc_y, layer);
-            layersDrawn++;
+            t1 = gettime();
+            draw_time += t1 - t0;
         }
     }
+
+    draw_time = ticks_to_microsecs(draw_time) / 1000.f;
+    obj_particles_time = ticks_to_microsecs(obj_particles_time) / 1000.f;
     
     GX_SetTevOp  (GX_TEVSTAGE0, GX_PASSCLR);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);

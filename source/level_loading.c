@@ -662,31 +662,6 @@ void free_typed_object_list(GDTypedObjectList *list) {
     free(list);
 }
 
-int compare_typed_objects(const void *a, const void *b) {
-    GDObjectSortable *objA = (GDObjectSortable *)a;
-    GDObjectSortable *objB = (GDObjectSortable *)b;
-
-    int zlayerA = objA->obj->zlayer;
-    int zlayerB = objB->obj->zlayer;
-
-    if (zlayerA != zlayerB)
-        return zlayerA - zlayerB; // Ascending
-       
-    int zsheetlayerA = objA->obj->zsheetlayer;
-    int zsheetlayerB = objB->obj->zsheetlayer;
-
-    if (zsheetlayerA != zsheetlayerB)
-        return zsheetlayerB - zsheetlayerA; // Descending
-
-    int zorderA = objA->obj->zorder;
-    int zorderB = objB->obj->zorder;
-
-    if (zorderA != zorderB)
-        return zorderA - zorderB; // Ascending
-
-    return objA->originalIndex - objB->originalIndex; // Stable fallback
-}
-
 int compare_sortable_layers(const void *a, const void *b) {
     GDLayerSortable *layerSortA = *(GDLayerSortable **)a;
     GDLayerSortable *layerSortB = *(GDLayerSortable **)b;
@@ -717,6 +692,13 @@ int compare_sortable_layers(const void *a, const void *b) {
 
     if (zorderA != zorderB)
         return zorderA - zorderB; // Ascending
+    
+    int layer_numA = layerSortA->layerNum;
+    int layer_numB = layerSortB->layerNum;
+
+    if (layer_numA != layer_numB) {
+        return layer_numA - layer_numB; // Ascending
+    } 
 
     return layerSortA->originalIndex - layerSortB->originalIndex; // Stable fallback
 }
@@ -739,6 +721,7 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
         
         sortable_list[i].layer = list->layers[i];
         sortable_list[i].originalIndex = i;
+        sortable_list[i].layerNum = list->layers[i]->layerNum;
         
         // GD epicness
         if (sortable_list[i].layer->obj->id != PLAYER_OBJECT) {

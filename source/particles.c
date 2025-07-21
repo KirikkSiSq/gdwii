@@ -356,6 +356,7 @@ void update_particles() {
 }
 
 void draw_particles(int group_id) {
+    set_texture(particleTex);
     for (int i = 0; i < MAX_PARTICLES; i++) {
         Particle *p = &state.particles[i];
 
@@ -368,7 +369,7 @@ void draw_particles(int group_id) {
             }
             switch(p->texture_id) { 
                 case PARTICLE_SQUARE:
-                    GRRLIB_DrawImg(
+                    custom_drawImg(
                         get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         particleTex,
                         0,
@@ -382,7 +383,7 @@ void draw_particles(int group_id) {
                     );
                     break;
                 case PARTICLE_CIRCLE:
-                    GRRLIB_Circle(
+                    custom_circle(
                         get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         p->scale,
                         RGBA(
@@ -395,7 +396,7 @@ void draw_particles(int group_id) {
                     );
                     break;
                 case PARTICLE_CIRCUNFERENCE:
-                    GRRLIB_Circle(
+                    custom_circle(
                         get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         p->scale,
                         RGBA(
@@ -406,7 +407,7 @@ void draw_particles(int group_id) {
                         ),
                         FALSE
                     );
-                    GRRLIB_Circle(
+                    custom_circle(
                         get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         p->scale-1,
                         RGBA(
@@ -420,8 +421,9 @@ void draw_particles(int group_id) {
                     break;
                 case PARTICLE_P1_TRAIL:
                     GRRLIB_texImg *p1TrailTex = get_p1_trail_tex();
-
-                    GRRLIB_DrawImg(
+                    
+                    set_texture(p1TrailTex);
+                    custom_drawImg(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 - (p1TrailTex->w/2), calc_y + 6 - (p1TrailTex->h/2),
                         p1TrailTex,
                         p->rotation * state.mirror_mult,
@@ -433,12 +435,14 @@ void draw_particles(int group_id) {
                             p->color.a
                         )
                     );
+                    set_texture(particleTex);
                     break;
             }
             
             GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
         }
     }
+    set_texture(prev_tex);
 }
 
 void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {

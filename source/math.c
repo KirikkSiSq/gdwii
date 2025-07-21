@@ -212,7 +212,6 @@ void set_texture(const GRRLIB_texImg *tex) {
 }
 
 void  custom_drawImg (const f32 xpos, const f32 ypos, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color) {
-    GXTexObj  texObj;
     Mtx       m, m1, m2, mv;
 
     guMtxIdentity  (m1);
