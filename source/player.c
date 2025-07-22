@@ -398,6 +398,26 @@ void run_player() {
     player->width = 30 * scale;
 
     trail.stroke = 10.f * scale;
+    
+    // Ground
+    if (getBottom(player) <= player->ground_y) {
+        if (player->upside_down) {
+            player->on_ceiling = TRUE;
+        } else {
+            player->on_ground = TRUE;           
+        }
+        player->time_since_ground = 0; 
+    } 
+
+    // Ceiling
+    if (getTop(player) >= player->ceiling_y) {
+        if (player->upside_down) {
+            player->on_ground = TRUE;
+        } else {
+            player->on_ceiling = TRUE;           
+        } 
+        player->time_since_ground = 0; 
+    } 
 
     switch (player->gamemode) {
         case GAMEMODE_CUBE:
@@ -438,13 +458,9 @@ void run_player() {
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
     player->x += player->vel_x * STEPS_DT;
 
+    // Ground
     if (player->gamemode == GAMEMODE_SHIP) update_ship_rotation(player);
     
-    player->gravity_change = FALSE;
-    player->on_ground = FALSE;
-    player->on_ceiling = FALSE;
-    
-    // Ground
     if (getBottom(player) < player->ground_y) {
         if (player->gamemode == GAMEMODE_CUBE && player->upside_down) {
             player->dead = TRUE;
@@ -453,26 +469,15 @@ void run_player() {
 
         player->vel_y = 0;
         player->y = player->ground_y + (player->height / 2);
-        
-        if (player->upside_down) {
-            player->on_ceiling = TRUE;
-        } else {
-            player->on_ground = TRUE;           
-        }
-        player->time_since_ground = 0;
-    } 
+    }
 
     // Ceiling
     if (getTop(player) > player->ceiling_y) {
         player->vel_y = 0;
         player->y = player->ceiling_y - (player->height / 2);
-        if (player->upside_down) {
-            player->on_ground = TRUE;
-        } else {
-            player->on_ceiling = TRUE;           
-        }
-        player->time_since_ground = 0;  
+ 
     } 
+
     
     // End level
     if (player->x > level_info.wall_x + 30) {
@@ -500,17 +505,21 @@ void handle_player() {
         player->buffering_state = BUFFER_NONE;
     }
     
-    u32 t0 = gettime();
-    run_player();
-    u32 t1 = gettime();
-    player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
+    player->gravity_change = FALSE;
+    player->on_ground = FALSE;
+    player->on_ceiling = FALSE;
 
-    t0 = gettime();
+    u32 t0 = gettime();
     collide_with_objects();
-    t1 = gettime();
+    u32 t1 = gettime();
     collision_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
     
+    t0 = gettime();
+    run_player();
+    t1 = gettime();
+    player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
 
+    
     run_camera();
     handle_mirror_transition();
 
