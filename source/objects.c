@@ -1149,7 +1149,12 @@ int compare_by_layer_index(const void *a, const void *b) {
 
     int layerA = la->layer->layerNum;
     int layerB = lb->layer->layerNum;
-    return layerA - layerB;
+
+    if (layerA != layerB) {
+        return layerA - layerB;
+    } 
+
+    return la->originalIndex - lb->originalIndex;
 }
 
 void draw_all_object_layers() {
