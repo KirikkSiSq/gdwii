@@ -399,25 +399,27 @@ void run_player() {
 
     trail.stroke = 10.f * scale;
     
-    // Ground
-    if (getBottom(player) <= player->ground_y) {
-        if (player->upside_down) {
-            player->on_ceiling = TRUE;
-        } else {
-            player->on_ground = TRUE;           
-        }
-        player->time_since_ground = 0; 
-    } 
-
-    // Ceiling
-    if (getTop(player) >= player->ceiling_y) {
-        if (player->upside_down) {
-            player->on_ground = TRUE;
-        } else {
-            player->on_ceiling = TRUE;           
+    if (!player->left_ground) {
+        // Ground
+        if (getBottom(player) <= player->ground_y) {
+            if (player->upside_down) {
+                player->on_ceiling = TRUE;
+            } else {
+                player->on_ground = TRUE;           
+            }
+            player->time_since_ground = 0; 
         } 
-        player->time_since_ground = 0; 
-    } 
+
+        // Ceiling
+        if (getTop(player) >= player->ceiling_y) {
+            if (player->upside_down) {
+                player->on_ground = TRUE;
+            } else {
+                player->on_ceiling = TRUE;           
+            } 
+            player->time_since_ground = 0; 
+        } 
+    }
 
     switch (player->gamemode) {
         case GAMEMODE_CUBE:
@@ -458,6 +460,8 @@ void run_player() {
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
     player->x += player->vel_x * STEPS_DT;
 
+    player->left_ground = FALSE;
+
     // Ground
     if (player->gamemode == GAMEMODE_SHIP) update_ship_rotation(player);
     
@@ -475,10 +479,8 @@ void run_player() {
     if (getTop(player) > player->ceiling_y) {
         player->vel_y = 0;
         player->y = player->ceiling_y - (player->height / 2);
- 
     } 
 
-    
     // End level
     if (player->x > level_info.wall_x + 30) {
         level_info.completing = TRUE;

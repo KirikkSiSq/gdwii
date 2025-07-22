@@ -126,6 +126,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             MotionTrail_ResumeStroke(&trail);
             player->vel_y = jump_heights_table[JUMP_YELLOW_PAD][player->gamemode][player->mini];
             player->on_ground = FALSE;
+            player->left_ground = TRUE;
             
             particle_templates[USE_EFFECT].start_scale = 0;
             particle_templates[USE_EFFECT].end_scale = 60;
@@ -155,6 +156,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 
             MotionTrail_ResumeStroke(&trail);
             player->gravity_change = TRUE;
+            player->left_ground = TRUE;
 
             player->vel_y = jump_heights_table[JUMP_BLUE_PAD][player->gamemode][player->mini];
             player->upside_down ^= 1;
@@ -188,6 +190,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 
                 player->on_ground = FALSE;
                 player->on_ceiling = FALSE;
+                player->left_ground = TRUE;
                 player->buffering_state = BUFFER_END;
 
                 particle_templates[USE_EFFECT].start_scale = 50;
@@ -222,6 +225,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 
                 player->on_ground = FALSE;
                 player->on_ceiling = FALSE;
+                player->left_ground = TRUE;
                 player->buffering_state = BUFFER_END;
 
                 particle_templates[USE_EFFECT].start_scale = 50;
@@ -304,6 +308,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                 player->vel_y /= -2;
                 player->upside_down = FALSE;
+                player->left_ground = TRUE;
 
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
@@ -327,6 +332,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                 player->vel_y /= -2;
                 player->upside_down = TRUE;
+                player->left_ground = TRUE;
 
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
