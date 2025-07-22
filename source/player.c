@@ -87,7 +87,7 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
                 if (!player->gravity_change) player->on_ground = TRUE;
                 player->time_since_ground = 0;
             } else {
-                if (player->gamemode == GAMEMODE_SHIP) {
+                if (player->gamemode != GAMEMODE_CUBE) {
                     if (gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) {
                         player->vel_y = 0;
                         player->on_ceiling = TRUE;
