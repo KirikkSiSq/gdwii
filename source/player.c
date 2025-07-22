@@ -75,22 +75,23 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
     int clip = (player->gamemode == GAMEMODE_SHIP ? 7 : 10);
     switch (hitbox->type) {
         case HITBOX_SOLID: 
-
+            bool padHitBefore = (!state.old_player.on_ground && player->gravity_change && ((state.old_player.vel_y <= 0 && player->vel_y > 0) || (state.old_player.vel_y >= 0 && player->vel_y < 0)));
+            
             if (obj_gravTop(player, obj) - gravBottom(player) > clip && intersect(
                 player->x, player->y, 9, 9, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 player->dead = TRUE;
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0 || player->gravity_change)) {
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0)) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
-                if (!player->gravity_change) player->on_ground = TRUE;
+                player->on_ground = TRUE;
                 player->time_since_ground = 0;
             } else {
-                if (player->gamemode != GAMEMODE_CUBE) {
-                    if (gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) {
+                if (player->gamemode != GAMEMODE_CUBE || padHitBefore) {
+                    if ((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) || padHitBefore) {
                         player->vel_y = 0;
-                        player->on_ceiling = TRUE;
+                        if (!padHitBefore) player->on_ceiling = TRUE;
                         player->time_since_ground = 0;
                         player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
                     }
@@ -500,14 +501,15 @@ void handle_player() {
     }
     
     u32 t0 = gettime();
-    collide_with_objects();
+    run_player();
     u32 t1 = gettime();
+    player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
+
+    t0 = gettime();
+    collide_with_objects();
+    t1 = gettime();
     collision_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
     
-    t0 = gettime();
-    run_player();
-    t1 = gettime();
-    player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
 
     run_camera();
     handle_mirror_transition();
