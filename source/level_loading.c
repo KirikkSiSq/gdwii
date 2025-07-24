@@ -838,45 +838,100 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
         return 0;
     }
 
-    char *red_bg = get_metadata_value(level_string, "kS1");
+    char *v19_bg = get_metadata_value(level_string, "kS29");
 
-    if (!red_bg) { // 1.9 only
-        parse_color_channel(channels, 0, get_metadata_value(level_string, "kS29"));
-        channels[0].channelID = 1000;
-        parse_color_channel(channels, 1, get_metadata_value(level_string, "kS30"));
-        channels[1].channelID = 1001;
+    int i = 0;
+
+    if (v19_bg) { // 1.9 only
+        parse_color_channel(channels, i, v19_bg);
+        channels[i].channelID = BG;
+        i++;
+
+        parse_color_channel(channels, i, get_metadata_value(level_string, "kS30"));
+        channels[i].channelID = GROUND;
+        i++;
+
+        char *line = get_metadata_value(level_string, "kS31");
+        if (line) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, line);
+            channels[i].channelID = LINE;
+            i++;
+        }
+        
+        char *obj = get_metadata_value(level_string, "kS32");
+        if (obj) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, obj);
+            channels[i].channelID = OBJ;
+            i++;
+        }
         
         *outArray = channels;
-        return 2;
+        return i;
     }
 
-    int bg_r = atoi(red_bg);
+    int bg_r = atoi(get_metadata_value(level_string, "kS1"));
     int bg_g = atoi(get_metadata_value(level_string, "kS2"));
     int bg_b = atoi(get_metadata_value(level_string, "kS3"));
 
     GDColorChannel bg_channel = {0};
-    bg_channel.channelID = 1000;
+    bg_channel.channelID = BG;
     bg_channel.fromRed = bg_r;
     bg_channel.fromGreen = bg_g;
     bg_channel.fromBlue = bg_b;
 
-    channels[0] = bg_channel;
+    channels[i] = bg_channel;
+    i++;
 
     int g_r = atoi(get_metadata_value(level_string, "kS4"));
     int g_g = atoi(get_metadata_value(level_string, "kS5"));
     int g_b = atoi(get_metadata_value(level_string, "kS6"));
 
     GDColorChannel g_channel = {0};
-    g_channel.channelID = 1001;
+    g_channel.channelID = GROUND;
     g_channel.fromRed = g_r;
     g_channel.fromGreen = g_g;
     g_channel.fromBlue = g_b;
     
-    channels[1] = g_channel;
+    channels[i] = g_channel;
+    i++;
+
+    char *line_r = get_metadata_value(level_string, "kS7");
+    char *line_g = get_metadata_value(level_string, "kS8");
+    char *line_b = get_metadata_value(level_string, "kS9");
+
+    if (line_r && line_g && line_b) {
+        GDColorChannel line_channel = {0};
+        line_channel.channelID = LINE;
+        line_channel.fromRed = atoi(line_r);
+        line_channel.fromGreen = atoi(line_g);
+        line_channel.fromBlue = atoi(line_b);
+        
+        channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+        channels[i] = line_channel;
+        i++;
+    }
+
+    char *obj_r = get_metadata_value(level_string, "kS10");
+    char *obj_g = get_metadata_value(level_string, "kS11");
+    char *obj_b = get_metadata_value(level_string, "kS12");
+
+    if (obj_r && obj_g && obj_b) {
+        GDColorChannel obj_channel = {0};
+        obj_channel.channelID = OBJ;
+        obj_channel.fromRed = atoi(obj_r);
+        obj_channel.fromGreen = atoi(obj_g);
+        obj_channel.fromBlue = atoi(obj_b);
+        
+        channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+        channels[i] = obj_channel;
+        i++;
+    }
 
     *outArray = channels;
 
-    return 2;
+    return i;
 }
 
 GDTypedObjectList *objectsArrayList = NULL;
@@ -936,7 +991,8 @@ void load_level(char *data) {
     }
 
     sort_layers_by_layer(layersArrayList);
-
+    
+    reset_color_channels();
     set_color_channels();
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
 
@@ -965,28 +1021,66 @@ void unload_level() {
     full_init_variables();
 }
 
+void reset_color_channels() {
+    for (s32 i = 0; i < 999; i++) {
+        channels[i].color.r = 255;
+        channels[i].color.g = 255;
+        channels[i].color.b = 255;
+        channels[i].blending = FALSE;
+    }
+
+    channels[BG].color.r = 56;
+    channels[BG].color.g = 121;
+    channels[BG].color.b = 255;
+    channels[BG].blending = FALSE;
+    
+    channels[GROUND].color.r = 56;
+    channels[GROUND].color.g = 121;
+    channels[GROUND].color.b = 255;
+    channels[GROUND].blending = FALSE;
+
+    channels[LINE].color.r = 255;
+    channels[LINE].color.g = 255;
+    channels[LINE].color.b = 255;
+    channels[LINE].blending = TRUE;
+
+    channels[OBJ].color.r = 255;
+    channels[OBJ].color.g = 255;
+    channels[OBJ].color.b = 255;
+    channels[OBJ].blending = FALSE;
+
+    channels[P1].color = p1;
+    channels[P1].blending = TRUE;
+    channels[P2].color = p2;
+    channels[P2].blending = TRUE;
+    
+    channels[BLACK].color.r = 0;
+    channels[BLACK].color.g = 0;
+    channels[BLACK].color.b = 0;
+    channels[BLACK].blending = FALSE;
+
+    channels[WHITE].color.r = 255;
+    channels[WHITE].color.g = 255;
+    channels[WHITE].color.b = 255;
+    channels[WHITE].blending = FALSE;
+}
+
 void set_color_channels() {
     for (int i = 0; i < channelCount; i++) {
         GDColorChannel colorChannel = colorChannels[i];
-        
-        switch (colorChannel.channelID) {
-            case 1000:
-                channels[BG].color.r = colorChannel.fromRed;
-                channels[BG].color.g = colorChannel.fromGreen;
-                channels[BG].color.b = colorChannel.fromBlue;
+        int id = colorChannel.channelID;
+
+        switch (id) {
+            case P1:
+            case P2:
+            case BLACK:
+            case WHITE:
                 break;
 
-            case 1001:
-                channels[GROUND].color.r = colorChannel.fromRed;
-                channels[GROUND].color.g = colorChannel.fromGreen;
-                channels[GROUND].color.b = colorChannel.fromBlue;
-                break;
-            
-            case 1002:
-                channels[LINE].color.r = colorChannel.fromRed;
-                channels[LINE].color.g = colorChannel.fromGreen;
-                channels[LINE].color.b = colorChannel.fromBlue;
-                break;
+            default:
+                channels[id].color.r = colorChannel.fromRed;
+                channels[id].color.g = colorChannel.fromGreen;
+                channels[id].color.b = colorChannel.fromBlue;
         }
     }
 }
@@ -1004,5 +1098,6 @@ void reload_level() {
         obj->collided = FALSE;
         obj->transition_applied = FADE_NONE;
     }
+    reset_color_channels();
     set_color_channels();
 }

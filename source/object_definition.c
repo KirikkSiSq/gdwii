@@ -52,7 +52,7 @@ const ObjectDefinition trigger = {
 
 
 const struct ObjectLayer player_layer = {
-    .col_channel = UNMODIFIABLE,
+    .col_channel = WHITE,
     .zlayer_offset = 0,
     .texture = NULL
 };
@@ -313,14 +313,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_01_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_01_front_001_png
             }
@@ -336,14 +336,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_02_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_02_front_001_png
             }
@@ -359,14 +359,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_03_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_03_front_001_png
             }
@@ -382,14 +382,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_04_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_04_front_001_png
             }
@@ -406,7 +406,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = rod_01_001_png
             },
@@ -443,7 +443,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = rod_02_001_png
             },
@@ -466,7 +466,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = rod_03_001_png
             },
@@ -566,7 +566,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = bump_01_001_png
             }
@@ -586,7 +586,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = ring_01_001_png
             }
@@ -688,14 +688,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_05_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_05_front_001_png
             }
@@ -711,14 +711,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_06_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_06_front_001_png
             }
@@ -734,14 +734,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_07_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_07_front_001_png
             }
@@ -1066,7 +1066,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = gravbump_01_001_png
             }
@@ -1554,7 +1554,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = gravring_01_001_png
             }
@@ -1929,14 +1929,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_08_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_08_front_001_png
             }
@@ -1953,14 +1953,14 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = -1,
                 .texture = portal_09_back_001_png
             },
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = UNMODIFIABLE,
+                .col_channel = WHITE,
                 .zlayer_offset = 0,
                 .texture = portal_09_front_001_png
             }
@@ -1999,5 +1999,6 @@ const ObjectDefinition objects[] = {
         .def_zorder = 2,
         .num_layers = 2
     },
+    trigger,
     trigger,
 };

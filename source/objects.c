@@ -27,89 +27,7 @@ float jump_heights_table[JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
     /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18}, {-169.04160, -135.2295}},
 };
 
-struct ColorChannel channels[COL_CHANNEL_COUNT] = {
-    // BG
-    {
-        .color = {
-            .r = 56,
-            .g = 121,
-            .b = 255,
-        },
-        .blending = FALSE
-    },
-    // Ground
-    {
-        .color = {
-            .r = 56,
-            .g = 121,
-            .b = 255,
-        },
-        .blending = FALSE
-    },
-    // Obj
-    {
-        .color = {
-            .r = 255,
-            .g = 255,
-            .b = 255,
-        },
-        .blending = FALSE
-    },
-    // Line
-    {
-        .color = {
-            .r = 255,
-            .g = 255,
-            .b = 255,
-        },
-        .blending = TRUE
-    },
-    // Black
-    {
-        .color = {
-            .r = 0,
-            .g = 0,
-            .b = 0,
-        },
-        .blending = FALSE
-    },
-    // LBG -- add later
-    {
-        .color = {
-            .r = 0,
-            .g = 0,
-            .b = 0,
-        },
-        .blending = FALSE
-    },
-    // P1
-    {
-        .color = {
-            .r = 0,
-            .g = 255,
-            .b = 0,
-        },
-        .blending = TRUE
-    },
-    // P2
-    {
-        .color = {
-            .r = 0,
-            .g = 255,
-            .b = 255,
-        },
-        .blending = TRUE
-    },
-    // Unmodifiable (white)
-    {
-        .color = {
-            .r = 255,
-            .g = 255,
-            .b = 255,
-        },
-        .blending = FALSE
-    }
-};
+struct ColorChannel channels[COL_CHANNEL_COUNT];
 
 float get_mirror_x(float x, float factor) {
     return x + factor * (screenWidth - 2.0f * x);
@@ -1390,6 +1308,17 @@ void handle_triggers(GDObjectTyped *obj) {
                     buffer = &trigger_buffer[LINE];
                     buffer->active = TRUE;
                     buffer->old_color = channels[LINE].color;
+                    buffer->new_color.r = obj->trig_colorR;
+                    buffer->new_color.g = obj->trig_colorG;
+                    buffer->new_color.b = obj->trig_colorB;
+                    buffer->seconds = obj->trig_duration;
+                    buffer->time_run = 0;
+                    break;
+                
+                case OBJ_TRIGGER:
+                    buffer = &trigger_buffer[OBJ];
+                    buffer->active = TRUE;
+                    buffer->old_color = channels[OBJ].color;
                     buffer->new_color.r = obj->trig_colorR;
                     buffer->new_color.g = obj->trig_colorG;
                     buffer->new_color.b = obj->trig_colorB;

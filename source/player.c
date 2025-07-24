@@ -1,6 +1,5 @@
 #include "player.h"
 #include "collision.h"
-#include "objects.h"
 #include "level_loading.h"
 #include "main.h"
 #include <wiiuse/wpad.h>
@@ -13,6 +12,7 @@
 #include "game.h"
 #include "custom_mp3player.h"
 #include "trail.h"
+#include "objects.h"
 
 GRRLIB_texImg *icon_l1;
 GRRLIB_texImg *icon_l2;

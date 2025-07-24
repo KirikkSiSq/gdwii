@@ -2,6 +2,7 @@
 
 #include <stdbool.h>
 #include <grrlib.h>
+#include "math.h"
 
 #define SCREEN_WIDTH_AREA ((screenWidth / BLOCK_SIZE_PX) * 30) 
 #define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
@@ -58,6 +59,9 @@ enum PlayerGamemode {
     GAMEMODE_BALL,
     GAMEMODE_COUNT
 };
+
+extern Color p1;
+extern Color p2;
 
 void handle_death();
 void init_variables();

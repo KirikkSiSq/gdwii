@@ -1,7 +1,5 @@
 #pragma once
 
-#include "objects.h"
-
 typedef enum {
     GD_VAL_INT,
     GD_VAL_FLOAT,
@@ -149,4 +147,5 @@ void free_typed_object_array(GDObjectTyped **array, int count);
 void load_level(char *data);
 void unload_level();
 void reload_level();
+void reset_color_channels();
 void set_color_channels();

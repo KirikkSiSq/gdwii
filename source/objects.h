@@ -1,8 +1,9 @@
 #pragma once
 
 #include <grrlib.h>
-#include "level_loading.h"
 #include "player.h"
+#include "math.h"
+#include "level_loading.h"
 
 #define MAX_OBJECT_LAYERS 4
 
@@ -136,6 +137,7 @@ enum Objects {
     MEDIUM_SPIKE,
 
     LINE_TRIGGER,
+    OBJ_TRIGGER,
 
     OBJECT_COUNT
 };
@@ -159,15 +161,18 @@ enum JumpType {
 };
 
 enum ColChannels {
-    BG,
+    BG = 1000,
     GROUND,
-    OBJ,
     LINE,
-    BLACK,
-    LBG,
+    THREEDL,
+    OBJ,
     P1,
     P2,
-    UNMODIFIABLE,
+    LBG,
+    // 1008 is skipped
+    G2 = 1009,
+    BLACK,
+    WHITE,
     COL_CHANNEL_COUNT
 };
 
@@ -195,19 +200,6 @@ enum SpriteSheets {
     SHEET_PORTALS,
     SHEET_COUNT
 };
-
-typedef struct {
-    u8 r;
-    u8 b;
-    u8 g;
-} Color;
-
-typedef struct {
-    float r;
-    float g;
-    float b;
-    float a;
-} ColorAlpha;
 
 struct ColorChannel {
     Color color;
