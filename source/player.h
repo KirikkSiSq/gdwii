@@ -37,7 +37,7 @@ typedef struct {
     bool upside_down;
     bool dead;
 
-    bool gravity_change;
+    bool touching_gravity_pad;
     bool left_ground;
 
     float ball_rotation_speed;

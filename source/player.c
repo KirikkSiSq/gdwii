@@ -75,7 +75,9 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
     int clip = (player->gamemode == GAMEMODE_SHIP ? 7 : 10);
     switch (hitbox->type) {
         case HITBOX_SOLID: 
-            bool padHitBefore = (!state.old_player.on_ground && player->gravity_change && ((state.old_player.vel_y <= 0 && player->vel_y > 0) || (state.old_player.vel_y >= 0 && player->vel_y < 0)));
+            //if (state.old_player.upside_down != player->upside_down) return;
+
+            bool padHitBefore = (!state.old_player.on_ground && player->touching_gravity_pad);
             
             if (obj_gravTop(player, obj) - gravBottom(player) > clip && intersect(
                 player->x, player->y, 9, 9, 0, 
@@ -115,7 +117,7 @@ void collide_with_obj(GDObjectTyped *obj) {
     Player *player = &state.player;
     ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
 
-    if (hitbox->type != HITBOX_NONE && !obj->activated && obj->id < OBJECT_COUNT) {
+    if (hitbox->type != HITBOX_NONE && obj->id < OBJECT_COUNT) {
         number_of_collisions_checks++;
         if (hitbox->is_circular) {
             if (intersect_rect_circle(
@@ -507,7 +509,7 @@ void handle_player() {
         player->buffering_state = BUFFER_NONE;
     }
     
-    player->gravity_change = FALSE;
+    player->touching_gravity_pad = FALSE;
     player->on_ground = FALSE;
     player->on_ceiling = FALSE;
 
