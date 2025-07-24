@@ -77,23 +77,33 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
         case HITBOX_SOLID: 
             //if (state.old_player.upside_down != player->upside_down) return;
 
-            bool padHitBefore = !state.old_player.on_ground && player->touching_gravity_pad && DIFFERENT_SIGN(state.old_player.vel_y, player->vel_y);
+            bool gravSnap = FALSE;
+
+            if (player->gravObj) {
+                // Only do the funny grav snap if player is touching pad and internal hitbox is touching block
+                bool internalCollidingBlock = intersect(
+                    player->x, player->y, 9, 9, 0, 
+                    obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
+                );
+
+                gravSnap = !state.old_player.on_ground && internalCollidingBlock;
+            }
             
-            if (obj_gravTop(player, obj) - gravBottom(player) > clip && intersect(
+            if (!gravSnap && obj_gravTop(player, obj) - gravBottom(player) > clip && intersect(
                 player->x, player->y, 9, 9, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 player->dead = TRUE;
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0 || padHitBefore)) {
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0 || gravSnap)) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
-                if (!padHitBefore) player->on_ground = TRUE;
+                if (!gravSnap) player->on_ground = TRUE;
                 player->time_since_ground = 0;
             } else {
-                if (player->gamemode != GAMEMODE_CUBE || padHitBefore) {
-                    if ((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) || padHitBefore) {
+                if (player->gamemode != GAMEMODE_CUBE || gravSnap) {
+                    if ((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) || gravSnap) {
                         player->vel_y = 0;
-                        if (!padHitBefore) player->on_ceiling = TRUE;
+                        if (!gravSnap) player->on_ceiling = TRUE;
                         player->time_since_ground = 0;
                         player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
                     }
@@ -512,6 +522,8 @@ void handle_player() {
     player->touching_gravity_pad = FALSE;
     player->on_ground = FALSE;
     player->on_ceiling = FALSE;
+
+    player->gravObj = NULL;
 
     u32 t0 = gettime();
     collide_with_objects();

@@ -67,6 +67,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             break;
 
         case BLUE_PAD:
+            player->gravObj = obj;
             if (obj->activated) {
                 if (obj->hitbox_counter == 1) {
                     player->touching_gravity_pad = TRUE;
@@ -142,6 +143,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
         case BLUE_ORB:
             if (!obj->activated && (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
+                player->gravObj = obj;
                 player->touching_gravity_pad = TRUE;
                 
                 player->vel_y = jump_heights_table[JUMP_BLUE_ORB][player->gamemode][player->mini];
@@ -234,7 +236,12 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             break;
         
         case BLUE_GRAVITY_PORTAL:
-            if (!obj->activated) {
+            player->gravObj = obj;
+            if (obj->activated) {
+                if (obj->hitbox_counter == 1) {
+                    player->touching_gravity_pad = TRUE;
+                }
+            } else {
                 if (player->upside_down) {
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                     player->vel_y /= -2;
@@ -260,7 +267,12 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             }
             break;
         case YELLOW_GRAVITY_PORTAL:
-            if (!obj->activated) {
+            player->gravObj = obj;
+            if (obj->activated) {
+                if (obj->hitbox_counter == 1) {
+                    player->touching_gravity_pad = TRUE;
+                }
+            } else {
                 if (!player->upside_down) {
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                     player->vel_y /= -2;

@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <grrlib.h>
 #include "math.h"
+#include "level_loading.h"
 
 #define SCREEN_WIDTH_AREA ((screenWidth / BLOCK_SIZE_PX) * 30) 
 #define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
@@ -45,6 +46,8 @@ typedef struct {
     int buffering_state;
 
     float time_since_ground;
+
+    GDObjectTyped *gravObj;
 } Player;
 
 enum BufferingState {
