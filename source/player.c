@@ -88,8 +88,10 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
 
                 gravSnap = !state.old_player.on_ground && internalCollidingBlock;
             }
+
+            bool safeZone = (obj_gravTop(player, obj) - gravBottom(player) <= clip) || (gravTop(player) - obj_gravBottom(player, obj) <= clip);
             
-            if (!gravSnap && obj_gravTop(player, obj) - gravBottom(player) > clip && intersect(
+            if (!gravSnap && !safeZone && intersect(
                 player->x, player->y, 9, 9, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
