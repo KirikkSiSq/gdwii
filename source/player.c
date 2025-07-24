@@ -77,17 +77,17 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
         case HITBOX_SOLID: 
             //if (state.old_player.upside_down != player->upside_down) return;
 
-            bool padHitBefore = (!state.old_player.on_ground && player->touching_gravity_pad);
+            bool padHitBefore = !state.old_player.on_ground && player->touching_gravity_pad && DIFFERENT_SIGN(state.old_player.vel_y, player->vel_y);
             
             if (obj_gravTop(player, obj) - gravBottom(player) > clip && intersect(
                 player->x, player->y, 9, 9, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 player->dead = TRUE;
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0)) {
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0 || padHitBefore)) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
-                player->on_ground = TRUE;
+                if (!padHitBefore) player->on_ground = TRUE;
                 player->time_since_ground = 0;
             } else {
                 if (player->gamemode != GAMEMODE_CUBE || padHitBefore) {

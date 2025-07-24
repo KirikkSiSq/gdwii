@@ -112,8 +112,7 @@ char *extract_gmd_key(const char *data, const char *key, const char *type) {
     snprintf(start_tag, sizeof(start_tag), "<k>%s</k><%s>", key, type);
     char end_tag[32];
     snprintf(end_tag, sizeof(end_tag), "</%s>", type);
-
-    printf("Searching for key '%s' in input...\n", key);
+    
     char *start = strstr(data, start_tag);
     if (!start) {
         printf("Could not find start tag '%s'\n", start_tag);
@@ -1096,6 +1095,7 @@ void reload_level() {
         GDObjectTyped *obj = objectsArrayList->objects[i];
         obj->activated = FALSE;
         obj->collided = FALSE;
+        obj->hitbox_counter = 0;
         obj->transition_applied = FADE_NONE;
     }
     reset_color_channels();

@@ -1,6 +1,9 @@
 #pragma once
 #include <grrlib.h>
 
+#define SAME_SIGN(v1,v2) (v1>=0)==(v2>=0)
+#define DIFFERENT_SIGN(v1,v2) (v1>=0)!=(v2>=0)
+
 typedef struct {
     float x, y;
 } Vec2D;

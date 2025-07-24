@@ -67,8 +67,11 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             break;
 
         case BLUE_PAD:
-            if (obj->activated) player->touching_gravity_pad = TRUE;
-            else {
+            if (obj->activated) {
+                if (obj->hitbox_counter == 1) {
+                    player->touching_gravity_pad = TRUE;
+                }
+            } else {
                 float rotation = adjust_angle(obj->rotation, obj->flippedV, obj->flippedH);
                 if ((rotation < 90 || rotation > 270) && player->upside_down)
                     break;
@@ -405,6 +408,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             }
             break;
     }
+    if (!obj->collided) obj->hitbox_counter++; 
 }
 
 // Prepare Graphics
