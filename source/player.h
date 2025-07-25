@@ -46,6 +46,8 @@ typedef struct {
     int buffering_state;
 
     float time_since_ground;
+    
+    float ufo_last_y;
 
     GDObjectTyped *gravObj;
 } Player;
@@ -60,6 +62,7 @@ enum PlayerGamemode {
     GAMEMODE_CUBE,
     GAMEMODE_SHIP,
     GAMEMODE_BALL,
+    GAMEMODE_UFO,
     GAMEMODE_COUNT
 };
 

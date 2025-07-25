@@ -20,6 +20,9 @@ GRRLIB_texImg *ship_l1;
 GRRLIB_texImg *ship_l2;
 GRRLIB_texImg *ball_l1;
 GRRLIB_texImg *ball_l2;
+GRRLIB_texImg *ufo_l1;
+GRRLIB_texImg *ufo_l2;
+GRRLIB_texImg *ufo_dome;
 
 GRRLIB_texImg *trail_tex;
 
@@ -349,6 +352,82 @@ void ball_gamemode(Player *player) {
     }
 }
 
+void ufo_particles(Player *player) {
+    int mult = (player->upside_down ? -1 : 1);
+    float scale = (player->mini) ? 0.6f : 1.f;
+    
+    float x, y;
+    rotate_point_around_center(
+        player->x, player->y,
+        player->rotation,
+        player->x, player->y + (player->upside_down ? 10 : -10) * scale,
+        &x, &y
+    );
+    
+    trail.positionR = (Vec2){x, y};  
+    trail.startingPositionInitialized = TRUE;
+
+    if ((frame_counter & 0b11) == 0) {   
+        // Particle trail
+        if ((frame_counter & 0b11) == 0) {
+            spawn_particle(UFO_TRAIL, player->x, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 6), NULL);
+        }
+        
+        // Jump particles
+        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A) {
+            for (s32 i = 0; i < 5; i++) {
+                spawn_particle(UFO_JUMP, x, y, NULL);
+            }
+        }
+
+        // Ground drag effect
+        if (player->on_ground) {
+            particle_templates[SHIP_DRAG].speed = 95 * mult;
+            particle_templates[SHIP_DRAG].gravity_y = (player->upside_down ? 100 : -300);
+            spawn_particle(SHIP_DRAG, player->x, (player->upside_down ? getTop(player) : getBottom(player)), NULL);
+        }
+    }
+}
+
+void ufo_gamemode(Player *player) {
+    int mult = (player->upside_down ? -1 : 1);
+
+    if (player->buffering_state == BUFFER_READY && (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
+        player->vel_y = maxf(player->vel_y, player->mini ? 358.992 : 371.034);
+        player->buffering_state = BUFFER_END;
+        player->ufo_last_y = player->y;
+    } else {
+        if (player->vel_y > grav(player, 103.485492)) {
+            player->gravity = player->mini ? -1969.92 : -1671.84;
+        } else {
+            player->gravity = player->mini ? -1308.96 : -1114.56;
+        }
+    }
+
+    ufo_particles(player);
+
+    if (player->on_ground) {
+        player->ufo_last_y = player->y;
+    }
+
+    float y_diff = (player->y - player->ufo_last_y) * mult;
+
+    if (y_diff >= 0) {
+        player->rotation = map_range(y_diff, 0.f, 60.f, 0.f, 10.f) * mult;
+    } else {
+        player->rotation = -map_range(-y_diff, 0.f, 300.f, 0.f, 25.f) * mult;
+    }
+
+    float min = player->mini ? -406.566f : -345.6f;
+    float max = player->mini ? 508.248f : 432.0f;
+
+    if (player->vel_y < min) {
+        player->vel_y = min;
+    } else if (player->vel_y > max) {
+        player->vel_y = max;
+    }
+}
+
 void run_camera() {
     Player *player = &state.player;
 
@@ -464,11 +543,26 @@ void run_player() {
                 spawn_particle(P1_TRAIL, player->x, player->y, NULL);
             }
             break;
-        
+        case GAMEMODE_UFO:
+            MotionTrail_ResumeStroke(&trail);
+            spawn_glitter_particles();
+            ufo_gamemode(player);
+
+            if (p1_trail && (frame_counter & 0b1111) == 0) {
+                particle_templates[P1_TRAIL].start_scale = 0.73333f * scale / 1.8;
+                particle_templates[P1_TRAIL].end_scale = 0.73333f * scale / 1.8;
+                spawn_particle(P1_TRAIL, player->x, player->y, NULL);
+            }
+            break;
     }
     
     player->time_since_ground += STEPS_DT;
-    player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
+    
+    if (player->gamemode == GAMEMODE_UFO) {
+        player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.075f, STEPS_DT);
+    } else {
+        player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
+    }
     
     player->vel_y += player->gravity * STEPS_DT;
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
@@ -571,6 +665,22 @@ void full_init_variables() {
     particle_templates[P1_TRAIL].end_color.r = p1.r;
     particle_templates[P1_TRAIL].end_color.g = p1.g;
     particle_templates[P1_TRAIL].end_color.b = p1.b;
+    
+    particle_templates[UFO_JUMP].start_color.r = p1.r;
+    particle_templates[UFO_JUMP].start_color.g = p1.g;
+    particle_templates[UFO_JUMP].start_color.b = p1.b;
+    
+    particle_templates[UFO_JUMP].end_color.r = p1.r;
+    particle_templates[UFO_JUMP].end_color.g = p1.g;
+    particle_templates[UFO_JUMP].end_color.b = p1.b;
+
+    particle_templates[UFO_TRAIL].start_color.r = p2.r;
+    particle_templates[UFO_TRAIL].start_color.g = p2.g;
+    particle_templates[UFO_TRAIL].start_color.b = p2.b;
+    
+    particle_templates[UFO_TRAIL].end_color.r = p2.r;
+    particle_templates[UFO_TRAIL].end_color.g = p2.g;
+    particle_templates[UFO_TRAIL].end_color.b = p2.b;
 
     init_variables();
 }
@@ -636,6 +746,9 @@ void load_icons() {
     ship_l2 = GRRLIB_LoadTexturePNG(ship_01_2_001_png);
     ball_l1 = GRRLIB_LoadTexturePNG(player_ball_01_001_png);
     ball_l2 = GRRLIB_LoadTexturePNG(player_ball_01_2_001_png);
+    ufo_l1 = GRRLIB_LoadTexturePNG(bird_01_001_png);
+    ufo_l2 = GRRLIB_LoadTexturePNG(bird_01_2_001_png);
+    ufo_dome = GRRLIB_LoadTexturePNG(bird_01_3_001_png);
     trail_tex = GRRLIB_LoadTexturePNG(trail_png);
 
     p1.r = 0;
@@ -658,10 +771,10 @@ void unload_icons() {
 }
 
 void draw_ship(Player *player, float calc_x, float calc_y) {
-    GRRLIB_SetHandle(icon_l1, 30, 30);  // 60x60
-    GRRLIB_SetHandle(icon_l2, 30, 30);
-    GRRLIB_SetHandle(ship_l1, 38, 24);  // 76x48
-    GRRLIB_SetHandle(ship_l2, 38, 24);
+    GRRLIB_SetHandle(icon_l1, icon_l1->w / 2, icon_l1->h / 2);
+    GRRLIB_SetHandle(icon_l2, icon_l2->w / 2, icon_l2->h / 2);
+    GRRLIB_SetHandle(ship_l1, ship_l1->w / 2, ship_l1->h / 2);
+    GRRLIB_SetHandle(ship_l2, ship_l2->w / 2, ship_l2->h / 2);
     
     float scale = (player->mini) ? 0.6f : 1.f;
 
@@ -735,6 +848,110 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
     );
 }
 
+void draw_ufo(Player *player, float calc_x, float calc_y) {
+    GRRLIB_SetHandle(icon_l1,  icon_l1->w / 2,  icon_l1->h / 2);
+    GRRLIB_SetHandle(icon_l2,  icon_l2->w / 2,  icon_l2->h / 2);
+    GRRLIB_SetHandle(ufo_l1,   ufo_l1->w / 2,   ufo_l1->h / 2); 
+    GRRLIB_SetHandle(ufo_l2,   ufo_l2->w / 2,   ufo_l2->h / 2); 
+    GRRLIB_SetHandle(ufo_dome, ufo_dome->w / 2, ufo_dome->h / 2); 
+    
+    float scale = (player->mini) ? 0.6f : 1.f;
+
+    int mult = (player->upside_down ? -1 : 1);
+
+    float x;
+    float y;
+
+    float calculated_scale = 0.733f * state.mirror_mult * scale;
+    float calculated_rotation = player->lerp_rotation * state.mirror_mult;
+
+    #define CUBE_DIVISOR 1.8
+    float y_rot = (player->upside_down) ? 20 : -4;
+    if (player->mini) {
+        y_rot = (player->upside_down) ? 16 : 2;
+    }
+    rotate_point_around_center_gfx(
+        get_mirror_x(calc_x, state.mirror_factor), calc_y,
+        6, y_rot,
+        ufo_l1->w / 2, ufo_l1->h / 2,
+        ufo_l1->w, ufo_l1->h,
+        calculated_rotation,
+        &x, &y
+    );
+
+    // Dome
+    set_texture(ufo_dome);
+    custom_drawImg(
+        x + 6 - (30), y + 6 - (30),
+        ufo_dome,
+        calculated_rotation,
+        calculated_scale, (0.733f * scale) * mult,
+        0xffffffff
+    );
+
+    // Top (icon)
+    rotate_point_around_center_gfx(
+        get_mirror_x(calc_x, state.mirror_factor), calc_y,
+        8, ((player->upside_down) ? 5 : -9) * scale,
+        ufo_l1->w / 2, ufo_l1->h / 2,
+        icon_l1->w, icon_l1->h,
+        calculated_rotation,
+        &x, &y
+    );
+
+    set_texture(icon_l1);
+
+    custom_drawImg(
+        x + 6 - (30), y + 6 - (30),
+        icon_l1,
+        calculated_rotation,
+        calculated_scale / CUBE_DIVISOR, (0.733f * scale) / CUBE_DIVISOR,
+        RGBA(p1.r, p1.g, p1.b, 255)
+    );
+
+    set_texture(icon_l2);
+    custom_drawImg(
+        x + 6 - (30), y + 6 - (30),
+        icon_l2,
+        calculated_rotation,
+        calculated_scale / CUBE_DIVISOR, (0.733f * scale) / CUBE_DIVISOR,
+        RGBA(p2.r, p2.g, p2.b, 255)
+    );
+
+    // Bottom (ufo)
+    y_rot = (player->upside_down) ? 2 : 23;
+    if (player->mini) {
+        y_rot = (player->upside_down) ? 6 : 19;
+    }
+    rotate_point_around_center_gfx(
+        get_mirror_x(calc_x, state.mirror_factor), calc_y,
+        0, y_rot,
+        ufo_l1->w / 2, ufo_l1->h / 2,
+        ufo_l1->w, ufo_l1->h,
+        calculated_rotation,
+        &x, &y
+    );
+
+    set_texture(ufo_l1);
+    custom_drawImg(
+        x + 6 - (30), y + 6 - (30),
+        ufo_l1,
+        calculated_rotation,
+        calculated_scale, (0.733f * scale) * mult,
+        RGBA(p1.r, p1.g, p1.b, 255)
+    );
+
+    set_texture(ufo_l2);
+    custom_drawImg(
+        x + 6 - (30), y + 6 - (30),
+        ufo_l2,
+        calculated_rotation,
+        calculated_scale, (0.733f * scale) * mult,
+        RGBA(p2.r, p2.g, p2.b, 255)
+    );
+}
+
+
 void draw_player() {
     Player *player = &state.player;
 
@@ -805,6 +1022,9 @@ void draw_player() {
                 0.73333333333333333333333333333333 * scale,
                 RGBA(p2.r, p2.g, p2.b, 255)
             );
+            break;
+        case GAMEMODE_UFO:
+            draw_ufo(player, calc_x - 8 * state.mirror_mult, calc_y);
             break;
     }
     set_texture(prev_tex);

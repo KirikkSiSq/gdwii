@@ -246,7 +246,43 @@ ParticleTemplate particle_templates[] = {
         .minRadius = 0,
         .maxRadius = 0,
         .texture_id = PARTICLE_P1_TRAIL
-    }
+    },
+    [UFO_JUMP] = {
+        .angle = 0, .angleVar = 180,
+        .speed = 80, .speedVar = 4,
+        .gravity_x = 0, .gravity_y = 0,
+        .life = 0.4f, .lifeVar = 0.15f,
+        .start_scale = 0.25, .start_scaleVar = 0.2,
+        .end_scale = 0, .end_scaleVar = 0,
+        .start_color = {0,0,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {0,0,0,255},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 5, .sourcePosVarY = 5,
+        .rotatePerSecond = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE
+    },
+    [UFO_TRAIL] = {
+        .angle = 0, .angleVar = 45,
+        .speed = 15, .speedVar = 4,
+        .gravity_x = 0, .gravity_y = -300,
+        .life = 0.3f, .lifeVar = 0.15f,
+        .start_scale = 0.25, .start_scaleVar = 0.2,
+        .end_scale = 0, .end_scaleVar = 0,
+        .start_color = {0,0,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {0,0,0,255},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 1, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE
+    },
 };
 
 void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {

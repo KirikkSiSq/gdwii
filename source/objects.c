@@ -22,12 +22,12 @@
 #include <ogc/lwp_watchdog.h>
 
 float jump_heights_table[JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
-    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},   {518.4,      414.72002}},
-    /* YELLOW ORB */ {{603.72,   482.976},  {603.72,   482.976}, {422.60399,  338.08319}},
-    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48}, {-207.36001, -165.88801}},
-    /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18}, {-169.04160, -135.2295}},
-    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},  {362.88001,  290.30401}},
-    /* PINK ORB   */ {{434.7,    347.76},   {223.398,  178.686}, {325.42019,  260.3286}},
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},   {518.4,      414.72002},  {432,      691.2}},
+    /* YELLOW ORB */ {{603.72,   482.976},  {603.72,   482.976}, {422.60399,  338.08319},  {603.72,   482.976}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48}, {-207.36001, -165.88801}, {-345.6,   -276.48}},
+    /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18}, {-169.04160, -135.2295},  {-241.488, -193.185}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},  {362.88001,  290.30401},  {345.6,    276.4}},
+    /* PINK ORB   */ {{434.7,    347.76},   {223.398,  178.686}, {325.42019,  260.3286},   {258.984,  207.198}},
 };
 
 struct ColorChannel channels[COL_CHANNEL_COUNT];
@@ -268,7 +268,6 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             }
             break;
             
-        case UFO_PORTAL: //placeholder
         case SHIP_PORTAL: 
             if (!obj->activated) {
                 player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
@@ -479,6 +478,39 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 
+                obj->activated = TRUE;
+            }
+            break;
+        case UFO_PORTAL:
+            if (!obj->activated) {
+                player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
+                player->ceiling_y = player->ground_y + 300;
+                set_intended_ceiling(player);
+
+                if (player->gamemode != GAMEMODE_UFO) {
+                    player->vel_y /= (state.old_player.gamemode == GAMEMODE_SHIP) ? 4 : 2;
+                    player->gamemode = GAMEMODE_UFO;
+                    player->ufo_last_y = player->y;
+
+                    if (state.old_player.gamemode == GAMEMODE_SHIP) {
+                        player->buffering_state = BUFFER_READY;
+                    }
+
+                    particle_templates[USE_EFFECT].start_scale = 80;
+                    particle_templates[USE_EFFECT].end_scale = 0;
+
+                    particle_templates[USE_EFFECT].start_color.r = 255;
+                    particle_templates[USE_EFFECT].start_color.g = 127;
+                    particle_templates[USE_EFFECT].start_color.b = 0;
+                    particle_templates[USE_EFFECT].start_color.a = 0;
+
+                    particle_templates[USE_EFFECT].end_color.r = 255;
+                    particle_templates[USE_EFFECT].end_color.g = 127;
+                    particle_templates[USE_EFFECT].end_color.b = 0;
+                    particle_templates[USE_EFFECT].end_color.a = 255;
+
+                    spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+                }
                 obj->activated = TRUE;
             }
             break;
@@ -736,6 +768,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             break;
 
         case ORANGE_MIRROR_PORTAL:
+        case UFO_PORTAL:
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
 
@@ -1305,6 +1338,8 @@ void draw_all_object_layers() {
             draw_particles(CUBE_DRAG);
             draw_particles(SHIP_TRAIL);
             draw_particles(HOLDING_SHIP_TRAIL);
+            draw_particles(UFO_JUMP);
+            draw_particles(UFO_TRAIL);
             draw_player();
             draw_particles(SHIP_DRAG);
             u64 t3 = gettime();

@@ -66,6 +66,8 @@ enum ParticleGroupID {
     USE_EFFECT,
     ORB_HITBOX_EFFECT,
     P1_TRAIL,
+    UFO_JUMP,
+    UFO_TRAIL,
 };
 
 extern ParticleTemplate particle_templates[];
