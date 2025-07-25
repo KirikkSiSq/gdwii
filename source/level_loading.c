@@ -721,9 +721,12 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
         // GD epicness
         if (sortable_list[i].layer->obj->id != PLAYER_OBJECT) {
             int zlayer = sortable_list[i].layer->obj->zlayer;
-            bool blending = channels[sortable_list[i].layer->layer->col_channel].blending;
-            if (blending ^ (zlayer % 2 == 0)) {
-                sortable_list[i].layer->obj->zlayer--;
+            int col_channel = sortable_list[i].layer->layer->col_channel;
+            if (col_channel != OBJ_BLENDING) {
+                bool blending = channels[col_channel].blending;
+                if (blending ^ (zlayer % 2 == 0)) {
+                    sortable_list[i].layer->obj->zlayer--;
+                }
             }
         }
 
