@@ -223,7 +223,7 @@ void cube_gamemode(Player *player) {
     player->rotation += 415.3848f * STEPS_DT * mult * (player->mini ? 1.2f : 1.f);
 
     if (player->on_ground) {
-        MotionTrail_StopStroke(&trail);
+        if (!state.old_player.on_ground) MotionTrail_StopStroke(&trail);
         player->rotation = round(player->rotation / 90.0f) * 90.0f;
     }
 
@@ -322,7 +322,7 @@ void ball_gamemode(Player *player) {
     
     if (player->on_ground || player->on_ceiling) {
         player->ball_rotation_speed = 2.3;
-        MotionTrail_StopStroke(&trail);
+        if (!state.old_player.on_ground) MotionTrail_StopStroke(&trail);
 
         if ((frame_counter & 0b11) == 0) {
             particle_templates[CUBE_DRAG].angle = (player->upside_down ? -90 : 90);
