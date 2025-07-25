@@ -82,9 +82,11 @@ void MotionTrail_ResumeStroke(MotionTrail* trail) {
 }
 
 void MotionTrail_StopStroke(MotionTrail* trail) {
-    trail->lastStopPosition = trail->positionR;
-    trail->wasStopped = true;
-    trail->appendNewPoints = false;
+    if (trail->appendNewPoints) {
+        trail->lastStopPosition = trail->positionR;
+        trail->wasStopped = true;
+        trail->appendNewPoints = false;
+    }
 }
 
 void MotionTrail_Update(MotionTrail* trail, float delta) {
