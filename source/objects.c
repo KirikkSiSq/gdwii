@@ -49,6 +49,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 player->vel_y = jump_heights_table[JUMP_YELLOW_PAD][player->gamemode][player->mini];
                 player->on_ground = FALSE;
                 player->left_ground = TRUE;
+                player->ufo_last_y = player->y;
                 
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
@@ -75,6 +76,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 player->vel_y = jump_heights_table[JUMP_PINK_PAD][player->gamemode][player->mini];
                 player->on_ground = FALSE;
                 player->left_ground = TRUE;
+                player->ufo_last_y = player->y;
                 
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
@@ -116,6 +118,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 player->vel_y = jump_heights_table[JUMP_BLUE_PAD][player->gamemode][player->mini];
                 player->upside_down ^= 1;
                 player->on_ground = FALSE;
+                player->ufo_last_y = player->y;
                 
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
@@ -148,6 +151,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 player->on_ceiling = FALSE;
                 player->left_ground = TRUE;
                 player->buffering_state = BUFFER_END;
+                player->ufo_last_y = player->y;
 
                 particle_templates[USE_EFFECT].start_scale = 50;
                 particle_templates[USE_EFFECT].end_scale = 0;
@@ -181,6 +185,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 player->on_ceiling = FALSE;
                 player->left_ground = TRUE;
                 player->buffering_state = BUFFER_END;
+                player->ufo_last_y = player->y;
 
                 particle_templates[USE_EFFECT].start_scale = 50;
                 particle_templates[USE_EFFECT].end_scale = 0;
@@ -217,6 +222,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 player->on_ceiling = FALSE;
                 player->left_ground = TRUE;
                 player->buffering_state = BUFFER_END;
+                player->ufo_last_y = player->y;
 
                 particle_templates[USE_EFFECT].start_scale = 50;
                 particle_templates[USE_EFFECT].end_scale = 0;
@@ -309,6 +315,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                     player->vel_y /= -2;
                     player->upside_down = FALSE;
                     player->left_ground = TRUE;
+                    player->ufo_last_y = player->y;
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
@@ -340,6 +347,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                     player->vel_y /= -2;
                     player->upside_down = TRUE;
                     player->left_ground = TRUE;
+                    player->ufo_last_y = player->y;
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
