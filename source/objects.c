@@ -281,7 +281,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 set_intended_ceiling(player);
 
                 if (player->gamemode != GAMEMODE_SHIP) {
-                    player->vel_y /= 2;
+                    player->vel_y /= (player->gamemode == GAMEMODE_UFO) ? 4 : 2;
                     player->gamemode = GAMEMODE_SHIP;
 
                     particle_templates[USE_EFFECT].start_scale = 80;
@@ -421,7 +421,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 if (player->gamemode != GAMEMODE_BALL) {
                     player->ball_rotation_speed = -1.f;
 
-                    if (player->gamemode == GAMEMODE_SHIP) player->vel_y /= 2;
+                    if (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) player->vel_y /= 2;
                     
                     player->gamemode = GAMEMODE_BALL;
 
