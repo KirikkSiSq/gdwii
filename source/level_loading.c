@@ -538,6 +538,9 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
             case 10: // Duration
                 if (type == GD_VAL_FLOAT) typed->trig_duration = val.f;
                 break;
+            case 11: // Touch Triggered
+                if (type == GD_VAL_BOOL) typed->touchTriggered = val.b;
+                break;
             case 24: // Z layer
                 if (type == GD_VAL_INT) typed->zlayer = val.i;
                 break;

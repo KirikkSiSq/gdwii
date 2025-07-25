@@ -25,9 +25,11 @@ typedef struct {
     u8 trig_colorG;      // key 8
     u8 trig_colorB;      // key 9
     float trig_duration;  // key 10
+    bool touchTriggered; // key 11
     int zsheetlayer; // no key has this, but used internally
     int zlayer;      // key 24
     int zorder;      // key 25
+
     int random; // random number assigned to this object
     bool activated; // if it has been activated
     unsigned int hitbox_counter; // number of times the player has entered the hitbox

@@ -135,5 +135,56 @@
 #include "square_06_glow_001_alt_png.h"
 #include "square_07_glow_001_alt_png.h"
 
+#include "d_chain_02_001_png.h"
+#include "d_02_chain_01_001_png.h"
+#include "d_02_chain_02_001_png.h"
+
+#include "portal_10_back_001_png.h"
+#include "portal_10_front_001_png.h"
+
+#include "d_brick_01_001_png.h"
+#include "d_brick_02_001_png.h"
+#include "d_brick_03_001_png.h"
+
+#include "square_f_01_001_png.h"
+#include "square_f_02_001_png.h"
+#include "square_f_03_001_png.h"
+#include "square_f_05_001_png.h"
+#include "square_f_06_001_png.h"
+#include "square_f_07_001_png.h"
+
+#include "d_thorn_01_001_png.h"
+#include "d_thorn_02_001_png.h"
+#include "d_thorn_03_001_png.h"
+#include "d_thorn_04_001_png.h"
+#include "d_thorn_05_001_png.h"
+#include "d_thorn_06_001_png.h"
+
+#include "d_cloud_03_001_png.h"
+#include "d_cloud_04_001_png.h"
+#include "d_cloud_05_001_png.h"
+
+#include "d_arrow_01_001_png.h"
+#include "d_exmark_01_001_png.h"
+#include "d_art_01_001_png.h"
+#include "d_qmark_01_001_png.h"
+
+#include "pit_b_01_001_png.h"
+#include "pit_b_02_001_png.h"
+#include "pit_b_03_001_png.h"
+#include "pit_b_04_001_png.h"
+
+#include "d_wheel_01_001_png.h"
+#include "d_wheel_02_001_png.h"
+#include "d_wheel_03_001_png.h"
+
+#include "bump_03_001_png.h"
+#include "ring_03_001_png.h"
+
+
+
+
+
+
 
 

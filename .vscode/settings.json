@@ -109,7 +109,19 @@
         "d_cogwheel_03_001_png.h": "c",
         "sawblade_03_001_png.h": "c",
         "square_07_glow_001_alt_png.h": "c",
-        "vector": "c"
+        "vector": "c",
+        "theoryofeverything_mp3.h": "c",
+        "d_02_chain_01_001_png.h": "c",
+        "portal_10_front_001_png.h": "c",
+        "square_f_01_001_png.h": "c",
+        "square_f_06_001_png.h": "c",
+        "square_f_07_001_png.h": "c",
+        "d_thorn_01_001_png.h": "c",
+        "d_thorn_03_001_png.h": "c",
+        "d_cloud_03_001_png.h": "c",
+        "d_arrow_01_001_png.h": "c",
+        "pit_b_01_001_png.h": "c",
+        "bump_03_001_png.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

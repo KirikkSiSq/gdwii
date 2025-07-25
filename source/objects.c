@@ -14,6 +14,7 @@
 #include "player.h"
 #include "trail.h"
 #include "level.h"
+#include "collision.h"
 
 #include <wiiuse/wpad.h>
 #include "particles.h"
@@ -25,6 +26,8 @@ float jump_heights_table[JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
     /* YELLOW ORB */ {{603.72,   482.976},  {603.72,   482.976}, {422.60399,  338.08319}},
     /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48}, {-207.36001, -165.88801}},
     /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18}, {-169.04160, -135.2295}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},  {362.88001,  290.30401}},
+    /* PINK ORB   */ {{434.7,    347.76},   {223.398,  178.686}, {325.42019,  260.3286}},
 };
 
 struct ColorChannel channels[COL_CHANNEL_COUNT];
@@ -58,6 +61,32 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 particle_templates[USE_EFFECT].end_color.r = 255;
                 particle_templates[USE_EFFECT].end_color.g = 255;
                 particle_templates[USE_EFFECT].end_color.b = 0;
+                particle_templates[USE_EFFECT].end_color.a = 0;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+                obj->activated = TRUE;
+            }
+            break;
+
+        case PINK_PAD:
+            if (!obj->activated) {
+                MotionTrail_ResumeStroke(&trail);
+                player->vel_y = jump_heights_table[JUMP_PINK_PAD][player->gamemode][player->mini];
+                player->on_ground = FALSE;
+                player->left_ground = TRUE;
+                
+                particle_templates[USE_EFFECT].start_scale = 0;
+                particle_templates[USE_EFFECT].end_scale = 60;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 31;
+                particle_templates[USE_EFFECT].start_color.b = 255;
+                particle_templates[USE_EFFECT].start_color.a = 255;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 31;
+                particle_templates[USE_EFFECT].end_color.b = 255;
                 particle_templates[USE_EFFECT].end_color.a = 0;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -140,6 +169,39 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
             break;
         
+        case PINK_ORB:
+            if (!obj->activated && (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
+                MotionTrail_ResumeStroke(&trail);
+                
+                player->vel_y = jump_heights_table[JUMP_PINK_ORB][player->gamemode][player->mini];
+                
+                player->ball_rotation_speed = -1.f;
+                
+                player->on_ground = FALSE;
+                player->on_ceiling = FALSE;
+                player->left_ground = TRUE;
+                player->buffering_state = BUFFER_END;
+
+                particle_templates[USE_EFFECT].start_scale = 50;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 31;
+                particle_templates[USE_EFFECT].start_color.b = 255;
+                particle_templates[USE_EFFECT].start_color.a = 0;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 31;
+                particle_templates[USE_EFFECT].end_color.b = 255;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+                obj->activated = TRUE;
+            } 
+            if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+            break;
+        
         case BLUE_ORB:
             if (!obj->activated && (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
@@ -206,6 +268,7 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             }
             break;
             
+        case UFO_PORTAL: //placeholder
         case SHIP_PORTAL: 
             if (!obj->activated) {
                 player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
@@ -533,6 +596,36 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             draw_obj_particles(USE_EFFECT, obj);
             break;
 
+        case PINK_ORB:
+            particle_templates[ORB_PARTICLES].start_color.r = 255;
+            particle_templates[ORB_PARTICLES].start_color.g = 31;
+            particle_templates[ORB_PARTICLES].start_color.b = 255;
+
+            particle_templates[ORB_PARTICLES].end_color.r = 255;
+            particle_templates[ORB_PARTICLES].end_color.g = 31;
+            particle_templates[ORB_PARTICLES].end_color.b = 255;
+            if (!state.player.dead) spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
+            draw_obj_particles(ORB_PARTICLES, obj);
+            draw_obj_particles(USE_EFFECT, obj);
+            draw_obj_particles(ORB_HITBOX_EFFECT, obj);
+            break;
+
+        case PINK_PAD:
+            particle_templates[PAD_PARTICLES].angle = 180.f - (adjust_angle_y(obj->rotation, obj->flippedV) + 90.f);
+
+            particle_templates[PAD_PARTICLES].start_color.r = 255;
+            particle_templates[PAD_PARTICLES].start_color.g = 31;
+            particle_templates[PAD_PARTICLES].start_color.b = 255;
+
+            particle_templates[PAD_PARTICLES].end_color.r = 255;
+            particle_templates[PAD_PARTICLES].end_color.g = 31;
+            particle_templates[PAD_PARTICLES].end_color.b = 255;
+
+            if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
+            draw_obj_particles(PAD_PARTICLES, obj);
+            draw_obj_particles(USE_EFFECT, obj);
+            break;
+
         case BLUE_ORB:
             particle_templates[ORB_PARTICLES].start_color.r = 56;
             particle_templates[ORB_PARTICLES].start_color.g = 200;
@@ -748,12 +841,16 @@ int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
     switch (obj->id) {
         case YELLOW_ORB:
         case BLUE_ORB:
+        case PINK_ORB:
         case PULSING_CIRCLE:
         case PULSING_CIRCUNFERENCE:
         case PULSING_HEART:
         case PULSING_DIAMOND:
         case PULSING_STAR:
         case PULSING_NOTE:
+        case D_ARROW:
+        case D_EXMARK:
+        case D_QMARK:
             return 1;
         case ROD_BIG:
         case ROD_MEDIUM:
@@ -771,6 +868,7 @@ float get_object_pulse(float amplitude, GDObjectTyped *obj) {
     switch (obj->id) {
         case YELLOW_ORB:
         case BLUE_ORB:
+        case PINK_ORB:
             return map_range(amplitude, 0.f, 1.f, 0.3f, 1.2f);
         case PULSING_CIRCLE:
         case PULSING_CIRCUNFERENCE:
@@ -782,6 +880,10 @@ float get_object_pulse(float amplitude, GDObjectTyped *obj) {
         case ROD_MEDIUM:
         case ROD_SMALL:
             return amplitude;
+        case D_ARROW:
+        case D_EXMARK:
+        case D_QMARK:
+            return map_range(amplitude, 0.f, 1.f, 0.8f, 1.2f);
     }
     return amplitude;
 }
@@ -797,6 +899,8 @@ GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GDObjectTyped *obj, 
                 return object_images[ROD_BIG][level_info.pulsing_type + 1]; // balls start at 1
             }
             break;
+        case BUSH_GROUND_SPIKE:
+            return object_images[BUSH_GROUND_SPIKE][obj->random & 0b11];
             
     }
 
@@ -836,10 +940,10 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
     float x_offset = objectLayer->x_offset * x_flip_mult;
     float y_offset = objectLayer->y_offset * y_flip_mult;
 
-    GRRLIB_texImg *image = object_images[obj_id][layer_index];
+    GRRLIB_texImg *tex = get_randomized_texture(object_images[obj_id][layer_index], obj, layer);
 
-    int width = image->w;
-    int height = image->h;
+    int width = tex->w;
+    int height = tex->h;
 
     int col_channel = objectLayer->col_channel;
 
@@ -896,7 +1000,6 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
         }
     }
     
-    GRRLIB_texImg *tex = get_randomized_texture(image, obj, layer);
     if (prev_tex != tex) {
         prev_tex = tex;
         set_texture(tex);
@@ -1099,9 +1202,12 @@ float get_rotation_speed(GDObjectTyped *obj) {
         case SAW_DECO_MEDIUM:
         case SAW_DECO_SMALL:
         case SAW_DECO_TINY:
+        case WHEEL_BIG:
+        case WHEEL_MEDIUM:
+        case WHEEL_SMALL:
             return 180.f;
     }
-    return 0;
+    return 0.f;
 }
 
 int compare_by_layer_index(const void *a, const void *b) {
@@ -1268,110 +1374,126 @@ void handle_col_triggers() {
     }
 }
 
+void run_trigger(GDObjectTyped *obj, struct TriggerBuffer *buffer) {
+    switch (obj->id) {
+        case TRIGGER_FADE_NONE:
+            current_fading_effect = FADE_NONE;
+            break;
+            
+        case TRIGGER_FADE_UP:
+            current_fading_effect = FADE_UP;
+            break;
+            
+        case TRIGGER_FADE_DOWN:
+            current_fading_effect = FADE_DOWN;
+            break;
+            
+        case TRIGGER_FADE_RIGHT:
+            current_fading_effect = FADE_RIGHT;
+            break;
+            
+        case TRIGGER_FADE_LEFT:
+            current_fading_effect = FADE_LEFT;
+            break;
+            
+        case TRIGGER_FADE_SCALE_IN:
+            current_fading_effect = FADE_SCALE_IN;
+            break;
+            
+        case TRIGGER_FADE_SCALE_OUT:
+            current_fading_effect = FADE_SCALE_OUT;
+            break;
+        
+        case TRIGGER_FADE_INWARDS:
+            current_fading_effect = FADE_INWARDS;
+            break;
+
+        case TRIGGER_FADE_OUTWARDS:
+            current_fading_effect = FADE_OUTWARDS;
+            break;
+        
+        case TRIGGER_FADE_LEFT_SEMICIRCLE:
+            current_fading_effect = FADE_CIRCLE_LEFT;
+            break;
+
+        case TRIGGER_FADE_RIGHT_SEMICIRCLE:
+            current_fading_effect = FADE_CIRCLE_RIGHT;
+            break;
+
+        case BG_TRIGGER:
+            buffer = &trigger_buffer[BG];
+            buffer->active = TRUE;
+            buffer->old_color = channels[BG].color;
+            buffer->new_color.r = obj->trig_colorR;
+            buffer->new_color.g = obj->trig_colorG;
+            buffer->new_color.b = obj->trig_colorB;
+            buffer->seconds = obj->trig_duration;
+            buffer->time_run = 0;
+            break;
+        
+        case GROUND_TRIGGER:
+            buffer = &trigger_buffer[GROUND];
+            buffer->active = TRUE;
+            buffer->old_color = channels[GROUND].color;
+            buffer->new_color.r = obj->trig_colorR;
+            buffer->new_color.g = obj->trig_colorG;
+            buffer->new_color.b = obj->trig_colorB;
+            buffer->seconds = obj->trig_duration;
+            buffer->time_run = 0;
+            break;
+                    
+        case LINE_TRIGGER:
+        case 915: // gd converts 1.4 line trigger to 2.0 one for some reason
+            buffer = &trigger_buffer[LINE];
+            buffer->active = TRUE;
+            buffer->old_color = channels[LINE].color;
+            buffer->new_color.r = obj->trig_colorR;
+            buffer->new_color.g = obj->trig_colorG;
+            buffer->new_color.b = obj->trig_colorB;
+            buffer->seconds = obj->trig_duration;
+            buffer->time_run = 0;
+            break;
+        
+        case OBJ_TRIGGER:
+            buffer = &trigger_buffer[OBJ];
+            buffer->active = TRUE;
+            buffer->old_color = channels[OBJ].color;
+            buffer->new_color.r = obj->trig_colorR;
+            buffer->new_color.g = obj->trig_colorG;
+            buffer->new_color.b = obj->trig_colorB;
+            buffer->seconds = obj->trig_duration;
+            buffer->time_run = 0;
+            break;
+        
+        case ENABLE_TRAIL:
+            p1_trail = TRUE;
+            break;
+        
+        case DISABLE_TRAIL:
+            p1_trail = FALSE;
+            break;
+    }
+    obj->activated = TRUE;
+}
+
 void handle_triggers(GDObjectTyped *obj) {
     int obj_id = obj->id;
 
     struct TriggerBuffer *buffer = NULL;
 
-    if (objects[obj_id].is_trigger) {
-        if (obj->x < state.player.x && obj->x > state.old_player.x) {
-            switch (obj_id) {
-                case TRIGGER_FADE_NONE:
-                    current_fading_effect = FADE_NONE;
-                    break;
-                    
-                case TRIGGER_FADE_UP:
-                    current_fading_effect = FADE_UP;
-                    break;
-                    
-                case TRIGGER_FADE_DOWN:
-                    current_fading_effect = FADE_DOWN;
-                    break;
-                    
-                case TRIGGER_FADE_RIGHT:
-                    current_fading_effect = FADE_RIGHT;
-                    break;
-                    
-                case TRIGGER_FADE_LEFT:
-                    current_fading_effect = FADE_LEFT;
-                    break;
-                    
-                case TRIGGER_FADE_SCALE_IN:
-                    current_fading_effect = FADE_SCALE_IN;
-                    break;
-                    
-                case TRIGGER_FADE_SCALE_OUT:
-                    current_fading_effect = FADE_SCALE_OUT;
-                    break;
-                
-                case TRIGGER_FADE_INWARDS:
-                    current_fading_effect = FADE_INWARDS;
-                    break;
+    Player *player = &state.player;
 
-                case TRIGGER_FADE_OUTWARDS:
-                    current_fading_effect = FADE_OUTWARDS;
-                    break;
-                
-                case TRIGGER_FADE_LEFT_SEMICIRCLE:
-                    current_fading_effect = FADE_CIRCLE_LEFT;
-                    break;
-
-                case TRIGGER_FADE_RIGHT_SEMICIRCLE:
-                    current_fading_effect = FADE_CIRCLE_RIGHT;
-                    break;
-
-                case BG_TRIGGER:
-                    buffer = &trigger_buffer[BG];
-                    buffer->active = TRUE;
-                    buffer->old_color = channels[BG].color;
-                    buffer->new_color.r = obj->trig_colorR;
-                    buffer->new_color.g = obj->trig_colorG;
-                    buffer->new_color.b = obj->trig_colorB;
-                    buffer->seconds = obj->trig_duration;
-                    buffer->time_run = 0;
-                    break;
-                
-                case GROUND_TRIGGER:
-                    buffer = &trigger_buffer[GROUND];
-                    buffer->active = TRUE;
-                    buffer->old_color = channels[GROUND].color;
-                    buffer->new_color.r = obj->trig_colorR;
-                    buffer->new_color.g = obj->trig_colorG;
-                    buffer->new_color.b = obj->trig_colorB;
-                    buffer->seconds = obj->trig_duration;
-                    buffer->time_run = 0;
-                    break;
-                         
-                case LINE_TRIGGER:
-                case 915: // gd converts 1.4 line trigger to 2.0 one for some reason
-                    buffer = &trigger_buffer[LINE];
-                    buffer->active = TRUE;
-                    buffer->old_color = channels[LINE].color;
-                    buffer->new_color.r = obj->trig_colorR;
-                    buffer->new_color.g = obj->trig_colorG;
-                    buffer->new_color.b = obj->trig_colorB;
-                    buffer->seconds = obj->trig_duration;
-                    buffer->time_run = 0;
-                    break;
-                
-                case OBJ_TRIGGER:
-                    buffer = &trigger_buffer[OBJ];
-                    buffer->active = TRUE;
-                    buffer->old_color = channels[OBJ].color;
-                    buffer->new_color.r = obj->trig_colorR;
-                    buffer->new_color.g = obj->trig_colorG;
-                    buffer->new_color.b = obj->trig_colorB;
-                    buffer->seconds = obj->trig_duration;
-                    buffer->time_run = 0;
-                    break;
-                
-                case ENABLE_TRAIL:
-                    p1_trail = TRUE;
-                    break;
-                
-                case DISABLE_TRAIL:
-                    p1_trail = FALSE;
-                    break;
+    if (objects[obj_id].is_trigger && !obj->activated) {
+        if (obj->touchTriggered) {
+            if (intersect(
+                player->x, player->y, player->width, player->height, 0, 
+                obj->x, obj->y, 30, 30, obj->rotation
+            )) {
+                run_trigger(obj, buffer);
+            }
+        } else {
+            if (obj->x < state.player.x && obj->x > state.old_player.x) {
+                run_trigger(obj, buffer);
             }
         }
     }

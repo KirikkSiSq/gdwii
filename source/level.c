@@ -48,6 +48,10 @@ LevelDefinition levels[] = {
         .data_ptr = Clutterfunk_gmd
     },
     {
+        .level_name = "Theory Of Everything",
+        .data_ptr = TheoryOfEverything_gmd
+    },
+    {
         .level_name = "Level Easy",
         .data_ptr  = LevelEasy_gmd
     },
@@ -128,6 +132,11 @@ SongDefinition songs[] = {
         .song_ptr = Clutterfunk_mp3,
         .song_size = Clutterfunk_mp3_size,
         .tempo = 140
+    },
+    {
+        .song_ptr = TheoryOfEverything_mp3,
+        .song_size = TheoryOfEverything_mp3_size,
+        .tempo = 132
     }
 };
 

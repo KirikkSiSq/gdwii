@@ -31,6 +31,9 @@
 #include "Clutterfunk_gmd.h"
 #include "Clutterfunk_mp3.h"
 
+#include "TheoryOfEverything_gmd.h"
+#include "TheoryOfEverything_mp3.h"
+
 #include "LevelEasy_gmd.h"
 #include "DemonPark_gmd.h"
 #include "TheNightmare_gmd.h"
