@@ -370,7 +370,7 @@ void ufo_particles(Player *player) {
     if ((frame_counter & 0b11) == 0) {   
         // Particle trail
         if ((frame_counter & 0b11) == 0) {
-            spawn_particle(UFO_TRAIL, player->x, (player->upside_down ? getTop(player) - 6 : getBottom(player) + 6), NULL);
+            spawn_particle(UFO_TRAIL, player->x, (player->upside_down ? getTop(player) - 4 : getBottom(player) + 4), NULL);
         }
         
         // Jump particles
