@@ -217,8 +217,8 @@ enum ColChannels {
     P1,
     P2,
     LBG,
-    // 1008 is skipped
-    G2 = 1009,
+    OBJ_BLENDING,
+    G2,
     BLACK,
     WHITE,
     COL_CHANNEL_COUNT
@@ -252,6 +252,7 @@ enum SpriteSheets {
 struct ColorChannel {
     Color color;
     bool blending;
+    int copy_color_id;
 };
 
 struct TriggerBuffer {

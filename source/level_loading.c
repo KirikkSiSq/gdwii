@@ -1051,6 +1051,9 @@ void reset_color_channels() {
     channels[OBJ].color.b = 255;
     channels[OBJ].blending = FALSE;
 
+    channels[OBJ_BLENDING].copy_color_id = OBJ;
+    channels[OBJ_BLENDING].blending = TRUE;
+
     channels[P1].color = p1;
     channels[P1].blending = TRUE;
     channels[P2].color = p2;

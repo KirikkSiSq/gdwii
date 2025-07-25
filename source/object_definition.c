@@ -74,7 +74,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 0.5,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_01_glow_001_png
             },
@@ -101,7 +101,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             },
@@ -128,7 +128,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_03_glow_001_png
             },
@@ -155,7 +155,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_04_glow_001_png
             },
@@ -198,7 +198,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_06_glow_001_png
             },
@@ -225,7 +225,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_07_glow_001_png
             },
@@ -252,7 +252,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 1,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = spike_01_glow_001_png
             },
@@ -608,7 +608,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = spike_02_glow_001_png
             },
@@ -635,7 +635,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_h_01_glow_001_png
             },
@@ -910,7 +910,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 10,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             },
@@ -998,7 +998,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 10,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             },
@@ -1032,7 +1032,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 10,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             },
@@ -1086,7 +1086,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 10,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             },
@@ -1120,7 +1120,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 0.5,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_01_glow_001_png
             },
@@ -1154,7 +1154,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             },
@@ -1188,7 +1188,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_03_glow_001_png
             },
@@ -1222,7 +1222,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_04_glow_001_png
             },
@@ -1272,7 +1272,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_06_glow_001_png
             },
@@ -1306,7 +1306,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_07_glow_001_png
             },
@@ -1340,7 +1340,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 0.5,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_01_glow_001_alt_png
             },
@@ -1374,7 +1374,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_alt_png
             },
@@ -1408,7 +1408,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_03_glow_001_alt_png
             },
@@ -1459,7 +1459,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_06_glow_001_alt_png
             },
@@ -1493,7 +1493,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_07_glow_001_alt_png
             },
@@ -1527,7 +1527,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_01_glow_001_png
             },
@@ -1667,7 +1667,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 0.5,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_01_glow_001_png
             },
@@ -1701,7 +1701,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             },
@@ -1735,7 +1735,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_03_glow_001_png
             },
@@ -1769,7 +1769,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_04_glow_001_png
             },
@@ -1823,7 +1823,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_06_glow_001_png
             },
@@ -1857,7 +1857,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_07_glow_001_png
             },
@@ -1977,7 +1977,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 1,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = spike_03_glow_001_png
             },
@@ -2128,7 +2128,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0.5,
                 .y_offset = 0.5,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_01_glow_001_png
             },
@@ -2155,7 +2155,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_02_glow_001_png
             },
@@ -2182,7 +2182,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_03_glow_001_png
             },
@@ -2209,7 +2209,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_04_glow_001_png
             },
@@ -2259,7 +2259,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_06_glow_001_png
             },
@@ -2286,7 +2286,7 @@ const ObjectDefinition objects[] = {
             {
                 .x_offset = 0,
                 .y_offset = 0,
-                .col_channel = OBJ,
+                .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
                 .texture = square_07_glow_001_png
             },

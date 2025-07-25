@@ -698,7 +698,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             
         case YELLOW_GRAVITY_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 255;
@@ -718,7 +718,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         case BLUE_GRAVITY_PORTAL:
         case BLUE_MIRROR_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 56;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 200;
@@ -738,7 +738,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         case CUBE_PORTAL:
         case BIG_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 0;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 255;
@@ -758,7 +758,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         case SHIP_PORTAL:
         case MINI_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 31;
@@ -778,7 +778,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         case ORANGE_MIRROR_PORTAL:
         case UFO_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 91;
@@ -797,7 +797,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
         
         case BALL_PORTAL:
             if (layer->layerNum == 1) {
-                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_x(obj->rotation, obj->flippedH);
+                particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
                 particle_templates[PORTAL_PARTICLES].start_color.r = 255;
                 particle_templates[PORTAL_PARTICLES].start_color.g = 0;
@@ -1417,6 +1417,15 @@ void handle_col_triggers() {
     }
 }
 
+void handle_copy_channels() {
+    for (int chan = 0; chan < COL_CHANNEL_COUNT; chan++) {
+        int copy_color_id = channels[chan].copy_color_id;
+        if (copy_color_id > 0) {
+            channels[chan].color = channels[copy_color_id].color;
+        }
+    }
+}
+
 void run_trigger(GDObjectTyped *obj, struct TriggerBuffer *buffer) {
     switch (obj->id) {
         case TRIGGER_FADE_NONE:
@@ -1584,4 +1593,5 @@ void handle_objects() {
         }
     }
     handle_col_triggers();
+    handle_copy_channels();
 }
