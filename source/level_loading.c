@@ -3,6 +3,7 @@
 #include <string.h>
 #include <zlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 
 #include "objects.h"
 #include "level_loading.h"
@@ -108,26 +109,51 @@ void assign_layer_to_section(GDLayerSortable *layer) {
 
 
 char *extract_gmd_key(const char *data, const char *key, const char *type) {
-    char start_tag[32];
-    snprintf(start_tag, sizeof(start_tag), "<k>%s</k><%s>", key, type);
-    char end_tag[32];
-    snprintf(end_tag, sizeof(end_tag), "</%s>", type);
+    char key_tag[32];
+    snprintf(key_tag, sizeof(key_tag), "<k>%s</k>", key);
     
-    char *start = strstr(data, start_tag);
-    if (!start) {
-        printf("Could not find start tag '%s'\n", start_tag);
+    char *key_pos = strstr(data, key_tag);
+    if (!key_pos) {
+        printf("Could not find key tag '%s'\n", key_tag);
         return NULL;
     }
-    start += strlen(start_tag);
 
-    char *end = strstr(start, end_tag);
+    // Move past the key tag
+    char *start = key_pos + strlen(key_tag);
+
+    // Skip whitespace (spaces, tabs, newlines, etc.)
+    while (*start && isspace((unsigned char)*start)) {
+        start++;
+    }
+
+    char type_start_tag[16];
+    snprintf(type_start_tag, sizeof(type_start_tag), "<%s>", type);
+
+    // Confirm that the type start tag is here
+    if (strncmp(start, type_start_tag, strlen(type_start_tag)) != 0) {
+        printf("Expected start tag '%s' not found after key\n", type_start_tag);
+        return NULL;
+    }
+
+    // Move past the type start tag
+    start += strlen(type_start_tag);
+
+    // Find the end tag
+    char type_end_tag[16];
+    snprintf(type_end_tag, sizeof(type_end_tag), "</%s>", type);
+    char *end = strstr(start, type_end_tag);
     if (!end) {
-        printf("Could not find end tag '%s'\n", end_tag);
+        printf("Could not find end tag '%s'\n", type_end_tag);
         return NULL;
     }
 
+    // Allocate and copy value
     int len = end - start;
     char *value = malloc(len + 1);
+    if (!value) {
+        printf("malloc for gmd key %s failed\n", key);
+        return NULL;
+    }
     strncpy(value, start, len);
     value[len] = '\0';
     return value;
