@@ -38,7 +38,6 @@ typedef struct {
     bool upside_down;
     bool dead;
 
-    bool touching_gravity_pad;
     bool left_ground;
 
     float ball_rotation_speed;
@@ -48,6 +47,8 @@ typedef struct {
     float time_since_ground;
     
     float ufo_last_y;
+
+    float ceiling_inv_time;
 
     GDObjectTyped *gravObj;
 } Player;

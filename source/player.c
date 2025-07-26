@@ -82,14 +82,14 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
 
             bool gravSnap = FALSE;
 
-            if (player->gravObj) {
+            if (player->gravObj && player->gravObj->hitbox_counter == 1) {
                 // Only do the funny grav snap if player is touching pad and internal hitbox is touching block
                 bool internalCollidingBlock = intersect(
                     player->x, player->y, 9, 9, 0, 
                     obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
                 );
 
-                gravSnap = !state.old_player.on_ground && internalCollidingBlock;
+                gravSnap = (!state.old_player.on_ground && internalCollidingBlock) || (player->ceiling_inv_time > 0 && internalCollidingBlock);
             }
 
             bool safeZone = (obj_gravTop(player, obj) - gravBottom(player) <= clip) || (gravTop(player) - obj_gravBottom(player, obj) <= clip);
@@ -99,10 +99,10 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 player->dead = TRUE;
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && (player->vel_y <= 0 || gravSnap)) {
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
-                if (!gravSnap) player->on_ground = TRUE;
+                player->on_ground = TRUE;
                 player->time_since_ground = 0;
             } else {
                 if (player->gamemode != GAMEMODE_CUBE || gravSnap) {
@@ -559,7 +559,7 @@ void run_player() {
     player->time_since_ground += STEPS_DT;
     
     if (player->gamemode == GAMEMODE_UFO) {
-        player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.075f, STEPS_DT);
+        player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.1f, STEPS_DT);
     } else {
         player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
     }
@@ -570,11 +570,17 @@ void run_player() {
 
     player->left_ground = FALSE;
 
+    if (player->ceiling_inv_time > 0) {
+        player->ceiling_inv_time -= STEPS_DT;
+    } else {
+        player->ceiling_inv_time = 0;
+    }
+
     // Ground
     if (player->gamemode == GAMEMODE_SHIP) update_ship_rotation(player);
     
     if (getBottom(player) < player->ground_y) {
-        if (player->gamemode == GAMEMODE_CUBE && player->upside_down) {
+        if (player->ceiling_inv_time <= 0 && player->gamemode == GAMEMODE_CUBE && player->upside_down) {
             player->dead = TRUE;
             return;
         }
@@ -615,7 +621,6 @@ void handle_player() {
         player->buffering_state = BUFFER_NONE;
     }
     
-    player->touching_gravity_pad = FALSE;
     player->on_ground = FALSE;
     player->on_ceiling = FALSE;
 
