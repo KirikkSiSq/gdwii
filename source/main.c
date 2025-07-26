@@ -209,7 +209,6 @@ Exit:
 
 static void ExitGame(void) {
     unload_spritesheet();
-    unload_level();
 
     // Deinitialize GRRLIB & Video
     GRRLIB_Exit();

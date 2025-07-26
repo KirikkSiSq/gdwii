@@ -543,7 +543,6 @@ void load_spritesheet() {
     bg = GRRLIB_LoadTexturePNG(game_bg_png);
     ground = GRRLIB_LoadTexturePNG(game_ground_png);
     ground_line = GRRLIB_LoadTexturePNG(ground_line_png);
-    particleTex = GRRLIB_LoadTexturePNG(particle_png);
 
     for (s32 object = 1; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < MAX_OBJECT_LAYERS; layer++) {
@@ -581,11 +580,15 @@ void unload_spritesheet() {
     GRRLIB_FreeTexture(bg);
     GRRLIB_FreeTexture(ground);
     GRRLIB_FreeTexture(ground_line);
-    GRRLIB_FreeTexture(particleTex);
 
     for (s32 object = 0; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < objects[object].num_layers; layer++) {
-            GRRLIB_FreeTexture(object_images[object][layer]);
+            const unsigned char *texture = objects[object].layers[layer].texture;
+            int existing = find_existing_texture(object, texture);
+            // Dont double free textures
+            if (existing < 0) {
+                GRRLIB_FreeTexture(object_images[object][layer]);
+            }
         }
     }
     
