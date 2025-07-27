@@ -440,14 +440,6 @@ void run_camera() {
         state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
     }
 
-    float upper = 90.f;
-    float lower = 120.f;
-
-    if (player->upside_down) {
-        upper = 120.f;
-        lower = 90.f;
-    }
-    
     float playable_height = state.player.ceiling_y - state.player.ground_y;
     float calc_height = 0;
 
@@ -458,21 +450,38 @@ void run_camera() {
     state.ground_y_gfx = iSlerp(state.ground_y_gfx, calc_height, 0.02f, STEPS_DT);
 
     if (player->gamemode == GAMEMODE_CUBE) {
-        if (player->y <= SCREEN_HEIGHT_AREA + state.camera_y_lerp - upper) {
-            if (player->y < lower + state.camera_y_lerp){
-                state.camera_y_lerp = player->y - lower;
+        float distance = state.camera_y_lerp + (SCREEN_HEIGHT_AREA / 2) - player->y;
+        float distance_abs = fabsf(distance);
+
+        int mult = (distance >= 0 ? 1 : -1);
+
+        float difference = player->y - state.old_player.y;
+
+        if (distance_abs > 60.f && (difference * -mult >= 0 || player->on_ground)) {
+            float lerp_ratio = 0.1f;
+            if (player->on_ground) {
+                // Slowly make player in bounds (60 units from player center)
+                state.camera_y_lerp = player->y + 60.f * mult - (SCREEN_HEIGHT_AREA / 2);
+                lerp_ratio = 0.05f;
+            } else {
+                // Move camera
+                state.camera_y_lerp += difference;
             }
+            // Lerp so the camera doesn't go all the way when not moving
+            state.intermediate_camera_y = iSlerp(state.intermediate_camera_y, state.camera_y_lerp, lerp_ratio, STEPS_DT);
         } else {
-            state.camera_y_lerp = player->y - SCREEN_HEIGHT_AREA + upper;
+            state.camera_y_lerp = state.intermediate_camera_y;
         }
 
         if (state.camera_y_lerp < -90.f) state.camera_y_lerp = -90.f;
         if (state.camera_y_lerp > MAX_LEVEL_HEIGHT) state.camera_y_lerp = MAX_LEVEL_HEIGHT;
 
-        state.camera_y = iSlerp(state.camera_y, state.camera_y_lerp, 0.05f, STEPS_DT);
+        state.camera_y = iSlerp(state.camera_y, state.intermediate_camera_y, 0.05f, STEPS_DT);
+        
     } else {
         state.camera_y = iSlerp(state.camera_y, state.camera_intended_y, 0.02f, STEPS_DT);
         state.camera_y_lerp = state.camera_y;
+        state.intermediate_camera_y = state.camera_y;
     }
 }
 
@@ -698,6 +707,7 @@ void init_variables() {
     state.camera_x_lerp = -120;
     state.camera_y = -90;
     state.camera_y_lerp = -90;
+    state.intermediate_camera_y = -90;
 
 
     state.ground_y_gfx = 0;

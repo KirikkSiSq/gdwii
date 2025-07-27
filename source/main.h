@@ -15,6 +15,8 @@ typedef struct {
     float camera_x_lerp;
     float camera_y_lerp;
 
+    float intermediate_camera_y;
+
     float ground_x;
     float background_x;
     
