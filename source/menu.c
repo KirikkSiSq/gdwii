@@ -73,13 +73,13 @@ int menu_loop() {
     }
 
     while (1) {
-        WPAD_ScanPads();
+        update_input();
 
         if (!MP3Player_IsPlaying()) {
             MP3Player_PlayBuffer(menuLoop_mp3, menuLoop_mp3_size, NULL);
         }
                     
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_1) {
+        if (state.input.pressed1orX) {
             level_id = 0;
             level_mode ^= 1;
         }
@@ -91,7 +91,7 @@ int menu_loop() {
         }
 
         
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
+        if (state.input.pressedHome) {
             return TRUE;
         }
 
@@ -111,7 +111,7 @@ int sdcard_levels() {
         snprintf(text, 269, "%d - %s", level_id + 1, current_level_name);
         GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
 
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
+        if (state.input.pressedDir & INPUT_LEFT) {
             level_id--;
             if (level_id < 0) level_id = sd_level_count - 1; 
             
@@ -124,7 +124,7 @@ int sdcard_levels() {
             }
         }
 
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_RIGHT) {
+        if (state.input.pressedDir & INPUT_RIGHT) {
             level_id++;
             if (level_id >= sd_level_count) level_id = 0;
                 
@@ -137,13 +137,13 @@ int sdcard_levels() {
             }
         }
 
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A) {
+        if (state.input.pressedA) {
             // Start level
             gameRoutine = ROUTINE_GAME;
             MP3Player_Stop();
             PlayOgg(playSound_01_ogg, playSound_01_ogg_size, 0, OGG_ONE_TIME);
             for (int i = 0; i < 90; i++) {
-                WPAD_ScanPads();
+                update_input();
                 VIDEO_WaitVSync();
             }
             
@@ -170,23 +170,23 @@ int main_levels() {
     snprintf(text, 255, "%d - %s", level_id + 1, levels[level_id].level_name);
     GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
 
-    if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_LEFT) {
+    if (state.input.pressedDir & INPUT_LEFT) {
         level_id--;
         if (level_id < 0) level_id = LEVEL_NUM - 1; 
     }
 
-    if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_RIGHT) {
+    if (state.input.pressedDir & INPUT_RIGHT) {
         level_id++;
         if (level_id >= LEVEL_NUM) level_id = 0;
     }
     
-    if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A) {
+    if (state.input.pressedA) {
         // Start level
         gameRoutine = ROUTINE_GAME;
         MP3Player_Stop();
         PlayOgg(playSound_01_ogg, playSound_01_ogg_size, 0, OGG_ONE_TIME);
         for (int i = 0; i < 90; i++) {
-            WPAD_ScanPads();
+            update_input();
             VIDEO_WaitVSync();
         }
         

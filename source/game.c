@@ -23,7 +23,7 @@ int game_loop() {
 
     while (1) {
         start_frame = gettime();
-        WPAD_ScanPads();
+        update_input();
         float frameTime = ticks_to_secs_float(start_frame - prevTicks);
         dt = frameTime;
 
@@ -36,7 +36,7 @@ int game_loop() {
 
         accumulator += frameTime;
 
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_1) state.noclip ^= 1;
+        if (state.input.pressed1orX) state.noclip ^= 1;
         
         u64 t0 = gettime();
         while (accumulator >= STEPS_DT) {
@@ -76,22 +76,22 @@ int game_loop() {
             draw_game();
             handle_death();
             MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
-            WPAD_ScanPads();
+            update_input();
             fixed_dt = TRUE;
         }
 
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_HOME) {
+        if (state.input.pressedHome) {
             unload_level();
             return TRUE;
         }
 
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_MINUS) {
+        if (state.input.pressedMinusOrR) {
             MP3Player_Stop();
             gameRoutine = ROUTINE_MENU;
             break;
         }
         
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_PLUS) {
+        if (state.input.pressedPlusOrL) {
             enable_info ^= 1;
         }
 

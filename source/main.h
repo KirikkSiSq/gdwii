@@ -7,6 +7,28 @@ extern int screenWidth;
 extern int screenHeight;
 
 typedef struct {
+    u8 pressedA:1;
+    u8 holdA:1;
+
+    u8 pressedB:1;
+    u8 holdB:1;
+
+    u8 pressedHome:1;
+
+    u8 pressed1orX:1;
+    u8 hold1orX:1;
+    
+    u8 pressedPlusOrL:1;
+    u8 holdPlusOrL:1;
+    
+    u8 pressedMinusOrR:1;
+    u8 holdMinusOrR:1;
+
+    u8 pressedDir;
+    u8 holdDir;
+} KeyInput;
+
+typedef struct {
     float camera_x;
     float camera_y;
 
@@ -34,12 +56,20 @@ typedef struct {
     bool noclip;
     
     Particle particles[MAX_PARTICLES];
+
+    KeyInput input;
 } GameState;
+
 
 enum GameRoutine {
     ROUTINE_MENU,
     ROUTINE_GAME
 };
+
+#define INPUT_UP    PAD_BUTTON_UP
+#define INPUT_DOWN  PAD_BUTTON_DOWN
+#define INPUT_RIGHT PAD_BUTTON_RIGHT
+#define INPUT_LEFT  PAD_BUTTON_LEFT
 
 extern int gameRoutine;
 
@@ -64,3 +94,4 @@ extern GameState state;
 extern GRRLIB_texImg *font;
 
 void draw_game();
+void update_input();

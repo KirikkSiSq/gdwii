@@ -235,12 +235,12 @@ void cube_gamemode(Player *player) {
         spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
 
-    if (player->on_ground && WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
+    if (player->on_ground && state.input.holdA) {
         set_p_velocity(player, 603.72);
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
 
-        if (!(WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
+        if (!state.input.pressedA) {
             player->vel_y -= player->gravity * STEPS_DT;
             printf("Second jump\n");
         } else {
@@ -269,7 +269,7 @@ void ship_particles(Player *player) {
         spawn_particle(SHIP_TRAIL, x, y, NULL);
         
         // Holding particles
-        if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
+        if (state.input.holdA) {
             spawn_particle(HOLDING_SHIP_TRAIL, x, y, NULL);
         }
 
@@ -291,7 +291,7 @@ void update_ship_rotation(Player *player) {
 }
 
 void ship_gamemode(Player *player) {
-    if (WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) {
+    if (state.input.holdA) {
         if (player->vel_y <= grav(player, 103.485492f))
             player->gravity = player->mini ? 1643.5872f : 1397.0491f;
         else
@@ -334,7 +334,7 @@ void ball_gamemode(Player *player) {
     }
 
     // Jump
-    if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) && (player->on_ground || player->on_ceiling) && player->buffering_state == BUFFER_READY) {
+    if ((state.input.holdA) && (player->on_ground || player->on_ceiling) && player->buffering_state == BUFFER_READY) {
         player->upside_down ^= 1;
         set_p_velocity(player, -181.11601);
 
@@ -374,7 +374,7 @@ void ufo_particles(Player *player) {
         }
         
         // Jump particles
-        if (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A) {
+        if (state.input.pressedA) {
             for (s32 i = 0; i < 5; i++) {
                 spawn_particle(UFO_JUMP, x, y, NULL);
             }
@@ -392,7 +392,7 @@ void ufo_particles(Player *player) {
 void ufo_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
 
-    if (player->buffering_state == BUFFER_READY && (WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
+    if (player->buffering_state == BUFFER_READY && (state.input.pressedA)) {
         player->vel_y = maxf(player->vel_y, player->mini ? 358.992 : 371.034);
         player->buffering_state = BUFFER_END;
         player->ufo_last_y = player->y;
@@ -622,7 +622,7 @@ void handle_mirror_transition() {
 
 void handle_player() {
     Player *player = &state.player;
-    if ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A)) {
+    if (state.input.holdA) {
         if (player->buffering_state == BUFFER_NONE) {
             player->buffering_state = BUFFER_READY;
         }
