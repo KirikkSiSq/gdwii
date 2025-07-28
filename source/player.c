@@ -294,6 +294,7 @@ void update_ship_rotation(Player *player) {
 
 void ship_gamemode(Player *player) {
     if (state.input.holdA) {
+        player->buffering_state = BUFFER_END;
         if (player->vel_y <= grav(player, 103.485492f))
             player->gravity = player->mini ? 1643.5872f : 1397.0491f;
         else

@@ -98,8 +98,8 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
             break;
 
         case BLUE_PAD:
-            player->gravObj = obj;
-            if (!obj->activated) {
+            if (obj->activated) player->gravObj = obj;
+            else {
                 float rotation = adjust_angle(obj->rotation, obj->flippedV, obj->flippedH);
                 if ((rotation < 90 || rotation > 270) && player->upside_down)
                     break;
@@ -109,6 +109,8 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
 
                 MotionTrail_ResumeStroke(&trail);
                 player->left_ground = TRUE;
+
+                player->gravObj = obj;
 
                 player->vel_y = jump_heights_table[JUMP_BLUE_PAD][player->gamemode][player->mini];
                 player->upside_down ^= 1;
