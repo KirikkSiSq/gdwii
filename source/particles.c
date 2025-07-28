@@ -283,6 +283,47 @@ ParticleTemplate particle_templates[] = {
         .maxRadius = 0,
         .texture_id = PARTICLE_SQUARE
     },
+    [DEATH_PARTICLES] = {
+        .angle = 0, .angleVar = 180,
+        .speed = 160, .speedVar = 80,
+        .gravity_x = 0, .gravity_y = 0,
+        .life = 0.8f, .lifeVar = 0.15f,
+        .start_scale = 0.45, .start_scaleVar = 0.2,
+        .end_scale = 0, .end_scaleVar = 0,
+        .start_color = {0,0,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {0,0,0,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 5, .sourcePosVarY = 5,
+        .rotatePerSecond = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE
+    },
+    [DEATH_CIRCLE] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 0, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = 0,
+        .life = 0.4f, .lifeVar = 0,
+        .start_scale = 0, .start_scaleVar = 0,
+        .end_scale = 90, .end_scaleVar = 0,
+        .start_color = {255,255,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {255,255,0,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_CIRCLE
+    },
 };
 
 void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {

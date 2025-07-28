@@ -23,8 +23,8 @@
 #include "main.h"
 
 #include "custom_mp3player.h"
+#include "oggplayer.h"
 
-// include generated header
 #include "level_loading.h"
 #include "objects.h"
 
@@ -207,7 +207,9 @@ int main() {
     // Initialise the audio subsystem
 	ASND_Init();
     MP3Player_Init();
-
+    
+    
+    SetVolumeOgg(255);
     load_spritesheet();
 
     // Set resolution based on mode

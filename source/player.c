@@ -13,6 +13,8 @@
 #include "custom_mp3player.h"
 #include "trail.h"
 #include "objects.h"
+#include "oggplayer.h"
+#include "explode_11_ogg.h"
 
 GRRLIB_texImg *icon_l1;
 GRRLIB_texImg *icon_l2;
@@ -695,6 +697,22 @@ void full_init_variables() {
     particle_templates[UFO_TRAIL].end_color.g = p2.g;
     particle_templates[UFO_TRAIL].end_color.b = p2.b;
 
+    particle_templates[DEATH_CIRCLE].start_color.r = p1.r;
+    particle_templates[DEATH_CIRCLE].start_color.g = p1.g;
+    particle_templates[DEATH_CIRCLE].start_color.b = p1.b;
+    
+    particle_templates[DEATH_CIRCLE].end_color.r = p1.r;
+    particle_templates[DEATH_CIRCLE].end_color.g = p1.g;
+    particle_templates[DEATH_CIRCLE].end_color.b = p1.b;
+
+    particle_templates[DEATH_PARTICLES].start_color.r = p2.r;
+    particle_templates[DEATH_PARTICLES].start_color.g = p2.g;
+    particle_templates[DEATH_PARTICLES].start_color.b = p2.b;
+    
+    particle_templates[DEATH_PARTICLES].end_color.r = p2.r;
+    particle_templates[DEATH_PARTICLES].end_color.g = p2.g;
+    particle_templates[DEATH_PARTICLES].end_color.b = p2.b;
+
     init_variables();
 }
 
@@ -739,12 +757,14 @@ void init_variables() {
 }
 
 void handle_death() {
-    MP3Player_Stop();
-    for (s32 i = 0; i < 60; i++) {
-        draw_game();
+    // Spawn death particles
+    spawn_particle(DEATH_CIRCLE, state.player.x, state.player.y, NULL);
+    for (s32 i = 0; i < 20; i++) {
+        spawn_particle(DEATH_PARTICLES, state.player.x, state.player.y, NULL);
     }
-    init_variables();
-    reload_level();
+
+    MP3Player_Stop();
+    PlayOgg(explode_11_ogg, explode_11_ogg_size, 0, OGG_ONE_TIME);
 }
 
 void handle_completion() {

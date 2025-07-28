@@ -11,6 +11,7 @@
 extern bool enable_info;
 extern float amplitude;
 extern float dt;
+extern float death_timer;
 
 extern u64 start_frame;
 

@@ -15,6 +15,9 @@ bool enable_info = FALSE;
 float amplitude = 0.0f;
 float dt = 0;
 u64 start_frame = 0;
+
+float death_timer = 0.0f;
+
 int game_loop() {
     u64 prevTicks = gettime();
     double accumulator = 0.0f;
@@ -42,7 +45,7 @@ int game_loop() {
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;
             amplitude = (beat_pulse ? 0.8f : 0.1f);
-            handle_player();
+            if (death_timer <= 0) handle_player();
             
             u64 t2 = gettime();
             handle_objects();
@@ -72,12 +75,22 @@ int game_loop() {
             break;
         }
 
-        if (state.player.dead) {
-            draw_game();
+        if (state.player.dead && death_timer <= 0.f) {
+            death_timer = 1.f;
             handle_death();
-            MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
-            update_input();
-            fixed_dt = TRUE;
+            state.player.dead = FALSE;
+        }
+
+        if (death_timer > 0.f) {
+            death_timer -= dt;
+
+            if (death_timer <= 0.f) {
+                init_variables();
+                reload_level(); 
+                MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
+                update_input();
+                fixed_dt = TRUE;
+            }
         }
 
         if (state.input.pressedHome) {

@@ -1334,12 +1334,16 @@ void draw_all_object_layers() {
 
         if (obj_id == PLAYER_OBJECT) {
             u64 t2 = gettime();
+            draw_particles(DEATH_CIRCLE);
+            draw_particles(DEATH_PARTICLES);
             draw_particles(CUBE_DRAG);
             draw_particles(SHIP_TRAIL);
             draw_particles(HOLDING_SHIP_TRAIL);
             draw_particles(UFO_JUMP);
             draw_particles(UFO_TRAIL);
-            draw_player();
+            if (death_timer <= 0) {
+                draw_player();
+            }
             draw_particles(SHIP_DRAG);
             u64 t3 = gettime();
             player_draw_time = ticks_to_microsecs(t3 - t2) / 1000.f;

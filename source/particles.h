@@ -68,6 +68,8 @@ enum ParticleGroupID {
     P1_TRAIL,
     UFO_JUMP,
     UFO_TRAIL,
+    DEATH_PARTICLES,
+    DEATH_CIRCLE,
 };
 
 extern ParticleTemplate particle_templates[];
