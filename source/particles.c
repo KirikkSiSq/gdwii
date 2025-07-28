@@ -305,7 +305,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 0,
         .speed = 0, .speedVar = 0,
         .gravity_x = 0, .gravity_y = 0,
-        .life = 0.4f, .lifeVar = 0,
+        .life = 0.5f, .lifeVar = 0,
         .start_scale = 0, .start_scaleVar = 0,
         .end_scale = 90, .end_scaleVar = 0,
         .start_color = {255,255,0,255},

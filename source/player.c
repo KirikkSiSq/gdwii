@@ -697,21 +697,21 @@ void full_init_variables() {
     particle_templates[UFO_TRAIL].end_color.g = p2.g;
     particle_templates[UFO_TRAIL].end_color.b = p2.b;
 
-    particle_templates[DEATH_CIRCLE].start_color.r = p1.r;
-    particle_templates[DEATH_CIRCLE].start_color.g = p1.g;
-    particle_templates[DEATH_CIRCLE].start_color.b = p1.b;
+    particle_templates[DEATH_CIRCLE].start_color.r = p2.r;
+    particle_templates[DEATH_CIRCLE].start_color.g = p2.g;
+    particle_templates[DEATH_CIRCLE].start_color.b = p2.b;
     
-    particle_templates[DEATH_CIRCLE].end_color.r = p1.r;
-    particle_templates[DEATH_CIRCLE].end_color.g = p1.g;
-    particle_templates[DEATH_CIRCLE].end_color.b = p1.b;
+    particle_templates[DEATH_CIRCLE].end_color.r = p2.r;
+    particle_templates[DEATH_CIRCLE].end_color.g = p2.g;
+    particle_templates[DEATH_CIRCLE].end_color.b = p2.b;
 
-    particle_templates[DEATH_PARTICLES].start_color.r = p2.r;
-    particle_templates[DEATH_PARTICLES].start_color.g = p2.g;
-    particle_templates[DEATH_PARTICLES].start_color.b = p2.b;
+    particle_templates[DEATH_PARTICLES].start_color.r = p1.r;
+    particle_templates[DEATH_PARTICLES].start_color.g = p1.g;
+    particle_templates[DEATH_PARTICLES].start_color.b = p1.b;
     
-    particle_templates[DEATH_PARTICLES].end_color.r = p2.r;
-    particle_templates[DEATH_PARTICLES].end_color.g = p2.g;
-    particle_templates[DEATH_PARTICLES].end_color.b = p2.b;
+    particle_templates[DEATH_PARTICLES].end_color.r = p1.r;
+    particle_templates[DEATH_PARTICLES].end_color.g = p1.g;
+    particle_templates[DEATH_PARTICLES].end_color.b = p1.b;
 
     init_variables();
 }
