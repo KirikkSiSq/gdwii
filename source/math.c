@@ -190,6 +190,10 @@ float iSlerp(float a, float b, float ratio, float dt) {
 	return slerp(a, b, iRatio);
 }
 
+float ease_out(float current, float target, float smoothing) {
+    return current + (target - current) * smoothing;
+}
+
 static guVector axis = (guVector){0.0f, 0.0f, 1.0f};
 
 void set_texture(const GRRLIB_texImg *tex) {

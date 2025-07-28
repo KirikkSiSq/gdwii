@@ -1005,7 +1005,7 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
     get_fade_vars(obj, x, &fade_x, &fade_y, &fade_scale);
 
     if (layer_pulses(obj, layer)) {
-        obj->ampl_scaling = iSlerp(obj->ampl_scaling, get_object_pulse(amplitude, obj), 0.2f, STEPS_DT);
+        obj->ampl_scaling = ease_out(obj->ampl_scaling, get_object_pulse(amplitude, obj), 0.2f);
         fade_scale *= obj->ampl_scaling;
     }
 

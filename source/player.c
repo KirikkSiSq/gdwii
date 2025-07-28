@@ -447,7 +447,7 @@ void run_camera() {
         calc_height = (SCREEN_HEIGHT_AREA - playable_height) / 2;
     }
 
-    state.ground_y_gfx = iSlerp(state.ground_y_gfx, calc_height, 0.02f, STEPS_DT);
+    state.ground_y_gfx = ease_out(state.ground_y_gfx, calc_height, 0.02f);
 
     if (player->gamemode == GAMEMODE_CUBE) {
         float distance = state.camera_y_lerp + (SCREEN_HEIGHT_AREA / 2) - player->y;
@@ -457,18 +457,18 @@ void run_camera() {
 
         float difference = player->y - state.old_player.y;
 
-        if (distance_abs > 60.f && (difference * -mult >= 0 || player->on_ground)) {
+        if (distance_abs > 60.f && (difference * -mult > 0 || player->on_ground)) {
             float lerp_ratio = 0.1f;
             if (player->on_ground) {
                 // Slowly make player in bounds (60 units from player center)
                 state.camera_y_lerp = player->y + 60.f * mult - (SCREEN_HEIGHT_AREA / 2);
-                lerp_ratio = 0.05f;
+                lerp_ratio = 0.2f;
             } else {
                 // Move camera
                 state.camera_y_lerp += difference;
             }
             // Lerp so the camera doesn't go all the way when not moving
-            state.intermediate_camera_y = iSlerp(state.intermediate_camera_y, state.camera_y_lerp, lerp_ratio, STEPS_DT);
+            state.intermediate_camera_y = ease_out(state.intermediate_camera_y, state.camera_y_lerp, lerp_ratio);
         } else {
             state.camera_y_lerp = state.intermediate_camera_y;
         }
@@ -476,10 +476,9 @@ void run_camera() {
         if (state.camera_y_lerp < -90.f) state.camera_y_lerp = -90.f;
         if (state.camera_y_lerp > MAX_LEVEL_HEIGHT) state.camera_y_lerp = MAX_LEVEL_HEIGHT;
 
-        state.camera_y = iSlerp(state.camera_y, state.intermediate_camera_y, 0.05f, STEPS_DT);
-        
+        state.camera_y = ease_out(state.camera_y, state.intermediate_camera_y, 0.07f);
     } else {
-        state.camera_y = iSlerp(state.camera_y, state.camera_intended_y, 0.02f, STEPS_DT);
+        state.camera_y = ease_out(state.camera_y, state.camera_intended_y, 0.02f);
         state.camera_y_lerp = state.camera_y;
         state.intermediate_camera_y = state.camera_y;
     }
