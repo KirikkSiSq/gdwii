@@ -3649,8 +3649,8 @@ const ObjectDefinition objects[] = {
             .type = HITBOX_SPIKE
         },
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 1,
         .is_saw = TRUE,
         .num_layers = 2
     },
@@ -3677,8 +3677,8 @@ const ObjectDefinition objects[] = {
             .type = HITBOX_SPIKE
         },
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 1,
         .is_saw = TRUE,
         .num_layers = 2
     },
@@ -3705,8 +3705,8 @@ const ObjectDefinition objects[] = {
             .type = HITBOX_SPIKE
         },
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 1,
         .is_saw = TRUE,
         .num_layers = 2
     },
@@ -3733,8 +3733,8 @@ const ObjectDefinition objects[] = {
             .type = HITBOX_SPIKE
         },
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 1,
         .is_saw = TRUE,
         .num_layers = 2
     },
@@ -3761,8 +3761,8 @@ const ObjectDefinition objects[] = {
             .type = HITBOX_SPIKE
         },
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 1,
         .is_saw = TRUE,
         .num_layers = 2
     },
@@ -3789,8 +3789,8 @@ const ObjectDefinition objects[] = {
             .type = HITBOX_SPIKE
         },
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_B1,
-        .def_zorder = 9,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 1,
         .is_saw = TRUE,
         .num_layers = 2
     },
