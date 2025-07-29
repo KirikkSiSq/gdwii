@@ -5,7 +5,6 @@
 #include "custom_mp3player.h"
 #include "oggplayer.h"
 #include "playSound_01_ogg.h"
-#include "menuLoop_mp3.h"
 
 #include <fat.h>
 #include <dirent.h>
@@ -18,6 +17,7 @@
 
 int main_levels();
 int sdcard_levels();
+void game_folder_not_found();
 
 int level_id = 0;
 
@@ -38,30 +38,38 @@ int menu_loop() {
 	struct dirent *pent;
 	struct stat statbuf;
     
-    DIR *pdir = opendir("sd:/levels/");
+    DIR *pdir = opendir(SDCARD_FOLDER);
 
 	if (!pdir){
-		printf("opendir() failure; terminating\n");
+		game_folder_not_found();
+        return TRUE;
 	}
+
+    char usr_lvl_dir[256];
+    snprintf(usr_lvl_dir, sizeof(usr_lvl_dir), "%s/%s", SDCARD_FOLDER, USER_LEVELS_FOLDER);
+
+    DIR *level_dir = opendir(usr_lvl_dir);
     
     sd_level_count = 0;
-	while ((pent=readdir(pdir))!=NULL) {
-		
-        stat(pent->d_name,&statbuf);
+    if (level_dir) {
+        while ((pent=readdir(level_dir))!=NULL) {
+            stat(pent->d_name,&statbuf);
 
-		if(strcmp(".", pent->d_name) == 0 || strcmp("..", pent->d_name) == 0)
-			continue;
+            if(strcmp(".", pent->d_name) == 0 || strcmp("..", pent->d_name) == 0)
+                continue;
 
-        const char *ext = strrchr(pent->d_name, '.');
-        if (ext && strcmp(ext, ".gmd") == 0) {
-            snprintf(sd_level_paths[sd_level_count], MAX_PATH_LEN, "sd:/levels/%s", pent->d_name);
-            
-            sd_level_count++;
-            if (sd_level_count >= MAX_SD_LEVELS) break;
+            const char *ext = strrchr(pent->d_name, '.');
+            if (ext && strcmp(ext, ".gmd") == 0) {
+                snprintf(sd_level_paths[sd_level_count], MAX_PATH_LEN, "%s/%s", usr_lvl_dir, pent->d_name);
+                
+                sd_level_count++;
+                if (sd_level_count >= MAX_SD_LEVELS) break;
 
-            printf("Found GMD file: %s %llu\n", pent->d_name, pent->d_stat.st_size);
+                printf("Found GMD file: %s %llu\n", pent->d_name, pent->d_stat.st_size);
+            }
         }
-	}
+        closedir(level_dir);
+    }
 
 	closedir(pdir);
     
@@ -72,11 +80,14 @@ int menu_loop() {
         free(level_data);
     }
 
+    size_t size;
+    char *menuLoop = load_song("menuLoop.mp3", &size);
+
     while (1) {
         update_input();
 
-        if (!MP3Player_IsPlaying()) {
-            MP3Player_PlayBuffer(menuLoop_mp3, menuLoop_mp3_size, NULL);
+        if (!MP3Player_IsPlaying() && menuLoop) {
+            MP3Player_PlayBuffer(menuLoop, size, NULL);
         }
                     
         if (state.input.pressed1orX) {
@@ -92,13 +103,42 @@ int menu_loop() {
 
         
         if (state.input.pressedHome) {
+            if (menuLoop) free(menuLoop);
+
             return TRUE;
         }
 
         GRRLIB_Render();
     }
+    
+    if (menuLoop) free(menuLoop);
 
     return FALSE;
+}
+
+void game_folder_not_found() {
+    char path[256];
+    snprintf(path, sizeof(path), "%s", SDCARD_FOLDER);
+
+    while (1) {
+        update_input();
+
+        GRRLIB_FillScreen(RGBA(0, 127, 255, 255));
+
+        
+        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, "Couldn't find the game folder.");
+        GRRLIB_Printf(0, 45, font, RGBA(255,255,255,255), 0.75, "Make sure the resources folder");
+        GRRLIB_Printf(0, 70, font, RGBA(255,255,255,255), 0.75, "and boot.dol is in the following");
+        GRRLIB_Printf(0, 95, font, RGBA(255,255,255,255), 0.75, "path:");
+        GRRLIB_Printf(0, 120, font, RGBA(255,255,255,255), 0.75, path);
+        GRRLIB_Printf(0, 155, font, RGBA(255,255,255,255), 0.75, "Press home to exit.");
+                
+        if (state.input.pressedHome) {
+            break;
+        }
+
+        GRRLIB_Render();
+    }
 }
 
 int sdcard_levels() {
@@ -153,10 +193,12 @@ int sdcard_levels() {
             return 1;
         }
     } else {
-        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, "Put levels in a folder called \"levels\"");
-        GRRLIB_Printf(0, 45, font, RGBA(255,255,255,255), 0.75, "in the root folder of the sdcard");
-        GRRLIB_Printf(0, 70, font, RGBA(255,255,255,255), 0.75, "and put levels exported with");
-        GRRLIB_Printf(0, 95, font, RGBA(255,255,255,255), 0.75, "the mod \"GDShare\" in that folder.");
+        char path[512];
+        snprintf(path, sizeof(path), "%s/%s", SDCARD_FOLDER, USER_LEVELS_FOLDER);
+        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, "Put levels in:");
+        GRRLIB_Printf(0, 45, font, RGBA(255,255,255,255), 0.75, path);
+        GRRLIB_Printf(0, 70, font, RGBA(255,255,255,255), 0.75, "For getting levels, use the mod");
+        GRRLIB_Printf(0, 95, font, RGBA(255,255,255,255), 0.75, "\"GDShare\" for exporting.");
     }
     return 0;
 }

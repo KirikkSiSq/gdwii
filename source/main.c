@@ -208,7 +208,6 @@ int main() {
 	ASND_Init();
     MP3Player_Init();
     
-    
     SetVolumeOgg(255);
     load_spritesheet();
 

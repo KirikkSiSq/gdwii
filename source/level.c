@@ -52,6 +52,14 @@ LevelDefinition levels[] = {
         .data_ptr = TheoryOfEverything_gmd
     },
     {
+        .level_name = "Electroman Adventures",
+        .data_ptr = Electroman_gmd
+    },
+    {
+        .level_name = "Clubstep",
+        .data_ptr = Clubstep_gmd
+    },
+    {
         .level_name = "Level Easy",
         .data_ptr  = LevelEasy_gmd
     },
@@ -70,73 +78,65 @@ LevelDefinition levels[] = {
     {
         .level_name = "auto jumper",
         .data_ptr  = AutoJumper_gmd
-    },
-    {
-        .level_name = "Test",
-        .data_ptr = Test_gmd
     }
 };
 
 SongDefinition songs[] = {
     {
-        .song_ptr = StereoMadness_mp3,
-        .song_size = StereoMadness_mp3_size,
+        .song_name = "StereoMadness.mp3",
         .tempo = 160
     },
     {
-        .song_ptr = BackOnTrack_mp3,
-        .song_size = BackOnTrack_mp3_size,
+        .song_name = "BackOnTrack.mp3",
         .tempo = 142
     },
     {
-        .song_ptr = Polargeist_mp3,
-        .song_size = Polargeist_mp3_size,
+        .song_name = "Polargeist.mp3",
         .tempo = 175
     },
     {
-        .song_ptr = DryOut_mp3,
-        .song_size = DryOut_mp3_size,
+        .song_name = "DryOut.mp3",
         .tempo = 145
     },
     {
-        .song_ptr = BaseAfterBase_mp3,
-        .song_size = BaseAfterBase_mp3_size,
+        .song_name = "BaseAfterBase.mp3",
         .tempo = 141
     },
     {
-        .song_ptr = CantLetGo_mp3,
-        .song_size = CantLetGo_mp3_size,
+        .song_name = "CantLetGo.mp3",
         .tempo = 170
     },
     {
-        .song_ptr = Jumper_mp3,
-        .song_size = Jumper_mp3_size,
+        .song_name = "Jumper.mp3",
         .tempo = 175
     },
     {
-        .song_ptr = TimeMachine_mp3,
-        .song_size = TimeMachine_mp3_size,
+        .song_name = "TimeMachine.mp3",
         .tempo = 143
     },
     {
-        .song_ptr = Cycles_mp3,
-        .song_size = Cycles_mp3_size,
+        .song_name = "Cycles.mp3",
         .tempo = 140
     },
     {
-        .song_ptr = xStep_mp3,
-        .song_size = xStep_mp3_size,
+        .song_name = "xStep.mp3",
         .tempo = 130
     },
     {
-        .song_ptr = Clutterfunk_mp3,
-        .song_size = Clutterfunk_mp3_size,
+        .song_name = "Clutterfunk.mp3",
         .tempo = 140
     },
     {
-        .song_ptr = TheoryOfEverything_mp3,
-        .song_size = TheoryOfEverything_mp3_size,
+        .song_name = "TheoryOfEverything.mp3",
         .tempo = 132
+    },
+    {
+        .song_name = "Electroman.mp3",
+        .tempo = 127
+    },
+    {
+        .song_name = "Clubstep.mp3",
+        .tempo = 128
     }
 };
 

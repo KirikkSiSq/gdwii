@@ -181,6 +181,32 @@
 #include "bump_03_001_png.h"
 #include "ring_03_001_png.h"
 
+#include "brick_02_001_png.h"
+#include "brick_02_glow_001_png.h"
+
+#include "invis_spike_01_001_png.h"
+#include "invis_spike_03_001_png.h"
+#include "invis_square_01_001_png.h"
+#include "invis_plank_01_001_png.h"
+
+#include "invis_plank_01_glow_001_png.h"
+#include "invis_spike_01_glow_001_png.h"
+#include "invis_spike_03_glow_001_png.h"
+#include "invis_square_01_glow_001_png.h"
+
+#include "d_ball_07_001_png.h"
+#include "d_ball_08_001_png.h"
+
+#include "d_cross_01_001_png.h"
+
+#include "d_spikeart_01_001_png.h"
+#include "d_spikeart_02_001_png.h"
+#include "d_spikeart_03_001_png.h"
+
+#include "d_spikewheel_01_001_png.h"
+#include "d_spikewheel_02_001_png.h"
+#include "d_spikewheel_03_001_png.h"
+
 
 
 

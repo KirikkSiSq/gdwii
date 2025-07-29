@@ -6,13 +6,13 @@ typedef struct {
 } LevelDefinition;
 
 typedef struct {
-    const unsigned char *song_ptr;
+    const char *song_name;
     int song_size;
     int tempo;
 } SongDefinition;
 
-#define LEVEL_NUM 18
-#define SONG_NUM 12
+#define LEVEL_NUM 19
+#define SONG_NUM 14
 
 extern int level_id;
 

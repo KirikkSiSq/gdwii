@@ -71,6 +71,11 @@ enum GameRoutine {
 #define INPUT_RIGHT PAD_BUTTON_RIGHT
 #define INPUT_LEFT  PAD_BUTTON_LEFT
 
+#define SDCARD_FOLDER "sd:/apps/wiidash"
+#define RESOURCES_FOLDER "resources"
+#define SONGS_FOLDER "songs"
+#define USER_LEVELS_FOLDER "user_levels"
+
 extern int gameRoutine;
 
 extern int frame_counter;

@@ -13,6 +13,9 @@
 
 #include "level.h"
 #include "player.h"
+#include "filesystem.h"
+
+#include "../libraries/color.h"
 
 struct LoadedLevelInfo level_info;
 
@@ -1129,10 +1132,55 @@ void reload_level() {
     for (int i = 0; i < objectsArrayList->count; i++) {
         GDObjectTyped *obj = objectsArrayList->objects[i];
         obj->activated = FALSE;
+        obj->toggled = FALSE;
         obj->collided = FALSE;
         obj->hitbox_counter = 0;
         obj->transition_applied = FADE_NONE;
     }
     reset_color_channels();
     set_color_channels();
+}
+
+// https://github.com/gd-programming/gd.docs/issues/87
+void calculate_lbg() {
+    struct ColorChannel channel = channels[BG];
+    float h,s,v;
+    
+    convertRGBtoHSV(channel.color.r, channel.color.g, channel.color.b, &h, &s, &v);
+
+    s -= 0.20f;
+    s = clampf(s, 0.f, 1.f);
+    v += 0.20f;
+    v = clampf(v, 0.f, 1.f);
+
+    unsigned char r,g,b;
+
+    convertHSVtoRGB(h, s, v, &r, &g, &b);
+
+    // Set here no lerping LBG
+    channels[LBG_NO_LERP].color.r = r;
+    channels[LBG_NO_LERP].color.g = g;
+    channels[LBG_NO_LERP].color.b = b;
+    channels[LBG_NO_LERP].blending = TRUE;
+
+    float factor = (channel.color.r + channel.color.g + channel.color.b) / 150.f;
+
+    if (factor < 1.f) {
+        r = r * factor + p1.r * (1 - factor);
+        g = g * factor + p1.g * (1 - factor);
+        b = b * factor + p1.b * (1 - factor);
+    }
+
+    // Set here lerped LBG
+    channels[LBG].color.r = r;
+    channels[LBG].color.g = g;
+    channels[LBG].color.b = b;
+    channels[LBG].blending = TRUE;
+}
+
+
+char *load_song(const char *file_name, size_t *out_size) {
+    char full_path[256];
+    snprintf(full_path, sizeof(full_path), "%s/%s/%s/%s", SDCARD_FOLDER, RESOURCES_FOLDER, SONGS_FOLDER, file_name);
+    return read_file(full_path, out_size);
 }

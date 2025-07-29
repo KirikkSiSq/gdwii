@@ -11,6 +11,11 @@
 #define BG_DIMENSIONS 4
 #define BG_CHUNK ((1024/BG_DIMENSIONS) * BACKGROUND_SCALE)
 
+#define FADE_WIDTH 75
+
+#define FADING_OBJ_WIDTH 150
+#define FADING_OBJ_PADDING 90
+
 enum Objects {
     PLAYER_OBJECT,
     BASIC_BLOCK,
@@ -185,6 +190,26 @@ enum Objects {
     PINK_PAD,
     PINK_ORB,
 
+    SECRET_COIN,
+    BREAKABLE_BLOCK,
+
+    FADING_SPIKE,
+    FADING_MEDIUM_SPIKE,
+    FADING_BLOCK,
+    FADING_SLAB,
+
+    PULSING_SQUARE,
+    PULSING_TRIANGLE,
+    D_CROSS,
+    
+    SPIKEART_BIG,
+    SPIKEART_MEDIUM,
+    SPIKEART_SMALL,
+
+    SPIKEWHEEL_BIG,
+    SPIKEWHEEL_MEDIUM,
+    SPIKEWHEEL_SMALL,
+    
     OBJECT_COUNT
 };
 
@@ -221,6 +246,7 @@ enum ColChannels {
     G2,
     BLACK,
     WHITE,
+    LBG_NO_LERP,
     COL_CHANNEL_COUNT
 };
 
@@ -268,6 +294,7 @@ enum HitboxTypes {
     HITBOX_SOLID,
     HITBOX_SPIKE,
     HITBOX_SPECIAL,
+    HITBOX_BREAKABLE_BLOCK,
     HITBOX_TYPES
 };
 
@@ -295,6 +322,7 @@ typedef struct {
     u8 num_layers;
     u8 is_trigger;
     u8 is_saw;
+    u8 fades;
     ObjectHitbox hitbox;
 } ObjectDefinition;
 

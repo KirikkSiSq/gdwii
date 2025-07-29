@@ -123,7 +123,17 @@
         "pit_b_01_001_png.h": "c",
         "bump_03_001_png.h": "c",
         "bird_01_2_001_png.h": "c",
-        "bird_01_3_001_png.h": "c"
+        "bird_01_3_001_png.h": "c",
+        "brick_02_001_png.h": "c",
+        "ring_03_001_png.h": "c",
+        "color.h": "c",
+        "d_wheel_03_001_png.h": "c",
+        "invis_spike_02_001_png.h": "c",
+        "invis_spike_03_001_png.h": "c",
+        "invis_square_01_001_png.h": "c",
+        "d_spikeart_01_001_png.h": "c",
+        "d_spikewheel_01_001_png.h": "c",
+        "d_spikewheel_02_001_png.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

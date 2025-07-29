@@ -2648,4 +2648,291 @@ const ObjectDefinition objects[] = {
         .def_zorder = 12,
         .num_layers = 1
     },
+    unknown, // Coin
+    { // Breakable block
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = LBG_NO_LERP,
+                .zlayer_offset = 0,
+                .texture = brick_02_glow_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = brick_02_001_png
+            }
+        },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_BREAKABLE_BLOCK
+        },
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 2
+    },
+    { // Fading Spike
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 1,
+                .col_channel = LBG,
+                .zlayer_offset = 0,
+                .texture = invis_spike_01_glow_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = invis_spike_01_001_png
+            }
+        },
+        .hitbox = {
+            .width = 6,
+            .height = 12,
+            .type = HITBOX_SPIKE
+        },
+        .fades = TRUE,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 2
+    },
+    { // Fading Medium Spike
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 1,
+                .col_channel = LBG,
+                .zlayer_offset = 0,
+                .texture = invis_spike_03_glow_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = invis_spike_03_001_png
+            }
+        },
+        .hitbox = {
+            .width = 4,
+            .height = 7.6,
+            .type = HITBOX_SPIKE
+        },
+        .fades = TRUE,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 2
+    },
+    { // Fading block
+        .layers = {
+            {
+                .x_offset = 0.5,
+                .y_offset = 0.5,
+                .col_channel = LBG,
+                .zlayer_offset = 0,
+                .texture = invis_square_01_glow_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = invis_square_01_001_png
+            }
+        },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_SOLID
+        },
+        .fades = TRUE,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 2
+    },
+    { // Fading Slab
+        .layers = {
+            {
+                .x_offset = 0.5,
+                .y_offset = 0,
+                .col_channel = LBG,
+                .zlayer_offset = 0,
+                .texture = invis_plank_01_glow_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = invis_plank_01_001_png
+            }
+        },
+        .hitbox = {
+            .width = 30,
+            .height = 14,
+            .type = HITBOX_SOLID
+        },
+        .fades = TRUE,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 2
+   },
+   { // Pulsing square
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P2,
+                .zlayer_offset = 0,
+                .texture = d_ball_07_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .num_layers = 1
+    },
+    { // Pulsing triangle
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P2,
+                .zlayer_offset = 0,
+                .texture = d_ball_08_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .num_layers = 1
+    },
+    { // Pulsing cross
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P2,
+                .zlayer_offset = 0,
+                .texture = d_cross_01_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 10,
+        .num_layers = 1
+    },
+    { // Spikeart big
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = d_spikeart_01_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .num_layers = 1
+    },
+    { // Spikeart medium
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = d_spikeart_02_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .num_layers = 1
+    },
+    { // Spikeart small
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = d_spikeart_03_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .num_layers = 1
+    },
+    { // Spikewheel big
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = d_spikewheel_01_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .is_saw = TRUE,
+        .num_layers = 1
+    },
+    { // Spikewheel medium
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = d_spikewheel_02_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .is_saw = TRUE,
+        .num_layers = 1
+    },
+    { // Spikewheel small
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = P1,
+                .zlayer_offset = 0,
+                .texture = d_spikewheel_03_001_png
+            }
+        },
+        .hitbox = no_hitbox,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_B1,
+        .def_zorder = 9,
+        .is_saw = TRUE,
+        .num_layers = 1
+    },
 };

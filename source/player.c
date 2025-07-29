@@ -79,6 +79,7 @@ void set_p_velocity(Player *player, float vel) {
 void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
     int clip = (player->gamemode == GAMEMODE_SHIP ? 7 : 10);
     switch (hitbox->type) {
+        case HITBOX_BREAKABLE_BLOCK:
         case HITBOX_SOLID: 
             //if (state.old_player.upside_down != player->upside_down) return;
 
@@ -100,7 +101,11 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
                 player->x, player->y, 9, 9, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
-                player->dead = TRUE;
+                if (hitbox->type == HITBOX_BREAKABLE_BLOCK) {
+                    obj->toggled = TRUE;
+                } else {
+                    player->dead = TRUE;
+                }
             } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
@@ -134,7 +139,7 @@ void collide_with_obj(GDObjectTyped *obj) {
     Player *player = &state.player;
     ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
 
-    if (hitbox->type != HITBOX_NONE && obj->id < OBJECT_COUNT) {
+    if (hitbox->type != HITBOX_NONE && !obj->toggled && obj->id < OBJECT_COUNT) {
         number_of_collisions_checks++;
         if (hitbox->is_circular) {
             if (intersect_rect_circle(

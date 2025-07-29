@@ -25,9 +25,13 @@ jobs:
       - name: Prepare for build publishing
         run: |
           mkdir -p out/rom
-          cp gdwii.dol out/rom
+          mkdir -p out/rom/resources
+          mkdir -p out/rom/resources/songs
+          cp -r data/hbc/. out/rom/
+          cp -r data/songs/. out/rom/resources/songs/
+          cp gdwii.dol out/rom/boot.dol
       - name: Publish build to GH Actions
         uses: actions/upload-artifact@v4
         with:
           path: out/rom
-          name: gd-wii
+          name: wiidash

@@ -15,27 +15,28 @@ typedef union {
 } GDValue;
 
 typedef struct {
-    int id;          // key 1
-    float x;         // key 2
-    float y;         // key 3
-    bool flippedH;   // key 4
-    bool flippedV;   // key 5
-    float rotation;  // key 6
+    int id;              // key 1
+    float x;             // key 2
+    float y;             // key 3
+    bool flippedH;       // key 4
+    bool flippedV;       // key 5
+    float rotation;      // key 6
     u8 trig_colorR;      // key 7
     u8 trig_colorG;      // key 8
     u8 trig_colorB;      // key 9
-    float trig_duration;  // key 10
+    float trig_duration; // key 10
     bool touchTriggered; // key 11
-    int zsheetlayer; // no key has this, but used internally
-    int zlayer;      // key 24
-    int zorder;      // key 25
+    int zsheetlayer;     // no key has this, but used internally
+    int zlayer;          // key 24
+    int zorder;          // key 25
 
-    int random; // random number assigned to this object
-    bool activated; // if it has been activated
+    int random;             // random number assigned to this object
+    bool activated;        // if it has been activated
     unsigned int hitbox_counter; // number of times the player has entered the hitbox
-    bool collided; // if the object just started being touched
-    float ampl_scaling; // the amplitude scaling for pulsing objects
-    u8 transition_applied;
+    bool collided;         // if the object just started being touched
+    float ampl_scaling;    // the amplitude scaling for pulsing objects
+    u8 transition_applied; // the transition applied to the object
+    bool toggled;          // if its enabled or disabled
 } GDObjectTyped;
 
 typedef struct {
@@ -152,3 +153,5 @@ void unload_level();
 void reload_level();
 void reset_color_channels();
 void set_color_channels();
+void calculate_lbg();
+char *load_song(const char *file_name, size_t *out_size);

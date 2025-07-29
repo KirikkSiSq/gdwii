@@ -810,7 +810,6 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
 }
 
 int get_fade_value(float x, int right_edge) {
-    #define FADE_WIDTH 75
     if (x < 0 || x > right_edge)
         return 0;
     else if (x < FADE_WIDTH)
@@ -910,6 +909,8 @@ float get_object_pulse(float amplitude, GDObjectTyped *obj) {
         case PULSING_DIAMOND:
         case PULSING_STAR:
         case PULSING_NOTE:
+        case PULSING_SQUARE:
+        case PULSING_TRIANGLE:
         case ROD_BIG:
         case ROD_MEDIUM:
         case ROD_SMALL:
@@ -917,6 +918,7 @@ float get_object_pulse(float amplitude, GDObjectTyped *obj) {
         case D_ARROW:
         case D_EXMARK:
         case D_QMARK:
+        case D_CROSS:
             return map_range(amplitude, 0.f, 1.f, 0.8f, 1.2f);
     }
     return amplitude;
@@ -959,6 +961,17 @@ int get_opacity(GDObjectTyped *obj, float x) {
     return opacity;
 }
 
+float get_fading_obj_fade(GDObjectTyped *obj, float x, float right_edge) {
+    if (x < FADING_OBJ_PADDING || x > right_edge - FADING_OBJ_PADDING)
+        return 1.f;
+    else if (x < FADING_OBJ_PADDING + FADING_OBJ_WIDTH)
+        return clampf(1.f - ((x - FADING_OBJ_PADDING) / FADING_OBJ_WIDTH), 0.05f, 1.f);
+    else if (x > right_edge - FADING_OBJ_WIDTH - FADING_OBJ_PADDING)
+        return clampf(1.f - ((right_edge - (x + FADING_OBJ_PADDING)) / FADING_OBJ_WIDTH), 0.05f, 1.f);
+    else
+        return 0.05f;
+}
+
 GRRLIB_texImg *prev_tex = NULL;
 int prev_blending = GRRLIB_BLEND_ALPHA;
 
@@ -990,6 +1003,10 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
 
     int opacity = get_opacity(obj, x);
     
+    if (objects[obj_id].fades) {
+        opacity *= get_fading_obj_fade(obj, x, screenWidth);
+    }
+
     u32 color = RGBA(channels[col_channel].color.r, channels[col_channel].color.g, channels[col_channel].color.b, opacity);
         
     float angle_rad = obj->rotation * (M_PI / 180.0f); // Convert degrees to radians
@@ -1013,7 +1030,7 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
 
     float rotation = adjust_angle(obj->rotation, 0, state.mirror_mult < 0);
 
-    switch(obj->id) {
+    switch(obj_id) {
         case ROD_BIG:
         case ROD_MEDIUM:
         case ROD_SMALL:
@@ -1044,7 +1061,6 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
         GRRLIB_SetBlend(blending);
         prev_blending = blending;
     }
-    
 
     custom_drawImg(
         /* X        */ get_mirror_x(x, state.mirror_factor) + 6 - (width/2) + x_off_rot + fade_x,
@@ -1287,6 +1303,8 @@ void draw_all_object_layers() {
             for (int i = 0; i < sec->layer_count; i++) {
                 GDObjectTyped *obj = sec->layers[i]->layer->obj;
 
+                if (obj->toggled) continue;
+                
                 float calc_x = ((obj->x - state.camera_x) * SCALE);
                 float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
                 if (calc_x > -90 && calc_x < screen_x_max) {        
@@ -1590,5 +1608,6 @@ void handle_objects() {
         }
     }
     handle_col_triggers();
+    calculate_lbg();
     handle_copy_channels();
 }

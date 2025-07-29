@@ -18,11 +18,18 @@ u64 start_frame = 0;
 
 float death_timer = 0.0f;
 
+char *current_song_pointer = NULL;
+
 int game_loop() {
     u64 prevTicks = gettime();
     double accumulator = 0.0f;
 
-    MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
+    size_t size;
+    current_song_pointer = load_song(songs[level_info.song_id].song_name, &size);
+
+    if (current_song_pointer) {
+        MP3Player_PlayBuffer(current_song_pointer, size, NULL);
+    }
 
     while (1) {
         start_frame = gettime();
@@ -71,6 +78,7 @@ int game_loop() {
             PlayOgg(endStart_02_ogg, endStart_02_ogg_size, 0, OGG_ONE_TIME);
             handle_completion();
             MP3Player_Stop();
+            if (current_song_pointer) free(current_song_pointer);
             gameRoutine = ROUTINE_MENU;
             break;
         }
@@ -87,7 +95,9 @@ int game_loop() {
             if (death_timer <= 0.f) {
                 init_variables();
                 reload_level(); 
-                MP3Player_PlayBuffer(songs[level_info.song_id].song_ptr, songs[level_info.song_id].song_size, NULL);
+                if (current_song_pointer) {
+                    MP3Player_PlayBuffer(current_song_pointer, size, NULL);
+                }
                 update_input();
                 fixed_dt = TRUE;
             }

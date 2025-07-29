@@ -1,7 +1,7 @@
 #pragma once
 
 #define MAX_SD_LEVELS 128
-#define MAX_PATH_LEN 256 + 12
+#define MAX_PATH_LEN 512
 
 extern int level_id;
 
