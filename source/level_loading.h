@@ -41,10 +41,10 @@ typedef struct {
 } GDObjectTyped;
 
 typedef struct {
-    int keys[20];
-    GDValue values[20];
-    GDValueType types[20];
-    int propCount;
+    unsigned char keys[15];
+    unsigned char propCount;
+    unsigned char types[15];
+    GDValue values[15];
 } GDObject;
 
 typedef struct {

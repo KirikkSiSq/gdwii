@@ -659,6 +659,7 @@ GDObjectList *parse_string(const char *levelString) {
     
     GDObject *objects = (GDObject *)malloc(sizeof(GDObject) * objectCount);
 
+    printf("Size of gdobjects %d bytes\n", sizeof(GDObject) * objectCount);
     if (objects == NULL) {
         printf("Couldn't allocate GD Objects\n");
         return NULL;
