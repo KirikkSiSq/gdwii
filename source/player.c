@@ -769,7 +769,7 @@ void handle_death() {
         spawn_particle(DEATH_PARTICLES, state.player.x, state.player.y, NULL);
     }
 
-    MP3Player_Stop();
+    MP3Player_Volume(0);
     PlayOgg(explode_11_ogg, explode_11_ogg_size, 0, OGG_ONE_TIME);
 }
 

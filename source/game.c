@@ -96,7 +96,9 @@ int game_loop() {
                 init_variables();
                 reload_level(); 
                 if (current_song_pointer) {
+                    MP3Player_Stop();
                     MP3Player_PlayBuffer(current_song_pointer, size, NULL);
+                    MP3Player_Volume(255);
                 }
                 update_input();
                 fixed_dt = TRUE;
