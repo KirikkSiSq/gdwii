@@ -1553,6 +1553,17 @@ void run_trigger(GDObjectTyped *obj, struct TriggerBuffer *buffer) {
         case DISABLE_TRAIL:
             p1_trail = FALSE;
             break;
+
+        case 899: // 2.0 color trigger
+            buffer = &trigger_buffer[obj->target_color_id];
+            buffer->active = TRUE;
+            buffer->old_color = channels[obj->target_color_id].color;
+            buffer->new_color.r = obj->trig_colorR;
+            buffer->new_color.g = obj->trig_colorG;
+            buffer->new_color.b = obj->trig_colorB;
+            buffer->seconds = obj->trig_duration;
+            buffer->time_run = 0;
+            break;
     }
     obj->activated = TRUE;
 }

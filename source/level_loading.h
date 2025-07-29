@@ -27,6 +27,7 @@ typedef struct {
     float trig_duration; // key 10
     bool touchTriggered; // key 11
     bool tintGround;     // key 14
+    int target_color_id; // key 23
     int zsheetlayer;     // no key has this, but used internally
     int zlayer;          // key 24
     int zorder;          // key 25
