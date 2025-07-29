@@ -27,6 +27,7 @@ jobs:
           mkdir -p out/rom
           mkdir -p out/rom/resources
           mkdir -p out/rom/resources/songs
+          mkdir -p out/rom/user_levels
           cp -r data/hbc/. out/rom/
           cp -r data/songs/. out/rom/resources/songs/
           cp gdwii.dol out/rom/boot.dol
