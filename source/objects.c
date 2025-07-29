@@ -884,6 +884,7 @@ int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
         case D_ARROW:
         case D_EXMARK:
         case D_QMARK:
+        case D_CROSS:
             return 1;
         case ROD_BIG:
         case ROD_MEDIUM:
