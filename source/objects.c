@@ -1509,7 +1509,7 @@ void run_trigger(GDObjectTyped *obj, struct TriggerBuffer *buffer) {
             buffer->new_color.b = obj->trig_colorB;
             buffer->seconds = obj->trig_duration;
             buffer->time_run = 0;
-            break;
+            if (!obj->tintGround) break;
         
         case GROUND_TRIGGER:
             buffer = &trigger_buffer[GROUND];

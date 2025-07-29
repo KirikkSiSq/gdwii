@@ -447,6 +447,7 @@ GDValueType get_value_type_for_key(int key) {
         case 9:  return GD_VAL_INT;    // Blue
         case 10: return GD_VAL_FLOAT;  // Duration
         case 11: return GD_VAL_BOOL;   // Touch Triggered
+        case 14: return GD_VAL_BOOL;   // Tint ground
         case 24: return GD_VAL_INT;    // Zlayer
         case 25: return GD_VAL_INT;    // Zorder
         case 32: return GD_VAL_FLOAT;  // Scaling
@@ -569,6 +570,9 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
                 break;
             case 11: // Touch Triggered
                 if (type == GD_VAL_BOOL) typed->touchTriggered = val.b;
+                break;
+            case 14: // Tint Ground
+                if (type == GD_VAL_BOOL) typed->tintGround = val.b;
                 break;
             case 24: // Z layer
                 if (type == GD_VAL_INT) typed->zlayer = val.i;
