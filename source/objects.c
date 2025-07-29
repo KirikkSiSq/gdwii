@@ -972,6 +972,37 @@ float get_fading_obj_fade(GDObjectTyped *obj, float x, float right_edge) {
         return 0.05f;
 }
 
+float get_rotation_speed(GDObjectTyped *obj) {
+    switch (obj->id) {
+        case SAW_BIG: 
+        case SAW_MEDIUM:
+        case SAW_SMALL:
+        case BLADE_BIG:
+        case BLADE_MEDIUM:
+        case BLADE_SMALL:
+        case BLADE_ALT_BIG:
+        case BLADE_ALT_MEDIUM:
+        case BLADE_ALT_SMALL:
+            return 360.f;
+        
+        case SAW_DECO_BIG:
+        case SAW_DECO_MEDIUM:
+        case SAW_DECO_SMALL:
+        case SAW_DECO_TINY:
+        case WHEEL_BIG:
+        case WHEEL_MEDIUM:
+        case WHEEL_SMALL:
+        case SPIKEWHEEL_BIG:
+        case SPIKEWHEEL_MEDIUM:
+        case SPIKEWHEEL_SMALL:
+        case CARTWHEEL_BIG:
+        case CARTWHEEL_MEDIUM:
+        case CARTWHEEL_SMALL:
+            return 180.f;
+    }
+    return 0.f;
+}
+
 GRRLIB_texImg *prev_tex = NULL;
 int prev_blending = GRRLIB_BLEND_ALPHA;
 
@@ -1002,6 +1033,7 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
     }
 
     int opacity = get_opacity(obj, x);
+    int unmodified_opacity = opacity;
     
     if (objects[obj_id].fades) {
         opacity *= get_fading_obj_fade(obj, x, screenWidth);
@@ -1042,7 +1074,7 @@ static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObje
     }
 
     if (obj->transition_applied == FADE_DOWN_STATIONARY || obj->transition_applied == FADE_UP_STATIONARY) {
-        if (opacity < 255) {
+        if (unmodified_opacity < 255) {
             if (x > screenWidth / 2) {
                 x = screenWidth - FADE_WIDTH;
             } else {
@@ -1240,25 +1272,6 @@ void handle_special_fading(GDObjectTyped *obj, float calc_x, float calc_y) {
 }
 
 int layersDrawn = 0;
-
-float get_rotation_speed(GDObjectTyped *obj) {
-    switch (obj->id) {
-        case SAW_BIG: 
-        case SAW_MEDIUM:
-        case SAW_SMALL:
-            return 360.f;
-        
-        case SAW_DECO_BIG:
-        case SAW_DECO_MEDIUM:
-        case SAW_DECO_SMALL:
-        case SAW_DECO_TINY:
-        case WHEEL_BIG:
-        case WHEEL_MEDIUM:
-        case WHEEL_SMALL:
-            return 180.f;
-    }
-    return 0.f;
-}
 
 int compare_by_layer_index(const void *a, const void *b) {
     GDLayerSortable *la = *(GDLayerSortable **)a;

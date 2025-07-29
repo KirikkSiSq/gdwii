@@ -2,6 +2,7 @@
 #include "square_02_glow_001_png.h"
 #include "square_03_glow_001_png.h"
 #include "square_04_glow_001_png.h"
+#include "square_04_glow_002_png.h"
 #include "square_06_glow_001_png.h"
 #include "square_07_glow_001_png.h"
 
@@ -95,6 +96,7 @@
 #include "blockOutline_05_001_png.h"
 #include "blockOutline_05b_001_png.h"
 #include "blockOutline_06_001_png.h"
+#include "blockOutline_06_002_png.h"
 
 #include "gravbump_01_001_png.h"
 #include "gravring_01_001_png.h"
@@ -206,6 +208,81 @@
 #include "d_spikewheel_01_001_png.h"
 #include "d_spikewheel_02_001_png.h"
 #include "d_spikewheel_03_001_png.h"
+
+#include "d_wave_01_001_png.h"
+#include "d_wave_02_001_png.h"
+#include "d_wave_03_001_png.h"
+
+#include "square_g_03_001_png.h"
+#include "square_g_04_001_png.h"
+#include "square_g_05_001_png.h"
+#include "square_g_06_001_png.h"
+#include "square_g_07_001_png.h"
+#include "square_g_08_001_png.h"
+#include "square_g_09_001_png.h"
+#include "square_g_10_001_png.h"
+#include "square_g_11_001_png.h"
+
+#include "square_h_02_glow_001_png.h"
+#include "square_h_04_glow_001_png.h"
+#include "square_h_05_glow_001_png.h"
+#include "square_h_07_glow_001_png.h"
+
+#include "square_h_01_001_png.h"
+#include "square_h_02_001_png.h"
+#include "square_h_03_001_png.h"
+#include "square_h_04_001_png.h"
+#include "square_h_05_001_png.h"
+#include "square_h_06_001_png.h"
+#include "square_h_07_001_png.h"
+#include "square_h_08_001_png.h"
+#include "square_h_09_001_png.h"
+#include "square_h_10_001_png.h"
+
+#include "iceSpike_01_001_png.h"
+#include "iceSpike_02_001_png.h"
+#include "iceSpike_03_001_png.h"
+
+#include "iceSpike_01_glow_001_png.h"
+#include "iceSpike_02_glow_001_png.h"
+#include "iceSpike_03_glow_001_png.h"
+
+#include "d_cartwheel_01_001_png.h"
+#include "d_cartwheel_02_001_png.h"
+#include "d_cartwheel_03_001_png.h"
+
+#include "blade_01_001_png.h"
+#include "blade_02_001_png.h"
+#include "blade_03_001_png.h"
+
+#include "blade_01_glow_001_png.h"
+#include "blade_02_glow_001_png.h"
+#include "blade_03_glow_001_png.h"
+
+#include "blade_b_01_001_png.h"
+#include "blade_b_02_001_png.h"
+#include "blade_b_03_001_png.h"
+
+#include "blade_b_01_glow_001_png.h"
+#include "blade_b_02_glow_001_png.h"
+#include "blade_b_03_glow_001_png.h"
+
+#include "d_art_02_001_png.h"
+
+#include "fakeSpike_01_001_png.h"
+#include "fakeSpike_02_001_png.h"
+#include "fakeSpike_03_001_png.h"
+
+#include "square_h_09_glow_001_png.h"
+#include "square_h_10_glow_001_png.h"
+
+#include "square_01_small_001_png.h"
+#include "square_01_small_color_001_png.h"
+#include "square_01_small_glow_001_png.h"
+
+#include "plank_01_small_001_png.h"
+#include "plank_01_small_color_001_png.h"
+#include "plank_01_small_glow_001_png.h"
 
 
 
