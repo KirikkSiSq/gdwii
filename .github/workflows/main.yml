@@ -28,7 +28,7 @@ jobs:
           mkdir -p out/rom/resources
           mkdir -p out/rom/resources/songs
           mkdir -p out/rom/user_levels
-          touch out/rom/user_levels/ADD_GMDs_HERE.txt
+          echo "text so github doesn't remove the folder" >> out/rom/user_levels/ADD_GMDs_HERE.txt
           cp -r data/hbc/. out/rom/
           cp -r data/songs/. out/rom/resources/songs/
           cp gdwii.dol out/rom/boot.dol
