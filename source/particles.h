@@ -14,6 +14,7 @@ typedef struct {
     float rotation;
     float life;
     bool active;
+    bool rel_gravity;
     ColorAlpha color, start_color, end_color;
     ColorAlpha color_delta;
     float scale, start_scale, end_scale, scale_delta;
@@ -29,6 +30,7 @@ typedef struct {
     float angle, angleVar;
     float speed, speedVar;
     float gravity_x, gravity_y;
+    bool rel_gravity;
     float life, lifeVar;
     float start_scale, start_scaleVar;
     float end_scale, end_scaleVar;
@@ -52,6 +54,7 @@ enum ParticleTextures {
     PARTICLE_CIRCLE,
     PARTICLE_CIRCUNFERENCE,
     PARTICLE_P1_TRAIL,
+    PARTICLE_COIN,
 };
 
 enum ParticleGroupID {
@@ -70,6 +73,9 @@ enum ParticleGroupID {
     UFO_TRAIL,
     DEATH_PARTICLES,
     DEATH_CIRCLE,
+    BREAKABLE_BRICK_PARTICLES,
+    COIN_PARTICLES,
+    COIN_OBJ,
 };
 
 extern ParticleTemplate particle_templates[];

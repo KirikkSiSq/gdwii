@@ -13,6 +13,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 90, .angleVar = 45,
         .speed = 75, .speedVar = 20,
         .gravity_x = 0, .gravity_y = -300,
+        .rel_gravity = FALSE,
         .life = 0.3f, .lifeVar = 0.15f,
         .start_scale = 0.3, .start_scaleVar = 0.1,
         .end_scale = 0, .end_scaleVar = 0,
@@ -31,6 +32,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 90, .angleVar = 45,
         .speed = 15, .speedVar = 4,
         .gravity_x = 0, .gravity_y = -300,
+        .rel_gravity = FALSE,
         .life = 0.3f, .lifeVar = 0.15f,
         .start_scale = 0.25, .start_scaleVar = 0.2,
         .end_scale = 0, .end_scaleVar = 0,
@@ -49,6 +51,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 90, .angleVar = 90,
         .speed = 15, .speedVar = 4,
         .gravity_x = 0, .gravity_y = -300,
+        .rel_gravity = FALSE,
         .life = 0.3f, .lifeVar = 0.15f,
         .start_scale = 0.25, .start_scaleVar = 0.2,
         .end_scale = 0, .end_scaleVar = 0,
@@ -67,6 +70,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 110, .angleVar = 45,
         .speed = 95, .speedVar = 20,
         .gravity_x = -350, .gravity_y = -300,
+        .rel_gravity = FALSE,
         .life = 0.1f, .lifeVar = 0.05f,
         .start_scale = 0.15, .start_scaleVar = 0.1,
         .end_scale = 0, .end_scaleVar = 0,
@@ -90,6 +94,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 360,
         .speed = -75, .speedVar = 20,
         .gravity_x = 0, .gravity_y = -100,
+        .rel_gravity = TRUE,
         .life = 0.3f, .lifeVar = 0.15f,
         .start_scale = 0.2, .start_scaleVar = 0.1,
         .end_scale = 0, .end_scaleVar = 0,
@@ -113,6 +118,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 90, .angleVar = 0,
         .speed = 100, .speedVar = 20,
         .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
         .life = 0.4f, .lifeVar = 0.12f,
         .start_scale = 0.1f, .start_scaleVar = 0.05f,
         .end_scale = 0, .end_scaleVar = 0,
@@ -136,6 +142,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 270, .angleVar = 0,
         .speed = 0, .speedVar = 20,
         .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
         .life = 1.f, .lifeVar = 0.8f,
         .start_scale = 0.3f, .start_scaleVar = 0.1f,
         .end_scale = 0, .end_scaleVar = 0,
@@ -159,6 +166,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 80,
         .speed = -75, .speedVar = 0,
         .gravity_x = 0, .gravity_y = -100,
+        .rel_gravity = TRUE,
         .life = 0.48f, .lifeVar = 0,
         .start_scale = 0.3, .start_scaleVar = 0.1,
         .end_scale = 0.05, .end_scaleVar = 0,
@@ -182,6 +190,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 0,
         .speed = 0, .speedVar = 0,
         .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
         .life = 0.3f, .lifeVar = 0,
         .start_scale = 40, .start_scaleVar = 0,
         .end_scale = 0.0, .end_scaleVar = 0,
@@ -205,6 +214,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 0,
         .speed = 0, .speedVar = 0,
         .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
         .life = 0.3f, .lifeVar = 0,
         .start_scale = 0, .start_scaleVar = 0,
         .end_scale = 90, .end_scaleVar = 0,
@@ -228,6 +238,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 0,
         .speed = 0, .speedVar = 0,
         .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
         .life = 0.3f, .lifeVar = 0,
         .start_scale = 0.733333f, .start_scaleVar = 0,
         .end_scale = 0.733333f, .end_scaleVar = 0,
@@ -251,6 +262,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 180,
         .speed = 80, .speedVar = 4,
         .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
         .life = 0.4f, .lifeVar = 0.15f,
         .start_scale = 0.25, .start_scaleVar = 0.2,
         .end_scale = 0, .end_scaleVar = 0,
@@ -269,6 +281,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 45,
         .speed = 15, .speedVar = 4,
         .gravity_x = 0, .gravity_y = -300,
+        .rel_gravity = FALSE,
         .life = 0.3f, .lifeVar = 0.15f,
         .start_scale = 0.25, .start_scaleVar = 0.2,
         .end_scale = 0, .end_scaleVar = 0,
@@ -287,6 +300,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 180,
         .speed = 160, .speedVar = 80,
         .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
         .life = 0.8f, .lifeVar = 0.15f,
         .start_scale = 0.35, .start_scaleVar = 0.2,
         .end_scale = 0, .end_scaleVar = 0,
@@ -305,6 +319,7 @@ ParticleTemplate particle_templates[] = {
         .angle = 0, .angleVar = 0,
         .speed = 0, .speedVar = 0,
         .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
         .life = 0.5f, .lifeVar = 0,
         .start_scale = 0, .start_scaleVar = 0,
         .end_scale = 90, .end_scaleVar = 0,
@@ -323,6 +338,78 @@ ParticleTemplate particle_templates[] = {
         .minRadius = 0,
         .maxRadius = 0,
         .texture_id = PARTICLE_CIRCLE
+    },
+    [BREAKABLE_BRICK_PARTICLES] = {
+        .angle = 90, .angleVar = 90,
+        .speed = 110, .speedVar = 20,
+        .gravity_x = 0, .gravity_y = -616,
+        .rel_gravity = FALSE,
+        .life = 0.5f, .lifeVar = 0,
+        .start_scale = 0.25, .start_scaleVar = 0.1,
+        .end_scale = 0, .end_scaleVar = 0,
+        .start_color = {255,255,255,255},
+        .start_colorVar = {0,0,0,127},
+        .end_color = {255,255,255,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 14, .sourcePosVarY = 14,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE
+    },
+    [COIN_PARTICLES] = {
+        .angle = 270, .angleVar = 0,
+        .speed = 70, .speedVar = 10,
+        .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
+        .life = 0.45f, .lifeVar = 0.15f,
+        .start_scale = 0.15, .start_scaleVar = 0.1,
+        .end_scale = 0, .end_scaleVar = 0,
+        .start_color = {255,255,0,255},
+        .start_colorVar = {0,0,0,127},
+        .end_color = {0,0,0,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 3, .sourcePosVarY = 5,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE
+    },
+    [COIN_OBJ] = {
+        .angle = 90, .angleVar = 7,
+        .speed = 400, .speedVar = 10,
+        .gravity_x = 0, .gravity_y = -1500,
+        .rel_gravity = FALSE,
+        .life = 3.f, .lifeVar = 0,
+        .start_scale = 0.733333f, .start_scaleVar = 0,
+        .end_scale = 0.733333f, .end_scaleVar = 0,
+        .start_color = {255,255,255,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {255,255,255,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = FALSE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_COIN
     },
 };
 
@@ -396,6 +483,7 @@ void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
 
             particles[i].blending = tpl->blending;
             particles[i].active = TRUE;
+            particles[i].rel_gravity = tpl->rel_gravity;
             particles[i].parent_obj = parent_obj;
 
             particles[i].texture_id = tpl->texture_id;
@@ -414,8 +502,13 @@ void update_particles() {
         Particle *p = &state.particles[i];
         if (p->active) {
             p->velocity_angle += p->rotate_per_second * STEPS_DT;
-            p->vx += (p->gravity_y * cosf(DegToRad(p->velocity_angle)) - p->gravity_x * sinf(DegToRad(p->velocity_angle))) * STEPS_DT;
-            p->vy += (p->gravity_y * sinf(DegToRad(p->velocity_angle)) + p->gravity_x * cosf(DegToRad(p->velocity_angle))) * STEPS_DT;
+            if (p->rel_gravity) {
+                p->vx += (p->gravity_y * cosf(DegToRad(p->velocity_angle)) - p->gravity_x * sinf(DegToRad(p->velocity_angle))) * STEPS_DT;
+                p->vy += (p->gravity_y * sinf(DegToRad(p->velocity_angle)) + p->gravity_x * cosf(DegToRad(p->velocity_angle))) * STEPS_DT;
+            } else {
+                p->vx += p->gravity_x * STEPS_DT;
+                p->vy += p->gravity_y * STEPS_DT;
+            }
 
             p->x += p->vx * STEPS_DT;
             p->y += p->vy * STEPS_DT;
@@ -435,7 +528,6 @@ void update_particles() {
 void draw_particles(int group_id) {
     GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
     GRRLIB_texImg *p1TrailTex = get_p1_trail_tex();
-    set_texture(p1TrailTex);
 
     GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
@@ -502,11 +594,33 @@ void draw_particles(int group_id) {
                     );
                     break;
                 case PARTICLE_P1_TRAIL:
+                    set_texture(p1TrailTex);
                     GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
                     GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
                     custom_drawImg(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 - (p1TrailTex->w/2), calc_y + 6 - (p1TrailTex->h/2),
                         p1TrailTex,
+                        p->rotation * state.mirror_mult,
+                        p->scale * state.mirror_mult, p->scale,
+                        RGBA(
+                            p->color.r,
+                            p->color.g,
+                            p->color.b,
+                            p->color.a
+                        )
+                    
+                    );
+                    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+                    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
+                    break;
+                case PARTICLE_COIN:
+                    GRRLIB_texImg *coin_tex = get_coin_particle_texture();
+                    set_texture(coin_tex);
+                    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+                    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+                    custom_drawImg(
+                        get_mirror_x(calc_x, state.mirror_factor) + 6 - (coin_tex->w/2), calc_y + 6 - (coin_tex->h/2),
+                        coin_tex,
                         p->rotation * state.mirror_mult,
                         p->scale * state.mirror_mult, p->scale,
                         RGBA(

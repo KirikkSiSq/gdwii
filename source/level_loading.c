@@ -529,6 +529,9 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
     memset(typed, 0, sizeof(GDObjectTyped));
 
     typed->id = obj->values[0].i;
+    // Temporarily convert user coins (added in 2.0) into secret coins
+    if (typed->id == 1329) typed->id = SECRET_COIN;
+    
     typed->x = obj->values[1].f;
     typed->y = obj->values[2].f;
 

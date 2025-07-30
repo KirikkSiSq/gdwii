@@ -158,7 +158,9 @@
         "fakespike_01_001_png.h": "c",
         "square_h_09_glow_001_png.h": "c",
         "square_01_small_001_png.h": "c",
-        "square_01_small_color_001_png.h": "c"
+        "square_01_small_color_001_png.h": "c",
+        "secretcoin_01_001_png.h": "c",
+        "secretcoin_01_002_png.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

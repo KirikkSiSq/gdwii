@@ -413,6 +413,7 @@ int get_fade_value(float x, int right_edge);
 
 void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox);
 float get_mirror_x(float x, float factor);
+GRRLIB_texImg *get_coin_particle_texture();
 
 void draw_all_object_layers();
 void draw_background(f32 x, f32 y);

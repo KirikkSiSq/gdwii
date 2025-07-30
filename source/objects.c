@@ -512,6 +512,38 @@ void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hit
                 obj->activated = TRUE;
             }
             break;
+        case SECRET_COIN:
+            if (!obj->activated) {
+                // Coin particle
+                spawn_particle(COIN_OBJ, obj->x, obj->y, NULL);
+
+                // Explode particles
+                particle_templates[BREAKABLE_BRICK_PARTICLES].start_color.a = 127;
+                for (s32 i = 0; i < 10; i++) {
+                    spawn_particle(BREAKABLE_BRICK_PARTICLES, obj->x, obj->y, obj);
+                }
+
+                // Use particles
+                particle_templates[USE_EFFECT].start_scale = 60;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                particle_templates[USE_EFFECT].start_color.r = 255;
+                particle_templates[USE_EFFECT].start_color.g = 255;
+                particle_templates[USE_EFFECT].start_color.b = 0;
+                particle_templates[USE_EFFECT].start_color.a = 255;
+
+                particle_templates[USE_EFFECT].end_color.r = 255;
+                particle_templates[USE_EFFECT].end_color.g = 255;
+                particle_templates[USE_EFFECT].end_color.b = 0;
+                particle_templates[USE_EFFECT].end_color.a = 0;
+
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+                spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+
+                obj->toggled = TRUE;
+                obj->activated = TRUE;
+            }
+            break;
     }
     if (!obj->collided) obj->hitbox_counter++; 
 }
@@ -607,7 +639,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             particle_templates[ORB_PARTICLES].end_color.r = 255;
             particle_templates[ORB_PARTICLES].end_color.g = 255;
             particle_templates[ORB_PARTICLES].end_color.b = 0;
-            if (!state.player.dead) spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
+            spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             draw_obj_particles(ORB_HITBOX_EFFECT, obj);
@@ -624,7 +656,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             particle_templates[PAD_PARTICLES].end_color.g = 255;
             particle_templates[PAD_PARTICLES].end_color.b = 0;
 
-            if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
+            spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             break;
@@ -637,7 +669,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             particle_templates[ORB_PARTICLES].end_color.r = 255;
             particle_templates[ORB_PARTICLES].end_color.g = 31;
             particle_templates[ORB_PARTICLES].end_color.b = 255;
-            if (!state.player.dead) spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
+            spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             draw_obj_particles(ORB_HITBOX_EFFECT, obj);
@@ -654,7 +686,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             particle_templates[PAD_PARTICLES].end_color.g = 31;
             particle_templates[PAD_PARTICLES].end_color.b = 255;
 
-            if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
+            spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             break;
@@ -667,7 +699,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             particle_templates[ORB_PARTICLES].end_color.r = 56;
             particle_templates[ORB_PARTICLES].end_color.g = 200;
             particle_templates[ORB_PARTICLES].end_color.b = 255;
-            if (!state.player.dead) spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
+            spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             draw_obj_particles(ORB_HITBOX_EFFECT, obj);
@@ -683,7 +715,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
             particle_templates[PAD_PARTICLES].end_color.r = 56;
             particle_templates[PAD_PARTICLES].end_color.g = 200;
             particle_templates[PAD_PARTICLES].end_color.b = 255;
-            if (!state.player.dead) spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
+            spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             break;
@@ -702,7 +734,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.g = 255;
                 particle_templates[PORTAL_PARTICLES].end_color.b = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
-                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
                 draw_obj_particles(USE_EFFECT, obj);
             }
@@ -722,7 +754,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.g = 200;
                 particle_templates[PORTAL_PARTICLES].end_color.b = 255;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
-                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
                 draw_obj_particles(USE_EFFECT, obj);
             }
@@ -742,7 +774,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.g = 255;
                 particle_templates[PORTAL_PARTICLES].end_color.b = 50;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
-                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
                 draw_obj_particles(USE_EFFECT, obj);
             }
@@ -762,7 +794,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.g = 31;
                 particle_templates[PORTAL_PARTICLES].end_color.b = 255;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
-                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
                 draw_obj_particles(USE_EFFECT, obj);
             }
@@ -782,7 +814,7 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.g = 91;
                 particle_templates[PORTAL_PARTICLES].end_color.b = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
-                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
                 draw_obj_particles(USE_EFFECT, obj);
             }
@@ -801,9 +833,27 @@ void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
                 particle_templates[PORTAL_PARTICLES].end_color.g = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.b = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
-                if (!state.player.dead) spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
+                spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
                 draw_obj_particles(USE_EFFECT, obj);
+            }
+            break;
+        case BREAKABLE_BLOCK:
+            if (layer->layerNum == 1) {
+                particle_templates[BREAKABLE_BRICK_PARTICLES].start_color.a = 255;
+                draw_obj_particles(BREAKABLE_BRICK_PARTICLES, obj);
+            }
+            break;
+        case SECRET_COIN:
+            if (!obj->activated) {
+                spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
+                spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
+                spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
+                draw_obj_particles(COIN_PARTICLES, obj);
+            } else {
+                draw_obj_particles(BREAKABLE_BRICK_PARTICLES, obj);
+                draw_obj_particles(USE_EFFECT, obj);
+                draw_obj_particles(ORB_HITBOX_EFFECT, obj);
             }
             break;
     }
@@ -881,6 +931,8 @@ int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
         case PULSING_DIAMOND:
         case PULSING_STAR:
         case PULSING_NOTE:
+        case PULSING_SQUARE:
+        case PULSING_TRIANGLE:
         case D_ARROW:
         case D_EXMARK:
         case D_QMARK:
@@ -936,12 +988,19 @@ GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GDObjectTyped *obj, 
                 return object_images[ROD_BIG][level_info.pulsing_type + 1]; // balls start at 1
             }
             break;
+        case SECRET_COIN:
+            int index = (frame_counter & 0b1100000) >> 5;
+            return object_images[SECRET_COIN][index];
         case BUSH_GROUND_SPIKE:
             return object_images[BUSH_GROUND_SPIKE][obj->random & 0b11];
-            
     }
 
     return image;
+}
+
+GRRLIB_texImg *get_coin_particle_texture() {
+    int index = (frame_counter & 0b110000) >> 4;
+    return object_images[SECRET_COIN][index];
 }
 
 int get_opacity(GDObjectTyped *obj, float x) {
@@ -1316,8 +1375,6 @@ void draw_all_object_layers() {
             GFXSection *sec = get_or_create_gfx_section(cam_sx + dx, cam_sy + dy);
             for (int i = 0; i < sec->layer_count; i++) {
                 GDObjectTyped *obj = sec->layers[i]->layer->obj;
-
-                if (obj->toggled) continue;
                 
                 float calc_x = ((obj->x - state.camera_x) * SCALE);
                 float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
@@ -1379,6 +1436,7 @@ void draw_all_object_layers() {
                 draw_player();
             }
             draw_particles(SHIP_DRAG);
+            draw_particles(COIN_OBJ);
             u64 t3 = gettime();
             player_draw_time = ticks_to_microsecs(t3 - t2) / 1000.f;
 
@@ -1405,7 +1463,7 @@ void draw_all_object_layers() {
             obj_particles_time += t1 - t0;
             
             t0 = gettime();
-            put_object_layer(obj, calc_x, calc_y, layer);
+            if (!obj->toggled) put_object_layer(obj, calc_x, calc_y, layer);
             t1 = gettime();
             draw_time += t1 - t0;
         }

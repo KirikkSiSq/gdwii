@@ -103,6 +103,9 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
             )) {
                 if (hitbox->type == HITBOX_BREAKABLE_BLOCK) {
                     obj->toggled = TRUE;
+                    for (s32 i = 0; i < 10; i++) {
+                        spawn_particle(BREAKABLE_BRICK_PARTICLES, obj->x, obj->y, obj);
+                    }
                 } else {
                     player->dead = TRUE;
                 }
@@ -239,6 +242,7 @@ void cube_gamemode(Player *player) {
 
     if ((player->time_since_ground < 0.05f) && (frame_counter & 0b11) == 0) {
         particle_templates[CUBE_DRAG].angle = (player->upside_down ? -90 : 90);
+        particle_templates[CUBE_DRAG].gravity_y = (player->upside_down ? 300 : -300);
         spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
 
@@ -283,7 +287,7 @@ void ship_particles(Player *player) {
         // Ground drag effectr
         if (player->on_ground) {
             particle_templates[SHIP_DRAG].speed = 95 * mult;
-            particle_templates[SHIP_DRAG].gravity_y = (player->upside_down ? 100 : -300);
+            particle_templates[SHIP_DRAG].gravity_y = (player->upside_down ? 300 : -300);
             spawn_particle(SHIP_DRAG, player->x, (player->upside_down ? getTop(player) : getBottom(player)), NULL);
         }
     }
@@ -337,6 +341,7 @@ void ball_gamemode(Player *player) {
 
         if ((frame_counter & 0b11) == 0) {
             particle_templates[CUBE_DRAG].angle = (player->upside_down ? -90 : 90);
+            particle_templates[CUBE_DRAG].gravity_y = (player->upside_down ? 300 : -300);
             spawn_particle(CUBE_DRAG, player->x, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
         }
     }
@@ -666,10 +671,6 @@ void full_init_variables() {
     particle_templates[CUBE_DRAG].start_color.r = p1.r;
     particle_templates[CUBE_DRAG].start_color.g = p1.g;
     particle_templates[CUBE_DRAG].start_color.b = p1.b;
-    
-    particle_templates[CUBE_DRAG].end_color.r = p1.r;
-    particle_templates[CUBE_DRAG].end_color.g = p1.g;
-    particle_templates[CUBE_DRAG].end_color.b = p1.b;
 
     particle_templates[GLITTER_EFFECT].start_color.r = p1.r;
     particle_templates[GLITTER_EFFECT].start_color.g = p1.g;

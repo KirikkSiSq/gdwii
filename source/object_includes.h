@@ -284,6 +284,10 @@
 #include "plank_01_small_color_001_png.h"
 #include "plank_01_small_glow_001_png.h"
 
+#include "secretCoin_01_001_png.h"
+#include "secretCoin_01_002_png.h"
+#include "secretCoin_01_003_png.h"
+#include "secretCoin_01_004_png.h"
 
 
 

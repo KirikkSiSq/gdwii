@@ -112,6 +112,8 @@ int game_loop() {
 
         if (state.input.pressedMinusOrR) {
             MP3Player_Stop();
+            MP3Player_Volume(255);
+            death_timer = 0.f;
             gameRoutine = ROUTINE_MENU;
             break;
         }

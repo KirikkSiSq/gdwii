@@ -2648,7 +2648,47 @@ const ObjectDefinition objects[] = {
         .def_zorder = 12,
         .num_layers = 1
     },
-    unknown, // Coin
+    { // Coin
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = WHITE,
+                .zlayer_offset = 0,
+                .texture = secretCoin_01_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = WHITE,
+                .zlayer_offset = 0,
+                .texture = secretCoin_01_002_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = WHITE,
+                .zlayer_offset = 0,
+                .texture = secretCoin_01_003_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = WHITE,
+                .zlayer_offset = 0,
+                .texture = secretCoin_01_004_png
+            }
+        },
+        .hitbox = {
+            .width = 40,
+            .height = 40,
+            .type = HITBOX_SPECIAL
+        },
+        .spritesheet_layer = SHEET_PORTALS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 9,
+        .num_layers = 1
+    },
     { // Breakable block
         .layers = {
             {
