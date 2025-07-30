@@ -11,7 +11,6 @@ typedef union {
     int i;
     float f;
     bool b;
-    char *s; // For base64 text strings or others
 } GDValue;
 
 typedef struct {
@@ -32,14 +31,14 @@ typedef struct {
     int zlayer;          // key 24
     int zorder;          // key 25
 
-    int random;             // random number assigned to this object
-    bool activated;        // if it has been activated
+    int random;                  // random number assigned to this object
+    bool activated;              // if it has been activated
     unsigned int hitbox_counter; // number of times the player has entered the hitbox
-    bool collided;         // if the object just started being touched
-    float ampl_scaling;    // the amplitude scaling for pulsing objects
-    u8 transition_applied; // the transition applied to the object
-    bool toggled;          // if its enabled or disabled
-} GDObjectTyped;
+    bool collided;               // if the object just started being touched
+    float ampl_scaling;          // the amplitude scaling for pulsing objects
+    u8 transition_applied;       // the transition applied to the object
+    bool toggled;                // if its enabled or disabled
+} GameObject;
 
 typedef struct {
     unsigned char keys[15];
@@ -55,16 +54,16 @@ typedef struct {
 
 typedef struct {
     int count;
-    GDObjectTyped **objects;
+    GameObject **objects;
 } GDTypedObjectList;
 
 typedef struct {
-    GDObjectTyped *obj;
+    GameObject *obj;
     int originalIndex;
 } GDObjectSortable;
 
 typedef struct {
-    GDObjectTyped *obj;
+    GameObject *obj;
     struct ObjectLayer *layer;
     int layerNum;
 } GDObjectLayer;
@@ -114,7 +113,7 @@ struct LoadedLevelInfo {
 #define GFX_SECTION_SIZE 128
 
 typedef struct Section {
-    GDObjectTyped **objects;
+    GameObject **objects;
     int object_count;
     int object_capacity;
 
@@ -149,7 +148,7 @@ extern GDObjectLayerList *layersArrayList;
 extern GDLayerSortable gfx_player_layer;
 
 void free_typed_object_list(GDTypedObjectList *list);
-void free_typed_object_array(GDObjectTyped **array, int count);
+void free_typed_object_array(GameObject **array, int count);
 void load_level(char *data);
 void unload_level();
 void reload_level();

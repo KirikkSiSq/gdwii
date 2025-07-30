@@ -41,42 +41,42 @@ inline static float gravBottom(Player *player) { return player->upside_down ? -g
 inline static float gravTop(Player *player) { return player->upside_down ? -getBottom(player) : getTop(player); }
 inline static float grav(Player *player, float val) { return player->upside_down ? -val : val; }
 
-inline static float obj_getTop(GDObjectTyped *object)  { 
+inline static float obj_getTop(GameObject *object)  { 
     if (positive_fmod(object->rotation, 180.f) >= 90.f) {
         return object->y + (objects[object->id].hitbox.width / 2); 
     } else {
         return object->y + (objects[object->id].hitbox.height / 2); 
     }
 }
-inline static float obj_getBottom(GDObjectTyped *object)  { 
+inline static float obj_getBottom(GameObject *object)  { 
     if (positive_fmod(object->rotation, 180.f) >= 90.f) {
         return object->y - (objects[object->id].hitbox.width / 2); 
     } else {
         return object->y - (objects[object->id].hitbox.height / 2);
     }
 }
-inline static float obj_getRight(GDObjectTyped *object)  { 
+inline static float obj_getRight(GameObject *object)  { 
     if (positive_fmod(object->rotation, 180.f) >= 90.f) {
         return object->x + objects[object->id].hitbox.height / 2;
     } else {
         return object->x + objects[object->id].hitbox.width / 2; 
     }
 }
-inline static float obj_getLeft(GDObjectTyped *object)  { 
+inline static float obj_getLeft(GameObject *object)  { 
     if (positive_fmod(object->rotation, 180.f) >= 90.f) {
         return object->x - objects[object->id].hitbox.height / 2; 
     } else {
         return object->x - objects[object->id].hitbox.width / 2; 
     }
 }
-inline static float obj_gravBottom(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
-inline static float obj_gravTop(Player *player, GDObjectTyped *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
+inline static float obj_gravBottom(Player *player, GameObject *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
+inline static float obj_gravTop(Player *player, GameObject *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
 
 void set_p_velocity(Player *player, float vel) {
     player->vel_y = vel * ((player->mini) ? 0.8 : 1);
 }
 
-void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
+void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
     int clip = (player->gamemode == GAMEMODE_SHIP ? 7 : 10);
     switch (hitbox->type) {
         case HITBOX_BREAKABLE_BLOCK:
@@ -141,7 +141,7 @@ float player_get_vel(Player *player, float vel) {
     return vel * (player->upside_down ? -1 : 1);
 }
 
-void collide_with_obj(GDObjectTyped *obj) {
+void collide_with_obj(GameObject *obj) {
     Player *player = &state.player;
     ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
 
@@ -177,10 +177,10 @@ void collide_with_obj(GDObjectTyped *obj) {
     }
 }
 
-GDObjectTyped *block_buffer[MAX_COLLIDED_OBJECTS];
+GameObject *block_buffer[MAX_COLLIDED_OBJECTS];
 int block_count = 0;
 
-GDObjectTyped *hazard_buffer[MAX_COLLIDED_OBJECTS];
+GameObject *hazard_buffer[MAX_COLLIDED_OBJECTS];
 int hazard_count = 0;
 
 void collide_with_objects() {
@@ -195,7 +195,7 @@ void collide_with_objects() {
         for (int dy = -1; dy <= 1; dy++) {
             Section *sec = get_or_create_section(sx + dx, sy + dy);
             for (int i = 0; i < sec->object_count; i++) {
-                GDObjectTyped *obj = sec->objects[i];
+                GameObject *obj = sec->objects[i];
                 ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
                 
                 if (hitbox->type == HITBOX_SOLID) {
@@ -210,12 +210,12 @@ void collide_with_objects() {
     }
 
     for (int i = 0; i < block_count; i++) {
-        GDObjectTyped *obj = block_buffer[i];
+        GameObject *obj = block_buffer[i];
         collide_with_obj(obj);
     }
     
     for (int i = 0; i < hazard_count; i++) {
-        GDObjectTyped *obj = hazard_buffer[i];
+        GameObject *obj = hazard_buffer[i];
         collide_with_obj(obj);
     }
 

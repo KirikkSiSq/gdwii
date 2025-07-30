@@ -50,7 +50,7 @@ typedef struct {
 
     float ceiling_inv_time;
 
-    GDObjectTyped *gravObj;
+    GameObject *gravObj;
 } Player;
 
 enum BufferingState {

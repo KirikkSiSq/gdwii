@@ -408,10 +408,10 @@ extern GRRLIB_texImg *prev_tex;
 void update_beat();
 void draw_end_wall();
 
-void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float *fade_scale);
+void get_fade_vars(GameObject *obj, float x, int *fade_x, int *fade_y, float *fade_scale);
 int get_fade_value(float x, int right_edge);
 
-void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox);
+void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox);
 float get_mirror_x(float x, float factor);
 GRRLIB_texImg *get_coin_particle_texture();
 

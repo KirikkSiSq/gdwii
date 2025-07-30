@@ -6,7 +6,7 @@
 
 typedef struct {
     int group_id;
-    GDObjectTyped *parent_obj;
+    GameObject *parent_obj;
     float x, y;
     float vx, vy;
     float ax, ay;
@@ -82,7 +82,7 @@ extern ParticleTemplate particle_templates[];
 extern GRRLIB_texImg *particleCircleTex;
 extern GRRLIB_texImg *particleTex;
 
-void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj);
+void spawn_particle(int group_id, float x, float y, GameObject *parent_obj);
 void update_particles();
 void draw_particles(int group_id);
-void draw_obj_particles(int group_id, GDObjectTyped *parent_obj);
+void draw_obj_particles(int group_id, GameObject *parent_obj);

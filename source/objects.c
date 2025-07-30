@@ -41,7 +41,7 @@ void set_intended_ceiling(Player *player) {
     state.camera_intended_y = mid_point - (SCREEN_HEIGHT_AREA / 2);
 }
 
-void handle_special_hitbox(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) {
+void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
     switch (obj->id) {
         case YELLOW_PAD:
             if (!obj->activated) {
@@ -629,7 +629,7 @@ void unload_spritesheet() {
     unload_icons();
 }
 
-void handle_object_particles(GDObjectTyped *obj, GDObjectLayer *layer) {
+void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
     switch (obj->id) {
         case YELLOW_ORB:
             particle_templates[ORB_PARTICLES].start_color.r = 255;
@@ -885,7 +885,7 @@ float get_out_scale_fade(float x, int right_edge) {
     return 1 + ((fade / 255.f) / 2);
 }
 
-void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float *fade_scale) {
+void get_fade_vars(GameObject *obj, float x, int *fade_x, int *fade_y, float *fade_scale) {
     switch (obj->transition_applied) {
         case FADE_NONE:
             break;
@@ -920,7 +920,7 @@ void get_fade_vars(GDObjectTyped *obj, float x, int *fade_x, int *fade_y, float 
     }
 }
 
-int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
+int layer_pulses(GameObject *obj, GDObjectLayer *layer) {
     switch (obj->id) {
         case YELLOW_ORB:
         case BLUE_ORB:
@@ -950,7 +950,7 @@ int layer_pulses(GDObjectTyped *obj, GDObjectLayer *layer) {
     return 0;
 }
 
-float get_object_pulse(float amplitude, GDObjectTyped *obj) {
+float get_object_pulse(float amplitude, GameObject *obj) {
     switch (obj->id) {
         case YELLOW_ORB:
         case BLUE_ORB:
@@ -977,7 +977,7 @@ float get_object_pulse(float amplitude, GDObjectTyped *obj) {
     return amplitude;
 }
 
-GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GDObjectTyped *obj, GDObjectLayer *layer) {
+GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GameObject *obj, GDObjectLayer *layer) {
     switch (obj->id) {
         case GROUND_SPIKE:
             return object_images[GROUND_SPIKE][obj->random % 3];
@@ -1003,7 +1003,7 @@ GRRLIB_texImg *get_coin_particle_texture() {
     return object_images[SECRET_COIN][index];
 }
 
-int get_opacity(GDObjectTyped *obj, float x) {
+int get_opacity(GameObject *obj, float x) {
     int opacity = get_fade_value(x, screenWidth);
 
     switch (obj->id) {
@@ -1021,7 +1021,7 @@ int get_opacity(GDObjectTyped *obj, float x) {
     return opacity;
 }
 
-float get_fading_obj_fade(GDObjectTyped *obj, float x, float right_edge) {
+float get_fading_obj_fade(GameObject *obj, float x, float right_edge) {
     if (x < FADING_OBJ_PADDING || x > right_edge - FADING_OBJ_PADDING)
         return 1.f;
     else if (x < FADING_OBJ_PADDING + FADING_OBJ_WIDTH)
@@ -1032,7 +1032,7 @@ float get_fading_obj_fade(GDObjectTyped *obj, float x, float right_edge) {
         return 0.05f;
 }
 
-float get_rotation_speed(GDObjectTyped *obj) {
+float get_rotation_speed(GameObject *obj) {
     switch (obj->id) {
         case SAW_BIG: 
         case SAW_MEDIUM:
@@ -1066,7 +1066,7 @@ float get_rotation_speed(GDObjectTyped *obj) {
 GRRLIB_texImg *prev_tex = NULL;
 int prev_blending = GRRLIB_BLEND_ALPHA;
 
-static inline void put_object_layer(GDObjectTyped *obj, float x, float y, GDObjectLayer *layer) {
+static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectLayer *layer) {
     int obj_id = obj->id;
 
     int layer_index = layer->layerNum;
@@ -1280,7 +1280,7 @@ void draw_ground(f32 y, bool is_ceiling) {
     }
 }
 
-void handle_special_fading(GDObjectTyped *obj, float calc_x, float calc_y) {
+void handle_special_fading(GameObject *obj, float calc_x, float calc_y) {
     switch (current_fading_effect) {
         case FADE_INWARDS:
             if (calc_y > (screenHeight / 2)) {
@@ -1374,7 +1374,7 @@ void draw_all_object_layers() {
         for (int dy = -height; dy <= height; dy++) {
             GFXSection *sec = get_or_create_gfx_section(cam_sx + dx, cam_sy + dy);
             for (int i = 0; i < sec->layer_count; i++) {
-                GDObjectTyped *obj = sec->layers[i]->layer->obj;
+                GameObject *obj = sec->layers[i]->layer->obj;
                 
                 float calc_x = ((obj->x - state.camera_x) * SCALE);
                 float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
@@ -1419,7 +1419,7 @@ void draw_all_object_layers() {
     // Draw in sorted order
     for (int i = 0; i < visible_count; i++) {
         GDObjectLayer *layer = visible_layers[i]->layer;
-        GDObjectTyped *obj = layer->obj;
+        GameObject *obj = layer->obj;
 
         int obj_id = obj->id;
 
@@ -1513,7 +1513,18 @@ void handle_copy_channels() {
     }
 }
 
-void run_trigger(GDObjectTyped *obj, struct TriggerBuffer *buffer) {
+void upload_to_buffer(GameObject *obj, int channel) {
+    struct TriggerBuffer *buffer = &trigger_buffer[channel];
+    buffer->active = TRUE;
+    buffer->old_color = channels[channel].color;
+    buffer->new_color.r = obj->trig_colorR;
+    buffer->new_color.g = obj->trig_colorG;
+    buffer->new_color.b = obj->trig_colorB;
+    buffer->seconds = obj->trig_duration;
+    buffer->time_run = 0;
+}
+
+void run_trigger(GameObject *obj) {
     switch (obj->id) {
         case TRIGGER_FADE_NONE:
             current_fading_effect = FADE_NONE;
@@ -1560,48 +1571,20 @@ void run_trigger(GDObjectTyped *obj, struct TriggerBuffer *buffer) {
             break;
 
         case BG_TRIGGER:
-            buffer = &trigger_buffer[BG];
-            buffer->active = TRUE;
-            buffer->old_color = channels[BG].color;
-            buffer->new_color.r = obj->trig_colorR;
-            buffer->new_color.g = obj->trig_colorG;
-            buffer->new_color.b = obj->trig_colorB;
-            buffer->seconds = obj->trig_duration;
-            buffer->time_run = 0;
+            upload_to_buffer(obj, BG);
             if (!obj->tintGround) break;
         
         case GROUND_TRIGGER:
-            buffer = &trigger_buffer[GROUND];
-            buffer->active = TRUE;
-            buffer->old_color = channels[GROUND].color;
-            buffer->new_color.r = obj->trig_colorR;
-            buffer->new_color.g = obj->trig_colorG;
-            buffer->new_color.b = obj->trig_colorB;
-            buffer->seconds = obj->trig_duration;
-            buffer->time_run = 0;
+            upload_to_buffer(obj, GROUND);
             break;
                     
         case LINE_TRIGGER:
         case 915: // gd converts 1.4 line trigger to 2.0 one for some reason
-            buffer = &trigger_buffer[LINE];
-            buffer->active = TRUE;
-            buffer->old_color = channels[LINE].color;
-            buffer->new_color.r = obj->trig_colorR;
-            buffer->new_color.g = obj->trig_colorG;
-            buffer->new_color.b = obj->trig_colorB;
-            buffer->seconds = obj->trig_duration;
-            buffer->time_run = 0;
+            upload_to_buffer(obj, LINE);
             break;
         
         case OBJ_TRIGGER:
-            buffer = &trigger_buffer[OBJ];
-            buffer->active = TRUE;
-            buffer->old_color = channels[OBJ].color;
-            buffer->new_color.r = obj->trig_colorR;
-            buffer->new_color.g = obj->trig_colorG;
-            buffer->new_color.b = obj->trig_colorB;
-            buffer->seconds = obj->trig_duration;
-            buffer->time_run = 0;
+            upload_to_buffer(obj, OBJ);
             break;
         
         case ENABLE_TRAIL:
@@ -1613,24 +1596,14 @@ void run_trigger(GDObjectTyped *obj, struct TriggerBuffer *buffer) {
             break;
 
         case 899: // 2.0 color trigger
-            buffer = &trigger_buffer[obj->target_color_id];
-            buffer->active = TRUE;
-            buffer->old_color = channels[obj->target_color_id].color;
-            buffer->new_color.r = obj->trig_colorR;
-            buffer->new_color.g = obj->trig_colorG;
-            buffer->new_color.b = obj->trig_colorB;
-            buffer->seconds = obj->trig_duration;
-            buffer->time_run = 0;
+            upload_to_buffer(obj, obj->target_color_id);
             break;
     }
     obj->activated = TRUE;
 }
 
-void handle_triggers(GDObjectTyped *obj) {
+void handle_triggers(GameObject *obj) {
     int obj_id = obj->id;
-
-    struct TriggerBuffer *buffer = NULL;
-
     Player *player = &state.player;
 
     if (objects[obj_id].is_trigger && !obj->activated) {
@@ -1639,11 +1612,11 @@ void handle_triggers(GDObjectTyped *obj) {
                 player->x, player->y, player->width, player->height, 0, 
                 obj->x, obj->y, 30, 30, obj->rotation
             )) {
-                run_trigger(obj, buffer);
+                run_trigger(obj);
             }
         } else {
             if (obj->x < state.player.x && obj->x > state.old_player.x) {
-                run_trigger(obj, buffer);
+                run_trigger(obj);
             }
         }
     }
@@ -1685,12 +1658,12 @@ void handle_objects() {
         for (int sy = 0; sy <= MAX_LEVEL_HEIGHT / SECTION_SIZE; sy++) {
             Section *sec = get_or_create_section(sx + dx, sy);
             for (int i = 0; i < sec->object_count; i++) {
-                GDObjectTyped *obj = sec->objects[i];
+                GameObject *obj = sec->objects[i];
                 handle_triggers(obj);
             }
         }
     }
-    handle_col_triggers();
     calculate_lbg();
+    handle_col_triggers();
     handle_copy_channels();
 }

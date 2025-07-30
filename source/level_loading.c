@@ -38,7 +38,7 @@ Section *get_or_create_section(int x, int y) {
         sec = sec->next;
     }
     sec = malloc(sizeof(Section));
-    sec->objects = malloc(sizeof(GDObjectTyped*) * 8);
+    sec->objects = malloc(sizeof(GameObject*) * 8);
     sec->object_count = 0;
     sec->object_capacity = 8;
     sec->x = x;
@@ -87,13 +87,13 @@ void free_sections(void) {
     }
 }
 
-void assign_object_to_section(GDObjectTyped *obj) {
+void assign_object_to_section(GameObject *obj) {
     int sx = (int)(obj->x / SECTION_SIZE);
     int sy = (int)(obj->y / SECTION_SIZE);
     Section *sec = get_or_create_section(sx, sy);
     if (sec->object_count >= sec->object_capacity) {
         sec->object_capacity *= 2;
-        sec->objects = realloc(sec->objects, sizeof(GDObjectTyped*) * sec->object_capacity);
+        sec->objects = realloc(sec->objects, sizeof(GameObject*) * sec->object_capacity);
     }
     sec->objects[sec->object_count++] = obj;
 }
@@ -442,16 +442,15 @@ GDValueType get_value_type_for_key(int key) {
         case 4:  return GD_VAL_BOOL;   // Flipped Horizontally
         case 5:  return GD_VAL_BOOL;   // Flipped Vertically
         case 6:  return GD_VAL_FLOAT;  // Rotation
-        case 7:  return GD_VAL_INT;    // Red (color)
-        case 8:  return GD_VAL_INT;    // Green
-        case 9:  return GD_VAL_INT;    // Blue
-        case 10: return GD_VAL_FLOAT;  // Duration
-        case 11: return GD_VAL_BOOL;   // Touch Triggered
-        case 14: return GD_VAL_BOOL;   // Tint ground
-        case 23: return GD_VAL_INT;    // Target color ID
+        case 7:  return GD_VAL_INT;    // (Trigger) Red
+        case 8:  return GD_VAL_INT;    // (Trigger) Green
+        case 9:  return GD_VAL_INT;    // (Trigger) Blue
+        case 10: return GD_VAL_FLOAT;  // (Trigger) Duration
+        case 11: return GD_VAL_BOOL;   // (Trigger) Touch Triggered
+        case 14: return GD_VAL_BOOL;   // (Trigger) Tint ground
+        case 23: return GD_VAL_INT;    // (Trigger) Target color ID
         case 24: return GD_VAL_INT;    // Zlayer
         case 25: return GD_VAL_INT;    // Zorder
-        case 32: return GD_VAL_FLOAT;  // Scaling
         default:
             return GD_VAL_INT; // Default fallback
     }
@@ -521,17 +520,17 @@ int parse_gd_object(const char *objStr, GDObject *obj) {
     return 1;
 }
 
-GDObjectTyped *convert_to_typed(const GDObject *obj) {
-    GDObjectTyped *typed = malloc(sizeof(GDObjectTyped));
+GameObject *convert_to_typed(const GDObject *obj) {
+    GameObject *typed = malloc(sizeof(GameObject));
     if (!typed) return NULL;
 
     // Initialize all fields to default values:
-    memset(typed, 0, sizeof(GDObjectTyped));
+    memset(typed, 0, sizeof(GameObject));
 
     typed->id = obj->values[0].i;
     // Temporarily convert user coins (added in 2.0) into secret coins
     if (typed->id == 1329) typed->id = SECRET_COIN;
-    
+
     typed->x = obj->values[1].f;
     typed->y = obj->values[2].f;
 
@@ -599,7 +598,7 @@ GDObjectTyped *convert_to_typed(const GDObject *obj) {
     return typed;
 }
 
-void free_typed_object(GDObjectTyped *obj) {
+void free_typed_object(GameObject *obj) {
     if (!obj) return;
     //if (obj->text) free(obj->text);
     free(obj);
@@ -608,7 +607,7 @@ void free_typed_object(GDObjectTyped *obj) {
 GDTypedObjectList *convert_all_to_typed(GDObjectList *objList) {
     if (!objList) return NULL;
 
-    GDObjectTyped **typedArray = malloc(sizeof(GDObjectTyped *) * objList->objectCount);
+    GameObject **typedArray = malloc(sizeof(GameObject *) * objList->objectCount);
     if (!typedArray) return NULL;
 
     printf("Converting objects...\n");
@@ -712,8 +711,8 @@ int compare_sortable_layers(const void *a, const void *b) {
     struct ObjectLayer *layerA = layerSortA->layer->layer;
     struct ObjectLayer *layerB = layerSortB->layer->layer;
 
-    GDObjectTyped *objA = layerSortA->layer->obj;
-    GDObjectTyped *objB = layerSortB->layer->obj;
+    GameObject *objA = layerSortA->layer->obj;
+    GameObject *objB = layerSortB->layer->obj;
 
     int zlayerA = objA->zlayer + layerA->zlayer_offset;
     int zlayerB = objB->zlayer + layerB->zlayer_offset;
@@ -761,7 +760,7 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
         
         // GD epicness
         if (sortable_list[i].layer->obj->id != PLAYER_OBJECT) {
-            GDObjectTyped *obj = sortable_list[i].layer->obj;
+            GameObject *obj = sortable_list[i].layer->obj;
             int zlayer = obj->zlayer;
             int col_channel = sortable_list[i].layer->layer->col_channel;
             if (objects[obj->id].num_layers == 1) {
@@ -776,7 +775,7 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
     }
 }
 
-void free_typed_object_array(GDObjectTyped **array, int count) {
+void free_typed_object_array(GameObject **array, int count) {
     if (!array) return;
     for (int i = 0; i < count; i++) {
         free_typed_object(array[i]);
@@ -788,7 +787,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     // Count layers
     int layerCount = 0;
     for (int i = 0; i < objList->count; i++) {
-        GDObjectTyped *obj = objList->objects[i];
+        GameObject *obj = objList->objects[i];
 
         int obj_id = obj->id;
 
@@ -805,7 +804,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     }
 
     // Put player
-    GDObjectTyped *obj = malloc(sizeof(GDObjectTyped));
+    GameObject *obj = malloc(sizeof(GameObject));
     obj->id = PLAYER_OBJECT;
     obj->zlayer = LAYER_T1-1;
     obj->zorder = 0;
@@ -825,7 +824,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     // Fill array
     int count = 0;
     for (int i = 0; i < objList->count; i++) {
-        GDObjectTyped *obj = objList->objects[i];
+        GameObject *obj = objList->objects[i];
 
         int obj_id = obj->id;
 
@@ -881,7 +880,7 @@ void free_layer_list(GDObjectLayerList *list) {
 int parse_old_channels(char *level_string, GDColorChannel **outArray) {
     GDColorChannel *channels = malloc(sizeof(GDColorChannel) * 2);
     if (!channels) {
-        printf("Couldn't alloc pre 1.9 color channels\n");
+        printf("Couldn't alloc initial pre 2.0 color channels\n");
         return 0;
     }
 
@@ -913,11 +912,52 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
             channels[i].channelID = OBJ;
             i++;
         }
+
+        char *col1 = get_metadata_value(level_string, "kS33");
+        if (col1) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, col1);
+            channels[i].channelID = 1;
+            i++;
+        }
+
+        char *col2 = get_metadata_value(level_string, "kS34");
+        if (col2) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, col2);
+            channels[i].channelID = 2;
+            i++;
+        }
+
+        char *col3 = get_metadata_value(level_string, "kS35");
+        if (col3) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, col3);
+            channels[i].channelID = 3;
+            i++;
+        }
+
+        char *col4 = get_metadata_value(level_string, "kS36");
+        if (col4) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, col4);
+            channels[i].channelID = 4;
+            i++;
+        }
+
+        char *dl3 = get_metadata_value(level_string, "kS37");
+        if (dl3) {
+            channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+            parse_color_channel(channels, i, dl3);
+            channels[i].channelID = THREEDL;
+            i++;
+        }
         
         *outArray = channels;
         return i;
     }
 
+    // Pre 1.9
     int bg_r = atoi(get_metadata_value(level_string, "kS1"));
     int bg_g = atoi(get_metadata_value(level_string, "kS2"));
     int bg_b = atoi(get_metadata_value(level_string, "kS3"));
@@ -928,7 +968,13 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
     bg_channel.fromGreen = bg_g;
     bg_channel.fromBlue = bg_b;
 
+    char *bg_player_color = get_metadata_value(level_string, "kS16");
+    if (bg_player_color) {
+       bg_channel.playerColor = atoi(bg_player_color);
+    }
+
     channels[i] = bg_channel;
+
     i++;
 
     int g_r = atoi(get_metadata_value(level_string, "kS4"));
@@ -940,6 +986,11 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
     g_channel.fromRed = g_r;
     g_channel.fromGreen = g_g;
     g_channel.fromBlue = g_b;
+
+    char *g_player_color = get_metadata_value(level_string, "kS17");
+    if (g_player_color) {
+        g_channel.playerColor = atoi(g_player_color);
+    }
     
     channels[i] = g_channel;
     i++;
@@ -955,6 +1006,11 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
         line_channel.fromGreen = atoi(line_g);
         line_channel.fromBlue = atoi(line_b);
         
+        char *line_player_color = get_metadata_value(level_string, "kS18");
+        if (line_player_color) {
+            line_channel.playerColor = atoi(line_player_color);
+        }
+
         channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
         channels[i] = line_channel;
         i++;
@@ -970,9 +1026,35 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
         obj_channel.fromRed = atoi(obj_r);
         obj_channel.fromGreen = atoi(obj_g);
         obj_channel.fromBlue = atoi(obj_b);
+
+        char *obj_player_color = get_metadata_value(level_string, "kS19");
+        if (obj_player_color) {
+            obj_channel.playerColor = atoi(obj_player_color);
+        }
         
         channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
         channels[i] = obj_channel;
+        i++;
+    }
+
+    char *obj_2_r = get_metadata_value(level_string, "kS13");
+    char *obj_2_g = get_metadata_value(level_string, "kS14");
+    char *obj_2_b = get_metadata_value(level_string, "kS15");
+
+    if (obj_2_r && obj_2_g && obj_2_b) {
+        GDColorChannel obj_2_channel = {0};
+        obj_2_channel.channelID = OBJ;
+        obj_2_channel.fromRed = atoi(obj_2_r);
+        obj_2_channel.fromGreen = atoi(obj_2_g);
+        obj_2_channel.fromBlue = atoi(obj_2_b);
+        
+        char *obj_2_player_color = get_metadata_value(level_string, "kS20");
+        if (obj_2_player_color) {
+            obj_2_channel.playerColor = atoi(obj_2_player_color);
+        }
+        
+        channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
+        channels[i] = obj_2_channel;
         i++;
     }
 
@@ -1131,6 +1213,7 @@ void set_color_channels() {
                 channels[id].color.r = colorChannel.fromRed;
                 channels[id].color.g = colorChannel.fromGreen;
                 channels[id].color.b = colorChannel.fromBlue;
+                channels[id].blending = colorChannel.blending;
         }
     }
 }
@@ -1143,7 +1226,7 @@ void reload_level() {
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
     memset(&state.particles, 0, sizeof(state.particles));
     for (int i = 0; i < objectsArrayList->count; i++) {
-        GDObjectTyped *obj = objectsArrayList->objects[i];
+        GameObject *obj = objectsArrayList->objects[i];
         obj->activated = FALSE;
         obj->toggled = FALSE;
         obj->collided = FALSE;

@@ -413,7 +413,7 @@ ParticleTemplate particle_templates[] = {
     },
 };
 
-void spawn_particle(int group_id, float x, float y, GDObjectTyped *parent_obj) {
+void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
     ParticleTemplate *tpl = &particle_templates[group_id];
     Particle *particles = state.particles;
     for (int i = 0; i < MAX_PARTICLES; i++) {
@@ -644,7 +644,7 @@ void draw_particles(int group_id) {
     GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 }
 
-void draw_obj_particles(int group_id, GDObjectTyped *parent_obj) {
+void draw_obj_particles(int group_id, GameObject *parent_obj) {
     GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
     int fade_x = 0;
     int fade_y = 0;
