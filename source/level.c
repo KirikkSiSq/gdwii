@@ -132,7 +132,7 @@ SongDefinition songs[] = {
     },
     {
         .song_name = "Electroman.mp3",
-        .tempo = 127
+        .tempo = 170
     },
     {
         .song_name = "Clubstep.mp3",
