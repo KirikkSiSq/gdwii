@@ -3962,8 +3962,8 @@ const ObjectDefinition objects[] = {
             }
         },
         .hitbox = {
-            .width = 30,
-            .height = 14,
+            .width = 15,
+            .height = 15,
             .type = HITBOX_SOLID
         },
         .spritesheet_layer = SHEET_BLOCKS,
@@ -3996,8 +3996,8 @@ const ObjectDefinition objects[] = {
             }
         },
         .hitbox = {
-            .width = 30,
-            .height = 14,
+            .width = 15,
+            .height = 8,
             .type = HITBOX_SOLID
         },
         .spritesheet_layer = SHEET_BLOCKS,

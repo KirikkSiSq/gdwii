@@ -81,12 +81,10 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
     switch (hitbox->type) {
         case HITBOX_BREAKABLE_BLOCK:
         case HITBOX_SOLID: 
-            //if (state.old_player.upside_down != player->upside_down) return;
-
             bool gravSnap = FALSE;
 
             if (player->gravObj && player->gravObj->hitbox_counter == 1) {
-                // Only do the funny grav snap if player is touching pad and internal hitbox is touching block
+                // Only do the funny grav snap if player is touching a gravity object and internal hitbox is touching block
                 bool internalCollidingBlock = intersect(
                     player->x, player->y, 9, 9, 0, 
                     obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
@@ -115,6 +113,11 @@ void handle_collision(Player *player, GDObjectTyped *obj, ObjectHitbox *hitbox) 
                 player->on_ground = TRUE;
                 player->time_since_ground = 0;
             } else {
+                // Ufo can break breakable blocks from above, so dont use as a ceiling
+                if (player->gamemode == GAMEMODE_UFO && hitbox->type == HITBOX_BREAKABLE_BLOCK) {
+                    break;
+                }
+                // Behave normally
                 if (player->gamemode != GAMEMODE_CUBE || gravSnap) {
                     if ((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) || gravSnap) {
                         player->vel_y = 0;
@@ -671,6 +674,7 @@ void full_init_variables() {
     particle_templates[CUBE_DRAG].start_color.r = p1.r;
     particle_templates[CUBE_DRAG].start_color.g = p1.g;
     particle_templates[CUBE_DRAG].start_color.b = p1.b;
+
 
     particle_templates[GLITTER_EFFECT].start_color.r = p1.r;
     particle_templates[GLITTER_EFFECT].start_color.g = p1.g;
