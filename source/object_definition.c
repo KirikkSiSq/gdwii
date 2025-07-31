@@ -5575,7 +5575,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0.5,
                 .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
-                .texture = square_01_glow_001_png
+                .texture = square_01_glow_001_alt_png
             },
             {
                 .x_offset = 0,
@@ -5589,7 +5589,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
-                .texture = lightsquare_02_01_001_png
+                .texture = blockOutline_01_001_alt_png
             }
         },
         .hitbox = {
@@ -5609,7 +5609,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
-                .texture = square_02_glow_001_png
+                .texture = square_02_glow_001_alt_png
             },
             {
                 .x_offset = 0,
@@ -5623,7 +5623,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
-                .texture = lightsquare_02_02_001_png
+                .texture = blockOutline_02_001_alt_png
             }
         },
         .hitbox = {
@@ -5643,7 +5643,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
-                .texture = square_03_glow_001_png
+                .texture = square_03_glow_001_alt_png
             },
             {
                 .x_offset = 0,
@@ -5657,7 +5657,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
-                .texture = lightsquare_02_03_001_png
+                .texture = blockOutline_03_001_alt_png
             }
         },
         .hitbox = {
@@ -5693,7 +5693,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
-                .texture = square_06_glow_001_png
+                .texture = square_06_glow_001_alt_png
             },
             {
                 .x_offset = 0,
@@ -5707,7 +5707,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
-                .texture = lightsquare_02_06_001_png
+                .texture = blockOutline_04_001_alt_png
             }
         },
         .hitbox = {
@@ -5727,7 +5727,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
-                .texture = square_07_glow_001_png
+                .texture = square_07_glow_001_alt_png
             },
             {
                 .x_offset = 0,
@@ -5741,7 +5741,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = OBJ,
                 .zlayer_offset = 0,
-                .texture = lightsquare_02_07_001_png
+                .texture = blockOutline_05_001_alt_png
             }
         },
         .hitbox = {
@@ -5761,7 +5761,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0.5,
                 .col_channel = OBJ_BLENDING,
                 .zlayer_offset = 0,
-                .texture = square_01_glow_001_png
+                .texture = square_01_glow_001_alt_png
             },
             {
                 .x_offset = 0,
