@@ -4404,8 +4404,8 @@ const ObjectDefinition objects[] = {
         },
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 1,
+        .def_zlayer = LAYER_B2,
+        .def_zorder = -7,
         .num_layers = 1
     },
     { // Colored tileset pillar end
