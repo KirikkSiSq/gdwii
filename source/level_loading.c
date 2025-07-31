@@ -17,6 +17,30 @@
 
 #include "../libraries/color.h"
 
+#include "bg_01_png.h"
+#include "bg_02_png.h"
+#include "bg_03_png.h"
+#include "bg_04_png.h"
+
+#include "g_01_png.h"
+#include "g_02_png.h"
+#include "g_03_png.h"
+#include "g_04_png.h"
+
+const unsigned char *backgrounds[] = {
+    bg_01_png,
+    bg_02_png,
+    bg_03_png,
+    bg_04_png
+};
+
+const unsigned char *grounds[] = {
+    g_01_png,
+    g_02_png,
+    g_03_png,
+    g_04_png
+};
+
 struct LoadedLevelInfo level_info;
 
 Section *section_hash[SECTION_HASH_SIZE] = {0};
@@ -448,6 +472,9 @@ GDValueType get_value_type_for_key(int key) {
         case 10: return GD_VAL_FLOAT;  // (Trigger) Duration
         case 11: return GD_VAL_BOOL;   // (Trigger) Touch Triggered
         case 14: return GD_VAL_BOOL;   // (Trigger) Tint ground
+        case 15: return GD_VAL_BOOL;   // (Trigger) Player 1 color
+        case 16: return GD_VAL_BOOL;   // (Trigger) Player 2 color
+        case 17: return GD_VAL_BOOL;   // (Trigger) Blending
         case 23: return GD_VAL_INT;    // (Trigger) Target color ID
         case 24: return GD_VAL_INT;    // Zlayer
         case 25: return GD_VAL_INT;    // Zorder
@@ -576,6 +603,15 @@ GameObject *convert_to_typed(const GDObject *obj) {
                 break;
             case 14: // Tint Ground
                 if (type == GD_VAL_BOOL) typed->tintGround = val.b;
+                break;
+            case 15: // Player 1 color
+                if (type == GD_VAL_BOOL) typed->p1_color = val.b;
+                break;
+            case 16: // Player 2 color
+                if (type == GD_VAL_BOOL) typed->p2_color = val.b;
+                break;
+            case 17: // Blending
+                if (type == GD_VAL_BOOL) typed->blending = val.b;
                 break;
             case 23: // Target color ID
                 if (type == GD_VAL_INT) typed->target_color_id = val.i;
@@ -714,8 +750,8 @@ int compare_sortable_layers(const void *a, const void *b) {
     GameObject *objA = layerSortA->layer->obj;
     GameObject *objB = layerSortB->layer->obj;
 
-    int zlayerA = objA->zlayer + layerA->zlayer_offset;
-    int zlayerB = objB->zlayer + layerB->zlayer_offset;
+    int zlayerA = layerSortA->zlayer + layerA->zlayer_offset;
+    int zlayerB = layerSortB->zlayer + layerB->zlayer_offset;
 
     if (zlayerA != zlayerB)
         return zlayerA - zlayerB; // Ascending
@@ -729,8 +765,8 @@ int compare_sortable_layers(const void *a, const void *b) {
     if (sheetA != sheetB)
         return sheetB - sheetA; // Descending
 
-    int zorderA = objA->zorder;
-    int zorderB = objB->zorder;
+    int zorderA = layerSortA->zorder;
+    int zorderB = layerSortB->zorder;
 
     if (zorderA != zorderB)
         return zorderA - zorderB; // Ascending
@@ -753,22 +789,19 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
     }
     
     for (int i = 0; i < list->count; i++) {
-        
         sortable_list[i].layer = list->layers[i];
         sortable_list[i].originalIndex = i;
         sortable_list[i].layerNum = list->layers[i]->layerNum;
         
-        // GD epicness
-        if (sortable_list[i].layer->obj->id != PLAYER_OBJECT) {
-            GameObject *obj = sortable_list[i].layer->obj;
-            int zlayer = obj->zlayer;
-            int col_channel = sortable_list[i].layer->layer->col_channel;
-            if (objects[obj->id].num_layers == 1) {
-                bool blending = channels[col_channel].blending;
-                if (blending ^ (zlayer % 2 == 0)) {
-                    obj->zlayer--;
-                }
-            }
+        GameObject *obj = sortable_list[i].layer->obj;
+        sortable_list[i].zlayer = obj->zlayer;
+        sortable_list[i].zorder = obj->zorder;
+        
+        int zlayer = sortable_list[i].zlayer;
+        int col_channel = sortable_list[i].layer->layer->col_channel;
+        bool blending = channels[col_channel].blending;
+        if (blending ^ (zlayer % 2 == 0)) {
+            sortable_list[i].zlayer--;
         }
 
         assign_layer_to_section(&sortable_list[i]);
@@ -816,6 +849,8 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     GDLayerSortable sortable_layer;
     sortable_layer.layer = layer;
     sortable_layer.originalIndex = 0;
+    sortable_layer.zlayer = obj->zlayer;
+    sortable_layer.zorder = obj->zorder;
 
     gfx_player_layer = sortable_layer;
 
@@ -1089,6 +1124,20 @@ void load_level(char *data) {
         level_info.song_id = atoi(gmd_song_id); // Official song id
     }
 
+    char *background_data = get_metadata_value(level_string, "kA6");
+    if (background_data) {
+        level_info.background_id = CLAMP(atoi(background_data) - 1, 0, BG_COUNT);
+    } else {
+        level_info.background_id = 0;
+    }
+
+    char *ground_data = get_metadata_value(level_string, "kA7");
+    if (ground_data) {
+        level_info.ground_id = CLAMP(atoi(ground_data) - 1, 0, G_COUNT);
+    } else {
+        level_info.ground_id = 0;
+    }
+
     // Fallback to pre 2.0 keys
     if (!channelCount) {
         channelCount = parse_old_channels(level_string, &colorChannels);
@@ -1119,13 +1168,17 @@ void load_level(char *data) {
         return;
     }
 
-    sort_layers_by_layer(layersArrayList);
-    
     reset_color_channels();
     set_color_channels();
+
+    sort_layers_by_layer(layersArrayList);
+    
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
 
     level_info.pulsing_type = random_int(0,2);
+
+    bg = GRRLIB_LoadTexturePNG(backgrounds[level_info.background_id]);
+    ground = GRRLIB_LoadTexturePNG(grounds[level_info.ground_id]);
 
     int rounded_last_obj_x = (int) (level_info.last_obj_x / 30) * 30 + 15;
     level_info.wall_x = (rounded_last_obj_x) + (9.f * 30.f);
@@ -1144,6 +1197,9 @@ void unload_level() {
         free(colorChannels);
         colorChannels = NULL;
     }
+
+    GRRLIB_FreeTexture(bg);
+    GRRLIB_FreeTexture(ground);
     channelCount = 0;
     memset(&state.particles, 0, sizeof(state.particles));
     free_sections();
@@ -1276,7 +1332,7 @@ void calculate_lbg() {
 
 
 char *load_song(const char *file_name, size_t *out_size) {
-    char full_path[256];
+    char full_path[273];
     snprintf(full_path, sizeof(full_path), "%s/%s/%s/%s", launch_dir, RESOURCES_FOLDER, SONGS_FOLDER, file_name);
     return read_file(full_path, out_size);
 }

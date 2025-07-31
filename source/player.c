@@ -72,6 +72,21 @@ inline static float obj_getLeft(GameObject *object)  {
 inline static float obj_gravBottom(Player *player, GameObject *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
 inline static float obj_gravTop(Player *player, GameObject *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
 
+const float player_speeds[SPEED_COUNT] = {
+	251.16007972276924,
+	311.580093712804,
+	387.42014039710523,
+	468.0001388338566
+};
+
+
+const float cube_jump_heights[SPEED_COUNT] = {
+    573.48,
+    603.72,
+    616.68,
+    606.42,
+};
+
 void set_p_velocity(Player *player, float vel) {
     player->vel_y = vel * ((player->mini) ? 0.8 : 1);
 }
@@ -250,7 +265,7 @@ void cube_gamemode(Player *player) {
     }
 
     if (player->on_ground && state.input.holdA) {
-        set_p_velocity(player, 603.72);
+        set_p_velocity(player, cube_jump_heights[player->speed]);
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
 
@@ -359,7 +374,7 @@ void ball_gamemode(Player *player) {
         player->ball_rotation_speed = -1.f;
     }
     
-    player->rotation += player->ball_rotation_speed * mult;
+    player->rotation += player->ball_rotation_speed * mult * (player_speeds[player->speed] / player_speeds[SPEED_NORMAL]) / (player->mini ? 0.8 : 1);
 
     if (player->vel_y < -810) {
         player->vel_y = -810;
@@ -588,6 +603,7 @@ void run_player() {
         player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
     }
     
+    player->vel_x = player_speeds[player->speed];
     player->vel_y += player->gravity * STEPS_DT;
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
     player->x += player->vel_x * STEPS_DT;
@@ -754,9 +770,10 @@ void init_variables() {
     Player *player = &state.player;
     player->width = 30;
     player->height = 30;
+    player->speed = SPEED_NORMAL;
     player->x = 0;
     player->y = player->height / 2;
-    player->vel_x = 311.580093712804;  
+    player->vel_x = player_speeds[player->speed];  
     player->vel_y = 0;
     player->ground_y = 0;
     player->ceiling_y = 999999;

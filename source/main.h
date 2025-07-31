@@ -76,6 +76,10 @@ enum GameRoutine {
 #define SONGS_FOLDER "songs"
 #define USER_LEVELS_FOLDER "user_levels"
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
+#define MAX(a,b) (((a)>(b))?(a):(b))
+#define CLAMP(x, lower, upper) (MIN((upper), MAX((x), (lower))))
+
 extern int gameRoutine;
 
 extern int frame_counter;
@@ -95,6 +99,8 @@ extern int number_of_collisions;
 extern int number_of_collisions_checks;
 
 extern char launch_dir[256];
+
+extern int frameCount;
 
 extern GameState state;
 

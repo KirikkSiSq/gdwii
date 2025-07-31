@@ -60,6 +60,10 @@ LevelDefinition levels[] = {
         .data_ptr = Clubstep_gmd
     },
     {
+        .level_name = "Electrodynamix",
+        .data_ptr = Electrodynamix_gmd
+    },
+    {
         .level_name = "Level Easy",
         .data_ptr  = LevelEasy_gmd
     },
@@ -137,6 +141,10 @@ SongDefinition songs[] = {
     {
         .song_name = "Clubstep.mp3",
         .tempo = 128
+    },
+    {
+        .song_name = "Electrodynamix.mp3",
+        .tempo = 127
     }
 };
 

@@ -50,6 +50,8 @@ typedef struct {
 
     float ceiling_inv_time;
 
+    unsigned char speed;
+
     GameObject *gravObj;
 } Player;
 
@@ -67,8 +69,18 @@ enum PlayerGamemode {
     GAMEMODE_COUNT
 };
 
+enum PlayerSpeeds {
+    SPEED_SLOW,
+    SPEED_NORMAL,
+    SPEED_FAST,
+    SPEED_FASTER,
+    SPEED_COUNT
+};
+
 extern Color p1;
 extern Color p2;
+
+extern const float player_speeds[SPEED_COUNT];
 
 void handle_death();
 void init_variables();

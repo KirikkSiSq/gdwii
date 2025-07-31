@@ -289,6 +289,112 @@
 #include "secretCoin_01_003_png.h"
 #include "secretCoin_01_004_png.h"
 
+#include "boost_01_001_png.h"
+#include "boost_02_001_png.h"
+#include "boost_03_001_png.h"
+#include "boost_04_001_png.h"
+
+#include "boost_01_glow_001_png.h"
+#include "boost_02_glow_001_png.h"
+#include "boost_03_glow_001_png.h"
+#include "boost_04_glow_001_png.h"
+
+#include "invis_plank_01_small_glow_001_png.h"
+#include "invis_spike_02_glow_001_png.h"
+#include "invis_square_01_small_glow_001_png.h"
+
+#include "invis_plank_01_small_001_png.h"
+#include "invis_spike_02_001_png.h"
+#include "invis_square_01_small_001_png.h"
+
+#include "colorPlank_01_color_001_png.h"
+
+#include "colorSpike_01_001_png.h"
+#include "colorSpike_01_color_001_png.h"
+
+#include "colorSpike_02_001_png.h"
+#include "colorSpike_02_color_001_png.h"
+
+#include "colorSpike_03_001_png.h"
+#include "colorSpike_03_color_001_png.h"
+
+#include "colorPlank_01_small_001_png.h"
+#include "colorPlank_01_small_color_001_png.h"
+
+#include "colorSquare_01_small_001_png.h"
+#include "colorSquare_01_small_color_001_png.h"
+
+#include "d_roundCloud_01_001_png.h"
+#include "d_roundCloud_02_001_png.h"
+#include "d_roundCloud_03_001_png.h"
+
+#include "d_swirve_01_001_png.h"
+#include "d_swirve_02_001_png.h"
+
+#include "d_bar_01_001_png.h"
+#include "d_bar_02_001_png.h"
+#include "d_bar_03_001_png.h"
+#include "d_bar_04_001_png.h"
+#include "d_bar_07_001_png.h"
+
+#include "d_smallbar_01_001_png.h"
+#include "d_smallbar_02_001_png.h"
+#include "d_smallbar_03_001_png.h"
+#include "d_smallbar_04_001_png.h"
+#include "d_smallbar_05_001_png.h"
+
+#include "d_square_01_001_png.h"
+#include "d_square_02_001_png.h"
+#include "d_square_03_01_001_png.h"
+#include "d_square_03_02_001_png.h"
+#include "d_square_03_03_001_png.h"
+#include "d_square_04_001_png.h"
+#include "d_square_05_001_png.h"
+
+
+#include "d_circle_01_001_png.h"
+
+#include "d_link_01_001_png.h"
+#include "d_link_02_001_png.h"
+#include "d_link_03_001_png.h"
+#include "d_link_04_001_png.h"
+#include "d_link_05_001_png.h"
+
+#include "pit_04_02_001_png.h"
+#include "pit_04_03_001_png.h"
+
+#include "square_f_brick01_001_png.h"
+#include "square_f_brick02_001_png.h"
+
+#include "lightsquare_02_01_001_png.h"
+#include "lightsquare_02_02_001_png.h"
+#include "lightsquare_02_03_001_png.h"
+#include "lightsquare_02_04_001_png.h"
+#include "lightsquare_02_05_001_png.h"
+#include "lightsquare_02_06_001_png.h"
+#include "lightsquare_02_07_001_png.h"
+#include "lightsquare_02_08_001_png.h"
+
+#include "lightsquare_02_01_color_001_png.h"
+#include "lightsquare_02_02_color_001_png.h"
+#include "lightsquare_02_03_color_001_png.h"
+#include "lightsquare_02_04_color_001_png.h"
+#include "lightsquare_02_05_color_001_png.h"
+#include "lightsquare_02_06_color_001_png.h"
+#include "lightsquare_02_07_color_001_png.h"
+#include "lightsquare_02_08_color_001_png.h"
+
+#include "lightsquare_03_01_color_001_png.h"
+#include "lightsquare_04_05_color_001_png.h"
+
+#include "lightsquare_05_01_color_001_png.h"
+#include "lightsquare_05_02_color_001_png.h"
+#include "lightsquare_05_03_color_001_png.h"
+#include "lightsquare_05_04_color_001_png.h"
+#include "lightsquare_05_05_color_001_png.h"
+#include "lightsquare_05_06_color_001_png.h"
+#include "lightsquare_05_07_color_001_png.h"
+#include "lightsquare_05_08_color_001_png.h"
 
 
 

@@ -24,8 +24,11 @@ typedef struct {
     u8 trig_colorG;      // key 8
     u8 trig_colorB;      // key 9
     float trig_duration; // key 10
-    bool touchTriggered; // key 11
-    bool tintGround;     // key 14
+    u8 touchTriggered:1; // key 11
+    u8 tintGround:1;     // key 14
+    u8 p1_color:1;       // key 15
+    u8 p2_color:1;       // key 16
+    u8 blending:1;       // key 17
     int target_color_id; // key 23
     int zsheetlayer;     // no key has this, but used internally
     int zlayer;          // key 24
@@ -70,6 +73,8 @@ typedef struct {
 
 typedef struct {
     GDObjectLayer *layer;
+    int zlayer;          
+    int zorder;          
     int originalIndex;
     int layerNum;
 } GDLayerSortable;
@@ -105,7 +110,12 @@ struct LoadedLevelInfo {
     int pulsing_type;
     int song_id;
     bool completing;
+    int background_id;
+    int ground_id;
 };
+
+#define BG_COUNT 4
+#define G_COUNT 4
 
 #define SECTION_HASH_SIZE 600
 

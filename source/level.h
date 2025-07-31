@@ -11,8 +11,8 @@ typedef struct {
     int tempo;
 } SongDefinition;
 
-#define LEVEL_NUM 19
-#define SONG_NUM 14
+#define LEVEL_NUM 20
+#define SONG_NUM 15
 
 extern int level_id;
 

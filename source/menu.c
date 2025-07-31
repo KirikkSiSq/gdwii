@@ -45,7 +45,7 @@ int menu_loop() {
         return TRUE;
 	}
 
-    char usr_lvl_dir[256];
+    char usr_lvl_dir[268];
     snprintf(usr_lvl_dir, sizeof(usr_lvl_dir), "%s/%s", launch_dir, USER_LEVELS_FOLDER);
 
     DIR *level_dir = opendir(usr_lvl_dir);

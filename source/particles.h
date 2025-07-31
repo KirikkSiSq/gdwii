@@ -76,6 +76,8 @@ enum ParticleGroupID {
     BREAKABLE_BRICK_PARTICLES,
     COIN_PARTICLES,
     COIN_OBJ,
+    SPEED_PORTAL_AMBIENT,
+    SPEEDUP,
 };
 
 extern ParticleTemplate particle_templates[];

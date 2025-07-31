@@ -1,6 +1,4 @@
 #include <grrlib.h>
-#include "game_bg_png.h"
-#include "game_ground_png.h"
 #include "objects.h"
 #include "level_loading.h"
 #include "stdio.h"
@@ -21,13 +19,42 @@
 #include "particle_png.h"
 #include <ogc/lwp_watchdog.h>
 
-float jump_heights_table[JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
-    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},   {518.4,      414.72002},  {432,      691.2}},
-    /* YELLOW ORB */ {{603.72,   482.976},  {603.72,   482.976}, {422.60399,  338.08319},  {603.72,   482.976}},
-    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48}, {-207.36001, -165.88801}, {-345.6,   -276.48}},
-    /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18}, {-169.04160, -135.2295},  {-241.488, -193.185}},
-    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},  {362.88001,  290.30401},  {345.6,    276.4}},
-    /* PINK ORB   */ {{434.7,    347.76},   {223.398,  178.686}, {325.42019,  260.3286},   {258.984,  207.198}},
+GRRLIB_texImg *prev_tex = NULL;
+int prev_blending = GRRLIB_BLEND_ALPHA;
+
+const float jump_heights_table[SPEED_COUNT][JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
+    { // SLOW               CUBE                   SHIP                  BALL                    UFO
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {573.48,   458.784}},
+    /* YELLOW ORB */ {{573.48,   458.784},  {573.48,   458.784},  {401.435993,  321.148795},  {573.48,   458.784}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-229.392, -183.519}, {-160.574397, -128.463298}, {-229.392, -183.519}},
+    /* BLUE ORB   */ {{-229.392, -183.519}, {-229.392, -183.519}, {-160.574397, -128.463298}, {-229.392, -183.519}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4}},
+    /* PINK ORB   */ {{412.884,  330.318},  {212.166,  169.776},  {309.090595,  247.287596},  {240.84,   192.672}},
+    },
+    { // NORMAL
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2}},
+    /* YELLOW ORB */ {{603.72,   482.976},  {603.72,   482.976},  {422.60399,   338.08319},   {603.72,   482.976}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48}},
+    /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18},  {-169.04160,  -135.2295},   {-241.488, -193.185}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4}},
+    /* PINK ORB   */ {{434.7,    347.76},   {223.398,  178.686},  {325.42019,   260.3286},    {258.984,  207.198}},
+    },
+    { // FAST
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2}},
+    /* YELLOW ORB */ {{616.68,   481.734},  {616.68,   481.734},  {431.67599,   345.34079},   {616.68,   481.734}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48}},
+    /* BLUE ORB   */ {{-246.672, -197.343}, {-246.672, -197.343}, {-172.6704,   -138.1401},   {-246.672, -197.343}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4}},
+    /* PINK ORB   */ {{443.988,  355.212},  {228.15,   182.52},   {332.37539,   265.923},     {258.984,  207.198}},
+    },
+    { // FASTER
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2}},
+    /* YELLOW ORB */ {{606.42,   485.136},  {606.42,   485.136},  {424.493993,  339.59519},   {606.42,   485.136}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48}},
+    /* BLUE ORB   */ {{-242.568, -194.049}, {-242.568, -194.049}, {-169.7976,   -135.8343},   {-242.568, -194.049}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4}},
+    /* PINK ORB   */ {{436.644,  349.272},  {224.37,   179.496},  {326.85659,   261.5004},    {254.718,  203.742}},
+    }
 };
 
 struct ColorChannel channels[COL_CHANNEL_COUNT];
@@ -41,12 +68,22 @@ void set_intended_ceiling(Player *player) {
     state.camera_intended_y = mid_point - (SCREEN_HEIGHT_AREA / 2);
 }
 
+void set_particle_color(int template_id, int r, int g, int b) {
+    particle_templates[template_id].start_color.r = r;
+    particle_templates[template_id].start_color.g = g;
+    particle_templates[template_id].start_color.b = b;
+
+    particle_templates[template_id].end_color.r = r;
+    particle_templates[template_id].end_color.g = g;
+    particle_templates[template_id].end_color.b = b;
+}
+
 void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
     switch (obj->id) {
         case YELLOW_PAD:
             if (!obj->activated) {
                 MotionTrail_ResumeStroke(&trail);
-                player->vel_y = jump_heights_table[JUMP_YELLOW_PAD][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[player->speed][JUMP_YELLOW_PAD][player->gamemode][player->mini];
                 player->on_ground = FALSE;
                 player->left_ground = TRUE;
                 player->ufo_last_y = player->y;
@@ -54,14 +91,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
 
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 255;
-                particle_templates[USE_EFFECT].start_color.b = 0;
+                set_particle_color(USE_EFFECT, 255, 255, 0);
                 particle_templates[USE_EFFECT].start_color.a = 255;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 255;
-                particle_templates[USE_EFFECT].end_color.b = 0;
                 particle_templates[USE_EFFECT].end_color.a = 0;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -73,7 +104,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
         case PINK_PAD:
             if (!obj->activated) {
                 MotionTrail_ResumeStroke(&trail);
-                player->vel_y = jump_heights_table[JUMP_PINK_PAD][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[player->speed][JUMP_PINK_PAD][player->gamemode][player->mini];
                 player->on_ground = FALSE;
                 player->left_ground = TRUE;
                 player->ufo_last_y = player->y;
@@ -81,14 +112,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
 
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 31;
-                particle_templates[USE_EFFECT].start_color.b = 255;
+                set_particle_color(USE_EFFECT, 255, 31, 255);
                 particle_templates[USE_EFFECT].start_color.a = 255;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 31;
-                particle_templates[USE_EFFECT].end_color.b = 255;
                 particle_templates[USE_EFFECT].end_color.a = 0;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -112,7 +137,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 player->gravObj = obj;
 
-                player->vel_y = jump_heights_table[JUMP_BLUE_PAD][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[player->speed][JUMP_BLUE_PAD][player->gamemode][player->mini];
                 player->upside_down ^= 1;
                 player->on_ground = FALSE;
                 player->ufo_last_y = player->y;
@@ -120,14 +145,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
 
-                particle_templates[USE_EFFECT].start_color.r = 56;
-                particle_templates[USE_EFFECT].start_color.g = 200;
-                particle_templates[USE_EFFECT].start_color.b = 255;
+                set_particle_color(USE_EFFECT, 56, 200, 255);
                 particle_templates[USE_EFFECT].start_color.a = 255;
-
-                particle_templates[USE_EFFECT].end_color.r = 56;
-                particle_templates[USE_EFFECT].end_color.g = 200;
-                particle_templates[USE_EFFECT].end_color.b = 255;
                 particle_templates[USE_EFFECT].end_color.a = 0;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -140,7 +159,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             if (!obj->activated && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
-                player->vel_y = jump_heights_table[JUMP_YELLOW_ORB][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[player->speed][JUMP_YELLOW_ORB][player->gamemode][player->mini];
                 
                 player->ball_rotation_speed = -1.f;
                 
@@ -153,14 +172,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 50;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 255;
-                particle_templates[USE_EFFECT].start_color.b = 0;
+                set_particle_color(USE_EFFECT, 255, 255, 0);
                 particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 255;
-                particle_templates[USE_EFFECT].end_color.b = 0;
                 particle_templates[USE_EFFECT].end_color.a = 255;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -174,7 +187,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             if (!obj->activated && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
-                player->vel_y = jump_heights_table[JUMP_PINK_ORB][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[player->speed][JUMP_PINK_ORB][player->gamemode][player->mini];
                 
                 player->ball_rotation_speed = -1.f;
                 
@@ -187,14 +200,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 50;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 31;
-                particle_templates[USE_EFFECT].start_color.b = 255;
+                set_particle_color(USE_EFFECT, 255, 31, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 31;
-                particle_templates[USE_EFFECT].end_color.b = 255;
                 particle_templates[USE_EFFECT].end_color.a = 255;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -209,7 +216,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 MotionTrail_ResumeStroke(&trail);
                 player->gravObj = obj;
                 
-                player->vel_y = jump_heights_table[JUMP_BLUE_ORB][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[player->speed][JUMP_BLUE_ORB][player->gamemode][player->mini];
                 player->upside_down ^= 1;
                 
                 player->ball_rotation_speed = -1.f;
@@ -223,14 +230,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 50;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
-                particle_templates[USE_EFFECT].start_color.r = 56;
-                particle_templates[USE_EFFECT].start_color.g = 200;
-                particle_templates[USE_EFFECT].start_color.b = 255;
+                set_particle_color(USE_EFFECT, 56, 200, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 56;
-                particle_templates[USE_EFFECT].end_color.g = 200;
-                particle_templates[USE_EFFECT].end_color.b = 255;
                 particle_templates[USE_EFFECT].end_color.a = 255;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -254,14 +255,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
 
-                    particle_templates[USE_EFFECT].start_color.r = 0;
-                    particle_templates[USE_EFFECT].start_color.g = 255;
-                    particle_templates[USE_EFFECT].start_color.b = 50;
+                    set_particle_color(USE_EFFECT, 0, 255, 50);
                     particle_templates[USE_EFFECT].start_color.a = 0;
-
-                    particle_templates[USE_EFFECT].end_color.r = 0;
-                    particle_templates[USE_EFFECT].end_color.g = 255;
-                    particle_templates[USE_EFFECT].end_color.b = 50;
                     particle_templates[USE_EFFECT].end_color.a = 255;
 
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -283,14 +278,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
 
-                    particle_templates[USE_EFFECT].start_color.r = 255;
-                    particle_templates[USE_EFFECT].start_color.g = 31;
-                    particle_templates[USE_EFFECT].start_color.b = 255;
+                    set_particle_color(USE_EFFECT, 255, 31, 255);
                     particle_templates[USE_EFFECT].start_color.a = 0;
-
-                    particle_templates[USE_EFFECT].end_color.r = 255;
-                    particle_templates[USE_EFFECT].end_color.g = 31;
-                    particle_templates[USE_EFFECT].end_color.b = 255;
                     particle_templates[USE_EFFECT].end_color.a = 255;
 
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -313,14 +302,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
 
-                    particle_templates[USE_EFFECT].start_color.r = 56;
-                    particle_templates[USE_EFFECT].start_color.g = 200;
-                    particle_templates[USE_EFFECT].start_color.b = 255;
+                    set_particle_color(USE_EFFECT, 56, 200, 255);
                     particle_templates[USE_EFFECT].start_color.a = 0;
-
-                    particle_templates[USE_EFFECT].end_color.r = 56;
-                    particle_templates[USE_EFFECT].end_color.g = 200;
-                    particle_templates[USE_EFFECT].end_color.b = 255;
                     particle_templates[USE_EFFECT].end_color.a = 255;
                     
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -342,14 +325,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
 
-                    particle_templates[USE_EFFECT].start_color.r = 255;
-                    particle_templates[USE_EFFECT].start_color.g = 255;
-                    particle_templates[USE_EFFECT].start_color.b = 0;
+                    set_particle_color(USE_EFFECT, 255, 255, 0);
                     particle_templates[USE_EFFECT].start_color.a = 0;
-
-                    particle_templates[USE_EFFECT].end_color.r = 255;
-                    particle_templates[USE_EFFECT].end_color.g = 255;
-                    particle_templates[USE_EFFECT].end_color.b = 0;
                     particle_templates[USE_EFFECT].end_color.a = 255;
                     
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -362,14 +339,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 94;
-                particle_templates[USE_EFFECT].start_color.b = 0;
+                set_particle_color(USE_EFFECT, 255, 94, 0);
                 particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 94;
-                particle_templates[USE_EFFECT].end_color.b = 0;
                 particle_templates[USE_EFFECT].end_color.a = 255;
                 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -384,14 +355,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
-                particle_templates[USE_EFFECT].start_color.r = 56;
-                particle_templates[USE_EFFECT].start_color.g = 200;
-                particle_templates[USE_EFFECT].start_color.b = 255;
+                set_particle_color(USE_EFFECT, 56, 200, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 56;
-                particle_templates[USE_EFFECT].end_color.g = 200;
-                particle_templates[USE_EFFECT].end_color.b = 255;
                 particle_templates[USE_EFFECT].end_color.a = 255;
                 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -418,14 +383,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
 
-                    particle_templates[USE_EFFECT].start_color.r = 255;
-                    particle_templates[USE_EFFECT].start_color.g = 0;
-                    particle_templates[USE_EFFECT].start_color.b = 0;
+                    set_particle_color(USE_EFFECT, 255, 0, 0);
                     particle_templates[USE_EFFECT].start_color.a = 0;
-
-                    particle_templates[USE_EFFECT].end_color.r = 255;
-                    particle_templates[USE_EFFECT].end_color.g = 0;
-                    particle_templates[USE_EFFECT].end_color.b = 0;
                     particle_templates[USE_EFFECT].end_color.a = 255;
 
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -441,14 +400,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
-                particle_templates[USE_EFFECT].start_color.r = 0;
-                particle_templates[USE_EFFECT].start_color.g = 255;
-                particle_templates[USE_EFFECT].start_color.b = 50;
+                set_particle_color(USE_EFFECT, 0, 255, 50);
                 particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 0;
-                particle_templates[USE_EFFECT].end_color.g = 255;
-                particle_templates[USE_EFFECT].end_color.b = 50;
                 particle_templates[USE_EFFECT].end_color.a = 255;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -464,14 +417,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 31;
-                particle_templates[USE_EFFECT].start_color.b = 255;
+                set_particle_color(USE_EFFECT, 255, 31, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 31;
-                particle_templates[USE_EFFECT].end_color.b = 255;
                 particle_templates[USE_EFFECT].end_color.a = 255;
                 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -497,14 +444,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
 
-                    particle_templates[USE_EFFECT].start_color.r = 255;
-                    particle_templates[USE_EFFECT].start_color.g = 127;
-                    particle_templates[USE_EFFECT].start_color.b = 0;
+                    set_particle_color(USE_EFFECT, 255, 127, 0);
                     particle_templates[USE_EFFECT].start_color.a = 0;
-
-                    particle_templates[USE_EFFECT].end_color.r = 255;
-                    particle_templates[USE_EFFECT].end_color.g = 127;
-                    particle_templates[USE_EFFECT].end_color.b = 0;
                     particle_templates[USE_EFFECT].end_color.a = 255;
 
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
@@ -527,20 +468,74 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].start_scale = 60;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
-                particle_templates[USE_EFFECT].start_color.r = 255;
-                particle_templates[USE_EFFECT].start_color.g = 255;
-                particle_templates[USE_EFFECT].start_color.b = 0;
+                set_particle_color(USE_EFFECT, 255, 255, 0);
                 particle_templates[USE_EFFECT].start_color.a = 255;
-
-                particle_templates[USE_EFFECT].end_color.r = 255;
-                particle_templates[USE_EFFECT].end_color.g = 255;
-                particle_templates[USE_EFFECT].end_color.b = 0;
                 particle_templates[USE_EFFECT].end_color.a = 0;
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
 
                 obj->toggled = TRUE;
+                obj->activated = TRUE;
+            }
+            break;
+        case SLOW_SPEED_PORTAL:
+            if (!obj->activated) {
+                if (player->speed != SPEED_SLOW) {
+                    set_particle_color(SPEEDUP, 255, 220, 0);
+                    particle_templates[SPEEDUP].speed = -20;
+                    particle_templates[SPEEDUP].sourcePosVarY = 20;
+                    for (int i = 0; i < 20; i++) {
+                        spawn_particle(SPEEDUP, state.camera_x + SCREEN_WIDTH_AREA + 20, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
+                    }
+                }
+                spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+                player->speed = SPEED_SLOW;
+                obj->activated = TRUE;
+            }
+            break;
+        case NORMAL_SPEED_PORTAL:
+            if (!obj->activated) {
+                if (player->speed != SPEED_NORMAL) {
+                    set_particle_color(SPEEDUP, 0, 255, 255);
+                    particle_templates[SPEEDUP].speed = -60;
+                    particle_templates[SPEEDUP].sourcePosVarY = 90;
+                    for (int i = 0; i < 20; i++) {
+                        spawn_particle(SPEEDUP, state.camera_x + SCREEN_WIDTH_AREA + 90, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
+                    }
+                }
+                spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+                player->speed = SPEED_NORMAL;
+                obj->activated = TRUE;
+            }
+            break;
+        case FAST_SPEED_PORTAL:
+            if (!obj->activated) {
+                if (player->speed != SPEED_FAST) {
+                    set_particle_color(SPEEDUP, 64, 255, 64);
+                    particle_templates[SPEEDUP].speed = -100;
+                    particle_templates[SPEEDUP].sourcePosVarY = 120;
+                    for (int i = 0; i < 20; i++) {
+                        spawn_particle(SPEEDUP, state.camera_x + SCREEN_WIDTH_AREA + 120, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
+                    }
+                }
+                spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+                player->speed = SPEED_FAST;
+                obj->activated = TRUE;
+            }
+            break;
+        case FASTER_SPEED_PORTAL:
+            if (!obj->activated) {
+                if (player->speed != SPEED_FASTER) {
+                    set_particle_color(SPEEDUP, 255, 127, 255);
+                    particle_templates[SPEEDUP].speed = -160;
+                    particle_templates[SPEEDUP].sourcePosVarY = 200;
+                    for (int i = 0; i < 20; i++) {
+                        spawn_particle(SPEEDUP, state.camera_x + SCREEN_WIDTH_AREA + 200, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
+                    }
+                }
+                spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+                player->speed = SPEED_FASTER;
                 obj->activated = TRUE;
             }
             break;
@@ -574,8 +569,6 @@ int find_existing_texture(int curr_object, const unsigned char *texture) {
 
 void load_spritesheet() {
     // Load Textures 
-    bg = GRRLIB_LoadTexturePNG(game_bg_png);
-    ground = GRRLIB_LoadTexturePNG(game_ground_png);
     ground_line = GRRLIB_LoadTexturePNG(ground_line_png);
 
     for (s32 object = 1; object < OBJECT_COUNT; object++) {
@@ -611,8 +604,6 @@ void load_spritesheet() {
 
 void unload_spritesheet() {
     // Free all memory used by textures.
-    GRRLIB_FreeTexture(bg);
-    GRRLIB_FreeTexture(ground);
     GRRLIB_FreeTexture(ground_line);
 
     for (s32 object = 0; object < OBJECT_COUNT; object++) {
@@ -628,17 +619,51 @@ void unload_spritesheet() {
     
     unload_icons();
 }
+void handle_post_draw_object_particles(GameObject *obj, GDObjectLayer *layer) {
+    switch (obj->id) {
+        case SLOW_SPEED_PORTAL:
+            particle_templates[SPEED_PORTAL_AMBIENT].sourcePosVarX = objects[SLOW_SPEED_PORTAL].hitbox.width / 2;
+            particle_templates[SPEED_PORTAL_AMBIENT].sourcePosVarY = objects[SLOW_SPEED_PORTAL].hitbox.height / 2;
+            set_particle_color(SPEED_PORTAL_AMBIENT, 255, 220, 0);
+            if ((frameCount & 0b1111) == 0) spawn_particle(SPEED_PORTAL_AMBIENT, obj->x, obj->y, obj);
+            draw_obj_particles(ORB_HITBOX_EFFECT, obj);
+            draw_obj_particles(SPEED_PORTAL_AMBIENT, obj);
+            break;
+        case NORMAL_SPEED_PORTAL:
+            particle_templates[SPEED_PORTAL_AMBIENT].sourcePosVarX = objects[NORMAL_SPEED_PORTAL].hitbox.width / 2;
+            particle_templates[SPEED_PORTAL_AMBIENT].sourcePosVarY = objects[NORMAL_SPEED_PORTAL].hitbox.height / 2;
+            set_particle_color(SPEED_PORTAL_AMBIENT, 0, 255, 255);
+            if ((frameCount & 0b1111) == 0) spawn_particle(SPEED_PORTAL_AMBIENT, obj->x, obj->y, obj);
+            draw_obj_particles(ORB_HITBOX_EFFECT, obj);
+            draw_obj_particles(SPEED_PORTAL_AMBIENT, obj);
+            break;
+        case FAST_SPEED_PORTAL:
+            particle_templates[SPEED_PORTAL_AMBIENT].sourcePosVarX = objects[FAST_SPEED_PORTAL].hitbox.width / 2;
+            particle_templates[SPEED_PORTAL_AMBIENT].sourcePosVarY = objects[FAST_SPEED_PORTAL].hitbox.height / 2;
+            set_particle_color(SPEED_PORTAL_AMBIENT, 64, 255, 64);
+            if ((frameCount & 0b1111) == 0) spawn_particle(SPEED_PORTAL_AMBIENT, obj->x, obj->y, obj);
+            draw_obj_particles(ORB_HITBOX_EFFECT, obj);
+            draw_obj_particles(SPEED_PORTAL_AMBIENT, obj);
+            break;
+        case FASTER_SPEED_PORTAL:
+            particle_templates[SPEED_PORTAL_AMBIENT].sourcePosVarX = objects[FASTER_SPEED_PORTAL].hitbox.width / 2;
+            particle_templates[SPEED_PORTAL_AMBIENT].sourcePosVarY = objects[FASTER_SPEED_PORTAL].hitbox.height / 2;
+            set_particle_color(SPEED_PORTAL_AMBIENT, 255, 127, 255);
+            if ((frameCount & 0b1111) == 0) spawn_particle(SPEED_PORTAL_AMBIENT, obj->x, obj->y, obj);
+            draw_obj_particles(ORB_HITBOX_EFFECT, obj);
+            draw_obj_particles(SPEED_PORTAL_AMBIENT, obj);
+            break;
+    }
 
-void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
+    if (GRRLIB_Settings.blend != prev_blending) {
+        GRRLIB_SetBlend(prev_blending);
+    }
+}
+
+void handle_pre_draw_object_particles(GameObject *obj, GDObjectLayer *layer) {
     switch (obj->id) {
         case YELLOW_ORB:
-            particle_templates[ORB_PARTICLES].start_color.r = 255;
-            particle_templates[ORB_PARTICLES].start_color.g = 255;
-            particle_templates[ORB_PARTICLES].start_color.b = 0;
-
-            particle_templates[ORB_PARTICLES].end_color.r = 255;
-            particle_templates[ORB_PARTICLES].end_color.g = 255;
-            particle_templates[ORB_PARTICLES].end_color.b = 0;
+            set_particle_color(ORB_PARTICLES, 255, 255, 0);
             spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
@@ -648,27 +673,14 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
         case YELLOW_PAD:
             particle_templates[PAD_PARTICLES].angle = 180.f - (adjust_angle_y(obj->rotation, obj->flippedV) + 90.f);
 
-            particle_templates[PAD_PARTICLES].start_color.r = 255;
-            particle_templates[PAD_PARTICLES].start_color.g = 255;
-            particle_templates[PAD_PARTICLES].start_color.b = 0;
-
-            particle_templates[PAD_PARTICLES].end_color.r = 255;
-            particle_templates[PAD_PARTICLES].end_color.g = 255;
-            particle_templates[PAD_PARTICLES].end_color.b = 0;
-
+            set_particle_color(PAD_PARTICLES, 255, 255, 0);
             spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             break;
 
         case PINK_ORB:
-            particle_templates[ORB_PARTICLES].start_color.r = 255;
-            particle_templates[ORB_PARTICLES].start_color.g = 31;
-            particle_templates[ORB_PARTICLES].start_color.b = 255;
-
-            particle_templates[ORB_PARTICLES].end_color.r = 255;
-            particle_templates[ORB_PARTICLES].end_color.g = 31;
-            particle_templates[ORB_PARTICLES].end_color.b = 255;
+            set_particle_color(ORB_PARTICLES, 255, 31, 255);
             spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
@@ -678,27 +690,14 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
         case PINK_PAD:
             particle_templates[PAD_PARTICLES].angle = 180.f - (adjust_angle_y(obj->rotation, obj->flippedV) + 90.f);
 
-            particle_templates[PAD_PARTICLES].start_color.r = 255;
-            particle_templates[PAD_PARTICLES].start_color.g = 31;
-            particle_templates[PAD_PARTICLES].start_color.b = 255;
-
-            particle_templates[PAD_PARTICLES].end_color.r = 255;
-            particle_templates[PAD_PARTICLES].end_color.g = 31;
-            particle_templates[PAD_PARTICLES].end_color.b = 255;
-
+            set_particle_color(PAD_PARTICLES, 255, 31, 255);
             spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
             break;
 
         case BLUE_ORB:
-            particle_templates[ORB_PARTICLES].start_color.r = 56;
-            particle_templates[ORB_PARTICLES].start_color.g = 200;
-            particle_templates[ORB_PARTICLES].start_color.b = 255;
-
-            particle_templates[ORB_PARTICLES].end_color.r = 56;
-            particle_templates[ORB_PARTICLES].end_color.g = 200;
-            particle_templates[ORB_PARTICLES].end_color.b = 255;
+            set_particle_color(ORB_PARTICLES, 56, 200, 255);
             spawn_particle(ORB_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(ORB_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
@@ -708,13 +707,7 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
         case BLUE_PAD:
             particle_templates[PAD_PARTICLES].angle = 180.f - (adjust_angle_y(obj->rotation, obj->flippedV) + 90.f);
             
-            particle_templates[PAD_PARTICLES].start_color.r = 56;
-            particle_templates[PAD_PARTICLES].start_color.g = 200;
-            particle_templates[PAD_PARTICLES].start_color.b = 255;
-
-            particle_templates[PAD_PARTICLES].end_color.r = 56;
-            particle_templates[PAD_PARTICLES].end_color.g = 200;
-            particle_templates[PAD_PARTICLES].end_color.b = 255;
+            set_particle_color(PAD_PARTICLES, 56, 200, 255);
             spawn_particle(PAD_PARTICLES, obj->x, obj->y, obj);
             draw_obj_particles(PAD_PARTICLES, obj);
             draw_obj_particles(USE_EFFECT, obj);
@@ -725,14 +718,8 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
-                particle_templates[PORTAL_PARTICLES].start_color.r = 255;
-                particle_templates[PORTAL_PARTICLES].start_color.g = 255;
-                particle_templates[PORTAL_PARTICLES].start_color.b = 0;
+                set_particle_color(PORTAL_PARTICLES, 255, 255, 0);
                 particle_templates[PORTAL_PARTICLES].start_color.a = 127;
-
-                particle_templates[PORTAL_PARTICLES].end_color.r = 255;
-                particle_templates[PORTAL_PARTICLES].end_color.g = 255;
-                particle_templates[PORTAL_PARTICLES].end_color.b = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
@@ -745,14 +732,8 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
-                particle_templates[PORTAL_PARTICLES].start_color.r = 56;
-                particle_templates[PORTAL_PARTICLES].start_color.g = 200;
-                particle_templates[PORTAL_PARTICLES].start_color.b = 255;
+                set_particle_color(PORTAL_PARTICLES, 56, 200, 255);
                 particle_templates[PORTAL_PARTICLES].start_color.a = 127;
-
-                particle_templates[PORTAL_PARTICLES].end_color.r = 56;
-                particle_templates[PORTAL_PARTICLES].end_color.g = 200;
-                particle_templates[PORTAL_PARTICLES].end_color.b = 255;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
@@ -765,14 +746,8 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
-                particle_templates[PORTAL_PARTICLES].start_color.r = 0;
-                particle_templates[PORTAL_PARTICLES].start_color.g = 255;
-                particle_templates[PORTAL_PARTICLES].start_color.b = 50;
+                set_particle_color(PORTAL_PARTICLES, 0, 255, 50);
                 particle_templates[PORTAL_PARTICLES].start_color.a = 127;
-
-                particle_templates[PORTAL_PARTICLES].end_color.r = 0;
-                particle_templates[PORTAL_PARTICLES].end_color.g = 255;
-                particle_templates[PORTAL_PARTICLES].end_color.b = 50;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
@@ -785,14 +760,8 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
-                particle_templates[PORTAL_PARTICLES].start_color.r = 255;
-                particle_templates[PORTAL_PARTICLES].start_color.g = 31;
-                particle_templates[PORTAL_PARTICLES].start_color.b = 255;
+                set_particle_color(PORTAL_PARTICLES, 255, 31, 255);
                 particle_templates[PORTAL_PARTICLES].start_color.a = 127;
-
-                particle_templates[PORTAL_PARTICLES].end_color.r = 255;
-                particle_templates[PORTAL_PARTICLES].end_color.g = 31;
-                particle_templates[PORTAL_PARTICLES].end_color.b = 255;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
@@ -805,14 +774,8 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
-                particle_templates[PORTAL_PARTICLES].start_color.r = 255;
-                particle_templates[PORTAL_PARTICLES].start_color.g = 91;
-                particle_templates[PORTAL_PARTICLES].start_color.b = 0;
+                set_particle_color(PORTAL_PARTICLES, 255, 91, 0);
                 particle_templates[PORTAL_PARTICLES].start_color.a = 127;
-
-                particle_templates[PORTAL_PARTICLES].end_color.r = 255;
-                particle_templates[PORTAL_PARTICLES].end_color.g = 91;
-                particle_templates[PORTAL_PARTICLES].end_color.b = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
@@ -824,14 +787,8 @@ void handle_object_particles(GameObject *obj, GDObjectLayer *layer) {
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
-                particle_templates[PORTAL_PARTICLES].start_color.r = 255;
-                particle_templates[PORTAL_PARTICLES].start_color.g = 0;
-                particle_templates[PORTAL_PARTICLES].start_color.b = 0;
+                set_particle_color(PORTAL_PARTICLES, 255, 0, 0);
                 particle_templates[PORTAL_PARTICLES].start_color.a = 127;
-
-                particle_templates[PORTAL_PARTICLES].end_color.r = 255;
-                particle_templates[PORTAL_PARTICLES].end_color.g = 0;
-                particle_templates[PORTAL_PARTICLES].end_color.b = 0;
                 particle_templates[PORTAL_PARTICLES].end_color.a = 255;
                 spawn_particle(PORTAL_PARTICLES, obj->x, obj->y, obj);
                 draw_obj_particles(PORTAL_PARTICLES, obj);
@@ -937,6 +894,7 @@ int layer_pulses(GameObject *obj, GDObjectLayer *layer) {
         case D_EXMARK:
         case D_QMARK:
         case D_CROSS:
+        case PULSING_BIG_CIRCUNFERENCE:
             return 1;
         case ROD_BIG:
         case ROD_MEDIUM:
@@ -972,6 +930,7 @@ float get_object_pulse(float amplitude, GameObject *obj) {
         case D_EXMARK:
         case D_QMARK:
         case D_CROSS:
+        case PULSING_BIG_CIRCUNFERENCE:
             return map_range(amplitude, 0.f, 1.f, 0.8f, 1.2f);
     }
     return amplitude;
@@ -1058,13 +1017,13 @@ float get_rotation_speed(GameObject *obj) {
         case CARTWHEEL_BIG:
         case CARTWHEEL_MEDIUM:
         case CARTWHEEL_SMALL:
+        case ROUND_CLOUD_BIG:
+        case ROUND_CLOUD_MEDIUM:
+        case ROUND_CLOUD_SMALL:
             return 180.f;
     }
     return 0.f;
 }
-
-GRRLIB_texImg *prev_tex = NULL;
-int prev_blending = GRRLIB_BLEND_ALPHA;
 
 static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectLayer *layer) {
     int obj_id = obj->id;
@@ -1416,6 +1375,8 @@ void draw_all_object_layers() {
     draw_particles(GLITTER_EFFECT);
     layersDrawn = visible_count;
 
+    prev_blending = -1;
+
     // Draw in sorted order
     for (int i = 0; i < visible_count; i++) {
         GDObjectLayer *layer = visible_layers[i]->layer;
@@ -1458,16 +1419,23 @@ void draw_all_object_layers() {
                 obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
             }
 
-            handle_object_particles(obj, layer); 
+            handle_pre_draw_object_particles(obj, layer); 
             u64 t1 = gettime();
             obj_particles_time += t1 - t0;
-            
+
             t0 = gettime();
             if (!obj->toggled) put_object_layer(obj, calc_x, calc_y, layer);
             t1 = gettime();
             draw_time += t1 - t0;
+            
+            t0 = gettime();
+            handle_post_draw_object_particles(obj, layer); 
+            t1 = gettime();
+            obj_particles_time += t1 - t0;
         }
     }
+
+    draw_particles(SPEEDUP);
 
     draw_time = ticks_to_microsecs(draw_time) / 1000.f;
     obj_particles_time = ticks_to_microsecs(obj_particles_time) / 1000.f;
@@ -1514,12 +1482,24 @@ void handle_copy_channels() {
 }
 
 void upload_to_buffer(GameObject *obj, int channel) {
+    if (channel == 0) channel = 1;
     struct TriggerBuffer *buffer = &trigger_buffer[channel];
     buffer->active = TRUE;
     buffer->old_color = channels[channel].color;
-    buffer->new_color.r = obj->trig_colorR;
-    buffer->new_color.g = obj->trig_colorG;
-    buffer->new_color.b = obj->trig_colorB;
+    if (obj->p1_color) {
+        buffer->new_color.r = p1.r;
+        buffer->new_color.g = p1.g;
+        buffer->new_color.b = p1.b;
+    } else if (obj->p2_color) {
+        buffer->new_color.r = p2.r;
+        buffer->new_color.g = p2.g;
+        buffer->new_color.b = p2.b;
+    } else {
+        buffer->new_color.r = obj->trig_colorR;
+        buffer->new_color.g = obj->trig_colorG;
+        buffer->new_color.b = obj->trig_colorB;
+    }
+    channels[channel].blending = obj->blending;
     buffer->seconds = obj->trig_duration;
     buffer->time_run = 0;
 }
@@ -1587,6 +1567,10 @@ void run_trigger(GameObject *obj) {
             upload_to_buffer(obj, OBJ);
             break;
         
+        case OBJ_2_TRIGGER:
+            upload_to_buffer(obj, 1);
+            break;
+
         case ENABLE_TRAIL:
             p1_trail = TRUE;
             break;
