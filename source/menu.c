@@ -93,6 +93,15 @@ int menu_loop() {
         if (state.input.pressed1orX) {
             level_id = 0;
             level_mode ^= 1;
+
+            if (level_mode == 1) {
+                // Read first gmd
+                char *level_data = read_file(sd_level_paths[level_id], &outsize);
+                if (level_data) {
+                    snprintf(current_level_name, 255, "%s", get_level_name(level_data));
+                    free(level_data);
+                }
+            }
         }
         
         if (level_mode == 0) {

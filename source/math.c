@@ -1,7 +1,9 @@
 #include <math.h>
+#include <stdlib.h>
+#include <float.h>
+
 #include "math.h"
 #include "objects.h"
-#include <stdlib.h>
 #include "game.h"
 #include "player.h"
 
@@ -383,4 +385,16 @@ float normalize_angle(float angle) {
     angle = fmodf(angle, 360.0f);
     if (angle < 0) angle += 360.0f;
     return angle;
+}
+
+bool is_effectively_integer(float x) {
+    return fabsf(x - roundf(x)) < FLT_EPSILON;
+}
+
+float ip1_ceilf(float x) {
+    float c = ceilf(x);
+    if (is_effectively_integer(x)) {
+        return c + 1.0f;
+    }
+    return c;
 }

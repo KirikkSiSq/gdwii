@@ -267,7 +267,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             
         case SHIP_PORTAL: 
             if (!obj->activated) {
-                player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
+                player->ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
                 player->ceiling_y = player->ground_y + 300;
                 set_intended_ceiling(player);
 
@@ -369,7 +369,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
         
         case BALL_PORTAL: 
             if (!obj->activated) {
-                player->ground_y = maxf(0, ceilf((obj->y - 150) / 30.f)) * 30;
+                player->ground_y = maxf(0, ip1_ceilf((obj->y - 150) / 30.f)) * 30;
                 player->ceiling_y = player->ground_y + 240;
                 set_intended_ceiling(player);
 
@@ -428,7 +428,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             break;
         case UFO_PORTAL:
             if (!obj->activated) {
-                player->ground_y = maxf(0, ceilf((obj->y - 180) / 30.f)) * 30;
+                player->ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
                 player->ceiling_y = player->ground_y + 300;
                 set_intended_ceiling(player);
 
