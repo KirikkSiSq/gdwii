@@ -1589,8 +1589,8 @@ void run_trigger(GameObject *obj) {
 void handle_triggers(GameObject *obj) {
     int obj_id = obj->id;
     Player *player = &state.player;
-
-    if (objects[obj_id].is_trigger && !obj->activated) {
+    
+    if ((objects[obj_id].is_trigger || obj->id > OBJECT_COUNT) && !obj->activated) {
         if (obj->touchTriggered) {
             if (intersect(
                 player->x, player->y, player->width, player->height, 0, 

@@ -4220,7 +4220,7 @@ const ObjectDefinition objects[] = {
         .hitbox = {
             .width = 6,
             .height = 5.6,
-            .type = HITBOX_SOLID
+            .type = HITBOX_SPIKE
         },
         .fades = TRUE,
         .spritesheet_layer = SHEET_BLOCKS,
