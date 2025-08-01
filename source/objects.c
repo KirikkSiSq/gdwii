@@ -1499,7 +1499,9 @@ void upload_to_buffer(GameObject *obj, int channel) {
         buffer->new_color.g = obj->trig_colorG;
         buffer->new_color.b = obj->trig_colorB;
     }
-    channels[channel].blending = obj->blending;
+    if (channel < BG) {
+        channels[channel].blending = obj->blending;
+    }
     buffer->seconds = obj->trig_duration;
     buffer->time_run = 0;
 }

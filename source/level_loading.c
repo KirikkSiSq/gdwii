@@ -632,6 +632,10 @@ GameObject *convert_to_typed(const GDObject *obj) {
         }
     }
 
+    if (typed->blending) {
+        printf("OBJ ID %i x %.2f y %.2f has blending\n", typed->id, typed->x, typed->y);
+    }
+
     // Setup slope
     if (objects[typed->id].is_slope) {
         int orientation = typed->rotation / 90;
@@ -1103,7 +1107,7 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
 
     if (obj_2_r && obj_2_g && obj_2_b) {
         GDColorChannel obj_2_channel = {0};
-        obj_2_channel.channelID = OBJ;
+        obj_2_channel.channelID = 1;
         obj_2_channel.fromRed = atoi(obj_2_r);
         obj_2_channel.fromGreen = atoi(obj_2_g);
         obj_2_channel.fromBlue = atoi(obj_2_b);
@@ -1111,6 +1115,11 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
         char *obj_2_player_color = get_metadata_value(level_string, "kS20");
         if (obj_2_player_color) {
             obj_2_channel.playerColor = atoi(obj_2_player_color);
+        }
+
+        char *obj_2_blending = get_metadata_value(level_string, "kA5");
+        if (obj_2_blending) {
+            obj_2_channel.blending = atoi(obj_2_blending) != 0;
         }
         
         channels = realloc(channels, sizeof(GDColorChannel) * (i + 1));
