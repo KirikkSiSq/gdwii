@@ -64,3 +64,4 @@ void  custom_rectangle (const f32 x,      const f32 y,
     const f32 width,  const f32 height,
     const u32 color, const bool filled);
 void set_texture(const GRRLIB_texImg *tex);
+float normalize_angle(float angle);

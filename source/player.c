@@ -79,6 +79,12 @@ const float player_speeds[SPEED_COUNT] = {
 	468.0001388338566
 };
 
+const float slopeHeights[SPEED_COUNT] = {
+    322.345224,
+    399.889818,
+    497.224926,
+    600.643296
+};
 
 const float cube_jump_heights[SPEED_COUNT] = {
     573.48,
@@ -92,11 +98,25 @@ void set_p_velocity(Player *player, float vel) {
 }
 
 void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
-    int clip = (player->gamemode == GAMEMODE_SHIP ? 7 : 10);
+    int clip = (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) ? 7 : 10;
     switch (hitbox->type) {
         case HITBOX_BREAKABLE_BLOCK:
         case HITBOX_SOLID: 
             bool gravSnap = FALSE;
+
+            float bottom = gravBottom(player);
+
+            if (player->slope_data.slope) {
+                bottom = bottom + sinf(slope_angle(player->slope_data.slope, player)) * player->height / 2;
+                clip = 7;
+                if (obj_gravTop(player, obj) - bottom < 2)
+                    return;
+            }
+            
+            if (objects[obj->id].is_slope) {
+                slope_collide(obj, player);
+                break;
+            }
 
             if (player->gravObj && player->gravObj->hitbox_counter == 1) {
                 // Only do the funny grav snap if player is touching a gravity object and internal hitbox is touching block
@@ -127,6 +147,10 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 player->vel_y = 0;
                 player->on_ground = TRUE;
                 player->time_since_ground = 0;
+                
+                if (player->slope_data.slope && grav_slope_orient(player->slope_data.slope, player) == 1) {
+                    clear_slope_data(player);
+                }
             } else {
                 // Ufo can break breakable blocks from above, so dont use as a ceiling
                 if (player->gamemode == GAMEMODE_UFO && hitbox->type == HITBOX_BREAKABLE_BLOCK) {
@@ -139,6 +163,10 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                         if (!gravSnap) player->on_ceiling = TRUE;
                         player->time_since_ground = 0;
                         player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
+                        
+                        if (player->slope_data.slope && grav_slope_orient(player->slope_data.slope, player) == 1) {
+                            clear_slope_data(player);
+                        }
                     }
                 }
             }
@@ -224,6 +252,12 @@ void collide_with_objects() {
         }
     }
 
+    //printf("%.2f\n", player->vel_y);
+    if (player->left_ground) {
+        printf("OBJECT CLEAR\n");
+        clear_slope_data(player);
+    }
+
     for (int i = 0; i < block_count; i++) {
         GameObject *obj = block_buffer[i];
         collide_with_obj(obj);
@@ -255,7 +289,7 @@ void cube_gamemode(Player *player) {
 
     if (player->on_ground) {
         MotionTrail_StopStroke(&trail);
-        player->rotation = round(player->rotation / 90.0f) * 90.0f;
+        if (!player->slope_data.slope) player->rotation = round(player->rotation / 90.0f) * 90.0f;
     }
 
     if ((player->time_since_ground < 0.05f) && (frame_counter & 0b11) == 0) {
@@ -265,7 +299,13 @@ void cube_gamemode(Player *player) {
     }
 
     if (player->on_ground && state.input.holdA) {
-        set_p_velocity(player, cube_jump_heights[player->speed]);
+        if (player->slope_data.slope && grav_slope_orient(player->slope_data.slope, player) == 0) {
+            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+            set_p_velocity(player, 0.25f * time * slopeHeights[player->speed] + cube_jump_heights[player->speed]);
+        } else {
+            set_p_velocity(player, cube_jump_heights[player->speed]);
+        }
+
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
 
@@ -608,12 +648,18 @@ void run_player() {
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
     player->x += player->vel_x * STEPS_DT;
 
+    player->rotation = normalize_angle(player->rotation);
+
     player->left_ground = FALSE;
 
     if (player->ceiling_inv_time > 0) {
         player->ceiling_inv_time -= STEPS_DT;
     } else {
         player->ceiling_inv_time = 0;
+    }
+    
+    if (player->slope_data.slope) {
+        slope_calc(player->slope_data.slope, player);
     }
 
     // Ground
@@ -625,12 +671,20 @@ void run_player() {
             return;
         }
 
+        if (player->slope_data.slope && grav_slope_orient(player->slope_data.slope, player) == 1) {
+            clear_slope_data(player);
+        }
+        
         player->vel_y = 0;
         player->y = player->ground_y + (player->height / 2);
     }
 
     // Ceiling
     if (getTop(player) > player->ceiling_y) {
+        if (player->slope_data.slope && grav_slope_orient(player->slope_data.slope, player) == 1) {
+            clear_slope_data(player);
+        }
+        
         player->vel_y = 0;
         player->y = player->ceiling_y - (player->height / 2);
     } 
@@ -665,6 +719,12 @@ void handle_player() {
     player->on_ceiling = FALSE;
 
     player->gravObj = NULL;
+    
+    player->timeElapsed += STEPS_DT;
+
+    if (player->slope_data.slope && player->slope_data.slope->orientation == 1) {
+        player->on_ground = TRUE;
+    }
 
     u32 t0 = gettime();
     collide_with_objects();
@@ -675,7 +735,6 @@ void handle_player() {
     run_player();
     t1 = gettime();
     player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
-
     
     run_camera();
     handle_mirror_transition();
@@ -782,6 +841,7 @@ void init_variables() {
     player->on_ceiling = FALSE;
     player->upside_down = FALSE;
     player->dead = FALSE;
+    player->timeElapsed = 0.f;
 }
 
 void handle_death() {
@@ -1104,4 +1164,398 @@ GRRLIB_texImg *get_p1_trail_tex() {
             return ball_l1;
     }
     return icon_l1;
+}
+
+const float ejections[SPEED_COUNT] = {
+    316.4617f,
+    392.5909f,
+    488.149356f,
+    589.68013f
+};
+
+const float falls[SPEED_COUNT] = {
+    226.044054,
+    280.422108,
+    348.678108,
+    421.200108
+};
+
+void clear_slope_data(Player *player) {
+    player->slope_data.slope = NULL;
+    player->slope_data.elapsed = 0.f;
+    player->slope_data.snapDown = FALSE;
+}
+
+int grav_slope_orient(GameObject *obj, Player *player) {
+    int orient = obj->orientation;
+
+    if (player->upside_down) {
+        if (orient == 3)
+			orient = 0;
+		else if (orient == 2)
+			orient = 1;
+		else if (orient == 0)
+			orient = 3;
+		else if (orient == 1)
+			orient = 2;
+    }
+    return orient;
+}
+
+float slope_angle(GameObject *obj, Player *player) {
+    float angle = atanf((float) obj->height / obj->width);
+    int orient = grav_slope_orient(obj, player);
+    if (orient == 1 || orient == 2) {
+        angle = -angle;
+    }
+
+    return angle;
+}
+
+float slope_snap_angle(GameObject *obj, Player *player) {
+    float angle = slope_angle(obj, player);
+    int orient = obj->orientation;
+
+    if (orient == 0) angle = -fabsf(angle);
+    if (orient == 1) angle = fabsf(angle);
+
+    return angle;
+}
+
+float expected_slope_y(GameObject *obj, Player *player) {
+    int flipping = grav_slope_orient(obj, player) >= 2;
+    int mult = (player->upside_down ^ flipping) ? -1 : 1;
+    
+    float angle = slope_angle(obj, player);
+    float ydist = mult * player->height * sqrtf(powf(tanf(angle), 2) + 1) / 2;
+    float pos_relative = ((float) obj->height / obj->width) * (player->x - obj_getLeft(obj));
+
+    if ((angle > 0) ^ player->upside_down ^ flipping) {
+        return obj_getBottom(obj) + MIN(pos_relative + ydist, obj->height + player->height / 2);
+    } else {
+        return obj_getTop(obj) - MAX(pos_relative - ydist, -player->height / 2);
+    }
+}
+
+bool slope_touching(GameObject *obj, Player *player) {
+    switch (grav_slope_orient(obj, player)) {
+        case 0:
+        case 1:
+            return grav(player, expected_slope_y(obj, player)) >= grav(player, player->y);
+        case 2:
+        case 3:
+            return grav(player, expected_slope_y(obj, player)) <= grav(player, player->y);  
+        default:
+            return false;
+    }
+}
+
+void slope_calc(GameObject *obj, Player *player) {
+    int orientation = grav_slope_orient(obj, player);
+    if (orientation == 0) {
+        // Handle leaving slope
+        if (!slope_touching(obj, player)) {
+            clear_slope_data(player);
+            return;
+        }
+
+        // On slope
+        if (gravBottom(player) != obj_gravTop(player, obj)) {
+            if (player->upside_down) {
+                player->y = MIN(player->y, expected_slope_y(obj, player));
+            } else {
+                player->y = MAX(player->y, expected_slope_y(obj, player));
+            }
+            snap_player_to_slope(obj, player);
+            
+            if (player->vel_y < 0) {
+                player->vel_y = 0;
+            }
+        }
+
+        // Sliding off slope
+        if (gravBottom(player) >= obj_gravTop(player, obj)) {
+            float vel = ejections[player->speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
+            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+            
+            if (player->gamemode == GAMEMODE_BALL) {
+                vel *= 0.75f;
+            }
+
+            if (player->gamemode == GAMEMODE_UFO) {
+                vel *= 0.7499f;
+            }
+
+            vel *= time;
+
+            player->vel_y = vel;
+            clear_slope_data(player);
+        }
+    } else if (orientation == 1) {
+        // Handle leaving slope
+        if (player->vel_y > 0) {
+            clear_slope_data(player);
+            return;
+        }
+
+        if (gravBottom(&state.old_player) != obj_gravTop(player, obj) || player->slope_data.snapDown) {
+            if (player->upside_down) {
+                player->y = MIN(MAX(player->y, expected_slope_y(obj, player)), player->y + player->height / 2);
+            } else {
+                player->y = MAX(MIN(player->y, expected_slope_y(obj, player)), player->y - player->height / 2);
+            }
+            snap_player_to_slope(obj, player);
+            if (player->vel_y < 0) {
+                player->vel_y = 0;
+            }
+        }
+
+        if (obj_gravTop(player, obj) <= grav(player, player->y)) {
+            float vel = -falls[player->speed] * ((float) obj->height / obj->width);
+            player->vel_y = vel;
+            clear_slope_data(player);
+        }
+    } else if (orientation == 3) {
+        // Handle leaving slope
+        if (!slope_touching(obj, player)) {
+            clear_slope_data(player);
+            return;
+        }
+        
+        bool gravSnap = player->ceiling_inv_time > 0;
+        
+        if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
+            player->dead = TRUE;
+        }
+
+        // On slope
+        if (gravBottom(player) != obj_gravTop(player, obj)) {
+            if (player->upside_down) {
+                player->y = MAX(player->y, expected_slope_y(obj, player));
+            } else {
+                player->y = MIN(player->y, expected_slope_y(obj, player));
+            }
+            snap_player_to_slope(obj, player);
+            
+            if (player->vel_y > 0) {
+                player->vel_y = 0;
+            }
+        }
+
+        // Sliding off slope
+        if (gravTop(player) <= obj_gravBottom(player, obj)) {
+            float vel = ejections[player->speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
+            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+            
+            if (player->gamemode == GAMEMODE_BALL) {
+                vel *= 0.75f;
+            }
+
+            if (player->gamemode == GAMEMODE_UFO) {
+                vel *= 0.7499f;
+            }
+
+            vel *= time;
+
+            player->vel_y = -vel;
+            clear_slope_data(player);
+        }
+    } else {
+        // Handle leaving slope
+        if (player->vel_y < 0) {
+            clear_slope_data(player);
+            return;
+        }
+        
+        bool gravSnap = player->ceiling_inv_time > 0;
+        
+        if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
+            player->dead = TRUE;
+        }
+
+        if (gravTop(&state.old_player) != obj_gravBottom(player, obj) || player->slope_data.snapDown) {
+            if (player->upside_down) {
+                player->y = MAX(MIN(player->y, expected_slope_y(obj, player)), player->y - player->height / 2);
+            } else {
+                player->y = MIN(MAX(player->y, expected_slope_y(obj, player)), player->y + player->height / 2);
+            }
+    
+            snap_player_to_slope(obj, player);
+            if (player->vel_y > 0) {
+                player->vel_y = 0;
+            }
+        }
+
+        if (obj_gravBottom(player, obj) <= grav(player, player->y)) {
+            float vel = falls[player->speed] * ((float) obj->height / obj->width);
+            player->vel_y = vel;
+            clear_slope_data(player);
+        }
+    }
+}
+
+void slope_collide(GameObject *obj, Player *player) {
+    int clip = (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) ? 7 : 10;
+    int orient = grav_slope_orient(obj, player);  
+    int mult = orient >= 2 ? -1 : 1;
+    
+    bool gravSnap = player->ceiling_inv_time > 0;
+
+    // Check if player inside slope
+    if (orient == 0 || orient == 3) {
+        bool internalCollidingSlope = intersect(
+            player->x, player->y, 9, 9, 0, 
+            obj_getRight(obj), obj->y, 1, obj->height, 0
+        );
+
+        if (internalCollidingSlope) player->dead = TRUE;
+    }
+
+    // Normal slope - resting on bottom
+    if (
+        !state.old_player.slope_data.slope &&
+        orient < 2 && 
+        gravTop(player) - obj_gravBottom(player, obj) <= clip + 5 * !player->mini // Remove extra if mini
+    ) {
+        if ((player->gamemode != GAMEMODE_CUBE && (player->vel_y >= 0)) || gravSnap) {
+            player->vel_y = 0;
+            if (!gravSnap) player->on_ceiling = TRUE;
+            player->time_since_ground = 0;
+            player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
+        } else {
+            printf("AGRIA\n");
+            bool internalCollidingSlope = intersect(
+                player->x, player->y, 9, 9, 0, 
+                obj->x, obj->y, obj->width, obj->height, 0
+            );
+
+            if (internalCollidingSlope) player->dead = TRUE;
+        }
+
+        return;
+    }
+
+    // Upside down slope - resting on top
+    if (
+        !state.old_player.slope_data.slope &&
+        orient >= 2 && 
+        obj_gravTop(player, obj) - gravBottom(player) <= clip + 5 * !player->mini // Remove extra if mini
+    ) {
+        if (player->vel_y <= 0) {
+            player->vel_y = 0;
+            if (!gravSnap) player->on_ground = TRUE;
+            player->time_since_ground = 0;
+            player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
+        } else {
+            bool internalCollidingSlope = intersect(
+                player->x, player->y, 9, 9, 0, 
+                obj->x, obj->y, obj->width, obj->height, 0
+            );
+
+            if (internalCollidingSlope) player->dead = TRUE;
+        }
+        
+        return;
+    }
+
+    // Left side collision
+    if (
+        !state.old_player.slope_data.slope && 
+        (orient == 1 || orient == 2) && 
+        player->x - obj_getLeft(obj) < 0
+    ) {
+        // Going from the left
+        if (obj_gravTop(player, obj) - gravBottom(player) > clip) {
+            bool internalCollidingSlope = intersect(
+                player->x, player->y, 9, 9, 0, 
+                obj->x, obj->y, obj->width, obj->height, 0
+            );
+
+            if (internalCollidingSlope) player->dead = TRUE;
+            return;
+        }
+        
+        // Touching slope before center is in slope
+        if (player->vel_y * mult <= 0) {
+            if (orient == 1) {
+                player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
+            } else {
+                player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
+            }
+            player->on_ground = TRUE;
+            return;
+        }
+    }
+
+    GameObject *slope = player->slope_data.slope;
+    if (
+        !slope ||
+        !slope_touching(obj, player) || 
+        grav_slope_orient(slope, player) == grav_slope_orient(obj, player) ||
+        (
+            grav_slope_orient(slope, player) != grav_slope_orient(obj, player) && 
+            (
+                (grav_slope_orient(slope, player) == 1 && grav_slope_orient(obj, player) == 0) ||
+                (grav_slope_orient(slope, player) == 2 && grav_slope_orient(obj, player) == 3)
+            )
+        )
+    ) {
+        float angle = atanf((player->vel_y * STEPS_DT) / (player_speeds[player->speed] * STEPS_DT));
+        
+        if (orient >= 2) angle = -angle;
+
+        bool hasSlope = state.old_player.slope_data.slope;
+        bool projectedHit = (orient == 1 || orient == 2) ? (angle * 1.1f <= slope_angle(obj, player)) : (angle <= slope_angle(obj, player));
+        bool clip = slope_touching(obj, player);
+        bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult > 0 && player->x - obj_getLeft(obj) > 0;
+
+        if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
+            player->on_ground = TRUE;
+            player->slope_data.slope = obj;
+            snap_player_to_slope(obj, player);
+
+            if (snapDown && !hasSlope) {
+                if (orient == 1 && player->vel_y <= 0) {
+                    player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
+                    player->slope_data.snapDown = TRUE;
+                    player->vel_y = 0;
+                } else if (orient == 2 && player->vel_y >= 0) {
+                    player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
+                    player->slope_data.snapDown = TRUE;
+                    player->vel_y = 0;
+                }
+            }
+
+            if (!player->slope_data.elapsed) {
+                player->slope_data.elapsed = state.old_player.timeElapsed;
+            }
+        } 
+    }
+}
+
+void snap_player_to_slope(GameObject *obj, Player *player) {
+    if (player->gamemode != GAMEMODE_SHIP) {
+        float base = RadToDeg(slope_snap_angle(obj, player));
+        printf("deg %.2f\n", base);
+        float bestSnap = base;
+        float minDiff = 999999.0f;
+
+        for (int i = 0; i < 4; ++i) {
+            float snapAngle = base + i * 90.0f;
+            
+            while (snapAngle < 0) snapAngle += 360.0f;
+            while (snapAngle >= 360.0f) snapAngle -= 360.0f;
+
+            float diff = fabsf(snapAngle - (player->rotation - 0.01f));
+            if (diff > 180.0f) diff = 360.0f - diff;
+
+            if (diff < minDiff) {
+                minDiff = diff;
+                bestSnap = snapAngle;
+            }
+        }
+
+        printf("best snap %.2f prev rotation %.2f\n", bestSnap, player->rotation);
+        player->rotation = bestSnap;
+    }
 }

@@ -329,6 +329,7 @@ enum Objects {
     BRICK,
     HALF_BRICK,
 
+    COLORED_CHECKER_FULL,
     COLORED_CHECKER_EDGE,
     COLORED_CHECKER_CORNER,
     COLORED_CHECKER_INS_CORNER,
@@ -375,6 +376,17 @@ enum Objects {
     MINI_HEXAGON_DECO_TRIPLE,
     MINI_HEXAGON_DECO_FULL,
     MINI_HEXAGON_DECO_SINGLE,
+
+    DUAL_PORTAL,
+    DIVORCE_PORTAL,
+
+    UNKNOWN_288,
+
+    CHECKER_SLOPE_45,
+
+    UNKNOWN_290,
+
+    CHECKER_SLOPE_22_66,
 
     OBJECT_COUNT
 };
@@ -486,9 +498,10 @@ typedef struct {
     int def_zlayer;
     int def_zorder;
     u8 num_layers;
-    u8 is_trigger;
-    u8 is_saw;
-    u8 fades;
+    u8 is_trigger:1;
+    u8 is_saw:1;
+    u8 is_slope:1;
+    u8 fades:1;
     ObjectHitbox hitbox;
 } ObjectDefinition;
 

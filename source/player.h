@@ -2,8 +2,8 @@
 
 #include <stdbool.h>
 #include <grrlib.h>
-#include "math.h"
 #include "level_loading.h"
+#include "math.h"
 
 #define SCREEN_WIDTH_AREA ((screenWidth / BLOCK_SIZE_PX) * 30) 
 #define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
@@ -11,6 +11,12 @@
 #define MAX_LEVEL_HEIGHT 2400.f
 
 #define MAX_COLLIDED_OBJECTS 4096
+
+typedef struct {
+    GameObject *slope;
+    float elapsed;
+    bool snapDown;
+} SlopeData;
 
 typedef struct {
     float x;
@@ -52,7 +58,11 @@ typedef struct {
 
     unsigned char speed;
 
+    float timeElapsed;
+
     GameObject *gravObj;
+
+    SlopeData slope_data;
 } Player;
 
 enum BufferingState {
@@ -92,3 +102,9 @@ void handle_player();
 void handle_completion();
 void set_p_velocity(Player *player, float vel);
 GRRLIB_texImg *get_p1_trail_tex();
+float slope_angle(GameObject *obj, Player *player);
+void slope_collide(GameObject *obj, Player *player);
+void slope_calc(GameObject *obj, Player *player);
+void clear_slope_data(Player *player);
+int grav_slope_orient(GameObject *obj, Player *player);
+void snap_player_to_slope(GameObject *obj, Player *player); 

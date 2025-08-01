@@ -115,6 +115,7 @@ int game_loop() {
             MP3Player_Volume(255);
             death_timer = 0.f;
             gameRoutine = ROUTINE_MENU;
+            if (current_song_pointer) free(current_song_pointer);
             break;
         }
         

@@ -6119,4 +6119,64 @@ const ObjectDefinition objects[] = {
         .def_zorder = 9,
         .num_layers = 1
     },
+    unknown,
+    unknown,
+    unknown,
+    { // Checker slope 45
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = triangle_a_02_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = blockOutline_14_001_png
+            }
+        },
+        .hitbox = {
+            .width = 30,
+            .height = 30,
+            .type = HITBOX_SOLID,
+        },
+        .is_slope = TRUE,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 2
+    },
+    unknown,
+    { // Checker slope 22/66
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = triangle_a_04_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = OBJ,
+                .zlayer_offset = 0,
+                .texture = blockOutline_15_001_png
+            }
+        },
+        .hitbox = {
+            .width = 60,
+            .height = 30,
+            .type = HITBOX_SOLID,
+        },
+        .is_slope = TRUE,
+        .spritesheet_layer = SHEET_BLOCKS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 2,
+        .num_layers = 2
+    }
 };

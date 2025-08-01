@@ -4,6 +4,7 @@
 #include <zlib.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <math.h>
 
 #include "objects.h"
 #include "level_loading.h"
@@ -630,6 +631,30 @@ GameObject *convert_to_typed(const GDObject *obj) {
                 break;
         }
     }
+
+    // Setup slope
+    if (objects[typed->id].is_slope) {
+        int orientation = typed->rotation / 90;
+        if (typed->flippedH && typed->flippedV) orientation += 2;
+        else if (typed->flippedH) orientation += 1;
+        else if (typed->flippedV) orientation += 3;
+        
+        orientation = orientation % 4;
+        if (orientation < 0) orientation += 4;
+
+        typed->orientation = orientation;
+    }
+
+    ObjectHitbox hitbox = objects[typed->id].hitbox;
+
+    if ((int) fabsf(typed->rotation) % 180 != 0) {
+        typed->width = hitbox.height;
+        typed->height = hitbox.width;
+    } else {
+        typed->width = hitbox.width;
+        typed->height = hitbox.height;
+    }
+
 
     return typed;
 }

@@ -41,6 +41,11 @@ typedef struct {
     float ampl_scaling;          // the amplitude scaling for pulsing objects
     u8 transition_applied;       // the transition applied to the object
     bool toggled;                // if its enabled or disabled
+    int width;
+    int height;
+
+    // Slope
+    unsigned char orientation;
 } GameObject;
 
 typedef struct {

@@ -3,6 +3,7 @@
 #include "objects.h"
 #include <stdlib.h>
 #include "game.h"
+#include "player.h"
 
 float positive_fmod(float n, float divisor) {
     float value = fmod(n, divisor);
@@ -376,4 +377,10 @@ void  custom_rectangle (const f32 x,      const f32 y,
             GX_Color1u32(color);
         GX_End();
     }
+}
+
+float normalize_angle(float angle) {
+    angle = fmodf(angle, 360.0f);
+    if (angle < 0) angle += 360.0f;
+    return angle;
 }

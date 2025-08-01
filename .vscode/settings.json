@@ -200,7 +200,8 @@
         "d_circle_01_001_png.h": "c",
         "d_link_05_001_png.h": "c",
         "bg_01_png.h": "c",
-        "g_03_png.h": "c"
+        "g_03_png.h": "c",
+        "blockoutline_15_001_png.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

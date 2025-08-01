@@ -396,6 +396,12 @@
 #include "lightsquare_05_07_color_001_png.h"
 #include "lightsquare_05_08_color_001_png.h"
 
+#include "triangle_a_02_001_png.h"
+#include "blockOutline_14_001_png.h"
+
+#include "triangle_a_04_001_png.h"
+#include "blockOutline_15_001_png.h"
+
 
 
 
