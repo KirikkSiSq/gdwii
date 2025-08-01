@@ -252,9 +252,7 @@ void collide_with_objects() {
         }
     }
 
-    //printf("%.2f\n", player->vel_y);
     if (player->left_ground) {
-        printf("OBJECT CLEAR\n");
         clear_slope_data(player);
     }
 
@@ -310,7 +308,6 @@ void cube_gamemode(Player *player) {
         } else {
             set_p_velocity(player, cube_jump_heights[player->speed]);
         }
-        printf("%.2f\n", player->vel_y);
 
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
@@ -487,12 +484,14 @@ void ufo_gamemode(Player *player) {
         player->ufo_last_y = player->y;
     }
 
-    float y_diff = (player->y - player->ufo_last_y) * mult;
+    if (!player->slope_data.slope) {
+        float y_diff = (player->y - player->ufo_last_y) * mult;
 
-    if (y_diff >= 0) {
-        player->rotation = map_range(y_diff, 0.f, 60.f, 0.f, 10.f) * mult;
-    } else {
-        player->rotation = -map_range(-y_diff, 0.f, 300.f, 0.f, 25.f) * mult;
+        if (y_diff >= 0) {
+            player->rotation = map_range(y_diff, 0.f, 60.f, 0.f, 10.f) * mult;
+        } else {
+            player->rotation = -map_range(-y_diff, 0.f, 300.f, 0.f, 25.f) * mult;
+        }
     }
 
     float min = player->mini ? -406.566f : -345.6f;
@@ -644,7 +643,11 @@ void run_player() {
     player->time_since_ground += STEPS_DT;
     
     if (player->gamemode == GAMEMODE_UFO) {
-        player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.1f, STEPS_DT);
+        if (player->slope_data.slope) {
+            player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.05f, STEPS_DT);
+        } else {
+            player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.1f, STEPS_DT);
+        }
     } else {
         player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
     }
@@ -1002,7 +1005,7 @@ void draw_ufo(Player *player, float calc_x, float calc_y) {
         get_mirror_x(calc_x, state.mirror_factor), calc_y,
         6, y_rot,
         ufo_l1->w / 2, ufo_l1->h / 2,
-        ufo_l1->w, ufo_l1->h,
+        ufo_dome->w, ufo_dome->h,
         calculated_rotation,
         &x, &y
     );
@@ -1272,6 +1275,7 @@ void slope_calc(GameObject *obj, Player *player) {
             } else {
                 player->y = MAX(player->y, expected_slope_y(obj, player));
             }
+            player->time_since_ground = 0;
             snap_player_to_slope(obj, player);
             
             if (player->vel_y < 0) {
@@ -1310,6 +1314,7 @@ void slope_calc(GameObject *obj, Player *player) {
             } else {
                 player->y = MAX(MIN(player->y, expected_slope_y(obj, player)), player->y - player->height / 2);
             }
+            player->time_since_ground = 0;
             snap_player_to_slope(obj, player);
             if (player->vel_y < 0) {
                 player->vel_y = 0;
@@ -1341,6 +1346,7 @@ void slope_calc(GameObject *obj, Player *player) {
             } else {
                 player->y = MIN(player->y, expected_slope_y(obj, player));
             }
+            player->time_since_ground = 0;
             snap_player_to_slope(obj, player);
             
             if (player->vel_y > 0) {
@@ -1385,7 +1391,7 @@ void slope_calc(GameObject *obj, Player *player) {
             } else {
                 player->y = MIN(MAX(player->y, expected_slope_y(obj, player)), player->y + player->height / 2);
             }
-    
+            player->time_since_ground = 0;
             snap_player_to_slope(obj, player);
             if (player->vel_y > 0) {
                 player->vel_y = 0;
@@ -1510,6 +1516,10 @@ void slope_collide(GameObject *obj, Player *player) {
         if (orient >= 2) angle = -angle;
 
         bool hasSlope = state.old_player.slope_data.slope;
+        if (hasSlope && slope) {
+            hasSlope = state.old_player.slope_data.slope->orientation == slope->orientation;
+        }
+        
         bool projectedHit = (orient == 1 || orient == 2) ? (angle * 1.1f <= slope_angle(obj, player)) : (angle <= slope_angle(obj, player));
         bool clip = slope_touching(obj, player);
         bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult >= 0 && player->x - obj_getLeft(obj) > 0;
@@ -1539,9 +1549,9 @@ void slope_collide(GameObject *obj, Player *player) {
 }
 
 void snap_player_to_slope(GameObject *obj, Player *player) {
-    if (player->gamemode == GAMEMODE_CUBE) {
+    if (player->gamemode == GAMEMODE_CUBE || player->gamemode == GAMEMODE_UFO) {
         float base = RadToDeg(slope_snap_angle(obj, player));
-        printf("deg %.2f\n", base);
+        //printf("deg %.2f\n", base);
         float bestSnap = base;
         float minDiff = 999999.0f;
 
@@ -1560,7 +1570,7 @@ void snap_player_to_slope(GameObject *obj, Player *player) {
             }
         }
 
-        printf("best snap %.2f prev rotation %.2f\n", bestSnap, player->rotation);
+        //printf("best snap %.2f prev rotation %.2f\n", bestSnap, player->rotation);
         player->rotation = bestSnap;
     }
 }
