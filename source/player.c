@@ -360,6 +360,7 @@ void update_ship_rotation(Player *player) {
     float diff_x = (player->x - state.old_player.x);
     float diff_y = (player->y - state.old_player.y);
 
+    printf("%.2f\n", player->y - state.old_player.y);
     float angle_rad = atan2f(-diff_y, diff_x);
     player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.05f, STEPS_DT);
 }
@@ -669,8 +670,6 @@ void run_player() {
         player->ceiling_inv_time = 0;
     }
 
-    // Ground
-    if (player->gamemode == GAMEMODE_SHIP) update_ship_rotation(player);
     
     bool slopeCheck = player->slope_data.slope && (grav_slope_orient(player->slope_data.slope, player) == 1 || grav_slope_orient(player->slope_data.slope, player) == 2);
 
@@ -700,6 +699,9 @@ void run_player() {
     if (player->slope_data.slope) {
         slope_calc(player->slope_data.slope, player);
     }
+    
+    // Ground
+    if (player->gamemode == GAMEMODE_SHIP) update_ship_rotation(player);
 
     // End level
     if (player->x > level_info.wall_x + 30) {
@@ -1322,7 +1324,7 @@ void slope_calc(GameObject *obj, Player *player) {
             }
         }
 
-        if (obj_gravTop(player, obj) <= grav(player, player->y)) {
+        if (obj_gravTop(player, obj) <= grav(player, player->y) || getLeft(player) - obj_getRight(obj) > 0) {
             float vel = -falls[player->speed] * ((float) obj->height / obj->width);
             player->vel_y = vel;
             clear_slope_data(player);
@@ -1399,7 +1401,7 @@ void slope_calc(GameObject *obj, Player *player) {
             }
         }
 
-        if (obj_gravBottom(player, obj) <= grav(player, player->y)) {
+        if (obj_gravTop(player, obj) <= grav(player, player->y)) {
             float vel = falls[player->speed] * ((float) obj->height / obj->width);
             player->vel_y = vel;
             clear_slope_data(player);
