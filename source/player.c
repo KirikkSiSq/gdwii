@@ -1523,7 +1523,7 @@ void slope_collide(GameObject *obj, Player *player) {
         
         bool projectedHit = (orient == 1 || orient == 2) ? (angle * 1.1f <= slope_angle(obj, player)) : (angle <= slope_angle(obj, player));
         bool clip = slope_touching(obj, player);
-        bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult >= 0 && player->x - obj_getLeft(obj) > 0 && getRight(player) - obj_getRight(obj) < 0;
+        bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult >= 0 && player->x - obj_getLeft(obj) > 0 && (player->on_ground || player->on_ceiling || getLeft(player) - obj_getRight(obj) > 0);
 
         //printf("hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d\n", hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown);
         
