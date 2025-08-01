@@ -299,12 +299,18 @@ void cube_gamemode(Player *player) {
     }
 
     if (player->on_ground && state.input.holdA) {
-        if (player->slope_data.slope && grav_slope_orient(player->slope_data.slope, player) == 0) {
-            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
-            set_p_velocity(player, 0.25f * time * slopeHeights[player->speed] + cube_jump_heights[player->speed]);
+        if (player->slope_data.slope) {
+            int orient = grav_slope_orient(player->slope_data.slope, player);
+            if (orient == 0 || orient == 3) {
+                float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+                set_p_velocity(player, 0.25f * time * slopeHeights[player->speed] + cube_jump_heights[player->speed]);
+            } else {
+                set_p_velocity(player, cube_jump_heights[player->speed]);
+            }
         } else {
             set_p_velocity(player, cube_jump_heights[player->speed]);
         }
+        printf("%.2f\n", player->vel_y);
 
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
@@ -1423,7 +1429,6 @@ void slope_collide(GameObject *obj, Player *player) {
             player->time_since_ground = 0;
             player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
         } else {
-            printf("AGRIA\n");
             bool internalCollidingSlope = intersect(
                 player->x, player->y, 9, 9, 0, 
                 obj->x, obj->y, obj->width, obj->height, 0
@@ -1507,10 +1512,10 @@ void slope_collide(GameObject *obj, Player *player) {
         bool hasSlope = state.old_player.slope_data.slope;
         bool projectedHit = (orient == 1 || orient == 2) ? (angle * 1.1f <= slope_angle(obj, player)) : (angle <= slope_angle(obj, player));
         bool clip = slope_touching(obj, player);
-        bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult > 0 && player->x - obj_getLeft(obj) > 0;
+        bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult >= 0 && player->x - obj_getLeft(obj) > 0;
 
         if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
-            player->on_ground = TRUE;
+            if (player->vel_y * mult <= 0) player->on_ground = TRUE;
             player->slope_data.slope = obj;
             snap_player_to_slope(obj, player);
 
@@ -1534,7 +1539,7 @@ void slope_collide(GameObject *obj, Player *player) {
 }
 
 void snap_player_to_slope(GameObject *obj, Player *player) {
-    if (player->gamemode != GAMEMODE_SHIP) {
+    if (player->gamemode == GAMEMODE_CUBE) {
         float base = RadToDeg(slope_snap_angle(obj, player));
         printf("deg %.2f\n", base);
         float bestSnap = base;
