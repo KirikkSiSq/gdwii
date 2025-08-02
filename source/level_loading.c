@@ -1240,7 +1240,7 @@ void load_level(char *data) {
     }
 
     char *dual_data = get_metadata_value(level_string, "kA8");
-    if (gamemode_data) {
+    if (dual_data) {
         level_info.initial_dual = atoi(dual_data) != 0;
     } else {
         level_info.initial_dual = 0; 
