@@ -320,7 +320,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_01_back_001_png
             },
             {
@@ -343,7 +343,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_02_back_001_png
             },
             {
@@ -366,7 +366,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_03_back_001_png
             },
             {
@@ -389,7 +389,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_04_back_001_png
             },
             {
@@ -705,7 +705,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_05_back_001_png
             },
             {
@@ -728,7 +728,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_06_back_001_png
             },
             {
@@ -751,7 +751,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_07_back_001_png
             },
             {
@@ -1958,7 +1958,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_08_back_001_png
             },
             {
@@ -1982,7 +1982,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_09_back_001_png
             },
             {
@@ -2088,7 +2088,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_10_back_001_png
             },
             {
@@ -4151,8 +4151,8 @@ const ObjectDefinition objects[] = {
             .height = 44,
             .type = HITBOX_SPECIAL
         },
-        .spritesheet_layer = SHEET_PORTALS,
-        .def_zlayer = LAYER_B1,
+        .spritesheet_layer = SHEET_SPEED_PORTALS,
+        .def_zlayer = LAYER_T1-1,
         .def_zorder = -6,
         .num_layers = 2
     },
@@ -4178,8 +4178,8 @@ const ObjectDefinition objects[] = {
             .height = 56,
             .type = HITBOX_SPECIAL
         },
-        .spritesheet_layer = SHEET_PORTALS,
-        .def_zlayer = LAYER_B1,
+        .spritesheet_layer = SHEET_SPEED_PORTALS,
+        .def_zlayer = LAYER_T1-1,
         .def_zorder = -6,
         .num_layers = 2
     },
@@ -4205,8 +4205,8 @@ const ObjectDefinition objects[] = {
             .height = 56,
             .type = HITBOX_SPECIAL
         },
-        .spritesheet_layer = SHEET_PORTALS,
-        .def_zlayer = LAYER_B1,
+        .spritesheet_layer = SHEET_SPEED_PORTALS,
+        .def_zlayer = LAYER_T1-1,
         .def_zorder = -6,
         .num_layers = 2
     },
@@ -4232,8 +4232,8 @@ const ObjectDefinition objects[] = {
             .height = 56,
             .type = HITBOX_SPECIAL
         },
-        .spritesheet_layer = SHEET_PORTALS,
-        .def_zlayer = LAYER_B1,
+        .spritesheet_layer = SHEET_SPEED_PORTALS,
+        .def_zlayer = LAYER_T1-1,
         .def_zorder = -6,
         .num_layers = 2
     },
@@ -6261,7 +6261,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_11_back_001_png
             },
             {
@@ -6284,7 +6284,7 @@ const ObjectDefinition objects[] = {
                 .x_offset = 0,
                 .y_offset = 0,
                 .col_channel = WHITE,
-                .zlayer_offset = -1,
+                .zlayer_offset = -2,
                 .texture = portal_12_back_001_png
             },
             {

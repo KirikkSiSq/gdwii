@@ -449,6 +449,7 @@ enum FadingEffects {
 
 enum SpriteSheets {
     SHEET_BLOCKS,
+    SHEET_SPEED_PORTALS,
     SHEET_PORTALS,
     SHEET_COUNT
 };
