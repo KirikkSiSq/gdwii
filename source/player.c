@@ -122,7 +122,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 break;
             }
 
-            if (player->gravObj && player->gravObj->hitbox_counter == 1) {
+            if (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1) {
                 // Only do the funny grav snap if player is touching a gravity object and internal hitbox is touching block
                 bool internalCollidingBlock = intersect(
                     player->x, player->y, 9, 9, 0, 
@@ -687,6 +687,11 @@ void run_player(Player *player) {
 
     // Ceiling
     if (getTop(player) > state.ceiling_y) {
+        if (player->ceiling_inv_time <= 0 && player->gamemode == GAMEMODE_CUBE && !player->upside_down) {
+            state.dead = TRUE;
+            return;
+        }
+
         if (slopeCheck) {
             clear_slope_data(player);
         }

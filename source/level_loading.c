@@ -1320,8 +1320,8 @@ void reload_level() {
         GameObject *obj = objectsArrayList->objects[i];
         obj->activated[0] = obj->activated[1] = FALSE;
         obj->toggled = FALSE;
-        obj->collided[state.current_player] = FALSE;
-        obj->hitbox_counter = 0;
+        obj->collided[0] = obj->collided[1] = FALSE;
+        obj->hitbox_counter[0] = obj->hitbox_counter[1] = 0;
         obj->transition_applied = FADE_NONE;
     }
     reset_color_channels();

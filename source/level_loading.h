@@ -34,13 +34,13 @@ typedef struct {
     int zlayer;          // key 24
     int zorder;          // key 25
 
-    int random;                  // random number assigned to this object
-    bool activated[2];           // if it has been activated
-    unsigned int hitbox_counter; // number of times the player has entered the hitbox
+    int random;                     // random number assigned to this object
+    bool activated[2];              // if it has been activated
+    unsigned int hitbox_counter[2]; // number of times the player has entered the hitbox
     bool collided[2];               // if the object just started being touched
-    float ampl_scaling;          // the amplitude scaling for pulsing objects
-    u8 transition_applied;       // the transition applied to the object
-    bool toggled;                // if its enabled or disabled
+    float ampl_scaling;             // the amplitude scaling for pulsing objects
+    u8 transition_applied;          // the transition applied to the object
+    bool toggled;                   // if its enabled or disabled
     int width;
     int height;
 

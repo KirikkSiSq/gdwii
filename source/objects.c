@@ -564,6 +564,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             }
             break;
         case DUAL_PORTAL:
+            player->gravObj = obj;
             if (!obj->activated[state.current_player] && !state.dual) {
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
@@ -573,7 +574,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 particle_templates[USE_EFFECT].end_color.a = 255;
                 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
-
+                
+                player->ceiling_inv_time = 0.1f;
                 state.dual = TRUE;
                 state.dual_portal_y = obj->y;
                 setup_dual();
@@ -603,7 +605,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             }
             break;
     }
-    if (!obj->collided[state.current_player]) obj->hitbox_counter++; 
+    if (!obj->collided[state.current_player]) obj->hitbox_counter[state.current_player]++; 
 }
 
 void setup_dual() {
