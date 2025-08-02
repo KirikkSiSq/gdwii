@@ -298,7 +298,7 @@ void cube_gamemode(Player *player) {
         spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
 
-    if (player->on_ground && state.input.holdA) {
+    if ((player->slope_data.slope || player->on_ground) && state.input.holdA) {
         if (player->slope_data.slope) {
             int orient = grav_slope_orient(player->slope_data.slope, player);
             if (orient == 0 || orient == 3) {
@@ -411,7 +411,7 @@ void ball_gamemode(Player *player) {
     }
 
     // Jump
-    if ((state.input.holdA) && (player->on_ground || player->on_ceiling) && player->buffering_state == BUFFER_READY) {
+    if ((state.input.holdA) && (player->on_ground || player->on_ceiling || player->slope_data.slope) && player->buffering_state == BUFFER_READY) {
         player->upside_down ^= 1;
         set_p_velocity(player, -181.11601);
 
