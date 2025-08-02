@@ -48,6 +48,7 @@ Section *section_hash[SECTION_HASH_SIZE] = {0};
 GFXSection *section_gfx_hash[SECTION_HASH_SIZE] = {0};
 
 GDLayerSortable gfx_player_layer;
+GameObject *player_game_object;
 
 GDLayerSortable *sortable_list;
 
@@ -142,7 +143,6 @@ char *extract_gmd_key(const char *data, const char *key, const char *type) {
     
     char *key_pos = strstr(data, key_tag);
     if (!key_pos) {
-        printf("Could not find key tag '%s'\n", key_tag);
         return NULL;
     }
 
@@ -559,25 +559,25 @@ GameObject *convert_to_typed(const GDObject *obj) {
     // Temporarily convert user coins (added in 2.0) into secret coins
     if (typed->id == 1329) typed->id = SECRET_COIN;
 
-    typed->x = obj->values[1].f;
-    typed->y = obj->values[2].f;
-
     typed->zsheetlayer = objects[typed->id].spritesheet_layer;
     typed->zlayer = objects[typed->id].def_zlayer;
     typed->zorder = objects[typed->id].def_zorder;
 
     typed->random = rand();
 
-    if (typed->x > level_info.last_obj_x) {
-        level_info.last_obj_x = typed->x;
-    }
 
-    for (int i = 2; i < obj->propCount; i++) {
+    for (int i = 0; i < obj->propCount; i++) {
         int key = obj->keys[i];
         GDValueType type = obj->types[i];
         GDValue val = obj->values[i];
 
         switch (key) {
+            case 2:  // X
+                if (type == GD_VAL_FLOAT) typed->x = val.f;
+                break;
+            case 3:  // Y
+                if (type == GD_VAL_FLOAT) typed->y = val.f;
+                break;
             case 4:  // FlippedH
                 if (type == GD_VAL_BOOL) typed->flippedH = val.b;
                 break;
@@ -631,9 +631,9 @@ GameObject *convert_to_typed(const GDObject *obj) {
                 break;
         }
     }
-
-    if (typed->blending) {
-        printf("OBJ ID %i x %.2f y %.2f has blending\n", typed->id, typed->x, typed->y);
+    
+    if (typed->x > level_info.last_obj_x) {
+        level_info.last_obj_x = typed->x;
     }
 
     // Setup slope
@@ -882,6 +882,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     sortable_layer.zorder = obj->zorder;
 
     gfx_player_layer = sortable_layer;
+    player_game_object = obj;
 
     printf("Allocated %d layers\n", layerCount);
 
@@ -1317,9 +1318,9 @@ void reload_level() {
     memset(&state.particles, 0, sizeof(state.particles));
     for (int i = 0; i < objectsArrayList->count; i++) {
         GameObject *obj = objectsArrayList->objects[i];
-        obj->activated = FALSE;
+        obj->activated[0] = obj->activated[1] = FALSE;
         obj->toggled = FALSE;
-        obj->collided = FALSE;
+        obj->collided[state.current_player] = FALSE;
         obj->hitbox_counter = 0;
         obj->transition_applied = FADE_NONE;
     }

@@ -24,6 +24,8 @@ typedef struct {
     float rotate_per_second;
     int texture_id;
     bool blending;
+    bool lock_to_player;
+    int player_id;
 } Particle;
 
 typedef struct {
@@ -37,6 +39,7 @@ typedef struct {
     ColorAlpha start_color, start_colorVar;
     ColorAlpha end_color, end_colorVar;
     bool blending;
+    bool lock_to_player;
     float sourcePosVarX, sourcePosVarY;
     float rotatePerSecond;
     float rotatePerSecondVariance;
@@ -78,6 +81,7 @@ enum ParticleGroupID {
     COIN_OBJ,
     SPEED_PORTAL_AMBIENT,
     SPEEDUP,
+    DUAL_BALL_HITBOX_EFFECT,
 };
 
 extern ParticleTemplate particle_templates[];

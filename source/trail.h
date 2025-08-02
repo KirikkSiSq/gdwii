@@ -49,6 +49,8 @@ typedef struct {
 } MotionTrail;
 
 extern MotionTrail trail;
+extern MotionTrail trail_p1;
+extern MotionTrail trail_p2;
 
 void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke, Color color, GRRLIB_texImg *tex);
 void MotionTrail_Update(MotionTrail* trail, float delta);

@@ -22,6 +22,13 @@
 GRRLIB_texImg *prev_tex = NULL;
 int prev_blending = GRRLIB_BLEND_ALPHA;
 
+const int dual_gamemode_heights[GAMEMODE_COUNT] = {
+    9,  // Cube
+    10, // Ship
+    9,  // Ball
+    10  // Ufo
+};
+
 const float jump_heights_table[SPEED_COUNT][JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
     { // SLOW               CUBE                   SHIP                  BALL                    UFO
     /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {573.48,   458.784}},
@@ -63,8 +70,8 @@ float get_mirror_x(float x, float factor) {
     return x + factor * (screenWidth - 2.0f * x);
 }
 
-void set_intended_ceiling(Player *player) {
-    float mid_point = (player->ground_y + player->ceiling_y) / 2;
+void set_intended_ceiling() {
+    float mid_point = (state.ground_y + state.ceiling_y) / 2;
     state.camera_intended_y = mid_point - (SCREEN_HEIGHT_AREA / 2);
 }
 
@@ -81,9 +88,9 @@ void set_particle_color(int template_id, int r, int g, int b) {
 void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
     switch (obj->id) {
         case YELLOW_PAD:
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 MotionTrail_ResumeStroke(&trail);
-                player->vel_y = jump_heights_table[player->speed][JUMP_YELLOW_PAD][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[state.speed][JUMP_YELLOW_PAD][player->gamemode][player->mini];
                 player->on_ground = FALSE;
                 player->left_ground = TRUE;
                 player->ufo_last_y = player->y;
@@ -97,14 +104,14 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
 
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
 
         case PINK_PAD:
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 MotionTrail_ResumeStroke(&trail);
-                player->vel_y = jump_heights_table[player->speed][JUMP_PINK_PAD][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[state.speed][JUMP_PINK_PAD][player->gamemode][player->mini];
                 player->on_ground = FALSE;
                 player->left_ground = TRUE;
                 player->ufo_last_y = player->y;
@@ -118,12 +125,12 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
 
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
 
         case BLUE_PAD:
-            if (obj->activated) player->gravObj = obj;
+            if (obj->activated[state.current_player]) player->gravObj = obj;
             else {
                 float rotation = adjust_angle(obj->rotation, obj->flippedV, obj->flippedH);
                 if ((rotation < 90 || rotation > 270) && player->upside_down)
@@ -137,8 +144,9 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 player->gravObj = obj;
 
-                player->vel_y = jump_heights_table[player->speed][JUMP_BLUE_PAD][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[state.speed][JUMP_BLUE_PAD][player->gamemode][player->mini];
                 player->upside_down ^= 1;
+                flip_other_player();
                 player->on_ground = FALSE;
                 player->ufo_last_y = player->y;
                 
@@ -151,15 +159,15 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
 
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         
         case YELLOW_ORB:
-            if (!obj->activated && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
-                player->vel_y = jump_heights_table[player->speed][JUMP_YELLOW_ORB][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[state.speed][JUMP_YELLOW_ORB][player->gamemode][player->mini];
                 
                 player->ball_rotation_speed = -1.f;
                 
@@ -178,16 +186,16 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
 
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             } 
-            if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+            if (!obj->collided[state.current_player]) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
             break;
         
         case PINK_ORB:
-            if (!obj->activated && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
-                player->vel_y = jump_heights_table[player->speed][JUMP_PINK_ORB][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[state.speed][JUMP_PINK_ORB][player->gamemode][player->mini];
                 
                 player->ball_rotation_speed = -1.f;
                 
@@ -206,18 +214,19 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
 
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             } 
-            if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+            if (!obj->collided[state.current_player]) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
             break;
         
         case BLUE_ORB:
-            if (!obj->activated && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 player->gravObj = obj;
                 
-                player->vel_y = jump_heights_table[player->speed][JUMP_BLUE_ORB][player->gamemode][player->mini];
+                player->vel_y = jump_heights_table[state.speed][JUMP_BLUE_ORB][player->gamemode][player->mini];
                 player->upside_down ^= 1;
+                flip_other_player();
                 
                 player->ball_rotation_speed = -1.f;
                 
@@ -236,17 +245,17 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
 
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             } 
-            if (!obj->collided) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
+            if (!obj->collided[state.current_player]) spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
             break;
 
         case CUBE_PORTAL: 
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 if (player->gamemode != GAMEMODE_CUBE) {
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_StopStroke(&trail);
-                    player->ground_y = 0;
-                    player->ceiling_y = 999999;
+                    state.ground_y = 0;
+                    state.ceiling_y = 999999;
 
                     if (player->gamemode != GAMEMODE_BALL) player->vel_y /= 2;
 
@@ -261,15 +270,18 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 }
-                obj->activated = TRUE;
+                if (state.dual) {
+                    set_dual_bounds();
+                } 
+                obj->activated[state.current_player] = TRUE;
             }
             break;
             
         case SHIP_PORTAL: 
-            if (!obj->activated) {
-                player->ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
-                player->ceiling_y = player->ground_y + 300;
-                set_intended_ceiling(player);
+            if (!obj->activated[state.current_player]) {
+                state.ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
+                state.ceiling_y = state.ground_y + 300;
+                set_intended_ceiling();
 
                 if (player->gamemode != GAMEMODE_SHIP) {
                     player->vel_y /= (player->gamemode == GAMEMODE_UFO) ? 4 : 2;
@@ -284,20 +296,25 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 }
-                obj->activated = TRUE;
+                if (state.dual) {
+                    set_dual_bounds();
+                } 
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         
         case BLUE_GRAVITY_PORTAL:
             player->gravObj = obj;
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 player->ceiling_inv_time = 0.1f;
                 if (player->upside_down) {
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                     player->vel_y /= -2;
                     player->upside_down = FALSE;
+                    flip_other_player();
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
+                    
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
@@ -308,17 +325,18 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 }
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         case YELLOW_GRAVITY_PORTAL:
             player->gravObj = obj;
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 player->ceiling_inv_time = 0.1f;
                 if (!player->upside_down) {
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                     player->vel_y /= -2;
                     player->upside_down = TRUE;
+                    flip_other_player();
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
 
@@ -332,10 +350,10 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 }
             }
-            obj->activated = TRUE;
+            obj->activated[state.current_player] = TRUE;
             break;
         case ORANGE_MIRROR_PORTAL:
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
@@ -347,11 +365,11 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 state.intended_mirror_factor = 1.f;
                 state.intended_mirror_speed_factor = -1.f;
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         case BLUE_MIRROR_PORTAL:
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
 
@@ -363,15 +381,15 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 state.intended_mirror_factor = 0.f;
                 state.intended_mirror_speed_factor = 1.f;
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         
         case BALL_PORTAL: 
-            if (!obj->activated) {
-                player->ground_y = maxf(0, ip1_ceilf((obj->y - 150) / 30.f)) * 30;
-                player->ceiling_y = player->ground_y + 240;
-                set_intended_ceiling(player);
+            if (!obj->activated[state.current_player]) {
+                state.ground_y = maxf(0, ip1_ceilf((obj->y - 150) / 30.f)) * 30;
+                state.ceiling_y = state.ground_y + 240;
+                set_intended_ceiling();
 
                 if (player->gamemode != GAMEMODE_BALL) {
                     player->ball_rotation_speed = -1.f;
@@ -389,12 +407,15 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 }
-                obj->activated = TRUE;
+                if (state.dual) {
+                    set_dual_bounds();
+                } 
+                obj->activated[state.current_player] = TRUE;
             }
             break;
 
         case BIG_PORTAL:
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 player->mini = FALSE;
 
                 particle_templates[USE_EFFECT].start_scale = 80;
@@ -406,12 +427,12 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;        
 
         case MINI_PORTAL:
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 player->mini = TRUE;
 
                 particle_templates[USE_EFFECT].start_scale = 80;
@@ -423,15 +444,15 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         case UFO_PORTAL:
-            if (!obj->activated) {
-                player->ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
-                player->ceiling_y = player->ground_y + 300;
-                set_intended_ceiling(player);
-
+            if (!obj->activated[state.current_player]) {
+                state.ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
+                state.ceiling_y = state.ground_y + 300;
+                set_intended_ceiling();
+                
                 if (player->gamemode != GAMEMODE_UFO) {
                     player->vel_y /= (state.old_player.gamemode == GAMEMODE_SHIP) ? 4 : 2;
                     player->gamemode = GAMEMODE_UFO;
@@ -450,11 +471,14 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
                 }
-                obj->activated = TRUE;
+                if (state.dual) {
+                    set_dual_bounds();
+                } 
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         case SECRET_COIN:
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 // Coin particle
                 spawn_particle(COIN_OBJ, obj->x, obj->y, NULL);
 
@@ -476,12 +500,12 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
 
                 obj->toggled = TRUE;
-                obj->activated = TRUE;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         case SLOW_SPEED_PORTAL:
-            if (!obj->activated) {
-                if (player->speed != SPEED_SLOW) {
+            if (!obj->activated[state.current_player]) {
+                if (state.speed != SPEED_SLOW) {
                     set_particle_color(SPEEDUP, 255, 220, 0);
                     particle_templates[SPEEDUP].speed = -20;
                     particle_templates[SPEEDUP].sourcePosVarY = 20;
@@ -490,13 +514,13 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     }
                 }
                 spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
-                player->speed = SPEED_SLOW;
-                obj->activated = TRUE;
+                state.speed = SPEED_SLOW;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         case NORMAL_SPEED_PORTAL:
-            if (!obj->activated) {
-                if (player->speed != SPEED_NORMAL) {
+            if (!obj->activated[state.current_player]) {
+                if (state.speed != SPEED_NORMAL) {
                     set_particle_color(SPEEDUP, 0, 255, 255);
                     particle_templates[SPEEDUP].speed = -60;
                     particle_templates[SPEEDUP].sourcePosVarY = 90;
@@ -505,13 +529,13 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     }
                 }
                 spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
-                player->speed = SPEED_NORMAL;
-                obj->activated = TRUE;
+                state.speed = SPEED_NORMAL;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         case FAST_SPEED_PORTAL:
-            if (!obj->activated) {
-                if (player->speed != SPEED_FAST) {
+            if (!obj->activated[state.current_player]) {
+                if (state.speed != SPEED_FAST) {
                     set_particle_color(SPEEDUP, 64, 255, 64);
                     particle_templates[SPEEDUP].speed = -100;
                     particle_templates[SPEEDUP].sourcePosVarY = 120;
@@ -520,13 +544,13 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     }
                 }
                 spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
-                player->speed = SPEED_FAST;
-                obj->activated = TRUE;
+                state.speed = SPEED_FAST;
+                obj->activated[state.current_player] = TRUE;
             }
             break;
         case FASTER_SPEED_PORTAL:
-            if (!obj->activated) {
-                if (player->speed != SPEED_FASTER) {
+            if (!obj->activated[state.current_player]) {
+                if (state.speed != SPEED_FASTER) {
                     set_particle_color(SPEEDUP, 255, 127, 255);
                     particle_templates[SPEEDUP].speed = -160;
                     particle_templates[SPEEDUP].sourcePosVarY = 200;
@@ -535,12 +559,126 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     }
                 }
                 spawn_particle(ORB_HITBOX_EFFECT, obj->x, obj->y, obj);
-                player->speed = SPEED_FASTER;
-                obj->activated = TRUE;
+                state.speed = SPEED_FASTER;
+                obj->activated[state.current_player] = TRUE;
+            }
+            break;
+        case DUAL_PORTAL:
+            if (!obj->activated[state.current_player] && !state.dual) {
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                set_particle_color(USE_EFFECT, 255, 94, 0);
+                particle_templates[USE_EFFECT].start_color.a = 0;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+                
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+                state.dual = TRUE;
+                state.dual_portal_y = obj->y;
+                setup_dual();
+                set_dual_bounds();
+                obj->activated[state.current_player] = TRUE;
+            }
+            break;
+
+        case DIVORCE_PORTAL:
+            if (!obj->activated[state.current_player]) {
+                particle_templates[USE_EFFECT].start_scale = 80;
+                particle_templates[USE_EFFECT].end_scale = 0;
+
+                set_particle_color(USE_EFFECT, 56, 200, 255);
+                particle_templates[USE_EFFECT].start_color.a = 0;
+                particle_templates[USE_EFFECT].end_color.a = 255;
+                
+                spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+
+                state.dual = FALSE;
+                obj->activated[state.current_player] = TRUE;
+
+                if (state.current_player == 1) {
+                    memcpy(&state.player, player, sizeof(Player));
+                }
+                MotionTrail_StopStroke(&trail_p2);
             }
             break;
     }
-    if (!obj->collided) obj->hitbox_counter++; 
+    if (!obj->collided[state.current_player]) obj->hitbox_counter++; 
+}
+
+void setup_dual() {
+    memcpy(&state.player2, &state.player, sizeof(Player));
+    state.player2.upside_down = state.player.upside_down ^ 1;
+}
+
+
+void set_dual_bounds() {
+    int height = MAX(dual_gamemode_heights[state.player.gamemode],
+                 dual_gamemode_heights[state.player2.gamemode]);
+
+    float in_block_y = fmodf(state.dual_portal_y, 30);
+
+    int ground_offset = (ceilf(((float) height + 1) / 2) - 1) * 30;
+    state.ground_y = maxf(0, floorf((state.dual_portal_y - ground_offset) / 30.f)) * 30;
+
+
+    // Shift down if odd height and in the top half
+    if (height % 2 != 0) {
+        if (in_block_y < 15) {
+            state.ground_y -= 30;
+        }
+    }
+
+    state.ceiling_y = state.ground_y + (height * 30.f);
+    set_intended_ceiling();
+}
+
+void flip_other_player() {
+    if (state.dual && state.player.gamemode == state.player2.gamemode) {
+        if (state.current_player == 0) {
+            state.player2.upside_down = !state.player.upside_down;
+            state.player2.vel_y /= -2;
+        } else {
+            state.player.upside_down = !state.player2.upside_down;
+            state.player.vel_y /= -2;
+        }
+    }
+}
+
+void do_ball_reflection() {
+    Player *player_1 = &state.player;
+    Player *player_2 = &state.player2;
+    if (state.dual && player_1->gamemode == GAMEMODE_BALL && player_2->gamemode == GAMEMODE_BALL) {
+        if (player_1->upside_down == player_2->upside_down) {
+            bool ballsIntersecting = intersect(
+                player_1->x, player_1->y, player_1->width, player_1->height, 0,
+                player_2->x, player_2->y, player_2->width, player_2->height, 0
+            );
+
+            if (ballsIntersecting) {
+                int current_player = state.current_player;
+                if (player_1->on_ground || player_1->on_ceiling) {
+                    state.current_player = 0;
+
+                    set_particle_color(DUAL_BALL_HITBOX_EFFECT, p1.r, p1.g, p1.b);
+                    spawn_particle(DUAL_BALL_HITBOX_EFFECT, player_1->x, player_1->y, NULL);
+
+                    player_2->vel_y = jump_heights_table[state.speed][JUMP_BLUE_PAD][player_2->gamemode][player_2->mini];
+                    player_2->upside_down ^= 1;
+                } else if (player_2->on_ground || player_2->on_ceiling) {
+                    state.current_player = 1;
+
+                    set_particle_color(DUAL_BALL_HITBOX_EFFECT, p2.r, p2.g, p2.b);
+                    spawn_particle(DUAL_BALL_HITBOX_EFFECT, player_2->x, player_2->y, NULL);
+
+                    player_1->vel_y = jump_heights_table[state.speed][JUMP_BLUE_PAD][player_1->gamemode][player_1->mini];
+                    player_1->upside_down ^= 1;
+                }
+                state.current_player = current_player;
+            }
+        }
+        
+    }
 }
 
 // Prepare Graphics
@@ -729,6 +867,7 @@ void handle_pre_draw_object_particles(GameObject *obj, GDObjectLayer *layer) {
 
         case BLUE_GRAVITY_PORTAL:
         case BLUE_MIRROR_PORTAL:
+        case DIVORCE_PORTAL:
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
@@ -771,6 +910,7 @@ void handle_pre_draw_object_particles(GameObject *obj, GDObjectLayer *layer) {
 
         case ORANGE_MIRROR_PORTAL:
         case UFO_PORTAL:
+        case DUAL_PORTAL:
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
@@ -802,7 +942,7 @@ void handle_pre_draw_object_particles(GameObject *obj, GDObjectLayer *layer) {
             }
             break;
         case SECRET_COIN:
-            if (!obj->activated) {
+            if (!obj->activated[state.current_player]) {
                 spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
                 spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
                 spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
@@ -1393,8 +1533,25 @@ void draw_all_object_layers() {
             draw_particles(HOLDING_SHIP_TRAIL);
             draw_particles(UFO_JUMP);
             draw_particles(UFO_TRAIL);
+            draw_particles(DUAL_BALL_HITBOX_EFFECT);
             if (death_timer <= 0) {
-                draw_player();
+                trail = trail_p1;
+                state.current_player = 0;
+                draw_player(&state.player);
+                trail_p1 = trail;
+
+                if (state.dual) {
+                    Color temp = p1;
+                    p1 = p2;
+                    p2 = temp;
+                    trail = trail_p2;
+                    state.current_player = 1;
+                    draw_player(&state.player2);
+                    trail_p2 = trail;
+                    temp = p1;
+                    p1 = p2;
+                    p2 = temp;
+                }
             }
             draw_particles(SHIP_DRAG);
             draw_particles(COIN_OBJ);
@@ -1585,14 +1742,14 @@ void run_trigger(GameObject *obj) {
             upload_to_buffer(obj, obj->target_color_id);
             break;
     }
-    obj->activated = TRUE;
+    obj->activated[state.current_player] = TRUE;
 }
 
 void handle_triggers(GameObject *obj) {
     int obj_id = obj->id;
     Player *player = &state.player;
     
-    if ((objects[obj_id].is_trigger || obj->id > OBJECT_COUNT) && !obj->activated) {
+    if ((objects[obj_id].is_trigger || obj->id > OBJECT_COUNT) && !obj->activated[state.current_player]) {
         if (obj->touchTriggered) {
             if (intersect(
                 player->x, player->y, player->width, player->height, 0, 

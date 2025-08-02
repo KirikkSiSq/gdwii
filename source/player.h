@@ -33,16 +33,12 @@ typedef struct {
     float width;
     float height;
 
-    float ground_y;
-    float ceiling_y;
-
     int gamemode;
 
     bool on_ground;
     bool on_ceiling;
     bool mini;
     bool upside_down;
-    bool dead;
 
     bool left_ground;
 
@@ -55,8 +51,6 @@ typedef struct {
     float ufo_last_y;
 
     float ceiling_inv_time;
-
-    unsigned char speed;
 
     float timeElapsed;
 
@@ -97,8 +91,9 @@ void init_variables();
 void full_init_variables();
 void load_icons();
 void unload_icons();
-void draw_player();
-void handle_player();
+void draw_player(Player *player);
+void handle_mirror_transition();
+void handle_player(Player *player);
 void handle_completion();
 void set_p_velocity(Player *player, float vel);
 GRRLIB_texImg *get_p1_trail_tex();
@@ -108,3 +103,4 @@ void slope_calc(GameObject *obj, Player *player);
 void clear_slope_data(Player *player);
 int grav_slope_orient(GameObject *obj, Player *player);
 void snap_player_to_slope(GameObject *obj, Player *player); 
+void run_camera();

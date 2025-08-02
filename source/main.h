@@ -43,6 +43,10 @@ typedef struct {
     float background_x;
     
     Player player;
+    Player player2;
+
+    unsigned char current_player;
+
     Player old_player;
 
     int mirror_mult;
@@ -51,9 +55,16 @@ typedef struct {
     float mirror_speed_factor;
     float mirror_factor;
 
+    float ground_y;
+    float ceiling_y;
     float ground_y_gfx;
 
+    float dual_portal_y;
+    unsigned char speed;
+
     bool noclip;
+    bool dual;
+    bool dead;
     
     Particle particles[MAX_PARTICLES];
 

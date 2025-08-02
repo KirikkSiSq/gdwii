@@ -532,6 +532,7 @@ extern GRRLIB_texImg *ground;
 
 void update_beat();
 void draw_end_wall();
+void setup_dual();
 
 void get_fade_vars(GameObject *obj, float x, int *fade_x, int *fade_y, float *fade_scale);
 int get_fade_value(float x, int right_edge);
@@ -546,3 +547,7 @@ void draw_ground(f32 x, bool is_ceiling);
 void load_spritesheet();
 void unload_spritesheet();
 void handle_objects();
+void set_dual_bounds();
+void flip_other_player();
+void do_ball_reflection();
+void set_particle_color(int template_id, int r, int g, int b);

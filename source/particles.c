@@ -459,6 +459,31 @@ ParticleTemplate particle_templates[] = {
         .maxRadius = 0,
         .texture_id = PARTICLE_SQUARE
     },
+    [DUAL_BALL_HITBOX_EFFECT] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 0, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
+        .life = 0.3f, .lifeVar = 0,
+        .start_scale = 0, .start_scaleVar = 0,
+        .end_scale = 90, .end_scaleVar = 0,
+        .start_color = {200,200,200,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {200,200,200,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .lock_to_player = TRUE,
+        .texture_id = PARTICLE_CIRCUNFERENCE
+    },
 };
 
 void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
@@ -535,6 +560,8 @@ void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
             particles[i].parent_obj = parent_obj;
 
             particles[i].texture_id = tpl->texture_id;
+            particles[i].lock_to_player = tpl->lock_to_player;
+            particles[i].player_id = state.current_player;
 
             particles[i].rotation = 0;
 
@@ -560,6 +587,17 @@ void update_particles() {
 
             p->x += p->vx * STEPS_DT;
             p->y += p->vy * STEPS_DT;
+
+            if (p->lock_to_player) {
+                if (p->player_id == 0) {
+                    p->x = state.player.x;
+                    p->y = state.player.y;
+                } else {
+                    p->x = state.player2.x;
+                    p->y = state.player2.y;
+                }
+            }
+
             p->scale += p->scale_delta * STEPS_DT;
             p->color.r += p->color_delta.r * STEPS_DT;
             p->color.g += p->color_delta.g * STEPS_DT;

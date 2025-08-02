@@ -396,6 +396,12 @@
 #include "lightsquare_05_07_color_001_png.h"
 #include "lightsquare_05_08_color_001_png.h"
 
+#include "portal_11_back_001_png.h"
+#include "portal_11_front_001_png.h"
+
+#include "portal_12_back_001_png.h"
+#include "portal_12_front_001_png.h"
+
 #include "triangle_a_02_001_png.h"
 #include "blockOutline_14_001_png.h"
 

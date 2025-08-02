@@ -9,6 +9,7 @@
 
 #include "oggplayer.h"
 #include "endStart_02_ogg.h"
+#include "trail.h"
 
 bool fixed_dt = FALSE;
 bool enable_info = FALSE;
@@ -52,8 +53,27 @@ int game_loop() {
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;
             amplitude = (beat_pulse ? 0.8f : 0.1f);
-            if (death_timer <= 0) handle_player();
-            
+
+            state.current_player = 0;
+            trail = trail_p1;
+            if (death_timer <= 0)  {
+                handle_player(&state.player);
+                
+                run_camera();
+                handle_mirror_transition();
+                trail_p1 = trail;
+                
+
+                if (state.dead) break;
+
+                if (state.dual) {
+                    trail = trail_p2;
+                    state.current_player = 1;
+                    handle_player(&state.player2);
+                    trail_p2 = trail;
+                }
+            }
+                
             u64 t2 = gettime();
             handle_objects();
             u64 t3 = gettime();
@@ -67,7 +87,7 @@ int game_loop() {
             update_beat();
             frame_counter++;
 
-            if (state.player.dead) break;
+            if (state.dead) break;
 
             accumulator -= STEPS_DT;
         }
@@ -83,10 +103,10 @@ int game_loop() {
             break;
         }
 
-        if (state.player.dead && death_timer <= 0.f) {
+        if (state.dead && death_timer <= 0.f) {
             death_timer = 1.f;
             handle_death();
-            state.player.dead = FALSE;
+            state.dead = FALSE;
         }
 
         if (death_timer > 0.f) {
@@ -113,7 +133,6 @@ int game_loop() {
         if (state.input.pressedMinusOrR) {
             MP3Player_Stop();
             MP3Player_Volume(255);
-            death_timer = 0.f;
             gameRoutine = ROUTINE_MENU;
             if (current_song_pointer) free(current_song_pointer);
             break;

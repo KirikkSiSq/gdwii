@@ -25,6 +25,12 @@ const ObjectHitbox size_portal_hitbox = {
     .type = HITBOX_SPECIAL
 };
 
+const ObjectHitbox dual_portal_hitbox = {
+    .width = 41,
+    .height = 91,
+    .type = HITBOX_SPECIAL
+};
+
 const ObjectHitbox no_hitbox = {
     .width = 0,
     .height = 0,
@@ -6119,9 +6125,53 @@ const ObjectDefinition objects[] = {
         .def_zorder = 9,
         .num_layers = 1
     },
-    unknown,
-    unknown,
-    unknown,
+    { // Dual portal
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = WHITE,
+                .zlayer_offset = -1,
+                .texture = portal_11_back_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = WHITE,
+                .zlayer_offset = 0,
+                .texture = portal_11_front_001_png
+            }
+        },
+        .hitbox = dual_portal_hitbox,
+        .spritesheet_layer = SHEET_PORTALS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 10,
+        .num_layers = 2
+    },
+    { // Divorce portal
+        .layers = {
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = WHITE,
+                .zlayer_offset = -1,
+                .texture = portal_12_back_001_png
+            },
+            {
+                .x_offset = 0,
+                .y_offset = 0,
+                .col_channel = WHITE,
+                .zlayer_offset = 0,
+                .texture = portal_12_front_001_png
+            }
+        },
+        .hitbox = dual_portal_hitbox,
+        .spritesheet_layer = SHEET_PORTALS,
+        .def_zlayer = LAYER_T1,
+        .def_zorder = 10,
+        .num_layers = 2
+    },
+    unknown, // 288
     { // Checker slope 45
         .layers = {
             {

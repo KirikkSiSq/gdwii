@@ -35,9 +35,9 @@ typedef struct {
     int zorder;          // key 25
 
     int random;                  // random number assigned to this object
-    bool activated;              // if it has been activated
+    bool activated[2];           // if it has been activated
     unsigned int hitbox_counter; // number of times the player has entered the hitbox
-    bool collided;               // if the object just started being touched
+    bool collided[2];               // if the object just started being touched
     float ampl_scaling;          // the amplitude scaling for pulsing objects
     u8 transition_applied;       // the transition applied to the object
     bool toggled;                // if its enabled or disabled
@@ -161,6 +161,7 @@ extern GDTypedObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;
 
 extern GDLayerSortable gfx_player_layer;
+extern GameObject *player_game_object;
 
 void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GameObject **array, int count);

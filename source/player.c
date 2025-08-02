@@ -29,6 +29,8 @@ GRRLIB_texImg *ufo_dome;
 GRRLIB_texImg *trail_tex;
 
 MotionTrail trail;
+MotionTrail trail_p1;
+MotionTrail trail_p2;
 
 Color p1;
 Color p2;
@@ -142,7 +144,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                         spawn_particle(BREAKABLE_BRICK_PARTICLES, obj->x, obj->y, obj);
                     }
                 } else {
-                    player->dead = TRUE;
+                    state.dead = TRUE;
                 }
             } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
@@ -174,7 +176,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
             }
             break;
         case HITBOX_SPIKE:
-            player->dead = TRUE;
+            state.dead = TRUE;
             break;
         case HITBOX_SPECIAL:
             handle_special_hitbox(player, obj, hitbox);
@@ -186,8 +188,7 @@ float player_get_vel(Player *player, float vel) {
     return vel * (player->upside_down ? -1 : 1);
 }
 
-void collide_with_obj(GameObject *obj) {
-    Player *player = &state.player;
+void collide_with_obj(Player *player, GameObject *obj) {
     ObjectHitbox *hitbox = (ObjectHitbox *) &objects[obj->id].hitbox;
 
     if (hitbox->type != HITBOX_NONE && !obj->toggled && obj->id < OBJECT_COUNT) {
@@ -198,10 +199,10 @@ void collide_with_obj(GameObject *obj) {
                 obj->x, obj->y, hitbox->radius
             )) {
                 handle_collision(player, obj, hitbox);
-                obj->collided = TRUE;
+                obj->collided[state.current_player] = TRUE;
                 number_of_collisions++;
             } else {
-                obj->collided = FALSE;
+                obj->collided[state.current_player] = FALSE;
             }
         } else {
             float obj_rot = fabsf(obj->rotation);
@@ -211,14 +212,14 @@ void collide_with_obj(GameObject *obj) {
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 handle_collision(player, obj, hitbox);
-                obj->collided = TRUE;
+                obj->collided[state.current_player] = TRUE;
                 number_of_collisions++;
             } else {
-                obj->collided = FALSE;
+                obj->collided[state.current_player] = FALSE;
             }
         }
     } else {
-        obj->collided = FALSE;
+        obj->collided[state.current_player] = FALSE;
     }
 }
 
@@ -228,8 +229,7 @@ int block_count = 0;
 GameObject *hazard_buffer[MAX_COLLIDED_OBJECTS];
 int hazard_count = 0;
 
-void collide_with_objects() {
-    Player *player = &state.player;
+void collide_with_objects(Player *player) {
     number_of_collisions = 0;
     number_of_collisions_checks = 0;
 
@@ -248,7 +248,7 @@ void collide_with_objects() {
                 } else if (hitbox->type == HITBOX_SPIKE) {
                     hazard_buffer[hazard_count++] = obj;
                 } else { // HITBOX_SPECIAL
-                    collide_with_obj(obj);
+                    collide_with_obj(player, obj);
                 }
             }
         }
@@ -260,12 +260,12 @@ void collide_with_objects() {
 
     for (int i = 0; i < block_count; i++) {
         GameObject *obj = block_buffer[i];
-        collide_with_obj(obj);
+        collide_with_obj(player, obj);
     }
     
     for (int i = 0; i < hazard_count; i++) {
         GameObject *obj = hazard_buffer[i];
-        collide_with_obj(obj);
+        collide_with_obj(player, obj);
     }
 
     block_count = 0;
@@ -282,7 +282,7 @@ void cube_gamemode(Player *player) {
     
     if (player->vel_y < -810) player->vel_y = -810;
 
-    if (player->y > 2794.f) player->dead = TRUE;
+    if (player->y > 2794.f) state.dead = TRUE;
 
 
     player->rotation += 415.3848f * STEPS_DT * mult * (player->mini ? 1.2f : 1.f);
@@ -303,12 +303,12 @@ void cube_gamemode(Player *player) {
             int orient = grav_slope_orient(player->slope_data.slope, player);
             if (orient == 0 || orient == 3) {
                 float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
-                set_p_velocity(player, 0.25f * time * slopeHeights[player->speed] + cube_jump_heights[player->speed]);
+                set_p_velocity(player, 0.25f * time * slopeHeights[state.speed] + cube_jump_heights[state.speed]);
             } else {
-                set_p_velocity(player, cube_jump_heights[player->speed]);
+                set_p_velocity(player, cube_jump_heights[state.speed]);
             }
         } else {
-            set_p_velocity(player, cube_jump_heights[player->speed]);
+            set_p_velocity(player, cube_jump_heights[state.speed]);
         }
 
         player->on_ground = FALSE;
@@ -420,7 +420,7 @@ void ball_gamemode(Player *player) {
         player->ball_rotation_speed = -1.f;
     }
     
-    player->rotation += player->ball_rotation_speed * mult * (player_speeds[player->speed] / player_speeds[SPEED_NORMAL]) / (player->mini ? 0.8 : 1);
+    player->rotation += player->ball_rotation_speed * mult * (player_speeds[state.speed] / player_speeds[SPEED_NORMAL]) / (player->mini ? 0.8 : 1);
 
     if (player->vel_y < -810) {
         player->vel_y = -810;
@@ -519,16 +519,16 @@ void run_camera() {
         state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
     }
 
-    float playable_height = state.player.ceiling_y - state.player.ground_y;
+    float playable_height = state.ceiling_y - state.ground_y;
     float calc_height = 0;
 
-    if (state.player.gamemode != GAMEMODE_CUBE) {
+    if (state.player.gamemode != GAMEMODE_CUBE || state.dual) {
         calc_height = (SCREEN_HEIGHT_AREA - playable_height) / 2;
     }
 
     state.ground_y_gfx = ease_out(state.ground_y_gfx, calc_height, 0.02f);
 
-    if (player->gamemode == GAMEMODE_CUBE) {
+    if (player->gamemode == GAMEMODE_CUBE && !state.dual) {
         float distance = state.camera_y_lerp + (SCREEN_HEIGHT_AREA / 2) - player->y;
         float distance_abs = fabsf(distance);
 
@@ -570,8 +570,7 @@ void spawn_glitter_particles() {
     }
 }
 
-void run_player() {
-    Player *player = &state.player;
+void run_player(Player *player) {
     float scale = (player->mini) ? 0.6f : 1.f;
 
     player->height = 30 * scale;
@@ -581,7 +580,7 @@ void run_player() {
     
     if (!player->left_ground) {
         // Ground
-        if (getBottom(player) <= player->ground_y) {
+        if (getBottom(player) <= state.ground_y) {
             if (player->upside_down) {
                 player->on_ceiling = TRUE;
             } else {
@@ -591,7 +590,7 @@ void run_player() {
         } 
 
         // Ceiling
-        if (getTop(player) >= player->ceiling_y) {
+        if (getTop(player) >= state.ceiling_y) {
             if (player->upside_down) {
                 player->on_ground = TRUE;
             } else {
@@ -655,7 +654,7 @@ void run_player() {
         player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
     }
     
-    player->vel_x = player_speeds[player->speed];
+    player->vel_x = player_speeds[state.speed];
     player->vel_y += player->gravity * STEPS_DT;
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
     player->x += player->vel_x * STEPS_DT;
@@ -673,9 +672,9 @@ void run_player() {
     
     bool slopeCheck = player->slope_data.slope && (grav_slope_orient(player->slope_data.slope, player) == 1 || grav_slope_orient(player->slope_data.slope, player) == 2);
 
-    if (getBottom(player) < player->ground_y) {
+    if (getBottom(player) < state.ground_y) {
         if (player->ceiling_inv_time <= 0 && player->gamemode == GAMEMODE_CUBE && player->upside_down) {
-            player->dead = TRUE;
+            state.dead = TRUE;
             return;
         }
 
@@ -683,17 +682,17 @@ void run_player() {
             clear_slope_data(player);
         }
         player->vel_y = 0;
-        player->y = player->ground_y + (player->height / 2);
+        player->y = state.ground_y + (player->height / 2);
     }
 
     // Ceiling
-    if (getTop(player) > player->ceiling_y) {
+    if (getTop(player) > state.ceiling_y) {
         if (slopeCheck) {
             clear_slope_data(player);
         }
         
         player->vel_y = 0;
-        player->y = player->ceiling_y - (player->height / 2);
+        player->y = state.ceiling_y - (player->height / 2);
     } 
     
     if (player->slope_data.slope) {
@@ -719,8 +718,19 @@ void handle_mirror_transition() {
     }
 }
 
-void handle_player() {
-    Player *player = &state.player;
+void handle_player(Player *player) {
+    if (state.current_player == 0) {
+        set_particle_color(CUBE_DRAG, p1.r, p1.g, p1.b); 
+        set_particle_color(P1_TRAIL, p1.r, p1.g, p1.b);
+        set_particle_color(UFO_JUMP, p1.r, p1.g, p1.b);
+        set_particle_color(UFO_TRAIL, p2.r, p2.g, p2.b);
+    } else {
+        set_particle_color(CUBE_DRAG, p2.r, p2.g, p2.b);  
+        set_particle_color(P1_TRAIL, p2.r, p2.g, p2.b);
+        set_particle_color(UFO_JUMP, p2.r, p2.g, p2.b);
+        set_particle_color(UFO_TRAIL, p1.r, p1.g, p1.b);
+    }
+    
     if (state.input.holdA) {
         if (player->buffering_state == BUFFER_NONE) {
             player->buffering_state = BUFFER_READY;
@@ -737,84 +747,33 @@ void handle_player() {
     player->timeElapsed += STEPS_DT;
 
     u32 t0 = gettime();
-    collide_with_objects();
+    collide_with_objects(player);
     u32 t1 = gettime();
     collision_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
     
     t0 = gettime();
-    run_player();
+    run_player(player);
     t1 = gettime();
     player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
     
-    run_camera();
-    handle_mirror_transition();
+    do_ball_reflection();
 
-    if (state.noclip) state.player.dead = FALSE;
+    if (state.noclip) state.dead = FALSE;
 }
 
 void full_init_variables() {
     state.ground_x = 0;
     state.background_x = 0;
 
-    particle_templates[CUBE_DRAG].start_color.r = p1.r;
-    particle_templates[CUBE_DRAG].start_color.g = p1.g;
-    particle_templates[CUBE_DRAG].start_color.b = p1.b;
-
-
-    particle_templates[GLITTER_EFFECT].start_color.r = p1.r;
-    particle_templates[GLITTER_EFFECT].start_color.g = p1.g;
-    particle_templates[GLITTER_EFFECT].start_color.b = p1.b;
-    
-    particle_templates[GLITTER_EFFECT].end_color.r = p1.r;
-    particle_templates[GLITTER_EFFECT].end_color.g = p1.g;
-    particle_templates[GLITTER_EFFECT].end_color.b = p1.b;
-
-    particle_templates[P1_TRAIL].start_color.r = p1.r;
-    particle_templates[P1_TRAIL].start_color.g = p1.g;
-    particle_templates[P1_TRAIL].start_color.b = p1.b;
-    
-    particle_templates[P1_TRAIL].end_color.r = p1.r;
-    particle_templates[P1_TRAIL].end_color.g = p1.g;
-    particle_templates[P1_TRAIL].end_color.b = p1.b;
-    
-    particle_templates[UFO_JUMP].start_color.r = p1.r;
-    particle_templates[UFO_JUMP].start_color.g = p1.g;
-    particle_templates[UFO_JUMP].start_color.b = p1.b;
-    
-    particle_templates[UFO_JUMP].end_color.r = p1.r;
-    particle_templates[UFO_JUMP].end_color.g = p1.g;
-    particle_templates[UFO_JUMP].end_color.b = p1.b;
-
-    particle_templates[UFO_TRAIL].start_color.r = p2.r;
-    particle_templates[UFO_TRAIL].start_color.g = p2.g;
-    particle_templates[UFO_TRAIL].start_color.b = p2.b;
-    
-    particle_templates[UFO_TRAIL].end_color.r = p2.r;
-    particle_templates[UFO_TRAIL].end_color.g = p2.g;
-    particle_templates[UFO_TRAIL].end_color.b = p2.b;
-
-    particle_templates[DEATH_CIRCLE].start_color.r = p2.r;
-    particle_templates[DEATH_CIRCLE].start_color.g = p2.g;
-    particle_templates[DEATH_CIRCLE].start_color.b = p2.b;
-    
-    particle_templates[DEATH_CIRCLE].end_color.r = p2.r;
-    particle_templates[DEATH_CIRCLE].end_color.g = p2.g;
-    particle_templates[DEATH_CIRCLE].end_color.b = p2.b;
-
-    particle_templates[DEATH_PARTICLES].start_color.r = p1.r;
-    particle_templates[DEATH_PARTICLES].start_color.g = p1.g;
-    particle_templates[DEATH_PARTICLES].start_color.b = p1.b;
-    
-    particle_templates[DEATH_PARTICLES].end_color.r = p1.r;
-    particle_templates[DEATH_PARTICLES].end_color.g = p1.g;
-    particle_templates[DEATH_PARTICLES].end_color.b = p1.b;
-
+    set_particle_color(GLITTER_EFFECT, p1.r, p1.g, p1.b);
     init_variables();
 }
 
 void init_variables() {
-    MotionTrail_Init(&trail, 0.3f, 3, 10.0f, p2, trail_tex);
-    MotionTrail_StopStroke(&trail);
+    MotionTrail_Init(&trail_p1, 0.3f, 3, 10.0f, p2, trail_tex);
+    MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, p1, trail_tex);
+    MotionTrail_StopStroke(&trail_p1);
+    MotionTrail_StopStroke(&trail_p2);
 
     state.camera_x = -120;
     state.camera_x_lerp = -120;
@@ -831,34 +790,52 @@ void init_variables() {
 
     current_fading_effect = FADE_NONE;
     p1_trail = FALSE;
+    death_timer = 0.f;
 
     level_info.completing = FALSE;
     
     memset(&state.player, 0, sizeof(Player));
 
+    state.dual = FALSE;
+    state.dead = FALSE;
+
     Player *player = &state.player;
     player->width = 30;
     player->height = 30;
-    player->speed = SPEED_NORMAL;
+    state.speed = SPEED_NORMAL;
     player->x = 0;
     player->y = player->height / 2;
-    player->vel_x = player_speeds[player->speed];  
+    player->vel_x = player_speeds[state.speed];  
     player->vel_y = 0;
-    player->ground_y = 0;
-    player->ceiling_y = 999999;
+    state.ground_y = 0;
+    state.ceiling_y = 999999;
     player->gamemode = GAMEMODE_CUBE;
     player->on_ground = TRUE;
     player->on_ceiling = FALSE;
     player->upside_down = FALSE;
-    player->dead = FALSE;
     player->timeElapsed = 0.f;
+
+    state.player2 = *player;
 }
 
 void handle_death() {
-    // Spawn death particles
-    spawn_particle(DEATH_CIRCLE, state.player.x, state.player.y, NULL);
-    for (s32 i = 0; i < 20; i++) {
-        spawn_particle(DEATH_PARTICLES, state.player.x, state.player.y, NULL);
+    // Spawn death particles depending on player
+    if (state.current_player == 0) {
+        set_particle_color(DEATH_CIRCLE, p2.r, p2.g, p2.b);
+        set_particle_color(DEATH_PARTICLES, p1.r, p1.g, p1.b);
+
+        spawn_particle(DEATH_CIRCLE, state.player.x, state.player.y, NULL);
+        for (s32 i = 0; i < 20; i++) {
+            spawn_particle(DEATH_PARTICLES, state.player.x, state.player.y, NULL);
+        }
+    } else {
+        set_particle_color(DEATH_CIRCLE, p1.r, p1.g, p1.b);
+        set_particle_color(DEATH_PARTICLES, p2.r, p2.g, p2.b);
+
+        spawn_particle(DEATH_CIRCLE, state.player2.x, state.player2.y, NULL);
+        for (s32 i = 0; i < 20; i++) {
+            spawn_particle(DEATH_PARTICLES, state.player2.x, state.player2.y, NULL);
+        }
     }
 
     MP3Player_Volume(0);
@@ -1084,8 +1061,7 @@ void draw_ufo(Player *player, float calc_x, float calc_y) {
 }
 
 
-void draw_player() {
-    Player *player = &state.player;
+void draw_player(Player *player) {
 
     float calc_x = ((player->x - state.camera_x) * SCALE);
     float calc_y = screenHeight - ((player->y - state.camera_y) * SCALE);
@@ -1093,6 +1069,9 @@ void draw_player() {
     GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
 
     MotionTrail_Update(&trail, dt);
+    
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
+
     MotionTrail_Draw(&trail);
 
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
@@ -1288,7 +1267,7 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // Sliding off slope
         if (gravBottom(player) >= obj_gravTop(player, obj)) {
-            float vel = ejections[player->speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
+            float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
             float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
             
             if (player->gamemode == GAMEMODE_BALL) {
@@ -1325,7 +1304,7 @@ void slope_calc(GameObject *obj, Player *player) {
         }
 
         if (obj_gravTop(player, obj) <= grav(player, player->y) || getLeft(player) - obj_getRight(obj) > 0) {
-            float vel = -falls[player->speed] * ((float) obj->height / obj->width);
+            float vel = -falls[state.speed] * ((float) obj->height / obj->width);
             player->vel_y = vel;
             clear_slope_data(player);
         }
@@ -1339,7 +1318,7 @@ void slope_calc(GameObject *obj, Player *player) {
         bool gravSnap = player->ceiling_inv_time > 0;
         
         if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
-            player->dead = TRUE;
+            state.dead = TRUE;
         }
 
         // On slope
@@ -1359,7 +1338,7 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // Sliding off slope
         if (gravTop(player) <= obj_gravBottom(player, obj)) {
-            float vel = ejections[player->speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
+            float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
             float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
             
             if (player->gamemode == GAMEMODE_BALL) {
@@ -1385,7 +1364,7 @@ void slope_calc(GameObject *obj, Player *player) {
         bool gravSnap = player->ceiling_inv_time > 0;
         
         if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
-            player->dead = TRUE;
+            state.dead = TRUE;
         }
 
         if (gravTop(&state.old_player) != obj_gravBottom(player, obj) || player->slope_data.snapDown) {
@@ -1402,7 +1381,7 @@ void slope_calc(GameObject *obj, Player *player) {
         }
 
         if (obj_gravTop(player, obj) <= grav(player, player->y)) {
-            float vel = falls[player->speed] * ((float) obj->height / obj->width);
+            float vel = falls[state.speed] * ((float) obj->height / obj->width);
             player->vel_y = vel;
             clear_slope_data(player);
         }
@@ -1423,7 +1402,7 @@ void slope_collide(GameObject *obj, Player *player) {
             obj_getRight(obj), obj->y, 1, obj->height, 0
         );
 
-        if (internalCollidingSlope) player->dead = TRUE;
+        if (internalCollidingSlope) state.dead = TRUE;
     }
 
     // Normal slope - resting on bottom
@@ -1443,7 +1422,7 @@ void slope_collide(GameObject *obj, Player *player) {
                 obj->x, obj->y, obj->width, obj->height, 0
             );
 
-            if (internalCollidingSlope) player->dead = TRUE;
+            if (internalCollidingSlope) state.dead = TRUE;
         }
 
         return;
@@ -1466,7 +1445,7 @@ void slope_collide(GameObject *obj, Player *player) {
                 obj->x, obj->y, obj->width, obj->height, 0
             );
 
-            if (internalCollidingSlope) player->dead = TRUE;
+            if (internalCollidingSlope) state.dead = TRUE;
         }
         
         return;
@@ -1485,7 +1464,7 @@ void slope_collide(GameObject *obj, Player *player) {
                 obj->x, obj->y, obj->width, obj->height, 0
             );
 
-            if (internalCollidingSlope) player->dead = TRUE;
+            if (internalCollidingSlope) state.dead = TRUE;
             return;
         }
         
@@ -1514,7 +1493,7 @@ void slope_collide(GameObject *obj, Player *player) {
             )
         )
     ) {
-        float angle = atanf((player->vel_y * STEPS_DT) / (player_speeds[player->speed] * STEPS_DT));
+        float angle = atanf((player->vel_y * STEPS_DT) / (player_speeds[state.speed] * STEPS_DT));
         
         if (orient >= 2) angle = -angle;
 
