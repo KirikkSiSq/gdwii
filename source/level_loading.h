@@ -29,10 +29,13 @@ typedef struct {
     u8 p1_color:1;       // key 15
     u8 p2_color:1;       // key 16
     u8 blending:1;       // key 17
+    int main_col_channel;   // key 21
+    int detail_col_channel; // key 22
     int target_color_id; // key 23
     int zsheetlayer;     // no key has this, but used internally
     int zlayer;          // key 24
     int zorder;          // key 25
+
 
     int random;                     // random number assigned to this object
     bool activated[2];              // if it has been activated
@@ -117,6 +120,11 @@ struct LoadedLevelInfo {
     bool completing;
     int background_id;
     int ground_id;
+    int initial_gamemode;
+    bool initial_mini;
+    unsigned char initial_speed;
+    bool initial_dual;
+    bool initial_upsidedown;
 };
 
 #define BG_COUNT 4

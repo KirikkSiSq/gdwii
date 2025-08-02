@@ -786,7 +786,6 @@ void init_variables() {
     state.camera_y_lerp = -90;
     state.intermediate_camera_y = -90;
 
-
     state.ground_y_gfx = 0;
     state.mirror_factor = 0;
     state.mirror_speed_factor = 1.f;
@@ -807,20 +806,35 @@ void init_variables() {
     Player *player = &state.player;
     player->width = 30;
     player->height = 30;
-    state.speed = SPEED_NORMAL;
+    state.speed = level_info.initial_speed;
     player->x = 0;
     player->y = player->height / 2;
     player->vel_x = player_speeds[state.speed];  
     player->vel_y = 0;
     state.ground_y = 0;
     state.ceiling_y = 999999;
-    player->gamemode = GAMEMODE_CUBE;
+    player->gamemode = level_info.initial_gamemode;
     player->on_ground = TRUE;
     player->on_ceiling = FALSE;
-    player->upside_down = FALSE;
+    player->upside_down = level_info.initial_upsidedown;
     player->timeElapsed = 0.f;
 
-    state.player2 = *player;
+    switch (level_info.initial_gamemode) {
+        case GAMEMODE_SHIP:
+        case GAMEMODE_UFO:
+            state.ceiling_y = state.ground_y + 300;
+            set_intended_ceiling();
+            break;
+        case GAMEMODE_BALL:
+            state.ceiling_y = state.ground_y + 240;
+            set_intended_ceiling();
+    }
+
+    if (level_info.initial_dual) {
+        state.dual = TRUE;
+        state.dual_portal_y = 0.f;
+        setup_dual();
+    }
 }
 
 void handle_death() {

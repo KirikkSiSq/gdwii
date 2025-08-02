@@ -476,6 +476,7 @@ GDValueType get_value_type_for_key(int key) {
         case 15: return GD_VAL_BOOL;   // (Trigger) Player 1 color
         case 16: return GD_VAL_BOOL;   // (Trigger) Player 2 color
         case 17: return GD_VAL_BOOL;   // (Trigger) Blending
+        case 19: return GD_VAL_INT;    // 1.9 color channel
         case 23: return GD_VAL_INT;    // (Trigger) Target color ID
         case 24: return GD_VAL_INT;    // Zlayer
         case 25: return GD_VAL_INT;    // Zorder
@@ -548,6 +549,37 @@ int parse_gd_object(const char *objStr, GDObject *obj) {
     return 1;
 }
 
+int get_main_channel_id(int id) {
+    ObjectDefinition obj = objects[id];
+    for (int i = 0; i < obj.num_layers; i++) {
+        int col_channel = obj.layers[i].col_channel;
+        if (obj.layers[i].color_type == COLOR_MAIN && is_modifiable(col_channel)) return col_channel;
+    }
+    return 0;
+}
+
+int get_detail_channel_id(int id) {
+    ObjectDefinition obj = objects[id];
+    for (int i = 0; i < obj.num_layers; i++) {
+        if (obj.layers[i].color_type == COLOR_DETAIL) return obj.layers[i].col_channel;
+    }
+    return 0;
+}
+
+int convert_1p9_channel(int channel) {
+    switch (channel) {
+        case 1: return P1;
+        case 2: return P2;
+        case 3: return 1;
+        case 4: return 2;
+        case 5: return LBG;
+        case 6: return 3;
+        case 7: return 4;
+        case 8: return THREEDL;
+    }
+    return 0;
+}
+
 GameObject *convert_to_typed(const GDObject *obj) {
     GameObject *typed = malloc(sizeof(GameObject));
     if (!typed) return NULL;
@@ -565,6 +597,8 @@ GameObject *convert_to_typed(const GDObject *obj) {
 
     typed->random = rand();
 
+    typed->main_col_channel = get_main_channel_id(typed->id);
+    typed->detail_col_channel = get_detail_channel_id(typed->id);
 
     for (int i = 0; i < obj->propCount; i++) {
         int key = obj->keys[i];
@@ -613,6 +647,15 @@ GameObject *convert_to_typed(const GDObject *obj) {
                 break;
             case 17: // Blending
                 if (type == GD_VAL_BOOL) typed->blending = val.b;
+                break;
+            case 19: // 1.9 channel id
+                if (type == GD_VAL_INT) typed->detail_col_channel = convert_1p9_channel(val.i);
+                break;
+            case 21: // 1.9 channel id
+                if (type == GD_VAL_INT) typed->main_col_channel = val.i;
+                break;
+            case 22: // 1.9 channel id
+                if (type == GD_VAL_INT) typed->detail_col_channel = val.i;
                 break;
             case 23: // Target color ID
                 if (type == GD_VAL_INT) typed->target_color_id = val.i;
@@ -1161,16 +1204,53 @@ void load_level(char *data) {
 
     char *background_data = get_metadata_value(level_string, "kA6");
     if (background_data) {
-        level_info.background_id = CLAMP(atoi(background_data) - 1, 0, BG_COUNT);
+        level_info.background_id = CLAMP(atoi(background_data) - 1, 0, BG_COUNT - 1);
     } else {
         level_info.background_id = 0;
     }
 
     char *ground_data = get_metadata_value(level_string, "kA7");
     if (ground_data) {
-        level_info.ground_id = CLAMP(atoi(ground_data) - 1, 0, G_COUNT);
+        level_info.ground_id = CLAMP(atoi(ground_data) - 1, 0, G_COUNT - 1);
     } else {
         level_info.ground_id = 0;
+    }
+    
+    char *gamemode_data = get_metadata_value(level_string, "kA2");
+    if (gamemode_data) {
+        level_info.initial_gamemode = CLAMP(atoi(gamemode_data), 0, GAMEMODE_COUNT - 1);
+    } else {
+        level_info.initial_gamemode = GAMEMODE_CUBE;
+    }
+
+    char *mini_data = get_metadata_value(level_string, "kA3");
+    if (gamemode_data) {
+        level_info.initial_mini = atoi(mini_data) != 0;
+    } else {
+        level_info.initial_mini = 0; 
+    }
+
+    char *speed_data = get_metadata_value(level_string, "kA4");
+    if (speed_data) {
+        level_info.initial_speed = CLAMP(atoi(speed_data), 0, SPEED_COUNT - 1);
+        if (level_info.initial_speed == 0) level_info.initial_speed = SPEED_NORMAL;
+        else if (level_info.initial_speed == 1) level_info.initial_speed = SPEED_SLOW;
+    } else {
+        level_info.initial_speed = SPEED_NORMAL;
+    }
+
+    char *dual_data = get_metadata_value(level_string, "kA8");
+    if (gamemode_data) {
+        level_info.initial_dual = atoi(dual_data) != 0;
+    } else {
+        level_info.initial_dual = 0; 
+    }
+
+    char *upsidedown_data = get_metadata_value(level_string, "kA11");
+    if (upsidedown_data) {
+        level_info.initial_upsidedown = atoi(upsidedown_data) != 0;
+    } else {
+        level_info.initial_upsidedown = 0; 
     }
 
     // Fallback to pre 2.0 keys
@@ -1217,7 +1297,7 @@ void load_level(char *data) {
 
     int rounded_last_obj_x = (int) (level_info.last_obj_x / 30) * 30 + 15;
     level_info.wall_x = (rounded_last_obj_x) + (9.f * 30.f);
-
+    full_init_variables();
     printf("Finished loading level\n");
 }
 

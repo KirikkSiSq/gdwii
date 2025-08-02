@@ -421,6 +421,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = -50,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = rod_ball_01_001_png
             },
             {
@@ -428,6 +429,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = -50,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = rod_ball_02_001_png
             },
             {
@@ -435,6 +437,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = -50,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = rod_ball_03_001_png
             }
         },
@@ -458,6 +461,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = -40,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = rod_ball_01_001_png
             }
         },
@@ -481,6 +485,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = -30,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = rod_ball_01_001_png
             }
         },
@@ -497,6 +502,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikes_01_001_png
             }
         },
@@ -513,6 +519,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikes_02_001_png
             }
         },
@@ -529,6 +536,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikes_03_001_png
             }
         },
@@ -545,6 +553,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikes_04_001_png
             }
         },
@@ -677,6 +686,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = chain_01_001_png
             }
         },
@@ -765,6 +775,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cloud_01_001_png
             }
         },
@@ -781,6 +792,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cloud_02_001_png
             }
         },
@@ -797,6 +809,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_ball_01_001_png
             }
         },
@@ -813,6 +826,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_ball_02_001_png
             }
         },
@@ -829,6 +843,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_ball_03_001_png
             }
         },
@@ -845,6 +860,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_ball_04_001_png
             }
         },
@@ -861,6 +877,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_ball_05_001_png
             }
         },
@@ -882,6 +899,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_ball_06_001_png
             }
         },
@@ -1582,6 +1600,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cogwheel_01_001_png
             }
         },
@@ -1599,6 +1618,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cogwheel_02_001_png
             }
         },
@@ -1616,6 +1636,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cogwheel_03_001_png
             }
         },
@@ -1899,6 +1920,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cogwheel_04_001_png
             }
         },
@@ -2014,6 +2036,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_02_chain_01_001_png
             }
         },
@@ -2030,6 +2053,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_02_chain_02_001_png
             }
         },
@@ -2048,6 +2072,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_chain_02_001_png
             }
         },
@@ -2088,6 +2113,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_brick_01_001_png
             }
         },
@@ -2104,6 +2130,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_brick_02_001_png
             }
         },
@@ -2120,6 +2147,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_brick_03_001_png
             }
         },
@@ -2321,6 +2349,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_thorn_01_001_png
             }
         },
@@ -2337,6 +2366,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_thorn_02_001_png
             }
         },
@@ -2353,6 +2383,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_thorn_03_001_png
             }
         },
@@ -2369,6 +2400,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_thorn_04_001_png
             }
         },
@@ -2385,6 +2417,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_thorn_05_001_png
             }
         },
@@ -2401,6 +2434,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_thorn_06_001_png
             }
         },
@@ -2417,6 +2451,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cloud_04_001_png
             }
         },
@@ -2433,6 +2468,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cloud_03_001_png
             }
         },
@@ -2449,6 +2485,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cloud_05_001_png
             }
         },
@@ -2465,6 +2502,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_arrow_01_001_png
             }
         },
@@ -2481,6 +2519,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_exmark_01_001_png
             }
         },
@@ -2497,6 +2536,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_art_01_001_png
             }
         },
@@ -2554,6 +2594,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_qmark_01_001_png
             }
         },
@@ -2570,6 +2611,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_wheel_01_001_png
             }
         },
@@ -2587,6 +2629,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_wheel_02_001_png
             }
         },
@@ -2604,6 +2647,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_wheel_03_001_png
             }
         },
@@ -2841,6 +2885,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_ball_07_001_png
             }
         },
@@ -2857,6 +2902,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_ball_08_001_png
             }
         },
@@ -2873,6 +2919,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cross_01_001_png
             }
         },
@@ -2889,6 +2936,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikeart_01_001_png
             }
         },
@@ -2905,6 +2953,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikeart_02_001_png
             }
         },
@@ -2921,6 +2970,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikeart_03_001_png
             }
         },
@@ -2937,6 +2987,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikewheel_01_001_png
             }
         },
@@ -2954,6 +3005,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_spikewheel_02_001_png
             }
         },
@@ -2988,6 +3040,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_wave_01_001_png
             }
         },
@@ -3004,6 +3057,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_wave_02_001_png
             }
         },
@@ -3020,6 +3074,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_wave_03_001_png
             }
         },
@@ -3628,6 +3683,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cartwheel_01_001_png
             }
         },
@@ -3645,6 +3701,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cartwheel_02_001_png
             }
         },
@@ -3662,6 +3719,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_cartwheel_03_001_png
             }
         },
@@ -3848,6 +3906,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_art_02_001_png
             }
         },
@@ -4276,6 +4335,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_01_02_color_001_png
             },
             {
@@ -4310,6 +4370,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_01_02_color_001_png
             },
             {
@@ -4344,6 +4405,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_01_02_color_001_png
             },
             {
@@ -4378,6 +4440,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_01_02_color_001_png
             },
             {
@@ -4405,6 +4468,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_01_02_color_001_png
             }
         },
@@ -4428,6 +4492,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_01_02_color_001_png
             },
             {
@@ -4462,6 +4527,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_01_02_color_001_png
             },
             {
@@ -4497,6 +4563,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = colorPlank_01_color_001_png
             },
             {
@@ -4531,6 +4598,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = colorSpike_01_color_001_png
             },
             {
@@ -4565,6 +4633,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = colorSpike_02_color_001_png
             },
             {
@@ -4599,6 +4668,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = colorSpike_03_color_001_png
             },
             {
@@ -4633,6 +4703,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = colorPlank_01_small_color_001_png
             },
             {
@@ -4667,6 +4738,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = colorSquare_01_small_color_001_png
             },
             {
@@ -4695,6 +4767,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_roundCloud_01_001_png
             }
         },
@@ -4712,6 +4785,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_roundCloud_02_001_png
             }
         },
@@ -4729,6 +4803,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_roundCloud_03_001_png
             }
         },
@@ -4746,6 +4821,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_swirve_01_001_png
             }
         },
@@ -4762,6 +4838,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_swirve_02_001_png
             }
         },
@@ -4778,6 +4855,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_bar_01_001_png
             }
         },
@@ -4794,6 +4872,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_bar_02_001_png
             }
         },
@@ -4810,6 +4889,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_bar_03_001_png
             }
         },
@@ -4826,6 +4906,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_bar_04_001_png
             }
         },
@@ -4842,6 +4923,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_smallbar_01_001_png
             }
         },
@@ -4858,6 +4940,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_smallbar_02_001_png
             }
         },
@@ -4874,6 +4957,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_03_01_001_png
             }
         },
@@ -4890,6 +4974,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_03_02_001_png
             }
         },
@@ -4906,6 +4991,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_03_03_001_png
             }
         },
@@ -4922,6 +5008,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P2,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_circle_01_001_png
             }
         },
@@ -4938,6 +5025,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_link_01_001_png
             }
         },
@@ -4954,6 +5042,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_link_02_001_png
             }
         },
@@ -4970,6 +5059,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_link_03_001_png
             }
         },
@@ -4986,6 +5076,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_link_04_001_png
             }
         },
@@ -5002,6 +5093,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = P1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_link_05_001_png
             }
         },
@@ -5018,6 +5110,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_bar_07_001_png
             }
         },
@@ -5113,6 +5206,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_02_01_color_001_png
             },
             {
@@ -5147,6 +5241,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_02_02_color_001_png
             },
             {
@@ -5181,6 +5276,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_02_03_color_001_png
             },
             {
@@ -5215,6 +5311,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_02_04_color_001_png
             },
             {
@@ -5242,6 +5339,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_02_05_color_001_png
             }
         },
@@ -5265,6 +5363,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_02_06_color_001_png
             },
             {
@@ -5299,6 +5398,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_02_07_color_001_png
             },
             {
@@ -5333,6 +5433,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_02_08_color_001_png
             },
             {
@@ -5367,6 +5468,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_03_01_color_001_png
             },
             {
@@ -5401,6 +5503,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_03_01_color_001_png
             },
             {
@@ -5435,6 +5538,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_03_01_color_001_png
             },
             {
@@ -5469,6 +5573,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_03_01_color_001_png
             },
             {
@@ -5496,6 +5601,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_03_01_color_001_png
             }
         },
@@ -5519,6 +5625,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_03_01_color_001_png
             },
             {
@@ -5553,6 +5660,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_03_01_color_001_png
             },
             {
@@ -5588,6 +5696,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_04_05_color_001_png
             },
             {
@@ -5622,6 +5731,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_04_05_color_001_png
             },
             {
@@ -5656,6 +5766,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_04_05_color_001_png
             },
             {
@@ -5683,6 +5794,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_04_05_color_001_png
             }
         },
@@ -5706,6 +5818,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_04_05_color_001_png
             },
             {
@@ -5740,6 +5853,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_04_05_color_001_png
             },
             {
@@ -5774,6 +5888,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_05_01_color_001_png
             },
             {
@@ -5808,6 +5923,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_05_02_color_001_png
             },
             {
@@ -5842,6 +5958,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_05_03_color_001_png
             },
             {
@@ -5876,6 +5993,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_05_04_color_001_png
             },
             {
@@ -5903,6 +6021,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_05_05_color_001_png
             }
         },
@@ -5926,6 +6045,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_05_06_color_001_png
             },
             {
@@ -5960,6 +6080,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = lightsquare_05_07_color_001_png
             },
             {
@@ -5988,6 +6109,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_03_02_001_png
             }
         },
@@ -6004,6 +6126,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = 1,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_03_03_001_png
             }
         },
@@ -6020,6 +6143,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_01_001_png
             }
         },
@@ -6036,6 +6160,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_02_001_png
             }
         },
@@ -6052,6 +6177,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_04_001_png
             }
         },
@@ -6068,6 +6194,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_square_05_001_png
             }
         },
@@ -6084,6 +6211,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_smallbar_03_001_png
             }
         },
@@ -6100,6 +6228,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_smallbar_04_001_png
             }
         },
@@ -6116,6 +6245,7 @@ const ObjectDefinition objects[] = {
                 .y_offset = 0,
                 .col_channel = LBG,
                 .zlayer_offset = 0,
+                .color_type = COLOR_DETAIL,
                 .texture = d_smallbar_05_001_png
             }
         },

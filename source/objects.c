@@ -579,7 +579,6 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 state.dual = TRUE;
                 state.dual_portal_y = obj->y;
                 setup_dual();
-                set_dual_bounds();
                 obj->activated[state.current_player] = TRUE;
             }
             break;
@@ -611,6 +610,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 void setup_dual() {
     memcpy(&state.player2, &state.player, sizeof(Player));
     state.player2.upside_down = state.player.upside_down ^ 1;
+    set_dual_bounds();
 }
 
 
@@ -1117,6 +1117,17 @@ int get_opacity(GameObject *obj, float x) {
         case BLACK_PILLAR:
             if (obj->transition_applied == FADE_NONE) opacity = 255;
             break;
+            
+        case COLORED_FULL:
+        case COLORED_EDGE:
+        case COLORED_CORNER:
+        case COLORED_INS_CORNER:
+        case COLORED_FILLER:
+        case COLORED_PILLAR_END:
+        case COLORED_PILLAR:
+            bool blending = channels[obj->detail_col_channel].blending;
+            if (!blending && obj->transition_applied == FADE_NONE) opacity = 255;
+            break;
     }
 
     return opacity;
@@ -1167,6 +1178,17 @@ float get_rotation_speed(GameObject *obj) {
     return 0.f;
 }
 
+bool is_modifiable(int col_channel) {
+    switch(col_channel) {
+        case BLACK:
+        case WHITE:
+        case OBJ_BLENDING:
+        case LBG_NO_LERP:
+            return FALSE;
+    }
+    return TRUE;
+}
+
 static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectLayer *layer) {
     int obj_id = obj->id;
 
@@ -1186,8 +1208,19 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
 
     int col_channel = objectLayer->col_channel;
 
+    if (is_modifiable(objectLayer->col_channel)) {
+        if (objectLayer->color_type == COLOR_MAIN) {
+            col_channel = obj->main_col_channel;  
+        } else {
+            col_channel = obj->detail_col_channel;  
+        }
+    }
+
     int blending;
-    if (channels[col_channel].blending) {
+    if (col_channel == OBJ_BLENDING) {
+        col_channel = obj->main_col_channel;
+        blending = TRUE;
+    } else if (channels[col_channel].blending) {
         blending = GRRLIB_BLEND_ADD;
     } else {
         blending = GRRLIB_BLEND_ALPHA;

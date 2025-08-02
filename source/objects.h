@@ -489,7 +489,13 @@ struct ObjectLayer {
     float y_offset;
     u32 col_channel;
     s32 zlayer_offset;
+    s8 color_type;
     const u8 *texture;
+};
+
+enum ColorTypes {
+    COLOR_MAIN,
+    COLOR_DETAIL,
 };
 
 typedef struct {
@@ -551,3 +557,5 @@ void set_dual_bounds();
 void flip_other_player();
 void do_ball_reflection();
 void set_particle_color(int template_id, int r, int g, int b);
+bool is_modifiable(int col_channel);
+void set_intended_ceiling();
