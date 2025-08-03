@@ -1375,7 +1375,7 @@ void draw_background(f32 x, f32 y) {
 #define LINE_SCALE 0.5f
 
 void draw_end_wall() {
-    float calc_x = ((level_info.wall_x - state.camera_x) * SCALE) - widthAdjust;
+    float calc_x = ((level_info.wall_x - state.camera_x) * SCALE);
     float calc_y =  positive_fmod(state.camera_y * SCALE, BLOCK_SIZE_PX) + screenHeight;    
     
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
