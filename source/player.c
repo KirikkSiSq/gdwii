@@ -796,7 +796,11 @@ void init_variables() {
     MotionTrail_StopStroke(&trail_p1);
     MotionTrail_StopStroke(&trail_p2);
 
-    float factor_x = ((float)screenWidth * 1.6 / 640);
+    float factor_x;
+    if (screenWidth <= 640)
+        factor_x = 1.0f;
+    else
+        factor_x = 1.0f + 0.00535714f * (screenWidth - 640);
 
     state.camera_x = -120 * factor_x;
     state.camera_x_lerp = -120 * factor_x;
