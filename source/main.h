@@ -4,6 +4,9 @@
 #include "particles.h"
 
 extern int screenWidth;
+extern int widthAdjust;
+extern float screen_factor_x;
+extern float screen_factor_y;
 extern int screenHeight;
 
 typedef struct {

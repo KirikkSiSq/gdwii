@@ -41,6 +41,9 @@ static void ExitGame(void);
 
 int screenWidth = 0;
 int screenHeight = 0;
+float screen_factor_x = 0;
+float screen_factor_y = 0;
+int widthAdjust = 0;
 
 int gameRoutine = ROUTINE_MENU;
 
@@ -231,8 +234,15 @@ int main(int argc, char **argv) {
     load_spritesheet();
 
     // Set resolution based on mode
-    screenWidth  = rmode->fbWidth;   // Framebuffer width (typically 640)
-    screenHeight = rmode->efbHeight; // EFB height (usually 480 or 576)
+    screenWidth  = GRRLIB_Settings.width;   // Framebuffer width (typically 640)
+    screenHeight = GRRLIB_Settings.height; // EFB height (usually 480 or 576)
+
+    widthAdjust = (screenWidth - 640) / 2.f;
+
+    screen_factor_x = (float) screenWidth / 640;
+    screen_factor_y = (float) screenHeight / 480;
+
+    printf("%d, %d\n", screenWidth, screenHeight);
 
     startTime = gettime();    
 

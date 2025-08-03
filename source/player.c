@@ -568,7 +568,7 @@ void run_camera() {
             state.camera_y_lerp = state.intermediate_camera_y;
         }
 
-        if (state.camera_y_lerp < -90.f) state.camera_y_lerp = -90.f;
+        if (state.camera_y_lerp < -180.f) state.camera_y_lerp = -90.f;
         if (state.camera_y_lerp > MAX_LEVEL_HEIGHT) state.camera_y_lerp = MAX_LEVEL_HEIGHT;
 
         state.camera_y = ease_out(state.camera_y, state.intermediate_camera_y, 0.07f);
@@ -796,11 +796,14 @@ void init_variables() {
     MotionTrail_StopStroke(&trail_p1);
     MotionTrail_StopStroke(&trail_p2);
 
-    state.camera_x = -120;
-    state.camera_x_lerp = -120;
-    state.camera_y = -90;
-    state.camera_y_lerp = -90;
-    state.intermediate_camera_y = -90;
+    float factor_x = ((float)screenWidth * 1.6 / 640);
+    float factor_y = ((float)screenHeight / 480);
+
+    state.camera_x = -120 * factor_x;
+    state.camera_x_lerp = -120 * factor_x;
+    state.camera_y = -90 * factor_y;
+    state.camera_y_lerp = -90 * factor_y;
+    state.intermediate_camera_y = -90 * factor_y;
 
     state.ground_y_gfx = 0;
     state.mirror_factor = 0;
@@ -1098,7 +1101,7 @@ void draw_ufo(Player *player, float calc_x, float calc_y) {
 
 void draw_player(Player *player) {
 
-    float calc_x = ((player->x - state.camera_x) * SCALE);
+    float calc_x = ((player->x - state.camera_x) * SCALE) - widthAdjust;
     float calc_y = screenHeight - ((player->y - state.camera_y) * SCALE);
     
     GRRLIB_SetBlend(GRRLIB_BLEND_ADD);

@@ -200,7 +200,7 @@ void MotionTrail_Draw(MotionTrail* trail) {
     for (int i = 0; i < trail->nuPoints * 2; i++) {
         Vec2 pos = trail->vertices[i];
         
-        float calc_x = ((pos.x - state.camera_x) * SCALE) + 6 * state.mirror_mult;  
+        float calc_x = ((pos.x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
         float calc_y = screenHeight - ((pos.y - state.camera_y) * SCALE) + 6;
 
         Tex2F tex = trail->texCoords[i];

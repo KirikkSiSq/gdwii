@@ -1328,7 +1328,7 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
 
 void draw_background_image(f32 x, f32 y, bool vflip) {
     for (s32 i = 0; i < BG_DIMENSIONS; i++) {
-        float calc_x = i*BG_CHUNK;
+        float calc_x = i*BG_CHUNK - widthAdjust;
         for (s32 j = 0; j < BG_DIMENSIONS; j++) {
             float calc_y = j*BG_CHUNK;
             
@@ -1355,7 +1355,7 @@ void draw_background(f32 x, f32 y) {
     int tiles_x = (screenWidth / offset) + 2;
     int tiles_y = (screenHeight / offset) + 2;
 
-    float calc_x = positive_fmod(x, offset);
+    float calc_x = positive_fmod(x, offset) - widthAdjust;
     float calc_y = positive_fmod(y, offset);
 
     for (int i = -1; i < tiles_x; i++) {
@@ -1375,7 +1375,7 @@ void draw_background(f32 x, f32 y) {
 #define LINE_SCALE 0.5f
 
 void draw_end_wall() {
-    float calc_x = ((level_info.wall_x - state.camera_x) * SCALE);
+    float calc_x = ((level_info.wall_x - state.camera_x) * SCALE) - widthAdjust;
     float calc_y =  positive_fmod(state.camera_y * SCALE, BLOCK_SIZE_PX) + screenHeight;    
     
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
@@ -1425,13 +1425,13 @@ void draw_ground(f32 y, bool is_ceiling) {
         GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
     }
 
-    int line_width = ground_line->w;
+    int line_width = ground_line->w * screen_factor_x;
     
     GRRLIB_DrawImg(
         (screenWidth / 2) - (line_width / (2 / LINE_SCALE)),
         calc_y + (is_ceiling ? 4 : 6),
         ground_line,
-        0, LINE_SCALE, 0.75,
+        0, LINE_SCALE * screen_factor_x, 0.75,
         RGBA(channels[LINE].color.r, channels[LINE].color.g, channels[LINE].color.b, 255)
     );
     
@@ -1536,7 +1536,7 @@ void draw_all_object_layers() {
             for (int i = 0; i < sec->layer_count; i++) {
                 GameObject *obj = sec->layers[i]->layer->obj;
                 
-                float calc_x = ((obj->x - state.camera_x) * SCALE);
+                float calc_x = ((obj->x - state.camera_x) * SCALE) - widthAdjust;
                 float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
                 if (calc_x > -90 && calc_x < screen_x_max) {        
                     if (calc_y > -90 && calc_y < screen_y_max) {    
@@ -1624,7 +1624,7 @@ void draw_all_object_layers() {
             GRRLIB_SetBlend(prev_blending);
         } else if (obj_id < OBJECT_COUNT) {
             u64 t0 = gettime();
-            float calc_x = ((obj->x - state.camera_x) * SCALE);
+            float calc_x = ((obj->x - state.camera_x) * SCALE) - widthAdjust;
             float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
 
             int fade_val = get_fade_value(calc_x, screenWidth);

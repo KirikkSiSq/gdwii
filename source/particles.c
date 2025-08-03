@@ -622,7 +622,7 @@ void draw_particles(int group_id) {
         Particle *p = &state.particles[i];
 
         if (p->group_id == group_id && p->active) {
-            float calc_x = ((p->x - state.camera_x) * SCALE);
+            float calc_x = ((p->x - state.camera_x) * SCALE) - widthAdjust;
             float calc_y = screenHeight - ((p->y - state.camera_y) * SCALE);
 
             if (p->blending) {
@@ -748,7 +748,7 @@ void draw_obj_particles(int group_id, GameObject *parent_obj) {
         bool condition = (parent_obj == NULL ? TRUE : parent_obj == p->parent_obj);
 
         if (p->group_id == group_id && condition && p->active) {
-            float calc_x = ((p->x - state.camera_x) * SCALE);
+            float calc_x = ((p->x - state.camera_x) * SCALE) - widthAdjust;
             float calc_y = screenHeight - ((p->y - state.camera_y) * SCALE);
 
             if (p->blending) {
