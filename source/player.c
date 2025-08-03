@@ -1567,7 +1567,7 @@ void slope_collide(GameObject *obj, Player *player) {
 
         printf("p %d - hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
         
-        if (hasSlope ? player->vel_y * mult < 0 : (projectedHit && clip) || snapDown) {
+        if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
             player->on_ground = TRUE;
             player->slope_data.slope = obj;
             snap_player_to_slope(obj, player);
