@@ -761,7 +761,8 @@ typedef struct {
     ObjectHitbox hitbox;
 } ObjectDefinition;
 
-#define BLOCK_SIZE_PX 44.f
+#define BLOCK_SIZE_PX (44.f * screen_factor_y)
+#define BASE_SCALE (0.733333 * screen_factor_y)
 #define SCALE (BLOCK_SIZE_PX / 30.0f)
 
 #define MAX_VISIBLE_LAYERS 4096

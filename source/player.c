@@ -797,13 +797,12 @@ void init_variables() {
     MotionTrail_StopStroke(&trail_p2);
 
     float factor_x = ((float)screenWidth * 1.6 / 640);
-    float factor_y = ((float)screenHeight / 480);
 
     state.camera_x = -120 * factor_x;
     state.camera_x_lerp = -120 * factor_x;
-    state.camera_y = -90 * factor_y;
-    state.camera_y_lerp = -90 * factor_y;
-    state.intermediate_camera_y = -90 * factor_y;
+    state.camera_y = -90;
+    state.camera_y_lerp = -90;
+    state.intermediate_camera_y = -90;
 
     state.ground_y_gfx = 0;
     state.mirror_factor = 0;
@@ -1131,8 +1130,8 @@ void draw_player(Player *player) {
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l1,
                 player->lerp_rotation * state.mirror_mult,
-                0.73333333333333333333333333333333 * state.mirror_mult * scale,
-                0.73333333333333333333333333333333 * scale,
+                BASE_SCALE * state.mirror_mult * scale,
+                BASE_SCALE * scale,
                 RGBA(p1.r, p1.g, p1.b, 255)
             );
 
@@ -1141,8 +1140,8 @@ void draw_player(Player *player) {
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (30), calc_y + 6 - (30),
                 icon_l2,
                 player->lerp_rotation * state.mirror_mult,
-                0.73333333333333333333333333333333 * state.mirror_mult * scale,
-                0.73333333333333333333333333333333 * scale,
+                BASE_SCALE * state.mirror_mult * scale,
+                BASE_SCALE * scale,
                 RGBA(p2.r, p2.g, p2.b, 255)
             );
             break;
@@ -1157,8 +1156,8 @@ void draw_player(Player *player) {
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (36), calc_y + 6 - (36),
                 ball_l1,
                 player->lerp_rotation * state.mirror_mult,
-                0.73333333333333333333333333333333 * state.mirror_mult * scale,
-                0.73333333333333333333333333333333 * scale,
+                BASE_SCALE * state.mirror_mult * scale,
+                BASE_SCALE * scale,
                 RGBA(p1.r, p1.g, p1.b, 255)
             );
 
@@ -1167,8 +1166,8 @@ void draw_player(Player *player) {
                 get_mirror_x(calc_x, state.mirror_factor) + 6 - (36), calc_y + 6 - (36),
                 ball_l2,
                 player->lerp_rotation * state.mirror_mult,
-                0.73333333333333333333333333333333 * state.mirror_mult * scale,
-                0.73333333333333333333333333333333 * scale,
+                BASE_SCALE * state.mirror_mult * scale,
+                BASE_SCALE * scale,
                 RGBA(p2.r, p2.g, p2.b, 255)
             );
             break;

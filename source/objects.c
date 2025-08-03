@@ -1319,8 +1319,8 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
         /* Y        */ y + 6 - (height/2) + y_off_rot + fade_y,
         /* Texture  */ tex, 
         /* Rotation */ rotation, 
-        /* Scale X  */ 0.73333333333333333333333333333333 * x_flip_mult * fade_scale * state.mirror_mult, 
-        /* Scale Y  */ 0.73333333333333333333333333333333 * y_flip_mult * fade_scale, 
+        /* Scale X  */ BASE_SCALE * x_flip_mult * fade_scale * state.mirror_mult, 
+        /* Scale Y  */ BASE_SCALE * y_flip_mult * fade_scale, 
         /* Color    */ color
     );
 }
@@ -1394,7 +1394,7 @@ void draw_end_wall() {
                     calc_y + 6 - i - (height/2),    
                     image,
                     adjust_angle(270, 0, state.mirror_mult < 0),
-                    0.73333333333333333333333333333333 * state.mirror_mult, 0.73333333333333333333333333333333,
+                    BASE_SCALE * state.mirror_mult, BASE_SCALE,
                     RGBA(255, 255, 255, 255) 
                 );
             }
