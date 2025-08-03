@@ -52,7 +52,7 @@ int game_loop() {
         u64 t0 = gettime();
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;
-            amplitude = (beat_pulse ? 0.8f : 0.1f);
+            amplitude = (beat_pulse ? 1.f : 0.1f);
 
             state.current_player = 0;
             trail = trail_p1;
@@ -67,6 +67,7 @@ int game_loop() {
                 if (state.dead) break;
 
                 if (state.dual) {
+                    state.old_player = state.player2;
                     trail = trail_p2;
                     state.current_player = 1;
                     handle_player(&state.player2);

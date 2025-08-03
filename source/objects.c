@@ -1032,11 +1032,17 @@ int layer_pulses(GameObject *obj, GDObjectLayer *layer) {
         case PULSING_NOTE:
         case PULSING_SQUARE:
         case PULSING_TRIANGLE:
+        case PULSING_HEXAGON:
         case D_ARROW:
         case D_EXMARK:
         case D_QMARK:
         case D_CROSS:
+        case D_ARROW_2:
         case PULSING_BIG_CIRCUNFERENCE:
+        case PULSING_ARROW_3:
+        case PULSING_BIG_SQUARE:
+        case PULSING_BIG_SQUARE_OUTLINE:
+        case PULSING_BIG_CIRCLE:
             return 1;
         case ROD_BIG:
         case ROD_MEDIUM:
@@ -1064,6 +1070,7 @@ float get_object_pulse(float amplitude, GameObject *obj) {
         case PULSING_NOTE:
         case PULSING_SQUARE:
         case PULSING_TRIANGLE:
+        case PULSING_HEXAGON:
         case ROD_BIG:
         case ROD_MEDIUM:
         case ROD_SMALL:
@@ -1072,6 +1079,11 @@ float get_object_pulse(float amplitude, GameObject *obj) {
         case D_EXMARK:
         case D_QMARK:
         case D_CROSS:
+        case D_ARROW_2:
+        case PULSING_ARROW_3:
+        case PULSING_BIG_SQUARE:
+        case PULSING_BIG_SQUARE_OUTLINE:
+        case PULSING_BIG_CIRCLE:
         case PULSING_BIG_CIRCUNFERENCE:
             return map_range(amplitude, 0.f, 1.f, 0.8f, 1.2f);
     }
@@ -1115,6 +1127,8 @@ int get_opacity(GameObject *obj, float x) {
         case BLACK_FILLER:
         case BLACK_PILLAR_END:
         case BLACK_PILLAR:
+        case BLACK_SLOPE_45:
+        case BLACK_SLOPE_22_66:
             if (obj->transition_applied == FADE_NONE) opacity = 255;
             break;
             
@@ -1125,6 +1139,8 @@ int get_opacity(GameObject *obj, float x) {
         case COLORED_FILLER:
         case COLORED_PILLAR_END:
         case COLORED_PILLAR:
+        case COLORED_SLOPE_45:
+        case COLORED_SLOPE_22_66:
             bool blending = channels[obj->detail_col_channel].blending;
             if (!blending && obj->transition_applied == FADE_NONE) opacity = 255;
             break;
@@ -1155,6 +1171,9 @@ float get_rotation_speed(GameObject *obj) {
         case BLADE_ALT_BIG:
         case BLADE_ALT_MEDIUM:
         case BLADE_ALT_SMALL:
+        case DARKBLADE_BIG:
+        case DARKBLADE_MEDIUM:
+        case DARKBLADE_SMALL:
             return 360.f;
         
         case SAW_DECO_BIG:
@@ -1173,6 +1192,13 @@ float get_rotation_speed(GameObject *obj) {
         case ROUND_CLOUD_BIG:
         case ROUND_CLOUD_MEDIUM:
         case ROUND_CLOUD_SMALL:
+        case ROTATING_BALL_BIG:
+        case ROTATING_BALL_MEDIUM:
+        case ROTATING_BALL_SMALL:
+        case ROTATING_BALL_TINY:
+        case ROTATING_HEXAGON_BIG:
+        case ROTATING_HEXAGON_MEDIUM:
+        case ROTATING_HEXAGON_TINY:
             return 180.f;
     }
     return 0.f;
@@ -1250,7 +1276,7 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
     get_fade_vars(obj, x, &fade_x, &fade_y, &fade_scale);
 
     if (layer_pulses(obj, layer)) {
-        obj->ampl_scaling = ease_out(obj->ampl_scaling, get_object_pulse(amplitude, obj), 0.2f);
+        obj->ampl_scaling = ease_out(obj->ampl_scaling, get_object_pulse(amplitude, obj), 0.25f);
         fade_scale *= obj->ampl_scaling;
     }
 

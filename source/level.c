@@ -64,6 +64,10 @@ LevelDefinition levels[] = {
         .data_ptr = Electrodynamix_gmd
     },
     {
+        .level_name = "Hexagon Force",
+        .data_ptr = HexagonForce_gmd
+    },
+    {
         .level_name = "Level Easy",
         .data_ptr  = LevelEasy_gmd
     },
@@ -145,6 +149,10 @@ SongDefinition songs[] = {
     {
         .song_name = "Electrodynamix.mp3",
         .tempo = 127
+    },
+    {
+        .song_name = "HexagonForce.mp3",
+        .tempo = 162
     }
 };
 

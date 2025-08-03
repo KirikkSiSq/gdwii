@@ -404,9 +404,233 @@
 
 #include "triangle_a_02_001_png.h"
 #include "blockOutline_14_001_png.h"
+#include "blockOutline_14_glow_001_png.h"
 
 #include "triangle_a_04_001_png.h"
 #include "blockOutline_15_001_png.h"
+#include "blockOutline_15_glow_001_png.h"
+
+#include "triangle_b_01_001_png.h"
+#include "triangle_b_02_001_png.h"
+#include "triangle_b_square_01_001_png.h"
+#include "triangle_b_square_02_001_png.h"
+
+#include "blockOutline_07_001_png.h"
+#include "blockOutline_08_001_png.h"
+
+#include "triangle_c_02_001_png.h"
+#include "triangle_c_04_001_png.h"
+
+#include "triangle_d_02_001_png.h"
+#include "triangle_d_04_001_png.h"
+
+#include "blockOutline_16_001_png.h"
+#include "blockOutline_16_glow_001_png.h"
+
+#include "blockOutline_17_001_png.h"
+#include "blockOutline_17_glow_001_png.h"
+
+#include "triangle_f_02_001_png.h"
+#include "triangle_f_04_001_png.h"
+
+#include "triangle_g_02_001_png.h"
+#include "triangle_g_04_001_png.h"
+#include "triangle_g_square_01_001_png.h"
+#include "triangle_g_square_02_001_png.h"
+#include "triangle_g_square_03_001_png.h"
+
+#include "triangle_h_01_001_png.h"
+#include "triangle_h_02_001_png.h"
+#include "triangle_h_square_01_001_png.h"
+#include "triangle_h_square_02_001_png.h"
+
+#include "triangle_h_01_glow_001_png.h"
+#include "triangle_h_02_glow_001_png.h"
+#include "triangle_h_square_01_glow_001_png.h"
+#include "triangle_h_square_02_glow_001_png.h"
+
+#include "lighttriangle_01_02_color_001_png.h"
+#include "lighttriangle_01_04_color_001_png.h"
+
+#include "lighttriangle_02_02_color_001_png.h"
+#include "lighttriangle_02_04_color_001_png.h"
+
+#include "lighttriangle_03_02_color_001_png.h"
+#include "lighttriangle_03_04_color_001_png.h"
+
+#include "lighttriangle_04_02_color_001_png.h"
+#include "lighttriangle_04_04_color_001_png.h"
+
+#include "lighttriangle_05_02_color_001_png.h"
+#include "lighttriangle_05_04_color_001_png.h"
+
+#include "pit_01_low_001_png.h"
+#include "pit_01_slope_01_001_png.h"
+#include "pit_01_slope_02_001_png.h"
+
+#include "pit_04_low_001_png.h"
+#include "pit_04_slope_01_001_png.h"
+#include "pit_04_slope_02_001_png.h"
+
+#include "plank_01_02_001_png.h"
+#include "plank_01_03_001_png.h"
+
+#include "plank_01_slope_01_001_png.h"
+#include "plank_01_slope_01_color_001_png.h"
+
+#include "plank_01_slope_02_001_png.h"
+#include "plank_01_slope_02_color_001_png.h"
+
+#include "plank_01_square_01_001_png.h"
+#include "plank_01_square_01_color_001_png.h"
+
+#include "plank_01_square_02_001_png.h"
+#include "plank_01_square_02_color_001_png.h"
+
+#include "plank_01_02_glow_001_png.h"
+#include "plank_01_03_glow_001_png.h"
+
+#include "plank_01_slope_01_glow_001_png.h"
+#include "plank_01_slope_02_glow_001_png.h"
+
+#include "plank_01_square_01_glow_001_png.h"
+#include "plank_01_square_02_glow_001_png.h"
+
+#include "d_rotatingBall_01_001_png.h"
+#include "d_rotatingBall_02_001_png.h"
+#include "d_rotatingBall_03_001_png.h"
+#include "d_rotatingBall_04_001_png.h"
+
+#include "spike_04_001_png.h"
+#include "spike_04_glow_001_png.h"
+#include "fakeSpike_04_001_png.h"
+
+#include "darkblade_01_001_png.h"
+#include "darkblade_02_001_png.h"
+#include "darkblade_03_001_png.h"
+
+#include "darkblade_01_color_001_png.h"
+#include "darkblade_02_color_001_png.h"
+#include "darkblade_03_color_001_png.h"
+
+#include "d_geometric_01_001_png.h"
+#include "d_geometric_02_001_png.h"
+#include "d_geometric_03_001_png.h"
+
+#include "d_ball_09_001_png.h"
+
+#include "d_grass_01_001_png.h"
+#include "d_grass_02_001_png.h"
+#include "d_grass_03_001_png.h"
+#include "d_grass_04_001_png.h"
+
+#include "d_link_b_01_001_png.h"
+#include "d_link_b_01_color_001_png.h"
+#include "d_link_b_02_001_png.h"
+#include "d_link_b_02_color_001_png.h"
+#include "d_link_b_03_001_png.h"
+#include "d_link_b_03_color_001_png.h"
+#include "d_link_b_04_001_png.h"
+#include "d_link_b_04_color_001_png.h"
+#include "d_link_b_05_001_png.h"
+#include "d_link_b_05_color_001_png.h"
+
+#include "d_spikeWave_01_001_png.h"
+#include "d_spikeWave_02_001_png.h"
+
+#include "pit_05_001_png.h"
+#include "pit_05_02_001_png.h"
+
+#include "pit_06_001_png.h"
+#include "pit_06_2_001_png.h"
+
+#include "d_pit06wave_01_001_png.h"
+#include "d_pit06wave_02_001_png.h"
+
+#include "d_pillar_01_001_png.h"
+#include "d_pillar_02_001_png.h"
+#include "d_pillar_03_001_png.h"
 
 
+#include "d_link_c_01_001_png.h"
+#include "d_link_c_01_color_001_png.h"
+#include "d_link_c_02_001_png.h"
+#include "d_link_c_02_color_001_png.h"
+#include "d_link_c_03_001_png.h"
+#include "d_link_c_03_color_001_png.h"
+#include "d_link_c_04_001_png.h"
+#include "d_link_c_04_color_001_png.h"
+#include "d_link_c_05_001_png.h"
+#include "d_link_c_05_color_001_png.h"
 
+#include "colorSpike_04_001_png.h"
+#include "colorSpike_04_color_001_png.h"
+
+#include "invis_spike_04_001_png.h"
+#include "invis_spike_04_glow_001_png.h"
+
+#include "d_arrow_02_001_png.h"
+#include "d_arrow_03_001_png.h"
+
+#include "blockOutline_09_001_png.h"
+#include "blockOutline_02_alt_001_png.h"
+#include "square_02_alt_glow_001_png.h"
+#include "blockOutline_09_glow_001_png.h"
+#include "blockOutline_07_glow_001_png.h"
+#include "blockOutline_08_glow_001_png.h"
+
+#include "block001_01_001_png.h"
+#include "block001_02_001_png.h"
+#include "block001_02_color_001_png.h"
+#include "block001_03_001_png.h"
+#include "block001_03_color_001_png.h"
+#include "block001_04_001_png.h"
+#include "block001_04_color_001_png.h"
+#include "block001_05_001_png.h"
+#include "block001_05_color_001_png.h"
+#include "block001_06_001_png.h"
+#include "block001_06_color_001_png.h"
+#include "block001_07_001_png.h"
+#include "block001_07_color_001_png.h"
+
+#include "block001_slope_01_001_png.h"
+#include "block001_slope_01_color_001_png.h"
+#include "block001_slope_02_001_png.h"
+#include "block001_slope_02_color_001_png.h"
+
+#include "block002_01_001_png.h"
+#include "block002_01_color_001_png.h"
+#include "block002_02_001_png.h"
+#include "block002_02_color_001_png.h"
+#include "block002_03_001_png.h"
+#include "block002_03_color_001_png.h"
+#include "block002_04_001_png.h"
+#include "block002_04_color_001_png.h"
+#include "block002_05_001_png.h"
+#include "block002_05_color_001_png.h"
+#include "block002_06_001_png.h"
+#include "block002_06_color_001_png.h"
+#include "block002_07_001_png.h"
+#include "block002_07_color_001_png.h"
+
+#include "block002_slope_01_001_png.h"
+#include "block002_slope_01_color_001_png.h"
+#include "block002_slope_02_001_png.h"
+#include "block002_slope_02_color_001_png.h"
+
+#include "d_circle_02_001_png.h"
+
+#include "d_largeSquare_01_001_png.h"
+#include "d_largeSquare_02_001_png.h"
+
+#include "d_03_chain_01_001_png.h"
+#include "d_03_chain_02_001_png.h"
+
+#include "square_09_001_png.h"
+
+#include "d_gradient_01_001_png.h"
+#include "d_gradient_02_001_png.h"
+#include "d_gradient_03_001_png.h"
+
+#include "d_swirve_03_001_png.h"
+#include "d_swirve_04_001_png.h"

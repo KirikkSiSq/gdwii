@@ -359,24 +359,37 @@ void ship_particles(Player *player) {
 void update_ship_rotation(Player *player) {
     float diff_x = (player->x - state.old_player.x);
     float diff_y = (player->y - state.old_player.y);
-
-    printf("%.2f\n", player->y - state.old_player.y);
     float angle_rad = atan2f(-diff_y, diff_x);
     player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.05f, STEPS_DT);
 }
 
 void ship_gamemode(Player *player) {
-    if (state.input.holdA) {
-        player->buffering_state = BUFFER_END;
-        if (player->vel_y <= grav(player, 103.485492f))
-            player->gravity = player->mini ? 1643.5872f : 1397.0491f;
-        else
-            player->gravity = player->mini ? 1314.86976f : 1117.64328f;
+    if (state.dual) {
+        if (state.input.holdA) {
+            player->buffering_state = BUFFER_END;
+            if (player->vel_y <= 103.485492f)
+                player->gravity = player->mini ? 1643.5872f : 1397.0491f;
+            else
+                player->gravity = player->mini ? 1314.86976f : 1117.64328f;
+        } else {
+            if (player->vel_y >= 103.485492f)
+                player->gravity = player->mini ? -1577.85408f : -1341.1719f;
+            else
+                player->gravity = player->mini ? -1051.8984f : -894.11464f;
+        }
     } else {
-        if (player->vel_y >= grav(player, 103.485492f))
-            player->gravity = player->mini ? -1577.85408f : -1341.1719f;
-        else
-            player->gravity = player->mini ? -1051.8984f : -894.11464f;
+        if (state.input.holdA) {
+            player->buffering_state = BUFFER_END;
+            if (player->vel_y <= grav(player, 103.485492f))
+                player->gravity = player->mini ? 1643.5872f : 1397.0491f;
+            else
+                player->gravity = player->mini ? 1314.86976f : 1117.64328f;
+        } else {
+            if (player->vel_y >= grav(player, 103.485492f))
+                player->gravity = player->mini ? -1577.85408f : -1341.1719f;
+            else
+                player->gravity = player->mini ? -1051.8984f : -894.11464f;
+        }
     }
 
     ship_particles(player);
@@ -1210,6 +1223,17 @@ int grav_slope_orient(GameObject *obj, Player *player) {
     return orient;
 }
 
+bool is_spike_slope(GameObject *obj) {
+    switch (obj->id) {
+        case GROUND_SPIKE_SLOPE_45:
+        case GROUND_SPIKE_SLOPE_22_66:
+        case WAVY_GROUND_SPIKE_SLOPE_45:
+        case WAVY_GROUND_SPIKE_SLOPE_22_66:
+            return TRUE;
+    }
+    return FALSE;
+}
+
 float slope_angle(GameObject *obj, Player *player) {
     float angle = atanf((float) obj->height / obj->width);
     int orient = grav_slope_orient(obj, player);
@@ -1271,6 +1295,10 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // On slope
         if (gravBottom(player) != obj_gravTop(player, obj)) {
+            if (is_spike_slope(obj)) {
+                state.dead = TRUE;
+            }
+
             if (player->upside_down) {
                 player->y = MIN(player->y, expected_slope_y(obj, player));
             } else {
@@ -1310,6 +1338,10 @@ void slope_calc(GameObject *obj, Player *player) {
         }
 
         if (gravBottom(&state.old_player) != obj_gravBottom(player, obj)) {
+            if (is_spike_slope(obj)) {
+                state.dead = TRUE;
+            }
+
             if (player->upside_down) {
                 player->y = MIN(MAX(player->y, expected_slope_y(obj, player)), player->y + player->height / 2);
             } else {
@@ -1342,6 +1374,10 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // On slope
         if (gravBottom(player) != obj_gravTop(player, obj)) {
+            if (is_spike_slope(obj)) {
+                state.dead = TRUE;
+            }
+
             if (player->upside_down) {
                 player->y = MAX(player->y, expected_slope_y(obj, player));
             } else {
@@ -1387,6 +1423,10 @@ void slope_calc(GameObject *obj, Player *player) {
         }
 
         if (gravTop(&state.old_player) != obj_gravBottom(player, obj) || player->slope_data.snapDown) {
+            if (is_spike_slope(obj)) {
+                state.dead = TRUE;
+            }
+
             if (player->upside_down) {
                 player->y = MAX(MIN(player->y, expected_slope_y(obj, player)), player->y - player->height / 2);
             } else {
@@ -1528,7 +1568,7 @@ void slope_collide(GameObject *obj, Player *player) {
         //printf("hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d\n", hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown);
         
         if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
-            if (player->vel_y * mult <= 0) player->on_ground = TRUE;
+            player->on_ground = TRUE;
             player->slope_data.slope = obj;
             snap_player_to_slope(obj, player);
 
