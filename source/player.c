@@ -114,6 +114,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 if (obj_gravTop(player, obj) - bottom < 2)
                     return;
             }
+            
             if (objects[obj->id].is_slope) {
                 slope_collide(obj, player);
                 break;
@@ -195,7 +196,7 @@ void collide_with_obj(Player *player, GameObject *obj) {
                 obj->collided[state.current_player] = FALSE;
             }
         } else {
-            float obj_rot = fabsf(obj->rotation);
+            float obj_rot = normalize_angle(obj->rotation);
             float rotation = (obj_rot == 0 || obj_rot == 90 || obj_rot == 180 || obj_rot == 270) ? 0 : player->rotation;
             if (intersect(
                 player->x, player->y, player->width, player->height, rotation, 
@@ -1532,11 +1533,14 @@ void slope_collide(GameObject *obj, Player *player) {
             return;
         }
     }
+    bool colliding = intersect(
+        player->x, player->y, player->width, player->height, 0, 
+        obj->x, obj->y, obj->width, obj->height, 0
+    );
 
     GameObject *slope = player->slope_data.slope;
     if (
-        !slope ||
-        !slope_touching(obj, player) || 
+        (!slope ||
         grav_slope_orient(slope, player) == grav_slope_orient(obj, player) ||
         (
             grav_slope_orient(slope, player) != grav_slope_orient(obj, player) && 
@@ -1544,7 +1548,7 @@ void slope_collide(GameObject *obj, Player *player) {
                 (grav_slope_orient(slope, player) == 1 && grav_slope_orient(obj, player) == 0) ||
                 (grav_slope_orient(slope, player) == 2 && grav_slope_orient(obj, player) == 3)
             )
-        )
+        ) ) && slope_touching(obj, player) && colliding
     ) {
         float angle = atanf((player->vel_y * STEPS_DT) / (player_speeds[state.speed] * STEPS_DT));
         
@@ -1563,7 +1567,7 @@ void slope_collide(GameObject *obj, Player *player) {
 
         printf("p %d - hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
         
-        if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
+        if (hasSlope ? player->vel_y * mult < 0 : (projectedHit && clip) || snapDown) {
             player->on_ground = TRUE;
             player->slope_data.slope = obj;
             snap_player_to_slope(obj, player);
