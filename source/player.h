@@ -103,4 +103,5 @@ void slope_calc(GameObject *obj, Player *player);
 void clear_slope_data(Player *player);
 int grav_slope_orient(GameObject *obj, Player *player);
 void snap_player_to_slope(GameObject *obj, Player *player); 
+bool slope_touching(GameObject *obj, Player *player);
 void run_camera();
