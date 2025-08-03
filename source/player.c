@@ -582,7 +582,7 @@ void run_camera() {
 void spawn_glitter_particles() {
     if ((frame_counter & 0b1111) == 0) {
         particle_templates[GLITTER_EFFECT].angle = random_float(0, 360);
-        spawn_particle(GLITTER_EFFECT, state.camera_x + 240, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
+        spawn_particle(GLITTER_EFFECT, state.camera_x + SCREEN_WIDTH_AREA, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
     }
 }
 

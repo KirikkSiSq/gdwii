@@ -549,8 +549,8 @@ void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
             particles[i].color_delta.a = (particles[i].end_color.a - particles[i].start_color.a) / life;
 
             // Scale interpolation
-            particles[i].start_scale = tpl->start_scale + tpl->start_scaleVar * random_float(-1, 1);
-            particles[i].end_scale = tpl->end_scale + tpl->end_scaleVar * random_float(-1, 1);
+            particles[i].start_scale = (tpl->start_scale + tpl->start_scaleVar * random_float(-1, 1)) * screen_factor_y;
+            particles[i].end_scale = (tpl->end_scale + tpl->end_scaleVar * random_float(-1, 1)) * screen_factor_y;
             particles[i].scale = particles[i].start_scale;
             particles[i].scale_delta = (particles[i].end_scale - particles[i].start_scale) / life;
 
