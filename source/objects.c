@@ -1655,7 +1655,10 @@ void draw_all_object_layers() {
 
     draw_particles(SPEEDUP);
 
-    if (state.hitbox_display) {
+    if (state.hitbox_display) { 
+        GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
+        GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+        GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
         for (int dx = -width; dx <= width; dx++) {
             for (int dy = -height; dy <= height; dy++) {
                 GFXSection *sec = get_or_create_gfx_section(cam_sx + dx, cam_sy + dy);
@@ -1678,6 +1681,9 @@ void draw_all_object_layers() {
         if (state.dual) {
             draw_player_hitbox(&state.player2);
         }
+        
+        GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+        GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
     }
 
     draw_time = ticks_to_microsecs(draw_time) / 1000.f;

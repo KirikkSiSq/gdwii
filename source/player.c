@@ -1712,15 +1712,9 @@ void draw_hitbox(GameObject *obj) {
         draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, color);
         draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, color);
     }
-    
-    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
-    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 }
 
 void draw_player_hitbox(Player *player) {
-    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
-    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
-    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
 
     Vec2D rect[4];
     // Rotated hitbox
@@ -1746,7 +1740,4 @@ void draw_player_hitbox(Player *player) {
     draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
     draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
     draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
-
-    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
-    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 }
