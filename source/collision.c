@@ -6,10 +6,12 @@
 #include "math.h"
 
 
-static void get_corners(float cx, float cy, float w, float h, float angle, Vec2D out[4]) {
+void get_corners(float cx, float cy, float w, float h, float angle, Vec2D out[4]) {
     float hw = w / 2.0f, hh = h / 2.0f;
-    float rad = angle * (M_PI / 180.0f);
+    angle = -angle; // Make it clockwise
+    float rad = DegToRad(angle);
     float cos_a = cosf(rad), sin_a = sinf(rad);
+    
 
     float local[4][2] = {
         { -hw, -hh },

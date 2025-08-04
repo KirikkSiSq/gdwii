@@ -164,7 +164,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             break;
         
         case YELLOW_ORB:
-            if (!obj->activated[state.current_player] && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdA || state.input.hold2orY) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
                 player->vel_y = jump_heights_table[state.speed][JUMP_YELLOW_ORB][player->gamemode][player->mini];
@@ -192,7 +192,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             break;
         
         case PINK_ORB:
-            if (!obj->activated[state.current_player] && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdA || state.input.hold2orY) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
                 player->vel_y = jump_heights_table[state.speed][JUMP_PINK_ORB][player->gamemode][player->mini];
@@ -220,7 +220,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             break;
         
         case BLUE_ORB:
-            if (!obj->activated[state.current_player] && (state.input.holdA) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdA || state.input.hold2orY) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 player->gravObj = obj;
                 
@@ -1261,7 +1261,7 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
 
     u32 color = RGBA(channels[col_channel].color.r, channels[col_channel].color.g, channels[col_channel].color.b, opacity);
         
-    float angle_rad = obj->rotation * (M_PI / 180.0f); // Convert degrees to radians
+    float angle_rad = DegToRad(obj->rotation); // Convert degrees to radians
     float cos_a = cosf(angle_rad);
     float sin_a = sinf(angle_rad);
 
@@ -1654,6 +1654,31 @@ void draw_all_object_layers() {
     }
 
     draw_particles(SPEEDUP);
+
+    if (state.hitbox_display) {
+        for (int dx = -width; dx <= width; dx++) {
+            for (int dy = -height; dy <= height; dy++) {
+                GFXSection *sec = get_or_create_gfx_section(cam_sx + dx, cam_sy + dy);
+                for (int i = 0; i < sec->layer_count; i++) {
+                    GameObject *obj = sec->layers[i]->layer->obj;
+                    
+                    float calc_x = ((obj->x - state.camera_x) * SCALE) - widthAdjust;
+                    float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
+                    if (calc_x > -90 && calc_x < screen_x_max) {        
+                        if (calc_y > -90 && calc_y < screen_y_max) {    
+                            draw_hitbox(obj);
+                        }
+                    }
+                }
+            }
+        }
+
+        draw_player_hitbox(&state.player);
+
+        if (state.dual) {
+            draw_player_hitbox(&state.player2);
+        }
+    }
 
     draw_time = ticks_to_microsecs(draw_time) / 1000.f;
     obj_particles_time = ticks_to_microsecs(obj_particles_time) / 1000.f;

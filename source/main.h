@@ -21,6 +21,9 @@ typedef struct {
     u8 pressed1orX:1;
     u8 hold1orX:1;
     
+    u8 pressed2orY:1;
+    u8 hold2orY:1;
+    
     u8 pressedPlusOrL:1;
     u8 holdPlusOrL:1;
     
@@ -66,6 +69,7 @@ typedef struct {
     unsigned char speed;
 
     bool noclip;
+    bool hitbox_display;
     bool dual;
     bool dead;
     

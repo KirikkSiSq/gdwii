@@ -184,6 +184,9 @@ void update_input() {
     
     state.input.pressed1orX = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_1) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_X)) > 0;
     state.input.hold1orX =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_1) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_X)) > 0;
+
+    state.input.pressed2orY = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_2) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_Y)) > 0;
+    state.input.hold2orY =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_2) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_Y)) > 0;
     
     state.input.pressedPlusOrL = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_PLUS) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_TRIGGER_L)) > 0;
     state.input.holdPlusOrL =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_PLUS) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_TRIGGER_L)) > 0;

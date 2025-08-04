@@ -6,6 +6,7 @@
 #include "objects.h"
 #include "game.h"
 #include "player.h"
+#include "main.h"
 
 float positive_fmod(float n, float divisor) {
     float value = fmod(n, divisor);
@@ -397,4 +398,56 @@ float ip1_ceilf(float x) {
         return c + 1.0f;
     }
     return c;
+}
+
+void custom_line (const f32 x1, const f32 y1,
+                   const f32 x2, const f32 y2, const u32 color) {
+    GX_Begin(GX_LINES, GX_VTXFMT0, 2);
+        GX_Position3f32(x1, y1, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(x2, y2, 0.0f);
+        GX_Color1u32(color);
+    GX_End();
+}
+void draw_thick_line(const float x1, const float y1, const float x2, const float y2, const float thickness, const uint32_t color) {
+    float dx = x2 - x1;
+    float dy = y2 - y1;
+    float length = sqrtf(dx * dx + dy * dy);
+
+    // Normalize perpendicular vector
+    float px = -dy / length;
+    float py =  dx / length;
+
+    // Half-width offset
+    float hw = thickness / 2.0f;
+
+    // Four points of the quad
+    float x1a = x1 + px * hw;
+    float y1a = y1 + py * hw;
+    float x1b = x1 - px * hw;
+    float y1b = y1 - py * hw;
+
+    float x2a = x2 + px * hw;
+    float y2a = y2 + py * hw;
+    float x2b = x2 - px * hw;
+    float y2b = y2 - py * hw;
+
+    // Draw as two triangles (quad)
+    GX_Begin(GX_TRIANGLES, GX_VTXFMT0, 6);
+
+    GX_Position3f32(x1a, y1a, 0.0f);
+    GX_Color1u32(color);
+    GX_Position3f32(x2a, y2a, 0.0f);
+    GX_Color1u32(color);
+    GX_Position3f32(x2b, y2b, 0.0f);
+    GX_Color1u32(color);
+
+    GX_Position3f32(x2b, y2b, 0.0f);
+    GX_Color1u32(color);
+    GX_Position3f32(x1b, y1b, 0.0f);
+    GX_Color1u32(color);
+    GX_Position3f32(x1a, y1a, 0.0f);
+    GX_Color1u32(color);
+
+    GX_End();
 }

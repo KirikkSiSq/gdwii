@@ -106,3 +106,7 @@ int grav_slope_orient(GameObject *obj, Player *player);
 void snap_player_to_slope(GameObject *obj, Player *player); 
 bool slope_touching(GameObject *obj, Player *player);
 void run_camera();
+float get_slope_angle(GameObject *obj);
+
+void draw_hitbox(GameObject *obj);
+void draw_player_hitbox(Player *player);

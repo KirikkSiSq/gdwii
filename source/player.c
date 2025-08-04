@@ -170,6 +170,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
             state.dead = TRUE;
             break;
         case HITBOX_SPECIAL:
+            printf("rot %.2f\n", normalize_angle(obj->rotation));
             handle_special_hitbox(player, obj, hitbox);
             break;
     }
@@ -200,7 +201,7 @@ void collide_with_obj(Player *player, GameObject *obj) {
             float rotation = (obj_rot == 0 || obj_rot == 90 || obj_rot == 180 || obj_rot == 270) ? 0 : player->rotation;
             if (intersect(
                 player->x, player->y, player->width, player->height, rotation, 
-                obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
+                obj->x, obj->y, hitbox->width, hitbox->height, obj_rot
             )) {
                 handle_collision(player, obj, hitbox);
                 obj->collided[state.current_player] = TRUE;
@@ -302,7 +303,7 @@ void cube_gamemode(Player *player) {
         spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
 
-    if ((player->slope_data.slope || player->on_ground) && state.input.holdA) {
+    if ((player->slope_data.slope || player->on_ground) && (state.input.holdA || state.input.hold2orY)) {
         if (player->slope_data.slope) {
             int orient = grav_slope_orient(player->slope_data.slope, player);
             if (orient == 0 || orient == 3) {
@@ -318,7 +319,7 @@ void cube_gamemode(Player *player) {
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
 
-        if (!state.input.pressedA) {
+        if (!state.input.pressedA || !state.input.pressed2orY) {
             player->vel_y -= player->gravity * STEPS_DT;
             printf("Second jump\n");
         } else {
@@ -347,7 +348,7 @@ void ship_particles(Player *player) {
         spawn_particle(SHIP_TRAIL, x, y, NULL);
         
         // Holding particles
-        if (state.input.holdA) {
+        if (state.input.holdA || state.input.hold2orY) {
             spawn_particle(HOLDING_SHIP_TRAIL, x, y, NULL);
         }
 
@@ -369,7 +370,7 @@ void update_ship_rotation(Player *player) {
 
 void ship_gamemode(Player *player) {
     if (state.dual) {
-        if (state.input.holdA) {
+        if (state.input.holdA || state.input.hold2orY) {
             player->buffering_state = BUFFER_END;
             if (player->vel_y <= 103.485492f)
                 player->gravity = player->mini ? 1643.5872f : 1397.0491f;
@@ -382,7 +383,7 @@ void ship_gamemode(Player *player) {
                 player->gravity = player->mini ? -1051.8984f : -894.11464f;
         }
     } else {
-        if (state.input.holdA) {
+        if (state.input.holdA || state.input.hold2orY) {
             player->buffering_state = BUFFER_END;
             if (player->vel_y <= grav(player, 103.485492f))
                 player->gravity = player->mini ? 1643.5872f : 1397.0491f;
@@ -428,7 +429,7 @@ void ball_gamemode(Player *player) {
     }
 
     // Jump
-    if ((state.input.holdA) && (player->on_ground || player->on_ceiling || player->slope_data.slope) && player->buffering_state == BUFFER_READY) {
+    if ((state.input.holdA || state.input.hold2orY) && (player->on_ground || player->on_ceiling || player->slope_data.slope) && player->buffering_state == BUFFER_READY) {
         player->upside_down ^= 1;
         set_p_velocity(player, -181.11601);
 
@@ -468,7 +469,7 @@ void ufo_particles(Player *player) {
         }
         
         // Jump particles
-        if (state.input.pressedA) {
+        if (state.input.pressedA || state.input.pressed2orY) {
             for (s32 i = 0; i < 5; i++) {
                 spawn_particle(UFO_JUMP, x, y, NULL);
             }
@@ -753,7 +754,7 @@ void handle_player(Player *player) {
         set_particle_color(UFO_TRAIL, p1.r, p1.g, p1.b);
     }
     
-    if (state.input.holdA) {
+    if (state.input.holdA || state.input.hold2orY) {
         if (player->buffering_state == BUFFER_NONE) {
             player->buffering_state = BUFFER_READY;
         }
@@ -1254,6 +1255,11 @@ float slope_angle(GameObject *obj, Player *player) {
     return angle;
 }
 
+float get_slope_angle(GameObject *obj) {
+    float angle = atanf((float) obj->height / obj->width);
+    return angle;
+}
+
 float slope_snap_angle(GameObject *obj, Player *player) {
     float angle = slope_angle(obj, player);
     int orient = obj->orientation;
@@ -1548,7 +1554,7 @@ void slope_collide(GameObject *obj, Player *player) {
                 (grav_slope_orient(slope, player) == 1 && grav_slope_orient(obj, player) == 0) ||
                 (grav_slope_orient(slope, player) == 2 && grav_slope_orient(obj, player) == 3)
             )
-        ) ) && slope_touching(obj, player) && colliding
+        ) ) && slope_touching(obj, player) && colliding && obj_gravTop(player, obj) - gravBottom(player) > 0.06
     ) {
         float angle = atanf((player->vel_y * STEPS_DT) / (player_speeds[state.speed] * STEPS_DT));
         
@@ -1632,4 +1638,107 @@ void snap_player_to_slope(GameObject *obj, Player *player) {
         //printf("best snap %.2f prev rotation %.2f\n", bestSnap, player->rotation);
         player->rotation = bestSnap;
     }
+}
+
+float calc_x_on_screen(float val) {
+    return ((val - state.camera_x) * SCALE) - widthAdjust + 6;
+}
+float calc_y_on_screen(float val) {
+    return screenHeight - ((val - state.camera_y) * SCALE) + 6;
+}
+
+extern void get_corners(float cx, float cy, float w, float h, float angle, Vec2D out[4]);
+
+void draw_triangle_from_rect(Vec2D rect[4], int skip_index, uint32_t color) {
+    Vec2D tri[3];
+    int ti = 0;
+
+    // Collect 3 points that are not the skipped one
+    for (int i = 0; i < 4; ++i) {
+        if (i == skip_index) continue;
+        tri[ti++] = rect[i];
+    }
+
+    // Draw 3 lines to form a closed triangle
+    for (int i = 0; i < 3; ++i) {
+        Vec2D a = tri[i];
+        Vec2D b = tri[(i + 1) % 3];  // Wrap around to connect last to first
+        draw_thick_line(
+            calc_x_on_screen(a.x), calc_y_on_screen(a.y),
+            calc_x_on_screen(b.x), calc_y_on_screen(b.y),
+            2, color
+        );
+    }
+}
+void draw_hitbox(GameObject *obj) {
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
+    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
+
+    ObjectHitbox hitbox = objects[obj->id].hitbox;
+
+    float x = obj->x;
+    float y = obj->y;
+    float w = hitbox.width;
+    float h = hitbox.height;
+    float angle = obj->rotation;
+
+    unsigned int color = RGBA(0x00, 0xff, 0xff, 0xff);
+
+    int hitbox_type = hitbox.type;
+    if (hitbox_type == HITBOX_SPIKE) color = RGBA(0xff, 0x00, 0x00, 0xff);
+    if (hitbox_type == HITBOX_SOLID) color = RGBA(0x00, 0x00, 0xff, 0xff);
+    
+
+    Vec2D rect[4];
+    if (objects[obj->id].is_slope) {
+        w = obj->width;
+        h = obj->height;
+        get_corners(x, y, w, h, 0, rect);
+
+        draw_triangle_from_rect(rect, 3 - obj->orientation,color);
+    } else {
+        get_corners(x, y, w, h, angle, rect);
+        draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, color);
+        draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, color);
+        draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, color);
+        draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, color);
+    }
+    
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
+}
+
+void draw_player_hitbox(Player *player) {
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
+    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
+
+    Vec2D rect[4];
+    // Rotated hitbox
+    get_corners(player->x, player->y, player->width, player->height, player->rotation, rect);
+
+    draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
+
+    // Internal hitbox
+    get_corners(player->x, player->y, 9, 9, 0, rect);
+
+    draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
+    
+    // Unrotated hitbox
+    get_corners(player->x, player->y, player->width, player->height, 0, rect);
+
+    draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
+    draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
+
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+    GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 }

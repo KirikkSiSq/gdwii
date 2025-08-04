@@ -48,6 +48,7 @@ int game_loop() {
         accumulator += frameTime;
 
         if (state.input.pressed1orX) state.noclip ^= 1;
+        if (state.input.pressedDir & INPUT_LEFT) state.hitbox_display ^= 1;
         
         u64 t0 = gettime();
         while (accumulator >= STEPS_DT) {

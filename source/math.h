@@ -1,5 +1,6 @@
 #pragma once
 #include <grrlib.h>
+#include "level_loading.h"
 
 #define SAME_SIGN(v1,v2) (v1>=0)==(v2>=0)
 #define DIFFERENT_SIGN(v1,v2) (v1>=0)!=(v2>=0)
@@ -63,6 +64,10 @@ void  custom_circle (const f32 x, const f32 y, const f32 radius,
 void  custom_rectangle (const f32 x,      const f32 y,
     const f32 width,  const f32 height,
     const u32 color, const bool filled);
+void custom_line (const f32 x1, const f32 y1,
+    const f32 x2, const f32 y2, const u32 color);
+void draw_thick_line(const float x1, const float y1, const float x2, const float y2, const float thickness, const uint32_t color);
+
 void set_texture(const GRRLIB_texImg *tex);
 float normalize_angle(float angle);
 float ip1_ceilf(float x);
