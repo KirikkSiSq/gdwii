@@ -218,7 +218,7 @@ int main(int argc, char **argv) {
 
     SYS_STDIO_Report(true);
     // Init GRRLIB & WiiUse
-    GRRLIB_Init();
+    printf("grrlib status %d\n", GRRLIB_Init());
     WPAD_Init();
     PAD_Init();
     WPAD_SetIdleTimeout( 60 * 10 );
@@ -242,7 +242,7 @@ int main(int argc, char **argv) {
     screen_factor_x = (float) screenWidth / 640;
     screen_factor_y = (float) screenHeight / 480;
 
-    printf("%d, %d\n", screenWidth, screenHeight);
+    printf("%d, %d mode %d\n", screenWidth, screenHeight, rmode->viTVMode);
 
     startTime = gettime();    
 
