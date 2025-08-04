@@ -1697,6 +1697,10 @@ void draw_hitbox(GameObject *obj) {
         get_corners(x, y, w, h, 0, rect);
 
         draw_triangle_from_rect(rect, 3 - obj->orientation,color);
+    } else if (objects[obj->id].is_saw) {
+        float calc_radius = hitbox.radius * SCALE;
+        custom_circle(calc_x_on_screen(x), calc_y_on_screen(y), calc_radius, color, FALSE);
+        custom_circle(calc_x_on_screen(x), calc_y_on_screen(y), calc_radius - 1, color, FALSE);
     } else {
         get_corners(x, y, w, h, angle, rect);
         draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, color);
