@@ -1361,7 +1361,7 @@ void slope_calc(GameObject *obj, Player *player) {
             return;
         }
         
-        bool gravSnap = player->ceiling_inv_time > 0;
+        bool gravSnap = (player->ceiling_inv_time > 0) || (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1);
         
         if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
             state.dead = TRUE;
@@ -1411,7 +1411,7 @@ void slope_calc(GameObject *obj, Player *player) {
             return;
         }
         
-        bool gravSnap = player->ceiling_inv_time > 0;
+        bool gravSnap = (player->ceiling_inv_time > 0) || (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1);
         
         if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
             state.dead = TRUE;
