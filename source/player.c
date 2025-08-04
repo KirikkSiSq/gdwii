@@ -927,7 +927,7 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
     GRRLIB_SetHandle(ship_l1, ship_l1->w / 2, ship_l1->h / 2);
     GRRLIB_SetHandle(ship_l2, ship_l2->w / 2, ship_l2->h / 2);
     
-    float scale = (player->mini) ? 0.6f : 1.f;
+    float scale = ((player->mini) ? 0.6f : 1.f) * screen_factor_y;
 
     int mult = (player->upside_down ? -1 : 1);
 
@@ -972,7 +972,7 @@ void draw_ship(Player *player, float calc_x, float calc_y) {
     }
     rotate_point_around_center_gfx(
         get_mirror_x(calc_x, state.mirror_factor), calc_y,
-        0, y_rot,
+        0, y_rot * screen_factor_y,
         38, 30,
         76, 48,
         calculated_rotation,
@@ -1006,7 +1006,7 @@ void draw_ufo(Player *player, float calc_x, float calc_y) {
     GRRLIB_SetHandle(ufo_l2,   ufo_l2->w / 2,   ufo_l2->h / 2); 
     GRRLIB_SetHandle(ufo_dome, ufo_dome->w / 2, ufo_dome->h / 2); 
     
-    float scale = (player->mini) ? 0.6f : 1.f;
+    float scale = ((player->mini) ? 0.6f : 1.f) * screen_factor_y;
 
     int mult = (player->upside_down ? -1 : 1);
 
@@ -1023,7 +1023,7 @@ void draw_ufo(Player *player, float calc_x, float calc_y) {
     }
     rotate_point_around_center_gfx(
         get_mirror_x(calc_x, state.mirror_factor), calc_y,
-        6, y_rot,
+        6, y_rot * screen_factor_y,
         ufo_l1->w / 2, ufo_l1->h / 2,
         ufo_dome->w, ufo_dome->h,
         calculated_rotation,
@@ -1076,7 +1076,7 @@ void draw_ufo(Player *player, float calc_x, float calc_y) {
     }
     rotate_point_around_center_gfx(
         get_mirror_x(calc_x, state.mirror_factor), calc_y,
-        0, y_rot,
+        0, y_rot * screen_factor_y,
         ufo_l1->w / 2, ufo_l1->h / 2,
         ufo_l1->w, ufo_l1->h,
         calculated_rotation,
