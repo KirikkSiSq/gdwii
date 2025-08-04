@@ -1641,7 +1641,11 @@ void snap_player_to_slope(GameObject *obj, Player *player) {
 }
 
 float calc_x_on_screen(float val) {
-    return ((val - state.camera_x) * SCALE) - widthAdjust + 6;
+    if (state.mirror_factor >= 0.5f) {
+        return screenWidth - (((val - state.camera_x) * SCALE) - widthAdjust) + 6;
+    } else {
+        return ((val - state.camera_x) * SCALE) - widthAdjust + 6;
+    }
 }
 float calc_y_on_screen(float val) {
     return screenHeight - ((val - state.camera_y) * SCALE) + 6;
