@@ -1448,12 +1448,41 @@ void slope_calc(GameObject *obj, Player *player) {
     }
 }
 
+bool player_circle_touches_slope(GameObject *obj, Player *player) {
+    float x1, y1, x2, y2;
+    int orientation = obj->orientation;
+
+    float hw = obj->height / 2.f, hh = obj->width / 2.f;
+
+    switch (orientation) {
+        case 0:
+        case 2:
+            x1 = obj->x - hw;
+            y1 = obj->y - hh;
+            x2 = obj->x + hw;
+            y2 = obj->y + hh;
+            break;
+        case 1:
+        case 3:
+            x1 = obj->x + hw;
+            y1 = obj->y - hh;
+            x2 = obj->x - hw;
+            y2 = obj->y + hh;
+            break;
+        default:
+            x1 = y1 = x2 = y2 = 0;
+            break;
+    }
+    printf("x %.2f y %.2f, x1 %.2f y1 %.2f x2 %.2f y2 %.2f\n", player->x, player->y, x1, y1, x2, y2);
+    return circle_rect_collision(player->x, player->y, player->width / 2, x1, y1, x2, y2);
+}
+
 void slope_collide(GameObject *obj, Player *player) {
     int clip = (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) ? 7 : 10;
     int orient = grav_slope_orient(obj, player);  
     int mult = orient >= 2 ? -1 : 1;
     
-    bool gravSnap = player->ceiling_inv_time > 0;
+    bool gravSnap = (player->ceiling_inv_time > 0) || (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1);
 
     // Check if player inside slope
     if (orient == 0 || orient == 3) {
@@ -1546,16 +1575,20 @@ void slope_collide(GameObject *obj, Player *player) {
 
     GameObject *slope = player->slope_data.slope;
     if (
-        (!slope ||
-        grav_slope_orient(slope, player) == grav_slope_orient(obj, player) ||
-        (
-            grav_slope_orient(slope, player) != grav_slope_orient(obj, player) && 
+        (!slope || grav_slope_orient(slope, player) == grav_slope_orient(obj, player) ||
             (
-                (grav_slope_orient(slope, player) == 1 && grav_slope_orient(obj, player) == 0) ||
-                (grav_slope_orient(slope, player) == 2 && grav_slope_orient(obj, player) == 3)
-            )
-        ) ) && slope_touching(obj, player) && colliding && obj_gravTop(player, obj) - gravBottom(player) > 0.06
+                grav_slope_orient(slope, player) != grav_slope_orient(obj, player) && 
+                (
+                    (grav_slope_orient(slope, player) == 1 && grav_slope_orient(obj, player) == 0) ||
+                    (grav_slope_orient(slope, player) == 2 && grav_slope_orient(obj, player) == 3)
+                )
+            ) 
+        ) && slope_touching(obj, player) && colliding && obj_gravTop(player, obj) - gravBottom(player) > 0.06
     ) {
+        
+        if (slope && slope_angle(obj, player) < slope_angle(slope, player)) return;
+
+        if (!gravSnap && player->gamemode == GAMEMODE_CUBE && grav_slope_orient(obj, player) >= 2 && !player_circle_touches_slope(obj, player)) return;
         float angle = atanf((player->vel_y * STEPS_DT) / (player_speeds[state.speed] * STEPS_DT));
         
         if (orient >= 2) angle = -angle;

@@ -640,7 +640,7 @@ void set_dual_bounds() {
 }
 
 void flip_other_player(int current_player) {
-    if (state.dual && state.player.gamemode == state.player2.gamemode) {
+    if (state.dual && state.player.gamemode == state.player2.gamemode && state.player.upside_down == state.player2.upside_down) {
         if (current_player == 0) {
             state.player2.upside_down = !state.player.upside_down;
             state.player2.vel_y /= -2;

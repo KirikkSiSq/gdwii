@@ -100,3 +100,34 @@ bool intersect_rect_circle(float rx, float ry, float rw, float rh, float rangle,
 
     return dist_sq <= cradius * cradius;
 }
+// Dot product helper
+float dot(float x1, float y1, float x2, float y2) {
+    return x1 * x2 + y1 * y2;
+}
+
+bool circle_rect_collision(float cx, float cy, float radius,
+                           float x1, float y1, float x2, float y2) {
+    // Vector from point 1 to circle center
+    float dx = x2 - x1;
+    float dy = y2 - y1;
+    float fx = cx - x1;
+    float fy = cy - y1;
+
+    float len_sq = dx * dx + dy * dy;
+    float t = dot(fx, fy, dx, dy) / len_sq;
+
+    // Clamp t to the [0,1] range to stay within the segment
+    if (t < 0.0f) t = 0.0f;
+    else if (t > 1.0f) t = 1.0f;
+
+    // Closest point on segment
+    float closestX = x1 + t * dx;
+    float closestY = y1 + t * dy;
+
+    // Distance from circle center to closest point
+    float distX = cx - closestX;
+    float distY = cy - closestY;
+    float distSq = distX * distX + distY * distY;
+
+    return distSq <= radius * radius;
+}
