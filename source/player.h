@@ -40,6 +40,9 @@ typedef struct {
     bool on_ceiling;
     bool mini;
     bool upside_down;
+    bool touching_slope;
+    
+    GameObject *potentialSlope;
 
     bool left_ground;
 
@@ -110,3 +113,4 @@ float get_slope_angle(GameObject *obj);
 
 void draw_hitbox(GameObject *obj);
 void draw_player_hitbox(Player *player);
+bool player_circle_touches_slope(GameObject *obj, Player *player);

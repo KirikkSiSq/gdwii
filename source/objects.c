@@ -252,10 +252,10 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
         case CUBE_PORTAL: 
             if (!obj->activated[state.current_player]) {
+                state.ground_y = 0;
+                state.ceiling_y = 999999;
                 if (player->gamemode != GAMEMODE_CUBE) {
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_StopStroke(&trail);
-                    state.ground_y = 0;
-                    state.ceiling_y = 999999;
 
                     if (player->gamemode != GAMEMODE_BALL) player->vel_y /= 2;
 

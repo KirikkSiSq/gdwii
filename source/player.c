@@ -105,7 +105,6 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
         case HITBOX_BREAKABLE_BLOCK:
         case HITBOX_SOLID: 
             bool gravSnap = FALSE;
-
             
             float bottom = gravBottom(player);
             if (player->slope_data.slope) {
@@ -131,6 +130,8 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 gravSnap = (!state.old_player.on_ground && internalCollidingBlock) || (player->ceiling_inv_time > 0 && internalCollidingBlock);
             }
 
+            bool slope_condition = player->touching_slope && !player_circle_touches_slope(player->potentialSlope, player) && !state.old_player.on_ground && !state.old_player.on_ceiling && obj_getRight(player->potentialSlope) - getLeft(player) < 6 && (player->potentialSlope->orientation == 1 || player->potentialSlope->orientation == 2);
+            
             bool safeZone = (obj_gravTop(player, obj) - gravBottom(player) <= clip) || (gravTop(player) - obj_gravBottom(player, obj) <= clip);
             
             if (!gravSnap && !safeZone && intersect(
@@ -145,7 +146,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 } else {
                     state.dead = TRUE;
                 }
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0) {
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0 && !slope_condition) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
                 player->on_ground = TRUE;
@@ -157,7 +158,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 }
                 // Behave normally
                 if (player->gamemode != GAMEMODE_CUBE || gravSnap) {
-                    if ((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) || gravSnap) {
+                    if (((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) || gravSnap) && !slope_condition) {
                         player->vel_y = 0;
                         if (!gravSnap) player->on_ceiling = TRUE;
                         player->time_since_ground = 0;
@@ -170,7 +171,6 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
             state.dead = TRUE;
             break;
         case HITBOX_SPECIAL:
-            printf("rot %.2f\n", normalize_angle(obj->rotation));
             handle_special_hitbox(player, obj, hitbox);
             break;
     }
@@ -257,6 +257,19 @@ void collide_with_objects(Player *player) {
         clear_slope_data(player);
     }
 
+    // Detect if touching slope
+    for (int i = 0; i < slope_count; i++) {
+        GameObject *obj = slope_buffer[i];
+        if (intersect(
+            player->x, player->y, player->width, player->height, 0, 
+            obj->x, obj->y, obj->width, obj->height, obj->rotation
+        )) {
+            player->touching_slope = TRUE;
+            player->potentialSlope = obj;
+            break;
+        }
+    }
+
     for (int i = 0; i < block_count; i++) {
         GameObject *obj = block_buffer[i];
         collide_with_obj(player, obj);
@@ -272,6 +285,7 @@ void collide_with_objects(Player *player) {
         collide_with_obj(player, obj);
     }
 
+    player->touching_slope = FALSE;
     slope_count = 0;
     block_count = 0;
     hazard_count = 0;
@@ -1452,7 +1466,7 @@ bool player_circle_touches_slope(GameObject *obj, Player *player) {
     float x1, y1, x2, y2;
     int orientation = obj->orientation;
 
-    float hw = obj->height / 2.f, hh = obj->width / 2.f;
+    float hw = obj->width / 2.f, hh = obj->height / 2.f;
 
     switch (orientation) {
         case 0:
@@ -1473,16 +1487,66 @@ bool player_circle_touches_slope(GameObject *obj, Player *player) {
             x1 = y1 = x2 = y2 = 0;
             break;
     }
-    printf("x %.2f y %.2f, x1 %.2f y1 %.2f x2 %.2f y2 %.2f\n", player->x, player->y, x1, y1, x2, y2);
-    return circle_rect_collision(player->x, player->y, player->width / 2, x1, y1, x2, y2);
+    bool collided_hipo = circle_rect_collision(player->x, player->y, player->width / 2, x1, y1, x2, y2);
+
+    // Collide with vertical
+    switch (orientation) {
+        case 0:
+        case 3:
+            x1 = obj->x + hw;
+            y1 = obj->y - hh;
+            x2 = obj->x + hw;
+            y2 = obj->y + hh;
+            break;
+        case 1:
+        case 2:
+            x1 = obj->x - hw;
+            y1 = obj->y - hh;
+            x2 = obj->x - hw;
+            y2 = obj->y + hh;
+            break;
+        default:
+            x1 = y1 = x2 = y2 = 0;
+            break;
+    }
+    
+    bool collided_vertical = circle_rect_collision(player->x, player->y, player->width / 2, x1, y1, x2, y2);
+
+    // Collide with horizontal
+    switch (orientation) {
+        case 0:
+        case 1:
+            x1 = obj->x + hw;
+            y1 = obj->y - hh;
+            x2 = obj->x - hw;
+            y2 = obj->y - hh;
+            break;
+        case 2:
+        case 3:
+            x1 = obj->x + hw;
+            y1 = obj->y + hh;
+            x2 = obj->x - hw;
+            y2 = obj->y + hh;
+            break;
+        default:
+            x1 = y1 = x2 = y2 = 0;
+            break;
+    }
+    
+    bool collided_horizontal = circle_rect_collision(player->x, player->y, player->width / 2, x1, y1, x2, y2);
+
+    return collided_vertical | collided_hipo | collided_horizontal;
 }
 
 void slope_collide(GameObject *obj, Player *player) {
     int clip = (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) ? 7 : 10;
     int orient = grav_slope_orient(obj, player);  
     int mult = orient >= 2 ? -1 : 1;
+
     
     bool gravSnap = (player->ceiling_inv_time > 0) || (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1);
+
+    if (!gravSnap && player->gamemode == GAMEMODE_CUBE && grav_slope_orient(obj, player) >= 2 && !player_circle_touches_slope(obj, player)) return;
 
     // Check if player inside slope
     if (orient == 0 || orient == 3) {
@@ -1587,8 +1651,6 @@ void slope_collide(GameObject *obj, Player *player) {
     ) {
         
         if (slope && slope_angle(obj, player) < slope_angle(slope, player)) return;
-
-        if (!gravSnap && player->gamemode == GAMEMODE_CUBE && grav_slope_orient(obj, player) >= 2 && !player_circle_touches_slope(obj, player)) return;
         float angle = atanf((player->vel_y * STEPS_DT) / (player_speeds[state.speed] * STEPS_DT));
         
         if (orient >= 2) angle = -angle;
@@ -1631,14 +1693,13 @@ void slope_collide(GameObject *obj, Player *player) {
 }
 
 bool slope_touching(GameObject *obj, Player *player) {
-    float epsilon = (player->time_since_ground <= STEPS_DT ? 0 : 3.5);
     switch (grav_slope_orient(obj, player)) {
         case 0:
             return grav(player, expected_slope_y(obj, player)) >= grav(player, player->y);
         case 1:
-            return grav(player, expected_slope_y(obj, player)) + epsilon >= grav(player, player->y);
+            return grav(player, expected_slope_y(obj, player)) >= grav(player, player->y);
         case 2:
-            return grav(player, expected_slope_y(obj, player)) <= grav(player, player->y) + epsilon; 
+            return grav(player, expected_slope_y(obj, player)) <= grav(player, player->y); 
         case 3:
             return grav(player, expected_slope_y(obj, player)) <= grav(player, player->y);  
         default:
@@ -1766,6 +1827,11 @@ void draw_player_hitbox(Player *player) {
     draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
     draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
     
+    // Circle hitbox
+    float calc_radius = (player->width / 2) * SCALE;
+    custom_circle(calc_x_on_screen(player->x), calc_y_on_screen(player->y), calc_radius, RGBA(0xff, 0x00, 0x00, 0xff), FALSE);
+    custom_circle(calc_x_on_screen(player->x), calc_y_on_screen(player->y), calc_radius - 1, RGBA(0xff, 0x00, 0x00, 0xff), FALSE);
+
     // Unrotated hitbox
     get_corners(player->x, player->y, player->width, player->height, 0, rect);
 
