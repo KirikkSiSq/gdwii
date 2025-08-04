@@ -1371,11 +1371,8 @@ void draw_background(f32 x, f32 y) {
     }
 }
 
-#define GROUND_SIZE 176 // pixels
-#define LINE_SCALE 0.5f
-
 void draw_end_wall() {
-    float calc_x = ((level_info.wall_x - state.camera_x) * SCALE);
+    float calc_x = ((level_info.wall_x - state.camera_x) * SCALE) - widthAdjust;
     float calc_y =  positive_fmod(state.camera_y * SCALE, BLOCK_SIZE_PX) + screenHeight;    
     
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
@@ -1404,6 +1401,9 @@ void draw_end_wall() {
     GX_SetTevOp  (GX_TEVSTAGE0, GX_PASSCLR);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
 }
+
+#define GROUND_SIZE 176 // pixels
+#define LINE_SCALE 0.5f
 
 void draw_ground(f32 y, bool is_ceiling) {
     int mult = (is_ceiling ? -1 : 1);

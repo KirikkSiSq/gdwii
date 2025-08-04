@@ -528,8 +528,8 @@ void run_camera() {
     Player *player = &state.player;
 
     // Cap at camera_x
-    if (state.camera_x + SCREEN_WIDTH_AREA >= level_info.wall_x) {
-        state.camera_x = level_info.wall_x - SCREEN_WIDTH_AREA;
+    if (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x) {
+        state.camera_x = level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA);
     } else {
         state.camera_x += player->vel_x * STEPS_DT;
         state.ground_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
