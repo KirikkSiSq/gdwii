@@ -600,9 +600,24 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 state.dual = FALSE;
                 obj->activated[state.current_player] = TRUE;
+                
 
                 if (state.current_player == 1) {
                     memcpy(&state.player, player, sizeof(Player));
+                }
+                switch (state.player.gamemode) {
+                    case GAMEMODE_CUBE:
+                        state.ground_y = 0;
+                        state.ceiling_y = 999999;
+                        break;
+                    case GAMEMODE_SHIP:
+                    case GAMEMODE_UFO:
+                        state.ceiling_y = state.ground_y + 300;
+                        set_intended_ceiling();
+                        break;
+                    case GAMEMODE_BALL:
+                        state.ceiling_y = state.ground_y + 240;
+                        set_intended_ceiling();
                 }
                 MotionTrail_StopStroke(&trail_p2);
             }
