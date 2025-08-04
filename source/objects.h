@@ -805,7 +805,7 @@ void load_spritesheet();
 void unload_spritesheet();
 void handle_objects();
 void set_dual_bounds();
-void flip_other_player();
+void flip_other_player(int current_player);
 void do_ball_reflection();
 void set_particle_color(int template_id, int r, int g, int b);
 bool is_modifiable(int col_channel);

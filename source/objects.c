@@ -146,7 +146,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 player->vel_y = jump_heights_table[state.speed][JUMP_BLUE_PAD][player->gamemode][player->mini];
                 player->upside_down ^= 1;
-                flip_other_player();
+                flip_other_player(state.current_player);
                 player->on_ground = FALSE;
                 player->ufo_last_y = player->y;
                 
@@ -226,7 +226,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 player->vel_y = jump_heights_table[state.speed][JUMP_BLUE_ORB][player->gamemode][player->mini];
                 player->upside_down ^= 1;
-                flip_other_player();
+                flip_other_player(state.current_player);
                 
                 player->ball_rotation_speed = -1.f;
                 
@@ -260,6 +260,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     if (player->gamemode != GAMEMODE_BALL) player->vel_y /= 2;
 
                     player->gamemode = GAMEMODE_CUBE;
+                    flip_other_player(state.current_player ^ 1);
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
@@ -286,6 +287,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 if (player->gamemode != GAMEMODE_SHIP) {
                     player->vel_y /= (player->gamemode == GAMEMODE_UFO) ? 4 : 2;
                     player->gamemode = GAMEMODE_SHIP;
+                    flip_other_player(state.current_player ^ 1);
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
@@ -311,7 +313,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                     player->vel_y /= -2;
                     player->upside_down = FALSE;
-                    flip_other_player();
+                    flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
                     
@@ -336,7 +338,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                     player->vel_y /= -2;
                     player->upside_down = TRUE;
-                    flip_other_player();
+                    flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
 
@@ -397,6 +399,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     if (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) player->vel_y /= 2;
                     
                     player->gamemode = GAMEMODE_BALL;
+                    flip_other_player(state.current_player ^ 1);
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
@@ -457,6 +460,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->vel_y /= (state.old_player.gamemode == GAMEMODE_SHIP) ? 4 : 2;
                     player->gamemode = GAMEMODE_UFO;
                     player->ufo_last_y = player->y;
+                    flip_other_player(state.current_player ^ 1);
 
                     if (state.old_player.gamemode == GAMEMODE_SHIP) {
                         player->buffering_state = BUFFER_READY;
@@ -635,9 +639,9 @@ void set_dual_bounds() {
     set_intended_ceiling();
 }
 
-void flip_other_player() {
+void flip_other_player(int current_player) {
     if (state.dual && state.player.gamemode == state.player2.gamemode) {
-        if (state.current_player == 0) {
+        if (current_player == 0) {
             state.player2.upside_down = !state.player.upside_down;
             state.player2.vel_y /= -2;
         } else {
