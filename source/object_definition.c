@@ -7429,7 +7429,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
             }
         },
         .hitbox = {
-            .width = 30,
+            .width = 60,
             .height = 30,
             .type = HITBOX_SOLID
         },
@@ -7491,7 +7491,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
             }
         },
         .hitbox = {
-            .width = 30,
+            .width = 60,
             .height = 30,
             .type = HITBOX_SOLID
         },
