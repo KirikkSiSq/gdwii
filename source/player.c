@@ -1769,10 +1769,6 @@ void draw_triangle_from_rect(Vec2D rect[4], int skip_index, uint32_t color) {
     }
 }
 void draw_hitbox(GameObject *obj) {
-    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
-    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
-    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
-
     ObjectHitbox hitbox = objects[obj->id].hitbox;
 
     float x = obj->x;
@@ -1796,10 +1792,15 @@ void draw_hitbox(GameObject *obj) {
 
         draw_triangle_from_rect(rect, 3 - obj->orientation,color);
     } else if (objects[obj->id].is_saw) {
+        if (hitbox.radius == 0) return;
+
         float calc_radius = hitbox.radius * SCALE;
+
         custom_circle(calc_x_on_screen(x), calc_y_on_screen(y), calc_radius, color, FALSE);
         custom_circle(calc_x_on_screen(x), calc_y_on_screen(y), calc_radius - 1, color, FALSE);
     } else {
+        if (w == 0 || h == 0) return;
+
         get_corners(x, y, w, h, angle, rect);
         draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, color);
         draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, color);

@@ -1688,7 +1688,7 @@ void draw_all_object_layers() {
                     float calc_y = screenHeight - ((obj->y - state.camera_y) * SCALE);  
                     if (calc_x > -90 && calc_x < screen_x_max) {        
                         if (calc_y > -90 && calc_y < screen_y_max) {    
-                            draw_hitbox(obj);
+                            if (sec->layers[i]->layerNum == 0) draw_hitbox(obj);
                         }
                     }
                 }
