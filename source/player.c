@@ -1708,9 +1708,8 @@ bool slope_touching(GameObject *obj, Player *player) {
 }
 
 void snap_player_to_slope(GameObject *obj, Player *player) {
-    if (player->gamemode == GAMEMODE_CUBE || player->gamemode == GAMEMODE_UFO) {
+    if (player->gamemode == GAMEMODE_CUBE) {
         float base = RadToDeg(slope_snap_angle(obj, player));
-        //printf("deg %.2f\n", base);
         float bestSnap = base;
         float minDiff = 999999.0f;
 
@@ -1731,6 +1730,8 @@ void snap_player_to_slope(GameObject *obj, Player *player) {
 
         //printf("best snap %.2f prev rotation %.2f\n", bestSnap, player->rotation);
         player->rotation = bestSnap;
+    } else if (player->gamemode == GAMEMODE_UFO) {
+        player->rotation = RadToDeg(slope_snap_angle(obj, player));
     }
 }
 
