@@ -20,6 +20,11 @@ typedef struct {
 } SlopeData;
 
 typedef struct {
+    float width;
+    float height;
+} InternalHitbox;
+
+typedef struct {
     float x;
     float y;
     
@@ -33,6 +38,8 @@ typedef struct {
     
     float width;
     float height;
+
+    InternalHitbox internal_hitbox;
 
     int gamemode;
 

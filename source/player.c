@@ -39,8 +39,18 @@ inline static float getTop(Player *player)  { return player->y + player->height 
 inline static float getBottom(Player *player)  { return player->y - player->height / 2; }
 inline static float getRight(Player *player)  { return player->x + player->width / 2; }
 inline static float getLeft(Player *player)  { return player->x - player->width / 2; }
+
+inline static float getInternalTop(Player *player)  { return player->y + player->internal_hitbox.height / 2; }
+inline static float getInternalBottom(Player *player)  { return player->y - player->internal_hitbox.height / 2; }
+inline static float getInternalRight(Player *player)  { return player->x + player->internal_hitbox.width / 2; }
+inline static float getInternalLeft(Player *player)  { return player->x - player->internal_hitbox.width / 2; }
+
 inline static float gravBottom(Player *player) { return player->upside_down ? -getTop(player) : getBottom(player); }
 inline static float gravTop(Player *player) { return player->upside_down ? -getBottom(player) : getTop(player); }
+
+inline static float gravInternalBottom(Player *player) { return player->upside_down ? -getInternalTop(player) : getInternalBottom(player); }
+inline static float gravInternalTop(Player *player) { return player->upside_down ? -getInternalBottom(player) : getInternalTop(player); }
+
 inline static float grav(Player *player, float val) { return player->upside_down ? -val : val; }
 
 inline static float obj_getTop(GameObject *object)  { 
@@ -100,6 +110,8 @@ void set_p_velocity(Player *player, float vel) {
 }
 
 void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
+    InternalHitbox internal = player->internal_hitbox;
+
     int clip = (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) ? 7 : 10;
     switch (hitbox->type) {
         case HITBOX_BREAKABLE_BLOCK:
@@ -125,11 +137,11 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
             if (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1) {
                 // Only do the funny grav snap if player is touching a gravity object and internal hitbox is touching block
                 bool internalCollidingBlock = intersect(
-                    player->x, player->y, 9, 9, 0, 
+                    player->x, player->y, internal.width, internal.height, 0, 
                     obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
                 );
 
-                gravSnap = (!state.old_player.on_ground && internalCollidingBlock) || (player->ceiling_inv_time > 0 && internalCollidingBlock);
+                gravSnap = (!state.old_player.on_ground || player->ceiling_inv_time > 0) && internalCollidingBlock && obj_gravTop(player, obj) - gravInternalBottom(player) <= clip;
             }
 
             bool slope_condition = player->touching_slope && !player_circle_touches_slope(player->potentialSlope, player) && !state.old_player.on_ground && !state.old_player.on_ceiling && obj_getRight(player->potentialSlope) - getLeft(player) < 6 && (player->potentialSlope->orientation == 1 || player->potentialSlope->orientation == 2);
@@ -137,7 +149,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
             bool safeZone = (obj_gravTop(player, obj) - gravBottom(player) <= clip) || (gravTop(player) - obj_gravBottom(player, obj) <= clip);
             
             if (!gravSnap && !safeZone && intersect(
-                player->x, player->y, 9, 9, 0, 
+                player->x, player->y, internal.width, internal.height, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
                 if (hitbox->type == HITBOX_BREAKABLE_BLOCK) {
@@ -882,6 +894,9 @@ void init_variables() {
     player->upside_down = level_info.initial_upsidedown;
     player->timeElapsed = 0.f;
 
+    player->internal_hitbox.height = 9;
+    player->internal_hitbox.width = 9;
+
     switch (level_info.initial_gamemode) {
         case GAMEMODE_SHIP:
         case GAMEMODE_UFO:
@@ -1579,6 +1594,8 @@ void slope_collide(GameObject *obj, Player *player) {
     int orient = grav_slope_orient(obj, player);  
     int mult = orient >= 2 ? -1 : 1;
 
+    InternalHitbox internal = player->internal_hitbox;
+
     
     bool gravSnap = (player->ceiling_inv_time > 0) || (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1);
 
@@ -1587,7 +1604,7 @@ void slope_collide(GameObject *obj, Player *player) {
     // Check if player inside slope
     if (orient == 0 || orient == 3) {
         bool internalCollidingSlope = intersect(
-            player->x, player->y, 9, 9, 0, 
+            player->x, player->y, internal.width, internal.height, 0, 
             obj_getRight(obj), obj->y, 1, obj->height, 0
         );
 
@@ -1607,7 +1624,7 @@ void slope_collide(GameObject *obj, Player *player) {
             player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
         } else {
             bool internalCollidingSlope = intersect(
-                player->x, player->y, 9, 9, 0, 
+                player->x, player->y, internal.width, internal.height, 0, 
                 obj->x, obj->y, obj->width, obj->height, 0
             );
 
@@ -1630,7 +1647,7 @@ void slope_collide(GameObject *obj, Player *player) {
             player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
         } else {
             bool internalCollidingSlope = intersect(
-                player->x, player->y, 9, 9, 0, 
+                player->x, player->y, internal.width, internal.height, 0, 
                 obj->x, obj->y, obj->width, obj->height, 0
             );
 
@@ -1649,7 +1666,7 @@ void slope_collide(GameObject *obj, Player *player) {
         // Going from the left
         if (obj_gravTop(player, obj) - gravBottom(player) > clip) {
             bool internalCollidingSlope = intersect(
-                player->x, player->y, 9, 9, 0, 
+                player->x, player->y, internal.width, internal.height, 0, 
                 obj->x, obj->y, obj->width, obj->height, 0
             );
 
@@ -1858,6 +1875,7 @@ void add_new_hitbox(Player *player) {
     hitbox.width = player->width;
     hitbox.height = player->height;
     hitbox.rotation = player->rotation;
+    hitbox.internal_hitbox = player->internal_hitbox;
 
     state.hitbox_trail_players[state.current_player][0] = hitbox;
 
@@ -1875,6 +1893,7 @@ void draw_hitbox_trail(int player) {
         player.y = hitbox.y;
         player.width = hitbox.width;
         player.height = hitbox.height;
+        player.internal_hitbox = hitbox.internal_hitbox;
         player.rotation = hitbox.rotation;
 
         draw_player_hitbox(&player);
@@ -1882,7 +1901,7 @@ void draw_hitbox_trail(int player) {
 }
 
 void draw_player_hitbox(Player *player) {
-
+    InternalHitbox internal = player->internal_hitbox;
     Vec2D rect[4];
     // Rotated hitbox
     get_corners(player->x, player->y, player->width, player->height, player->rotation, rect);
@@ -1893,7 +1912,7 @@ void draw_player_hitbox(Player *player) {
     draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
 
     // Internal hitbox
-    get_corners(player->x, player->y, 9, 9, 0, rect);
+    get_corners(player->x, player->y, internal.width, internal.height, 0, rect);
 
     draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
     draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));

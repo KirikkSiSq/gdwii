@@ -42,6 +42,7 @@ typedef struct {
     float width;
     float height;
     float rotation;
+    InternalHitbox internal_hitbox;
 } PlayerHitboxTrail;
 
 typedef struct {
