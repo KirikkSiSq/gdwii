@@ -28,6 +28,10 @@ static s32 have_samples = 0;
 static u32 mp3_volume = 255;
 static volatile float mp3_amplitude = 0.0f;
 
+static int frames_to_skip = 0; // ~1153 frames
+static int skipped = 0;
+
+
 #ifndef __SNDLIB_H__
 	#define ADMA_BUFFERSIZE			(4992)
 #else
@@ -87,12 +91,23 @@ static lwpq_t thQueue;
 static int mp3_voice = 1;  // Default voice is 1, but changeable
 
 static s32 (*mp3read)(void*,void *,s32);
-static void (*mp3filterfunc)(struct mad_stream *,struct mad_frame *);
+typedef bool (*mp3filter_t)(struct mad_stream *, struct mad_frame *);
+mp3filter_t mp3filterfunc = NULL;
 
 static void DataTransferCallback(s32);
 static void Init3BandState(EQState *es,s32 lowfreq,s32 highfreq,s32 mixfreq);
 static s16 Do3Band(EQState *es,s16 sample);
 static void Resample(struct mad_pcm *Pcm,EQState eqs[2],u32 stereo,u32 src_samplerate);
+
+typedef struct {
+    u8 *frame_start;
+    size_t frame_size;
+    u8 frame_data[DATABUFFER_SIZE];  // enough to hold next frame + padding
+    size_t byte_offset;
+	bool valid;
+} CachedMP3Start;
+
+static CachedMP3Start cached_start = {0};
 
 struct _rambuffer
 {
@@ -240,7 +255,7 @@ void MP3Player_Init(void)
 	}
 }
 
-s32 MP3Player_PlayBuffer(const void *buffer,s32 len,void (*filterfunc)(struct mad_stream *,struct mad_frame *))
+s32 MP3Player_PlayBuffer(const void *buffer,s32 len,bool (*filterfunc)(struct mad_stream *,struct mad_frame *))
 {
 	if(thr_running) return -1;
 
@@ -257,7 +272,7 @@ s32 MP3Player_PlayBuffer(const void *buffer,s32 len,void (*filterfunc)(struct ma
 	return 0;
 }
 
-s32 MP3Player_PlayFile(void *cb_data,s32 (*reader)(void *,void *,s32),void (*filterfunc)(struct mad_stream *,struct mad_frame *))
+s32 MP3Player_PlayFile(void *cb_data,s32 (*reader)(void *,void *,s32),bool (*filterfunc)(struct mad_stream *,struct mad_frame *))
 {
 	if(thr_running) return -1;
 
@@ -271,6 +286,14 @@ s32 MP3Player_PlayFile(void *cb_data,s32 (*reader)(void *,void *,s32),void (*fil
 }
 
 void MP3Player_Stop(void)
+{
+	skipped = 0;
+	frames_to_skip = 0;
+	memset(&cached_start,0,sizeof(cached_start));
+	MP3Player_Reset();
+}
+
+void MP3Player_Reset(void)
 {
 	if(!thr_running) return;
 
@@ -315,15 +338,24 @@ static void *StreamPlay(void *arg)
 	mad_timer_reset(&Timer);
 
 	atend = false;
-	MP3Playing = false;
-	while(!atend && thr_running) {
-		if(Stream.buffer==NULL || Stream.error==MAD_ERROR_BUFLEN) {
+	MP3Playing = true;
+	bool using_cache = false;
+
+	if (cached_start.valid) {
+		mad_stream_buffer(&Stream, cached_start.frame_data, cached_start.frame_size);
+		using_cache = true;
+	} else {
+		MP3Playing = false;
+	}
+
+	while (!atend && thr_running) {
+		if ((Stream.buffer == NULL || Stream.error == MAD_ERROR_BUFLEN) && !using_cache) {
 			u8 *ReadStart;
 			s32 ReadSize, Remaining;
 
-			if(Stream.next_frame!=NULL) {
+			if (Stream.next_frame != NULL) {
 				Remaining = Stream.bufend - Stream.next_frame;
-				memmove(InputBuffer,Stream.next_frame,Remaining);
+				memmove(InputBuffer, Stream.next_frame, Remaining);
 				ReadStart = InputBuffer + Remaining;
 				ReadSize = DATABUFFER_SIZE - Remaining;
 			} else {
@@ -332,36 +364,51 @@ static void *StreamPlay(void *arg)
 				Remaining = 0;
 			}
 
-
-			ReadSize = mp3read(mp3cb_data,ReadStart,ReadSize);
-			if(ReadSize<=0) {
+			ReadSize = mp3read(mp3cb_data, ReadStart, ReadSize);
+			if (ReadSize <= 0) {
 				GuardPtr = ReadStart;
-				memset(GuardPtr,0,MAD_BUFFER_GUARD);
+				memset(GuardPtr, 0, MAD_BUFFER_GUARD);
 				ReadSize = MAD_BUFFER_GUARD;
 				atend = true;
 			}
 
-			mad_stream_buffer(&Stream,InputBuffer,(ReadSize + Remaining));
-			//Stream.error = 0;
+			mad_stream_buffer(&Stream, InputBuffer, ReadSize + Remaining);
 		}
 
-		while (!mad_frame_decode(&Frame,&Stream) && thr_running) {
-			if(mp3filterfunc)
-				mp3filterfunc(&Stream,&Frame);
+		while (!mad_frame_decode(&Frame, &Stream) && thr_running) {
+			if (mp3filterfunc && mp3filterfunc(&Stream, &Frame)) {
+				if (skipped == frames_to_skip && !cached_start.valid) {
+					cached_start.frame_size = Stream.bufend - Stream.this_frame;
+					memcpy(cached_start.frame_data, Stream.this_frame, cached_start.frame_size);
+					cached_start.valid = true;
+					struct _rambuffer *rb = (struct _rambuffer *)mp3cb_data;
+					s32 remaining_bytes = Stream.bufend - Stream.this_frame;
+					cached_start.byte_offset = rb->pos - remaining_bytes;
+				}
+				continue;
+			}
 
-			mad_timer_add(&Timer,Frame.header.duration);
-			mad_synth_frame(&Synth,&Frame);
+			mad_timer_add(&Timer, Frame.header.duration);
+			mad_synth_frame(&Synth, &Frame);
 
-			Resample(&Synth.pcm,eqs,(MAD_NCHANNELS(&Frame.header)==2),Frame.header.samplerate);
+			Resample(&Synth.pcm, eqs, (MAD_NCHANNELS(&Frame.header) == 2), Frame.header.samplerate);
 		}
 
-		if(MAD_RECOVERABLE(Stream.error)) {
-		  if(Stream.error!=MAD_ERROR_LOSTSYNC
-			|| Stream.this_frame!=GuardPtr) continue;
+		if (MAD_RECOVERABLE(Stream.error)) {
+			if (Stream.error != MAD_ERROR_LOSTSYNC || Stream.this_frame != GuardPtr)
+				continue;
 		} else {
-			if(Stream.error!=MAD_ERROR_BUFLEN) break;
+			if (Stream.error != MAD_ERROR_BUFLEN)
+				break;
 		}
 
+		// If we were using cache and finished it, resume file reading
+		if (using_cache) {
+			using_cache = false;
+			Stream.buffer = NULL;
+			struct _rambuffer *rb = (struct _rambuffer *)mp3cb_data;
+			rb->pos += cached_start.byte_offset + cached_start.frame_size;
+		}
 	}
 
 	mad_synth_finish(&Synth);
@@ -515,6 +562,21 @@ static void DataTransferCallback(s32 voice)
 	}
 #endif
 }
+
+void MP3Player_SetSeconds(int seconds) {
+	if (!cached_start.valid) skipped = 0;
+	frames_to_skip = seconds * 38.28125;
+}
+
+bool seek_filter(struct mad_stream *stream, struct mad_frame *frame) {
+    if (skipped < frames_to_skip) {
+        skipped++;
+        return true;  // Skip this frame
+    } else {
+        return false;
+    }
+}
+
 
 float MP3Player_GetAmplitude(void)
 {

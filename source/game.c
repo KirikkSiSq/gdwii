@@ -22,8 +22,6 @@ float death_timer = 0.0f;
 char *current_song_pointer = NULL;
 
 int game_loop() {
-    u64 prevTicks = gettime();
-    double accumulator = 0.0f;
 
     size_t size;
     if (level_info.custom_song_id >= 0) {
@@ -33,8 +31,12 @@ int game_loop() {
     }
 
     if (current_song_pointer) {
-        MP3Player_PlayBuffer(current_song_pointer, size, NULL);
+        MP3Player_SetSeconds(level_info.song_offset);
+        MP3Player_PlayBuffer(current_song_pointer, size, seek_filter);
     }
+
+    u64 prevTicks = gettime();
+    double accumulator = 0.0f;
 
     while (1) {
         start_frame = gettime();
@@ -126,8 +128,9 @@ int game_loop() {
                 init_variables();
                 reload_level(); 
                 if (current_song_pointer) {
-                    MP3Player_Stop();
-                    MP3Player_PlayBuffer(current_song_pointer, size, NULL);
+                    MP3Player_Reset();
+                    MP3Player_SetSeconds(level_info.song_offset);
+                    MP3Player_PlayBuffer(current_song_pointer, size, seek_filter);
                     MP3Player_Volume(255);
                 }
                 update_input();

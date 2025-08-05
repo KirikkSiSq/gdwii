@@ -1213,6 +1213,14 @@ void load_level(char *data) {
         level_info.custom_song_id = atoi(gmd_custom_song_id); // Custom song id
     }
 
+    
+    char *gmd_song_offset = get_metadata_value(level_string, "kA13");
+    if (gmd_song_offset) {
+        level_info.song_offset = atoi(gmd_song_offset);
+    } else {
+        level_info.song_offset = 0;
+    }
+
     char *background_data = get_metadata_value(level_string, "kA6");
     if (background_data) {
         level_info.background_id = CLAMP(atoi(background_data) - 1, 0, BG_COUNT - 1);
