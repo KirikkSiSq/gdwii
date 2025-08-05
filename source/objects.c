@@ -92,6 +92,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 MotionTrail_ResumeStroke(&trail);
                 player->vel_y = jump_heights_table[state.speed][JUMP_YELLOW_PAD][player->gamemode][player->mini];
                 player->on_ground = FALSE;
+                player->inverse_rotation = FALSE;
                 player->left_ground = TRUE;
                 player->ufo_last_y = player->y;
                 
@@ -113,6 +114,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 MotionTrail_ResumeStroke(&trail);
                 player->vel_y = jump_heights_table[state.speed][JUMP_PINK_PAD][player->gamemode][player->mini];
                 player->on_ground = FALSE;
+                player->inverse_rotation = FALSE;
                 player->left_ground = TRUE;
                 player->ufo_last_y = player->y;
                 
@@ -148,6 +150,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 player->upside_down ^= 1;
                 flip_other_player(state.current_player);
                 player->on_ground = FALSE;
+                player->inverse_rotation = FALSE;
                 player->ufo_last_y = player->y;
                 
                 particle_templates[USE_EFFECT].start_scale = 0;
@@ -173,6 +176,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 player->on_ground = FALSE;
                 player->on_ceiling = FALSE;
+                player->inverse_rotation = FALSE;
                 player->left_ground = TRUE;
                 player->buffering_state = BUFFER_END;
                 player->ufo_last_y = player->y;
@@ -201,6 +205,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 player->on_ground = FALSE;
                 player->on_ceiling = FALSE;
+                player->inverse_rotation = FALSE;
                 player->left_ground = TRUE;
                 player->buffering_state = BUFFER_END;
                 player->ufo_last_y = player->y;
@@ -232,6 +237,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 player->on_ground = FALSE;
                 player->on_ceiling = FALSE;
+                player->inverse_rotation = FALSE;
                 player->left_ground = TRUE;
                 player->buffering_state = BUFFER_END;
                 player->ufo_last_y = player->y;
@@ -287,6 +293,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 if (player->gamemode != GAMEMODE_SHIP) {
                     player->vel_y /= (player->gamemode == GAMEMODE_UFO) ? 4 : 2;
                     player->gamemode = GAMEMODE_SHIP;
+                    player->inverse_rotation = FALSE;
                     flip_other_player(state.current_player ^ 1);
 
                     particle_templates[USE_EFFECT].start_scale = 80;
@@ -313,6 +320,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                     player->vel_y /= -2;
                     player->upside_down = FALSE;
+                    player->inverse_rotation = FALSE;
                     flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
@@ -338,6 +346,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     if (player->gamemode != GAMEMODE_BALL) MotionTrail_ResumeStroke(&trail);
                     player->vel_y /= -2;
                     player->upside_down = TRUE;
+                    player->inverse_rotation = FALSE;
                     flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
@@ -399,6 +408,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     if (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) player->vel_y /= 2;
                     
                     player->gamemode = GAMEMODE_BALL;
+                    player->inverse_rotation = FALSE;
                     flip_other_player(state.current_player ^ 1);
 
                     particle_templates[USE_EFFECT].start_scale = 80;
@@ -460,6 +470,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->vel_y /= (state.old_player.gamemode == GAMEMODE_SHIP) ? 4 : 2;
                     player->gamemode = GAMEMODE_UFO;
                     player->ufo_last_y = player->y;
+                    player->inverse_rotation = FALSE;
                     flip_other_player(state.current_player ^ 1);
 
                     if (state.old_player.gamemode == GAMEMODE_SHIP) {
