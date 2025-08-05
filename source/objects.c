@@ -1117,7 +1117,7 @@ float get_object_pulse(float amplitude, GameObject *obj) {
         case PULSING_BIG_SQUARE_OUTLINE:
         case PULSING_BIG_CIRCLE:
         case PULSING_BIG_CIRCUNFERENCE:
-            return map_range(amplitude, 0.f, 1.f, 0.8f, 1.2f);
+            return map_range(amplitude, 0.f, 1.f, 0.6f, 1.2f);
     }
     return amplitude;
 }
@@ -1690,6 +1690,10 @@ void draw_all_object_layers() {
     }
 
     draw_particles(SPEEDUP);
+    
+    prev_tex = NULL;
+    prev_blending = GRRLIB_BLEND_ALPHA;
+    GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
 
     if (state.hitbox_display) { 
         GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
@@ -1727,9 +1731,6 @@ void draw_all_object_layers() {
     draw_time = ticks_to_microsecs(draw_time) / 1000.f;
     obj_particles_time = ticks_to_microsecs(obj_particles_time) / 1000.f;
     
-    prev_tex = NULL;
-    prev_blending = GRRLIB_BLEND_ALPHA;
-    GRRLIB_SetBlend(prev_blending);
     
     GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
 }
