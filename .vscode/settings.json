@@ -297,7 +297,9 @@
         "g_04_png.h": "c",
         "bg_04_png.h": "c",
         "d_swirve_03_001_png.h": "c",
-        "icons_includes.h": "c"
+        "icons_includes.h": "c",
+        "text_encoding": "c",
+        "typeinfo": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

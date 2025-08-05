@@ -25,7 +25,12 @@ void game_folder_not_found();
 
 int level_id = 0;
 
-char sd_level_paths[MAX_SD_LEVELS][MAX_PATH_LEN];
+typedef struct {
+    char name[MAX_PATH_LEN];
+    bool is_dir;
+} FileOrFolder;
+
+FileOrFolder sd_level_paths[MAX_SD_LEVELS];
 int sd_level_count = 0;
 
 char current_level_name[255];
@@ -81,6 +86,9 @@ void game_folder_not_found() {
     }
 }
 
+char current_directory[256];
+int dir_level = 0;
+
 int custom_song_id = -1;
 
 void print_custom_song(int song_id) {
@@ -103,13 +111,78 @@ void check_custom_song(char *level_data) {
     }
 }
 
+void load_folder(char *dir) {
+    sd_level_count = 0;
+
+	struct dirent *pent;
+	struct stat statbuf;
+
+    char directory[268];
+    
+    if (strlen(dir) > 0) {
+        snprintf(directory, sizeof(directory), "%s", dir);
+    } else {
+        snprintf(directory, sizeof(directory), "%s/%s", launch_dir, USER_LEVELS_FOLDER);
+    }
+
+    strcpy(current_directory, directory);
+
+    DIR *level_dir = opendir(directory);
+
+    printf("Loaded folder: %s\n", directory);
+
+    while ((pent=readdir(level_dir))!=NULL) {
+        stat(pent->d_name,&statbuf);
+
+        if(strcmp(".", pent->d_name) == 0 || strcmp("..", pent->d_name) == 0)
+            continue;
+
+        const char *ext = strrchr(pent->d_name, '.');
+    
+        if (ext) {
+            if (strcmp(ext, ".gmd") == 0) { // GMD
+                snprintf(sd_level_paths[sd_level_count].name, MAX_PATH_LEN, "%s/%s", directory, pent->d_name);
+                sd_level_paths[sd_level_count].is_dir = FALSE;
+                sd_level_count++;
+
+                if (sd_level_count >= MAX_SD_LEVELS) break;
+
+                printf("Found GMD file: %s %llu\n", pent->d_name, pent->d_stat.st_size);
+            }
+        } else { { // Folder
+            snprintf(sd_level_paths[sd_level_count].name, MAX_PATH_LEN, "%s/%s", directory, pent->d_name);
+            sd_level_paths[sd_level_count].is_dir = TRUE;
+            sd_level_count++;
+
+            if (sd_level_count >= MAX_SD_LEVELS) break;
+
+            printf("Found folder: %s %llu\n", pent->d_name, pent->d_stat.st_size);
+        } }
+    }
+    closedir(level_dir);
+}
+
+void go_back_directory(char *path) {
+    size_t len = strlen(path);
+    if (len == 0) return;
+
+    while (len > 0 && path[len - 1] == '/') {
+        path[--len] = '\0';
+    }
+
+    while (len > 0 && path[len - 1] != '/') {
+        path[--len] = '\0';
+    }
+
+    if (len > 0 && path[len - 1] == '/') {
+        path[len - 1] = '\0';
+    }
+}
+
 int menu_loop() {
     if (!fatInitDefault()) {
 		printf("fatInitDefault failure\n");
 	}
-    
-	struct dirent *pent;
-	struct stat statbuf;
     
     DIR *pdir = opendir(launch_dir);
 
@@ -118,36 +191,12 @@ int menu_loop() {
         return TRUE;
 	}
 
-    char usr_lvl_dir[268];
-    snprintf(usr_lvl_dir, sizeof(usr_lvl_dir), "%s/%s", launch_dir, USER_LEVELS_FOLDER);
-
-    DIR *level_dir = opendir(usr_lvl_dir);
-    
-    sd_level_count = 0;
-    if (level_dir) {
-        while ((pent=readdir(level_dir))!=NULL) {
-            stat(pent->d_name,&statbuf);
-
-            if(strcmp(".", pent->d_name) == 0 || strcmp("..", pent->d_name) == 0)
-                continue;
-
-            const char *ext = strrchr(pent->d_name, '.');
-            if (ext && strcmp(ext, ".gmd") == 0) {
-                snprintf(sd_level_paths[sd_level_count], MAX_PATH_LEN, "%s/%s", usr_lvl_dir, pent->d_name);
-                
-                sd_level_count++;
-                if (sd_level_count >= MAX_SD_LEVELS) break;
-
-                printf("Found GMD file: %s %llu\n", pent->d_name, pent->d_stat.st_size);
-            }
-        }
-        closedir(level_dir);
-    }
+    load_folder(current_directory);
 
 	closedir(pdir);
     
     // Read first gmd
-    char *level_data = read_file(sd_level_paths[level_id], &outsize);
+    char *level_data = read_file(sd_level_paths[level_id].name, &outsize);
     if (level_data) {
         snprintf(current_level_name, 255, "%s", get_level_name(level_data));
         free(level_data);
@@ -169,7 +218,7 @@ int menu_loop() {
 
             if (level_mode == 1) {
                 // Read first gmd
-                char *level_data = read_file(sd_level_paths[level_id], &outsize);
+                char *level_data = read_file(sd_level_paths[level_id].name, &outsize);
                 if (level_data) {
                     snprintf(current_level_name, 255, "%s", get_level_name(level_data));
                     
@@ -186,7 +235,6 @@ int menu_loop() {
             if (sdcard_levels()) break;
         }
 
-        
         if (state.input.pressedHome) {
             if (menuLoop) free(menuLoop);
 
@@ -201,6 +249,23 @@ int menu_loop() {
     return FALSE;
 }
 
+void refresh_sdcard_levels() {
+    memset(current_level_name, 0, 255);
+                
+    if (sd_level_paths[level_id].is_dir) {
+        snprintf(current_level_name, 255, "%s", sd_level_paths[level_id].name);
+    }
+
+    char *level_data = read_file(sd_level_paths[level_id].name, &outsize);
+    if (level_data) {
+        snprintf(current_level_name, 255, "%s", get_level_name(level_data));
+        
+        check_custom_song(level_data);
+
+        free(level_data);
+    }
+}
+
 int sdcard_levels() {
     GRRLIB_FillScreen(RGBA(0, 127, 0, 255));
             
@@ -208,57 +273,58 @@ int sdcard_levels() {
     
     if (sd_level_count > 0) {
         char text[269];
-        snprintf(text, sizeof(text), "%d - %s", level_id + 1, current_level_name);
+        if (sd_level_paths[level_id].is_dir) {
+            snprintf(text, sizeof(text), "FOLDER - %s", current_level_name);
 
-        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
-        if (custom_song_id >= 0) print_custom_song(custom_song_id);
+            GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
+        } else {
+            snprintf(text, sizeof(text), "%d - %s", level_id + 1, current_level_name);
+
+            GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
+            if (custom_song_id >= 0) print_custom_song(custom_song_id);
+        }
 
         if (state.input.pressedDir & INPUT_LEFT) {
             level_id--;
             if (level_id < 0) level_id = sd_level_count - 1; 
-            
-            memset(current_level_name, 0, 255);
-
-            char *level_data = read_file(sd_level_paths[level_id], &outsize);
-            if (level_data) {
-                snprintf(current_level_name, 255, "%s", get_level_name(level_data));
-
-                check_custom_song(level_data);
-
-                free(level_data);
-            }
+            refresh_sdcard_levels();
         }
 
         if (state.input.pressedDir & INPUT_RIGHT) {
             level_id++;
             if (level_id >= sd_level_count) level_id = 0;
-                
-            memset(current_level_name, 0, 255);
-            
-            char *level_data = read_file(sd_level_paths[level_id], &outsize);
-            if (level_data) {
-                snprintf(current_level_name, 255, "%s", get_level_name(level_data));
-                
-                check_custom_song(level_data);
+            refresh_sdcard_levels();
+        }
 
-                free(level_data);
-            }
+        if (state.input.pressedB && dir_level > 0) {
+            go_back_directory(current_directory);
+            load_folder(current_directory);
+            level_id = 0;
+            dir_level--;
+            refresh_sdcard_levels();
         }
 
         if (state.input.pressedA) {
-            // Start level
-            gameRoutine = ROUTINE_GAME;
-            MP3Player_Stop();
-            PlayOgg(playSound_01_ogg, playSound_01_ogg_size, 0, OGG_ONE_TIME);
-            for (int i = 0; i < 90; i++) {
-                update_input();
-                VIDEO_WaitVSync();
+            if (sd_level_paths[level_id].is_dir) {
+                dir_level++;
+                load_folder(sd_level_paths[level_id].name);
+                level_id = 0;
+                refresh_sdcard_levels();
+            } else {
+                // Start level
+                gameRoutine = ROUTINE_GAME;
+                MP3Player_Stop();
+                PlayOgg(playSound_01_ogg, playSound_01_ogg_size, 0, OGG_ONE_TIME);
+                for (int i = 0; i < 90; i++) {
+                    update_input();
+                    VIDEO_WaitVSync();
+                }
+                
+                char *level = read_file(sd_level_paths[level_id].name, &outsize);
+                load_level(level);
+                free(level);
+                return 1;
             }
-            
-            char *level = read_file(sd_level_paths[level_id], &outsize);
-            load_level(level);
-            free(level);
-            return 1;
         }
     } else {
         char path[512];
