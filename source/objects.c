@@ -1712,9 +1712,11 @@ void draw_all_object_layers() {
             }
         }
 
+        if (state.hitbox_display == 2) draw_hitbox_trail(0);
         draw_player_hitbox(&state.player);
 
         if (state.dual) {
+            if (state.hitbox_display == 2) draw_hitbox_trail(1);
             draw_player_hitbox(&state.player2);
         }
         

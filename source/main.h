@@ -9,6 +9,8 @@ extern float screen_factor_x;
 extern float screen_factor_y;
 extern int screenHeight;
 
+#define HITBOX_TRAIL_SIZE 64
+
 typedef struct {
     u8 pressedA:1;
     u8 holdA:1;
@@ -33,6 +35,14 @@ typedef struct {
     u8 pressedDir;
     u8 holdDir;
 } KeyInput;
+
+typedef struct {
+    float x;
+    float y;
+    float width;
+    float height;
+    float rotation;
+} PlayerHitboxTrail;
 
 typedef struct {
     float camera_x;
@@ -69,11 +79,14 @@ typedef struct {
     unsigned char speed;
 
     bool noclip;
-    bool hitbox_display;
+    int hitbox_display;
     bool dual;
     bool dead;
     
     Particle particles[MAX_PARTICLES];
+
+    int last_hitbox_trail;
+    PlayerHitboxTrail hitbox_trail_players[2][HITBOX_TRAIL_SIZE];
 
     KeyInput input;
 } GameState;

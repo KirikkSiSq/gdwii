@@ -801,6 +801,8 @@ void handle_player(Player *player) {
     
     do_ball_reflection();
 
+    if (state.hitbox_display == 2) add_new_hitbox(player);
+
     if (state.noclip) state.dead = FALSE;
 }
 
@@ -843,6 +845,8 @@ void init_variables() {
     level_info.completing = FALSE;
     
     memset(&state.player, 0, sizeof(Player));
+    memset(&state.hitbox_trail_players, 0, sizeof(state.hitbox_trail_players));
+    state.last_hitbox_trail = 0;
 
     state.dual = FALSE;
     state.dead = FALSE;
@@ -1342,6 +1346,10 @@ void slope_calc(GameObject *obj, Player *player) {
             if (player->gamemode == GAMEMODE_BALL) {
                 vel *= 0.75f;
             }
+            
+            if (player->gamemode == GAMEMODE_SHIP) {
+                vel *= 0.75f;
+            }
 
             if (player->gamemode == GAMEMODE_UFO) {
                 vel *= 0.7499f;
@@ -1422,6 +1430,11 @@ void slope_calc(GameObject *obj, Player *player) {
             if (player->gamemode == GAMEMODE_BALL) {
                 vel *= 0.75f;
             }
+            
+            if (player->gamemode == GAMEMODE_SHIP) {
+                vel *= 0.75f;
+            }
+
 
             if (player->gamemode == GAMEMODE_UFO) {
                 vel *= 0.7499f;
@@ -1818,6 +1831,39 @@ void draw_hitbox(GameObject *obj) {
         draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, color);
         draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, color);
         draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, color);
+    }
+}
+
+void add_new_hitbox(Player *player) {
+    for (int i = HITBOX_TRAIL_SIZE - 2; i > 0; i--) {
+        state.hitbox_trail_players[state.current_player][i] = state.hitbox_trail_players[state.current_player][i - 1];
+    }
+    PlayerHitboxTrail hitbox;
+    hitbox.x = player->x;
+    hitbox.y = player->y;
+    hitbox.width = player->width;
+    hitbox.height = player->height;
+    hitbox.rotation = player->rotation;
+
+    state.hitbox_trail_players[state.current_player][0] = hitbox;
+
+    state.last_hitbox_trail++;
+
+    if (state.last_hitbox_trail >= HITBOX_TRAIL_SIZE) state.last_hitbox_trail = HITBOX_TRAIL_SIZE - 1;
+}
+
+void draw_hitbox_trail(int player) {
+    for (int i = state.last_hitbox_trail - 1; i >= 0; i--) {
+        PlayerHitboxTrail hitbox = state.hitbox_trail_players[player][i];
+
+        Player player;
+        player.x = hitbox.x;
+        player.y = hitbox.y;
+        player.width = hitbox.width;
+        player.height = hitbox.height;
+        player.rotation = hitbox.rotation;
+
+        draw_player_hitbox(&player);
     }
 }
 

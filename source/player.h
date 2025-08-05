@@ -114,6 +114,8 @@ bool slope_touching(GameObject *obj, Player *player);
 void run_camera();
 float get_slope_angle(GameObject *obj);
 
+void add_new_hitbox(Player *player);
 void draw_hitbox(GameObject *obj);
 void draw_player_hitbox(Player *player);
+void draw_hitbox_trail(int player);
 bool player_circle_touches_slope(GameObject *obj, Player *player);
