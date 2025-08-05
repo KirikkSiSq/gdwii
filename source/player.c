@@ -105,6 +105,8 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
         case HITBOX_BREAKABLE_BLOCK:
         case HITBOX_SOLID: 
             bool gravSnap = FALSE;
+
+            clip += fabsf(player->vel_y) * dt;
             
             float bottom = gravBottom(player);
             if (player->slope_data.slope) {
@@ -201,16 +203,28 @@ void collide_with_obj(Player *player, GameObject *obj) {
         } else {
             float obj_rot = normalize_angle(obj->rotation);
             float rotation = (obj_rot == 0 || obj_rot == 90 || obj_rot == 180 || obj_rot == 270) ? 0 : player->rotation;
-            if (intersect(
+            
+            bool checkColl = intersect(
                 player->x, player->y, player->width, player->height, rotation, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj_rot
-            )) {
+            );
+            
+            // Rotated hitboxes must also collide with the unrotated hitbox
+            if (rotation != 0) {
+                checkColl = checkColl && intersect(
+                    player->x, player->y, player->width, player->height, 0, 
+                    obj->x, obj->y, hitbox->width, hitbox->height, obj_rot
+                );
+            }
+
+            if (checkColl) {
                 handle_collision(player, obj, hitbox);
                 obj->collided[state.current_player] = TRUE;
                 number_of_collisions++;
             } else {
                 obj->collided[state.current_player] = FALSE;
             }
+            
         }
     } else {
         obj->collided[state.current_player] = FALSE;
@@ -503,7 +517,7 @@ void ufo_particles(Player *player) {
 void ufo_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
 
-    if (player->buffering_state == BUFFER_READY && (state.input.pressedA)) {
+    if (player->buffering_state == BUFFER_READY && (state.input.pressedA || state.input.pressed2orY)) {
         player->vel_y = maxf(player->vel_y, player->mini ? 358.992 : 371.034);
         player->buffering_state = BUFFER_END;
         player->ufo_last_y = player->y;
