@@ -150,6 +150,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
                 player->on_ground = TRUE;
+                player->inverse_rotation = FALSE;
                 player->time_since_ground = 0;
             } else {
                 // Ufo can break breakable blocks from above, so dont use as a ceiling
@@ -161,6 +162,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                     if (((gravTop(player) - obj_gravBottom(player, obj) <= clip && player->vel_y > 0) || gravSnap) && !slope_condition) {
                         player->vel_y = 0;
                         if (!gravSnap) player->on_ceiling = TRUE;
+                        player->inverse_rotation = FALSE;
                         player->time_since_ground = 0;
                         player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
                     }
@@ -292,7 +294,7 @@ void collide_with_objects(Player *player) {
 }
 
 void cube_gamemode(Player *player) {
-    int mult = (player->upside_down ? -1 : 1);
+    int mult = (player->upside_down ^ player->inverse_rotation ? -1 : 1);
     
     trail.positionR = (Vec2){player->x, player->y};  
     trail.startingPositionInitialized = TRUE;
@@ -615,8 +617,10 @@ void run_player(Player *player) {
         if (getBottom(player) <= state.ground_y) {
             if (player->upside_down) {
                 player->on_ceiling = TRUE;
+                player->inverse_rotation = FALSE;
             } else {
                 player->on_ground = TRUE;          
+                player->inverse_rotation = FALSE;
             }
             player->time_since_ground = 0; 
         } 
@@ -625,8 +629,10 @@ void run_player(Player *player) {
         if (getTop(player) >= state.ceiling_y) {
             if (player->upside_down) {
                 player->on_ground = TRUE;
+                player->inverse_rotation = FALSE;
             } else {
-                player->on_ceiling = TRUE;          
+                player->on_ceiling = TRUE;     
+                player->inverse_rotation = FALSE;     
             } 
             player->time_since_ground = 0; 
         } 
@@ -1343,6 +1349,7 @@ void slope_calc(GameObject *obj, Player *player) {
             vel *= time;
 
             player->vel_y = vel;
+            player->inverse_rotation = TRUE;
             clear_slope_data(player);
         }
     } else if (orientation == 1) {
@@ -1422,6 +1429,7 @@ void slope_calc(GameObject *obj, Player *player) {
             vel *= time;
 
             player->vel_y = -vel;
+            player->inverse_rotation = TRUE;
             clear_slope_data(player);
         }
     } else {
@@ -1629,6 +1637,7 @@ void slope_collide(GameObject *obj, Player *player) {
                 player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
             }
             player->on_ground = TRUE;
+            player->inverse_rotation = FALSE;
             return;
         }
     }
@@ -1670,6 +1679,7 @@ void slope_collide(GameObject *obj, Player *player) {
         
         if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
             player->on_ground = TRUE;
+            player->inverse_rotation = FALSE;
             player->slope_data.slope = obj;
             snap_player_to_slope(obj, player);
 

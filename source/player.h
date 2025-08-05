@@ -41,6 +41,7 @@ typedef struct {
     bool mini;
     bool upside_down;
     bool touching_slope;
+    bool inverse_rotation;
     
     GameObject *potentialSlope;
 
