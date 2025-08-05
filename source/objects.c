@@ -583,6 +583,9 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 state.dual = TRUE;
                 state.dual_portal_y = obj->y;
                 setup_dual();
+                
+                MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, p1, trail_tex);
+
                 obj->activated[state.current_player] = TRUE;
             }
             break;
@@ -619,7 +622,6 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                         state.ceiling_y = state.ground_y + 240;
                         set_intended_ceiling();
                 }
-                MotionTrail_StopStroke(&trail_p2);
             }
             break;
     }

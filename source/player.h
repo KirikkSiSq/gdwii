@@ -90,6 +90,8 @@ extern Color p2;
 
 extern const float player_speeds[SPEED_COUNT];
 
+extern GRRLIB_texImg *trail_tex;
+
 void handle_death();
 void init_variables();
 void full_init_variables();
