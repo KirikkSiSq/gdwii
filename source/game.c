@@ -26,7 +26,11 @@ int game_loop() {
     double accumulator = 0.0f;
 
     size_t size;
-    current_song_pointer = load_song(songs[level_info.song_id].song_name, &size);
+    if (level_info.custom_song_id >= 0) {
+        current_song_pointer = load_user_song(level_info.custom_song_id, &size);
+    } else {
+        current_song_pointer = load_song(songs[level_info.song_id].song_name, &size);
+    }
 
     if (current_song_pointer) {
         MP3Player_PlayBuffer(current_song_pointer, size, NULL);
@@ -53,7 +57,11 @@ int game_loop() {
         u64 t0 = gettime();
         while (accumulator >= STEPS_DT) {
             state.old_player = state.player;
-            amplitude = (beat_pulse ? 1.f : 0.1f);
+            if (level_info.custom_song_id >= 0) {
+                amplitude = CLAMP(MP3Player_GetAmplitude(), 0.1f, 1.f);
+            } else {
+                amplitude = (beat_pulse ? 1.f : 0.1f);
+            }
 
             state.current_player = 0;
             trail = trail_p1;

@@ -1,6 +1,8 @@
 #include "main.h"
 #include <grrlib.h>
+#include <stdlib.h>
 #include <wiiuse/wpad.h>
+
 #include "level.h"
 #include "custom_mp3player.h"
 #include "oggplayer.h"
@@ -9,6 +11,7 @@
 #include <fat.h>
 #include <dirent.h>
 #include <sys/types.h>
+
 #include "filesystem.h"
 #include "math.h"
 
@@ -52,6 +55,53 @@ const int default_lvl_colors[NUM_LVL_COLORS] = {
   RGBA(0, 228, 228, 255), // BP
   RGBA(0, 112, 231, 255), // ToE2
 };
+
+void game_folder_not_found() {
+    char path[256];
+    snprintf(path, sizeof(path), "%s", launch_dir);
+
+    while (1) {
+        update_input();
+
+        GRRLIB_FillScreen(RGBA(0, 127, 255, 255));
+
+        
+        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, "Couldn't find the game folder.");
+        GRRLIB_Printf(0, 45, font, RGBA(255,255,255,255), 0.75, "Make sure the resources folder");
+        GRRLIB_Printf(0, 70, font, RGBA(255,255,255,255), 0.75, "and boot.dol is in the following");
+        GRRLIB_Printf(0, 95, font, RGBA(255,255,255,255), 0.75, "path:");
+        GRRLIB_Printf(0, 120, font, RGBA(255,255,255,255), 0.75, path);
+        GRRLIB_Printf(0, 155, font, RGBA(255,255,255,255), 0.75, "Press home to exit.");
+                
+        if (state.input.pressedHome) {
+            break;
+        }
+
+        GRRLIB_Render();
+    }
+}
+
+int custom_song_id = -1;
+
+void print_custom_song(int song_id) {
+    char text[269];
+    snprintf(text, sizeof(text), "Level uses song: %d.mp3", song_id);
+    GRRLIB_Printf(0, 270, font, RGBA(255,255,255,255), 0.75, text);
+
+    if (!check_song(song_id)) {
+        GRRLIB_Printf(0, 300, font, RGBA(255,255,255,255), 0.75, "Song not found.");
+        GRRLIB_Printf(0, 330, font, RGBA(255,255,255,255), 0.75, "Add it in the \"user_songs\" folder.");
+    }
+}
+
+void check_custom_song(char *level_data) {
+    char *gmd_custom_song_id = extract_gmd_key((const char *) level_data, "k45", "i");
+    if (gmd_custom_song_id) {
+        custom_song_id = atoi(gmd_custom_song_id);        
+    } else {
+        custom_song_id = -1;
+    }
+}
 
 int menu_loop() {
     if (!fatInitDefault()) {
@@ -122,6 +172,9 @@ int menu_loop() {
                 char *level_data = read_file(sd_level_paths[level_id], &outsize);
                 if (level_data) {
                     snprintf(current_level_name, 255, "%s", get_level_name(level_data));
+                    
+                    check_custom_song(level_data);
+                    
                     free(level_data);
                 }
             }
@@ -148,31 +201,6 @@ int menu_loop() {
     return FALSE;
 }
 
-void game_folder_not_found() {
-    char path[256];
-    snprintf(path, sizeof(path), "%s", launch_dir);
-
-    while (1) {
-        update_input();
-
-        GRRLIB_FillScreen(RGBA(0, 127, 255, 255));
-
-        
-        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, "Couldn't find the game folder.");
-        GRRLIB_Printf(0, 45, font, RGBA(255,255,255,255), 0.75, "Make sure the resources folder");
-        GRRLIB_Printf(0, 70, font, RGBA(255,255,255,255), 0.75, "and boot.dol is in the following");
-        GRRLIB_Printf(0, 95, font, RGBA(255,255,255,255), 0.75, "path:");
-        GRRLIB_Printf(0, 120, font, RGBA(255,255,255,255), 0.75, path);
-        GRRLIB_Printf(0, 155, font, RGBA(255,255,255,255), 0.75, "Press home to exit.");
-                
-        if (state.input.pressedHome) {
-            break;
-        }
-
-        GRRLIB_Render();
-    }
-}
-
 int sdcard_levels() {
     GRRLIB_FillScreen(RGBA(0, 127, 0, 255));
             
@@ -180,8 +208,10 @@ int sdcard_levels() {
     
     if (sd_level_count > 0) {
         char text[269];
-        snprintf(text, 269, "%d - %s", level_id + 1, current_level_name);
+        snprintf(text, sizeof(text), "%d - %s", level_id + 1, current_level_name);
+
         GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
+        if (custom_song_id >= 0) print_custom_song(custom_song_id);
 
         if (state.input.pressedDir & INPUT_LEFT) {
             level_id--;
@@ -192,6 +222,9 @@ int sdcard_levels() {
             char *level_data = read_file(sd_level_paths[level_id], &outsize);
             if (level_data) {
                 snprintf(current_level_name, 255, "%s", get_level_name(level_data));
+
+                check_custom_song(level_data);
+
                 free(level_data);
             }
         }
@@ -205,6 +238,9 @@ int sdcard_levels() {
             char *level_data = read_file(sd_level_paths[level_id], &outsize);
             if (level_data) {
                 snprintf(current_level_name, 255, "%s", get_level_name(level_data));
+                
+                check_custom_song(level_data);
+
                 free(level_data);
             }
         }

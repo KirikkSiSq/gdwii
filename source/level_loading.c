@@ -1201,9 +1201,16 @@ void load_level(char *data) {
 
     char *gmd_song_id = extract_gmd_key((const char *) data, "k8", "i");
     if (!gmd_song_id) {
-        level_info.song_id = 0;
+        level_info.song_id = 0; // Stereo Madness
     } else {
         level_info.song_id = atoi(gmd_song_id); // Official song id
+    }
+
+    char *gmd_custom_song_id = extract_gmd_key((const char *) data, "k45", "i");
+    if (!gmd_custom_song_id) {
+        level_info.custom_song_id = -1;
+    } else {
+        level_info.custom_song_id = atoi(gmd_custom_song_id); // Custom song id
     }
 
     char *background_data = get_metadata_value(level_string, "kA6");
@@ -1454,4 +1461,16 @@ char *load_song(const char *file_name, size_t *out_size) {
     char full_path[273];
     snprintf(full_path, sizeof(full_path), "%s/%s/%s/%s", launch_dir, RESOURCES_FOLDER, SONGS_FOLDER, file_name);
     return read_file(full_path, out_size);
+}
+
+char *load_user_song(int id, size_t *out_size) {
+    char full_path[273];
+    snprintf(full_path, sizeof(full_path), "%s/%s/%d.mp3", launch_dir, USER_SONGS_FOLDER, id);
+    return read_file(full_path, out_size);
+}
+
+bool check_song(int id) {
+    char full_path[273];
+    snprintf(full_path, sizeof(full_path), "%s/%s/%d.mp3", launch_dir, USER_SONGS_FOLDER, id);
+    return access(full_path, F_OK) == 0;
 }

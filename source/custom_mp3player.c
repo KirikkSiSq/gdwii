@@ -393,6 +393,24 @@ typedef union {
 	u32 adword;
 } dword;
 
+float update_pulse(float current_amp) {
+    static float prev = 0.0f;
+    static float pulse = 0.0f;
+    float decay = 0.05f;
+    float delta = current_amp - prev;
+
+    if (delta > 0.02f) {
+        pulse += powf(delta, 0.6f) * 4.0f;
+    }
+
+    pulse *= (1.0f - decay);
+    if (pulse > 1.0f) pulse = 1.0f;
+    if (pulse < 0.0f) pulse = 0.0f;
+    prev = current_amp;
+
+    return pulse;
+}
+
 static void Resample(struct mad_pcm *Pcm,EQState eqs[2],u32 stereo,u32 src_samplerate)
 {
 	u32 val32;
@@ -424,7 +442,9 @@ static void Resample(struct mad_pcm *Pcm,EQState eqs[2],u32 stereo,u32 src_sampl
 	if (sample_count > 0) {
 		// RMS amplitude normalized to 0.0–1.0 (16-bit audio)
 		float rms = sqrtf((float)sum_squares / sample_count) / 32768.0f;
-		mp3_amplitude = clampf(rms, 0.f, 1.f);
+
+		mp3_amplitude = update_pulse(rms);
+		
 	}
 }
 

@@ -92,6 +92,7 @@ enum GameRoutine {
 #define SDCARD_FOLDER "sd:/apps/wiidash"
 #define RESOURCES_FOLDER "resources"
 #define SONGS_FOLDER "songs"
+#define USER_SONGS_FOLDER "user_songs"
 #define USER_LEVELS_FOLDER "user_levels"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))

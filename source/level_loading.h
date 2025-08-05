@@ -117,6 +117,7 @@ struct LoadedLevelInfo {
     float wall_x;
     int pulsing_type;
     int song_id;
+    int custom_song_id;
     bool completing;
     int background_id;
     int ground_id;
@@ -179,4 +180,10 @@ void reload_level();
 void reset_color_channels();
 void set_color_channels();
 void calculate_lbg();
+
+char *extract_gmd_key(const char *data, const char *key, const char *type);
+
 char *load_song(const char *file_name, size_t *out_size);
+char *load_user_song(int id, size_t *out_size);
+
+bool check_song(int id);
