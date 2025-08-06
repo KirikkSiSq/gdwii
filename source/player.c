@@ -1435,6 +1435,8 @@ void slope_calc(GameObject *obj, Player *player) {
 
         if (player->gamemode == GAMEMODE_WAVE) {
             state.dead = TRUE;
+            clear_slope_data(player);
+            return;
         }
 
         // On slope
@@ -1488,6 +1490,8 @@ void slope_calc(GameObject *obj, Player *player) {
         
         if (player->gamemode == GAMEMODE_WAVE) {
             state.dead = TRUE;
+            clear_slope_data(player);
+            return;
         }
 
         if (gravBottom(player) != obj_gravTop(player, obj) || player->slope_data.snapDown) {
@@ -1527,6 +1531,8 @@ void slope_calc(GameObject *obj, Player *player) {
 
         if (player->gamemode == GAMEMODE_WAVE) {
             state.dead = TRUE;
+            clear_slope_data(player);
+            return;
         }
 
         // On slope
@@ -1587,6 +1593,8 @@ void slope_calc(GameObject *obj, Player *player) {
         
         if (player->gamemode == GAMEMODE_WAVE) {
             state.dead = TRUE;
+            clear_slope_data(player);
+            return;
         }
 
         if (gravTop(player) != obj_gravBottom(player, obj) || player->slope_data.snapDown) {
@@ -1718,7 +1726,7 @@ void slope_collide(GameObject *obj, Player *player) {
         orient < 2 && 
         gravTop(player) - obj_gravBottom(player, obj) <= clip + 5 * !player->mini // Remove extra if mini
     ) {
-        if ((player->gamemode != GAMEMODE_CUBE && (player->vel_y >= 0)) || gravSnap) {
+        if (player->gamemode != GAMEMODE_WAVE && ((player->gamemode != GAMEMODE_CUBE && (player->vel_y >= 0)) || gravSnap)) {
             player->vel_y = 0;
             if (!gravSnap) player->on_ceiling = TRUE;
             player->time_since_ground = 0;
@@ -1741,7 +1749,7 @@ void slope_collide(GameObject *obj, Player *player) {
         orient >= 2 && 
         obj_gravTop(player, obj) - gravBottom(player) <= clip + 5 * !player->mini // Remove extra if mini
     ) {
-        if (player->vel_y <= 0) {
+        if (player->gamemode != GAMEMODE_WAVE && player->vel_y <= 0) {
             player->vel_y = 0;
             if (!gravSnap) player->on_ground = TRUE;
             player->time_since_ground = 0;
@@ -1776,7 +1784,7 @@ void slope_collide(GameObject *obj, Player *player) {
         }
         
         // Touching slope before center is in slope
-        if (player->vel_y * mult <= 0) {
+        if (player->gamemode != GAMEMODE_WAVE && player->vel_y * mult <= 0) {
             if (orient == 1) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
             } else {
