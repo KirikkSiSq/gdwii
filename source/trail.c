@@ -9,6 +9,7 @@
 
 #include "main.h"
 
+
 // Adds "thickness" to a line strip by generating a triangle strip
 void ccVertexLineToPolygon(const Vec2* points, float stroke, Vec2* outVerts, int offset, int count) {
     if (count <= 0) return;
@@ -49,6 +50,23 @@ void ccVertexLineToPolygon(const Vec2* points, float stroke, Vec2* outVerts, int
         outVerts[i * 2 + 1].y = p.y - perp.y * halfStroke;
     }
 }
+// Adds "vertical thickness" to a line strip by generating a triangle strip
+void ccVertexLineToPolygonWave(const Vec2* points, float stroke, Vec2* outVerts, int offset, int count) {
+    if (count <= 0) return;
+
+    float halfStroke = stroke / 2.0f;
+
+    for (int i = offset; i < count; ++i) {
+        Vec2 p = points[i];
+
+        // Offset vertically only (same x for both vertices)
+        outVerts[i * 2].x     = p.x;
+        outVerts[i * 2].y     = p.y + halfStroke;
+
+        outVerts[i * 2 + 1].x = p.x;
+        outVerts[i * 2 + 1].y = p.y - halfStroke;
+    }
+}
 
 static float getDistanceSq(const Vec2* a, const Vec2* b) {
     float dx = a->x - b->x;
@@ -56,7 +74,7 @@ static float getDistanceSq(const Vec2* a, const Vec2* b) {
     return dx*dx + dy*dy;
 }
 
-void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke, Color color, GRRLIB_texImg *tex) {
+void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke, bool waveTrail, Color color, GRRLIB_texImg *tex) {
     memset(trail, 0, sizeof(MotionTrail));
     trail->texture = tex;  
     trail->maxPoints = MAX_TRAIL_POINTS;
@@ -64,6 +82,7 @@ void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke
     trail->minSeg = minSeg * minSeg;  // Compare squared distance
     trail->stroke = stroke;
     trail->displayedColor = color;
+    trail->waveTrail = waveTrail;
     trail->appendNewPoints = true;
 }
 
@@ -90,6 +109,7 @@ void MotionTrail_StopStroke(MotionTrail* trail) {
 }
 
 void MotionTrail_Update(MotionTrail* trail, float delta) {
+    if (trail->waveTrail) return;
     if (!trail->startingPositionInitialized) return;
 
     delta *= trail->fadeDelta;
@@ -179,6 +199,102 @@ void MotionTrail_Update(MotionTrail* trail, float delta) {
         trail->previousNuPoints = trail->nuPoints;
     }
 }
+void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
+    if (!trail->waveTrail) return;
+    if (!trail->startingPositionInitialized) return;
+
+    // 1. Fade old points
+    delta *= trail->fadeDelta;
+    unsigned int mov = 0;
+    for (unsigned int i = 0; i < trail->nuPoints; ++i) {
+        trail->pointState[i] -= delta;
+        if (trail->pointState[i] <= 0.0f) {
+            mov++;
+        } else {
+            unsigned int newIdx = i - mov;
+            if (mov > 0) {
+                trail->pointState[newIdx] = trail->pointState[i];
+                trail->pointVertexes[newIdx] = trail->pointVertexes[i];
+
+                unsigned int i2 = i * 2;
+                unsigned int newIdx2 = newIdx * 2;
+                trail->vertices[newIdx2] = trail->vertices[i2];
+                trail->vertices[newIdx2 + 1] = trail->vertices[i2 + 1];
+
+                i2 *= 4;
+                newIdx2 *= 4;
+                memcpy(&trail->colorPointer[newIdx2], &trail->colorPointer[i2], 8);
+            }
+
+            unsigned int newIdx2 = newIdx * 8;
+            u8 op = (u8)(trail->pointState[newIdx] * 255.0f);
+            trail->colorPointer[newIdx2 + 3] = op;
+            trail->colorPointer[newIdx2 + 7] = op;
+        }
+    }
+
+    trail->nuPoints -= mov;
+
+    // 2. Move head point[0] to current position
+    if (trail->nuPoints > 0) {
+        trail->pointVertexes[trail->nuPoints - 1] = trail->positionR;
+    }
+
+    // 3. Rebuild geometry
+    if (trail->nuPoints > 1) {
+        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->nuPoints);
+    }
+
+    // 4. Update texCoords
+    if (trail->nuPoints && trail->previousNuPoints != trail->nuPoints) {
+        float texDelta = 1.0f / trail->nuPoints;
+        for (unsigned int i = 0; i < trail->nuPoints; i++) {
+            trail->texCoords[i * 2].u = 0;
+            trail->texCoords[i * 2].v = texDelta * i;
+            trail->texCoords[i * 2 + 1].u = 1;
+            trail->texCoords[i * 2 + 1].v = texDelta * i;
+        }
+        trail->previousNuPoints = trail->nuPoints;
+    }
+}
+
+void MotionTrail_AddWavePoint(MotionTrail* trail) {
+    if (!trail->waveTrail) return;
+    if (trail->nuPoints >= trail->maxPoints) return;
+
+    unsigned int idx = trail->nuPoints;
+
+    trail->pointVertexes[idx] = trail->positionR;
+    trail->startingPositionInitialized = TRUE;
+    trail->pointState[idx] = 1.0f;
+
+    unsigned int offset = idx * 8;
+    trail->colorPointer[offset + 0] = trail->displayedColor.r;
+    trail->colorPointer[offset + 1] = trail->displayedColor.g;
+    trail->colorPointer[offset + 2] = trail->displayedColor.b;
+    trail->colorPointer[offset + 3] = 255;
+    trail->colorPointer[offset + 4] = trail->displayedColor.r;
+    trail->colorPointer[offset + 5] = trail->displayedColor.g;
+    trail->colorPointer[offset + 6] = trail->displayedColor.b;
+    trail->colorPointer[offset + 7] = 255;
+
+    trail->nuPoints++;
+
+    if (trail->nuPoints > 1) {
+        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->nuPoints);
+    }
+
+    // Update tex coords
+    float texDelta = 1.0f / trail->nuPoints;
+    for (unsigned int i = 0; i < trail->nuPoints; i++) {
+        trail->texCoords[i * 2].u = 0;
+        trail->texCoords[i * 2].v = texDelta * i;
+        trail->texCoords[i * 2 + 1].u = 1;
+        trail->texCoords[i * 2 + 1].v = texDelta * i;
+    }
+
+    trail->previousNuPoints = trail->nuPoints;
+}
 
 void MotionTrail_Draw(MotionTrail* trail) {
     GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
@@ -196,8 +312,8 @@ void MotionTrail_Draw(MotionTrail* trail) {
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
     
     GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, trail->nuPoints * 2);
-
     for (int i = 0; i < trail->nuPoints * 2; i++) {
+        
         Vec2 pos = trail->vertices[i];
         
         float calc_x = ((pos.x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  

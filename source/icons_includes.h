@@ -11,4 +11,8 @@
 #include "bird_01_2_001_png.h"
 #include "bird_01_3_001_png.h"
 
+#include "dart_01_001_png.h"
+#include "dart_01_2_001_png.h"
+
 #include "trail_png.h"
+#include "wave_trail_png.h"

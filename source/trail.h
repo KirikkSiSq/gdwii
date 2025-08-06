@@ -23,6 +23,7 @@ typedef struct {
     bool appendNewPoints;
     bool fastMode;
     bool startingPositionInitialized;
+    bool waveTrail;
 
     int nuPoints;
     int previousNuPoints;
@@ -52,10 +53,19 @@ extern MotionTrail trail;
 extern MotionTrail trail_p1;
 extern MotionTrail trail_p2;
 
-void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke, Color color, GRRLIB_texImg *tex);
+extern MotionTrail wave_trail;
+extern MotionTrail wave_trail_p1;
+extern MotionTrail wave_trail_p2;
+
+
+void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke, bool waveTrail, Color color, GRRLIB_texImg *tex);
+void MotionTrail_UpdateWaveTrail(MotionTrail *trail, float delta);
 void MotionTrail_Update(MotionTrail* trail, float delta);
 void MotionTrail_ResumeStroke(MotionTrail* trail);
 void MotionTrail_StopStroke(MotionTrail* trail);
 void MotionTrail_Draw(MotionTrail* trail);
+void MotionTrail_DrawWave(MotionTrail* trail);
+
+void MotionTrail_AddWavePoint(MotionTrail* trail);
 
 #endif

@@ -26,41 +26,42 @@ const int dual_gamemode_heights[GAMEMODE_COUNT] = {
     9,  // Cube
     10, // Ship
     9,  // Ball
-    10  // Ufo
+    10, // Ufo
+    10, // Wave
 };
 
 const float jump_heights_table[SPEED_COUNT][JUMP_TYPES_COUNT][GAMEMODE_COUNT][2] = {
-    { // SLOW               CUBE                   SHIP                  BALL                    UFO
-    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {573.48,   458.784}},
-    /* YELLOW ORB */ {{573.48,   458.784},  {573.48,   458.784},  {401.435993,  321.148795},  {573.48,   458.784}},
-    /* BLUE PAD   */ {{-345.6,   -276.48},  {-229.392, -183.519}, {-160.574397, -128.463298}, {-229.392, -183.519}},
-    /* BLUE ORB   */ {{-229.392, -183.519}, {-229.392, -183.519}, {-160.574397, -128.463298}, {-229.392, -183.519}},
-    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4}},
-    /* PINK ORB   */ {{412.884,  330.318},  {212.166,  169.776},  {309.090595,  247.287596},  {240.84,   192.672}},
+    { // SLOW               CUBE                   SHIP                  BALL                    UFO                 WAVE
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {573.48,   458.784},  {0, 0}},
+    /* YELLOW ORB */ {{573.48,   458.784},  {573.48,   458.784},  {401.435993,  321.148795},  {573.48,   458.784},  {0, 0}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-229.392, -183.519}, {-160.574397, -128.463298}, {-229.392, -183.519}, {0, 0}},
+    /* BLUE ORB   */ {{-229.392, -183.519}, {-229.392, -183.519}, {-160.574397, -128.463298}, {-229.392, -183.519}, {0, 0}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4},    {0, 0}},
+    /* PINK ORB   */ {{412.884,  330.318},  {212.166,  169.776},  {309.090595,  247.287596},  {240.84,   192.672},  {0, 0}},
     },
     { // NORMAL
-    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2}},
-    /* YELLOW ORB */ {{603.72,   482.976},  {603.72,   482.976},  {422.60399,   338.08319},   {603.72,   482.976}},
-    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48}},
-    /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18},  {-169.04160,  -135.2295},   {-241.488, -193.185}},
-    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4}},
-    /* PINK ORB   */ {{434.7,    347.76},   {223.398,  178.686},  {325.42019,   260.3286},    {258.984,  207.198}},
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2},    {0, 0}},
+    /* YELLOW ORB */ {{603.72,   482.976},  {603.72,   482.976},  {422.60399,   338.08319},   {603.72,   482.976},  {0, 0}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48},  {0, 0}},
+    /* BLUE ORB   */ {{-241.488, -193.185}, {-241.488, -193.18},  {-169.04160,  -135.2295},   {-241.488, -193.185}, {0, 0}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4},    {0, 0}},
+    /* PINK ORB   */ {{434.7,    347.76},   {223.398,  178.686},  {325.42019,   260.3286},    {258.984,  207.198},  {0, 0}},
     },
     { // FAST
-    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2}},
-    /* YELLOW ORB */ {{616.68,   481.734},  {616.68,   481.734},  {431.67599,   345.34079},   {616.68,   481.734}},
-    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48}},
-    /* BLUE ORB   */ {{-246.672, -197.343}, {-246.672, -197.343}, {-172.6704,   -138.1401},   {-246.672, -197.343}},
-    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4}},
-    /* PINK ORB   */ {{443.988,  355.212},  {228.15,   182.52},   {332.37539,   265.923},     {258.984,  207.198}},
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2},    {0, 0}},
+    /* YELLOW ORB */ {{616.68,   481.734},  {616.68,   481.734},  {431.67599,   345.34079},   {616.68,   481.734},  {0, 0}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48},  {0, 0}},
+    /* BLUE ORB   */ {{-246.672, -197.343}, {-246.672, -197.343}, {-172.6704,   -138.1401},   {-246.672, -197.343}, {0, 0}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4},    {0, 0}},
+    /* PINK ORB   */ {{443.988,  355.212},  {228.15,   182.52},   {332.37539,   265.923},     {258.984,  207.198},  {0, 0}},
     },
     { // FASTER
-    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2}},
-    /* YELLOW ORB */ {{606.42,   485.136},  {606.42,   485.136},  {424.493993,  339.59519},   {606.42,   485.136}},
-    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48}},
-    /* BLUE ORB   */ {{-242.568, -194.049}, {-242.568, -194.049}, {-169.7976,   -135.8343},   {-242.568, -194.049}},
-    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4}},
-    /* PINK ORB   */ {{436.644,  349.272},  {224.37,   179.496},  {326.85659,   261.5004},    {254.718,  203.742}},
+    /* YELLOW PAD */ {{864,      691.2},    {432,      691.2},    {518.4,       414.72002},   {432,      691.2},    {0, 0}},
+    /* YELLOW ORB */ {{606.42,   485.136},  {606.42,   485.136},  {424.493993,  339.59519},   {606.42,   485.136},  {0, 0}},
+    /* BLUE PAD   */ {{-345.6,   -276.48},  {-345.6,   -276.48},  {-207.36001,  -165.88801},  {-345.6,   -276.48},  {0, 0}},
+    /* BLUE ORB   */ {{-242.568, -194.049}, {-242.568, -194.049}, {-169.7976,   -135.8343},   {-242.568, -194.049}, {0, 0}},
+    /* PINK PAD   */ {{561.6,    449.28},   {302.4,    241.92},   {362.88001,   290.30401},   {345.6,    276.4},    {0, 0}},
+    /* PINK ORB   */ {{436.644,  349.272},  {224.37,   179.496},  {326.85659,   261.5004},    {254.718,  203.742},  {0, 0}},
     }
 };
 
@@ -284,7 +285,6 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             }
             break;
             
-        case WAVE_PORTAL:
         case SHIP_PORTAL: 
             if (!obj->activated[state.current_player]) {
                 state.ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
@@ -596,7 +596,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 state.dual_portal_y = obj->y;
                 setup_dual();
                 
-                MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, p1, trail_tex);
+                MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, FALSE, p1, trail_tex);
 
                 obj->activated[state.current_player] = TRUE;
             }
@@ -634,6 +634,36 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                         state.ceiling_y = state.ground_y + 240;
                         set_intended_ceiling();
                 }
+            }
+            break;
+            
+        case WAVE_PORTAL:
+            if (!obj->activated[state.current_player]) {
+                state.ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
+                state.ceiling_y = state.ground_y + 300;
+                set_intended_ceiling();
+
+                if (player->gamemode != GAMEMODE_WAVE) {
+                    player->gamemode = GAMEMODE_WAVE;
+                    player->inverse_rotation = FALSE;
+                    flip_other_player(state.current_player ^ 1);
+                    wave_trail.positionR = (Vec2){player->x, player->y};  
+                    wave_trail.startingPositionInitialized = TRUE;
+                    MotionTrail_AddWavePoint(&wave_trail);
+
+                    particle_templates[USE_EFFECT].start_scale = 80;
+                    particle_templates[USE_EFFECT].end_scale = 0;
+
+                    set_particle_color(USE_EFFECT, 56, 200, 255);
+                    particle_templates[USE_EFFECT].start_color.a = 0;
+                    particle_templates[USE_EFFECT].end_color.a = 255;
+
+                    spawn_particle(USE_EFFECT, obj->x, obj->y, obj);
+                }
+                if (state.dual) {
+                    set_dual_bounds();
+                } 
+                obj->activated[state.current_player] = TRUE;
             }
             break;
     }
@@ -903,6 +933,7 @@ void handle_pre_draw_object_particles(GameObject *obj, GDObjectLayer *layer) {
         case BLUE_GRAVITY_PORTAL:
         case BLUE_MIRROR_PORTAL:
         case DIVORCE_PORTAL:
+        case WAVE_PORTAL:
             if (layer->layerNum == 1) {
                 particle_templates[PORTAL_PARTICLES].angle = 180.f - adjust_angle_y(obj->rotation, obj->flippedH);
 
@@ -1632,18 +1663,22 @@ void draw_all_object_layers() {
             draw_particles(DUAL_BALL_HITBOX_EFFECT);
             if (death_timer <= 0) {
                 trail = trail_p1;
+                wave_trail = wave_trail_p1;
                 state.current_player = 0;
                 draw_player(&state.player);
                 trail_p1 = trail;
+                wave_trail_p1 = wave_trail;
 
                 if (state.dual) {
                     Color temp = p1;
                     p1 = p2;
                     p2 = temp;
                     trail = trail_p2;
+                    wave_trail = wave_trail_p2;
                     state.current_player = 1;
                     draw_player(&state.player2);
                     trail_p2 = trail;
+                    wave_trail_p2 = wave_trail;
                     temp = p1;
                     p1 = p2;
                     p2 = temp;

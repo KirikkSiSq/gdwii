@@ -30,6 +30,10 @@
 
 #include "HexagonForce_gmd.h"
 
+#include "BlastProcessing_gmd.h"
+
+#include "TheoryofEverything2_gmd.h"
+
 #include "LevelEasy_gmd.h"
 #include "DemonPark_gmd.h"
 #include "TheNightmare_gmd.h"

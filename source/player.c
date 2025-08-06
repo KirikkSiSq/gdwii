@@ -25,18 +25,29 @@ GRRLIB_texImg *ball_l2;
 GRRLIB_texImg *ufo_l1;
 GRRLIB_texImg *ufo_l2;
 GRRLIB_texImg *ufo_dome;
+GRRLIB_texImg *wave_l1;
+GRRLIB_texImg *wave_l2;
 
 GRRLIB_texImg *trail_tex;
+GRRLIB_texImg *wave_trail_tex;
 
 MotionTrail trail;
 MotionTrail trail_p1;
 MotionTrail trail_p2;
+
+MotionTrail wave_trail;
+MotionTrail wave_trail_p1;
+MotionTrail wave_trail_p2;
 
 Color p1;
 Color p2;
 
 inline static float getTop(Player *player)  { return player->y + player->height / 2; }
 inline static float getBottom(Player *player)  { return player->y - player->height / 2; }
+
+inline static float getGroundTop(Player *player)  { return player->y + (player->height / 2) + ((player->gamemode == GAMEMODE_WAVE) ? (player->mini ? 3 : 5) : 0); }
+inline static float getGroundBottom(Player *player)  { return player->y - (player->height / 2) - ((player->gamemode == GAMEMODE_WAVE) ? (player->mini ? 3 : 5) : 0); }
+
 inline static float getRight(Player *player)  { return player->x + player->width / 2; }
 inline static float getLeft(Player *player)  { return player->x - player->width / 2; }
 
@@ -148,7 +159,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
             
             bool safeZone = (obj_gravTop(player, obj) - gravBottom(player) <= clip) || (gravTop(player) - obj_gravBottom(player, obj) <= clip);
             
-            if (!gravSnap && !safeZone && intersect(
+            if ((player->gamemode == GAMEMODE_WAVE || (!gravSnap && !safeZone)) && intersect(
                 player->x, player->y, internal.width, internal.height, 0, 
                 obj->x, obj->y, hitbox->width, hitbox->height, obj->rotation
             )) {
@@ -160,13 +171,13 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 } else {
                     state.dead = TRUE;
                 }
-            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0 && !slope_condition) {
+            } else if (obj_gravTop(player, obj) - gravBottom(player) <= clip && player->vel_y <= 0 && !slope_condition && player->gamemode != GAMEMODE_WAVE) {
                 player->y = grav(player, obj_gravTop(player, obj)) + grav(player, player->height / 2);
                 player->vel_y = 0;
                 player->on_ground = TRUE;
                 player->inverse_rotation = FALSE;
                 player->time_since_ground = 0;
-            } else {
+            } else if (player->gamemode != GAMEMODE_WAVE) {
                 // Ufo can break breakable blocks from above, so dont use as a ceiling
                 if (player->gamemode == GAMEMODE_UFO && hitbox->type == HITBOX_BREAKABLE_BLOCK) {
                     break;
@@ -567,6 +578,20 @@ void ufo_gamemode(Player *player) {
     }
 }
 
+void wave_gamemode(Player *player) {
+    trail.positionR = (Vec2){player->x, player->y};  
+    trail.startingPositionInitialized = TRUE;
+    
+    wave_trail.positionR = (Vec2){player->x, player->y};  
+    wave_trail.startingPositionInitialized = TRUE;
+
+    bool input = (state.input.holdA || state.input.hold2orY);
+    player->gravity = 0;
+    player->vel_y = (input * 2 - 1) * player_speeds[state.speed] * (player->mini ? 2 : 1);
+    
+    if (player->vel_y != state.old_player.vel_y) MotionTrail_AddWavePoint(&wave_trail);
+}
+
 void run_camera() {
     Player *player = &state.player;
 
@@ -633,14 +658,25 @@ void spawn_glitter_particles() {
 void run_player(Player *player) {
     float scale = (player->mini) ? 0.6f : 1.f;
 
-    player->height = 30 * scale;
-    player->width = 30 * scale;
+    if (player->gamemode != GAMEMODE_WAVE) {
+        player->height = 30 * scale;
+        player->width = 30 * scale;
+        
+        player->internal_hitbox.width = 9;
+        player->internal_hitbox.height = 9;
+    } else {
+        player->height = 10 * scale;
+        player->width = 10 * scale;
+
+        player->internal_hitbox.width = 3;
+        player->internal_hitbox.height = 3;
+    }
 
     trail.stroke = 10.f * scale;
     
     if (!player->left_ground) {
         // Ground
-        if (getBottom(player) <= state.ground_y) {
+        if (getGroundBottom(player) <= state.ground_y) {
             if (player->upside_down) {
                 player->on_ceiling = TRUE;
                 player->inverse_rotation = FALSE;
@@ -652,7 +688,7 @@ void run_player(Player *player) {
         } 
 
         // Ceiling
-        if (getTop(player) >= state.ceiling_y) {
+        if (getGroundTop(player) >= state.ceiling_y) {
             if (player->upside_down) {
                 player->on_ground = TRUE;
                 player->inverse_rotation = FALSE;
@@ -704,6 +740,17 @@ void run_player(Player *player) {
                 spawn_particle(P1_TRAIL, player->x, player->y, NULL);
             }
             break;
+        case GAMEMODE_WAVE:
+            MotionTrail_ResumeStroke(&trail);
+            spawn_glitter_particles();
+            wave_gamemode(player);
+
+            if (p1_trail && (frame_counter & 0b1111) == 0) {
+                particle_templates[P1_TRAIL].start_scale = 0.73333f * scale / 1.8;
+                particle_templates[P1_TRAIL].end_scale = 0.73333f * scale / 1.8;
+                spawn_particle(P1_TRAIL, player->x, player->y, NULL);
+            }
+            break;
     }
     
     player->time_since_ground += STEPS_DT;
@@ -736,7 +783,7 @@ void run_player(Player *player) {
     
     bool slopeCheck = player->slope_data.slope && (grav_slope_orient(player->slope_data.slope, player) == 1 || grav_slope_orient(player->slope_data.slope, player) == 2);
 
-    if (getBottom(player) < state.ground_y) {
+    if (getGroundBottom(player) < state.ground_y) {
         if (player->ceiling_inv_time <= 0 && player->gamemode == GAMEMODE_CUBE && player->upside_down) {
             state.dead = TRUE;
             return;
@@ -746,11 +793,11 @@ void run_player(Player *player) {
             clear_slope_data(player);
         }
         player->vel_y = 0;
-        player->y = state.ground_y + (player->height / 2);
+        player->y = state.ground_y + (player->height / 2) + ((player->gamemode == GAMEMODE_WAVE) ? (player->mini ? 3 : 5) : 0);;
     }
 
     // Ceiling
-    if (getTop(player) > state.ceiling_y) {
+    if (getGroundTop(player) > state.ceiling_y) {
         if (player->ceiling_inv_time <= 0 && player->gamemode == GAMEMODE_CUBE && !player->upside_down) {
             state.dead = TRUE;
             return;
@@ -761,7 +808,7 @@ void run_player(Player *player) {
         }
         
         player->vel_y = 0;
-        player->y = state.ceiling_y - (player->height / 2);
+        player->y = state.ceiling_y - (player->height / 2) - ((player->gamemode == GAMEMODE_WAVE) ? (player->mini ? 3 : 5) : 0);;
     } 
     
     if (player->slope_data.slope) {
@@ -769,7 +816,7 @@ void run_player(Player *player) {
     }
     
     // Ground
-    if (player->gamemode == GAMEMODE_SHIP) update_ship_rotation(player);
+    if (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_WAVE) update_ship_rotation(player);
 
     // End level
     if (player->x > level_info.wall_x + 30) {
@@ -841,11 +888,12 @@ void full_init_variables() {
 }
 
 void init_variables() {
-    MotionTrail_Init(&trail_p1, 0.3f, 3, 10.0f, p2, trail_tex);
-    MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, p1, trail_tex);
+    MotionTrail_Init(&trail_p1, 0.3f, 3, 10.0f, FALSE, p2, trail_tex);
+    MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, FALSE, p1, trail_tex);
+    MotionTrail_Init(&wave_trail_p1, 3.f, 3, 10.0f, TRUE, p2, wave_trail_tex);
+    MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, wave_trail_tex);
     MotionTrail_StopStroke(&trail_p1);
     MotionTrail_StopStroke(&trail_p2);
-
     float factor_x;
     if (screenWidth <= 640)
         factor_x = 1.0f;
@@ -900,6 +948,7 @@ void init_variables() {
     switch (level_info.initial_gamemode) {
         case GAMEMODE_SHIP:
         case GAMEMODE_UFO:
+        case GAMEMODE_WAVE:
             state.ceiling_y = state.ground_y + 300;
             set_intended_ceiling();
             break;
@@ -955,7 +1004,12 @@ void load_icons() {
     ufo_l1 = GRRLIB_LoadTexturePNG(bird_01_001_png);
     ufo_l2 = GRRLIB_LoadTexturePNG(bird_01_2_001_png);
     ufo_dome = GRRLIB_LoadTexturePNG(bird_01_3_001_png);
+    wave_l1 = GRRLIB_LoadTexturePNG(dart_01_001_png);
+    wave_l2 = GRRLIB_LoadTexturePNG(dart_01_2_001_png);
+
     trail_tex = GRRLIB_LoadTexturePNG(trail_png);
+    wave_trail_tex = GRRLIB_LoadTexturePNG(wave_trail_png);
+
 
     p1.r = 0;
     p1.g = 255;
@@ -973,7 +1027,13 @@ void unload_icons() {
     GRRLIB_FreeTexture(ship_l2);
     GRRLIB_FreeTexture(ball_l1);
     GRRLIB_FreeTexture(ball_l2);
+    GRRLIB_FreeTexture(ufo_l1);
+    GRRLIB_FreeTexture(ufo_l2);
+    GRRLIB_FreeTexture(ufo_dome);
+    GRRLIB_FreeTexture(wave_l1);
+    GRRLIB_FreeTexture(wave_l2);
     GRRLIB_FreeTexture(trail_tex);
+    GRRLIB_FreeTexture(wave_trail_tex);
 }
 
 void draw_ship(Player *player, float calc_x, float calc_y) {
@@ -1166,10 +1226,12 @@ void draw_player(Player *player) {
     GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
 
     MotionTrail_Update(&trail, dt);
+    MotionTrail_UpdateWaveTrail(&wave_trail, dt);
     
     GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
 
     MotionTrail_Draw(&trail);
+    MotionTrail_Draw(&wave_trail);
 
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
@@ -1233,6 +1295,29 @@ void draw_player(Player *player) {
             break;
         case GAMEMODE_UFO:
             draw_ufo(player, calc_x - 8 * state.mirror_mult, calc_y);
+            break;
+        case GAMEMODE_WAVE:
+            GRRLIB_SetHandle(wave_l1, wave_l1->w / 2, wave_l1->h / 2);
+            GRRLIB_SetHandle(wave_l2, wave_l2->w / 2, wave_l2->h / 2);
+            set_texture(wave_l1);
+            custom_drawImg(
+                get_mirror_x(calc_x, state.mirror_factor) + 6 - (wave_l1->w / 2), calc_y + 6 - (wave_l1->h / 2),
+                wave_l1,
+                player->lerp_rotation * state.mirror_mult,
+                BASE_SCALE * state.mirror_mult * scale,
+                BASE_SCALE * scale,
+                RGBA(p1.r, p1.g, p1.b, 255)
+            );
+
+            set_texture(wave_l2);
+            custom_drawImg(
+                get_mirror_x(calc_x, state.mirror_factor) + 6 - (wave_l2->w / 2), calc_y + 6 - (wave_l2->h / 2),
+                wave_l2,
+                player->lerp_rotation * state.mirror_mult,
+                BASE_SCALE * state.mirror_mult * scale,
+                BASE_SCALE * scale,
+                RGBA(p2.r, p2.g, p2.b, 255)
+            );
             break;
     }
     set_texture(prev_tex);
@@ -1348,6 +1433,10 @@ void slope_calc(GameObject *obj, Player *player) {
             return;
         }
 
+        if (player->gamemode == GAMEMODE_WAVE) {
+            state.dead = TRUE;
+        }
+
         // On slope
         if (gravBottom(player) != obj_gravTop(player, obj)) {
             if (is_spike_slope(obj)) {
@@ -1396,6 +1485,10 @@ void slope_calc(GameObject *obj, Player *player) {
             clear_slope_data(player);
             return;
         }
+        
+        if (player->gamemode == GAMEMODE_WAVE) {
+            state.dead = TRUE;
+        }
 
         if (gravBottom(player) != obj_gravTop(player, obj) || player->slope_data.snapDown) {
             if (is_spike_slope(obj)) {
@@ -1429,6 +1522,10 @@ void slope_calc(GameObject *obj, Player *player) {
         bool gravSnap = (player->ceiling_inv_time > 0) || (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1);
         
         if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
+            state.dead = TRUE;
+        }
+
+        if (player->gamemode == GAMEMODE_WAVE) {
             state.dead = TRUE;
         }
 
@@ -1485,6 +1582,10 @@ void slope_calc(GameObject *obj, Player *player) {
         bool gravSnap = (player->ceiling_inv_time > 0) || (player->gravObj && player->gravObj->hitbox_counter[state.current_player] == 1);
         
         if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
+            state.dead = TRUE;
+        }
+        
+        if (player->gamemode == GAMEMODE_WAVE) {
             state.dead = TRUE;
         }
 

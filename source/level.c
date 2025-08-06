@@ -68,6 +68,14 @@ LevelDefinition levels[] = {
         .data_ptr = HexagonForce_gmd
     },
     {
+        .level_name = "Blast Processing",
+        .data_ptr = BlastProcessing_gmd
+    },
+    {
+        .level_name = "Theory of Everything 2",
+        .data_ptr = TheoryofEverything2_gmd
+    },
+    {
         .level_name = "Level Easy",
         .data_ptr  = LevelEasy_gmd
     },
@@ -153,6 +161,14 @@ SongDefinition songs[] = {
     {
         .song_name = "HexagonForce.mp3",
         .tempo = 162
+    },
+    {
+        .song_name = "BlastProcessing.mp3",
+        .tempo = 135
+    },
+    {
+        .song_name = "TheoryOfEverything2.mp3",
+        .tempo = 132
     }
 };
 
