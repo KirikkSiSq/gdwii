@@ -557,9 +557,9 @@ int get_main_channel_id(int id) {
     ObjectDefinition obj = objects[id];
     for (int i = 0; i < obj.num_layers; i++) {
         int col_channel = obj.layers[i].col_channel;
-        if (obj.layers[i].color_type == COLOR_MAIN && is_modifiable(col_channel)) return col_channel;
+        if (obj.layers[i].color_type == COLOR_MAIN) return col_channel;
     }
-    return 0;
+    return -1;
 }
 
 int get_detail_channel_id(int id) {
@@ -567,7 +567,7 @@ int get_detail_channel_id(int id) {
     for (int i = 0; i < obj.num_layers; i++) {
         if (obj.layers[i].color_type == COLOR_DETAIL) return obj.layers[i].col_channel;
     }
-    return 0;
+    return -1;
 }
 
 int convert_1p9_channel(int channel) {
@@ -584,6 +584,20 @@ int convert_1p9_channel(int channel) {
     return 0;
 }
 
+int convert_object(int id) {
+    switch (id) {
+        case 1734:
+            return DARKCOGWHEEL_BIG;
+        case 1735:
+            return DARKCOGWHEEL_MEDIUM;
+        case 1736:
+            return DARKCOGWHEEL_SMALL;
+        case 1329:
+            return SECRET_COIN;
+    }
+    return id;
+}
+
 GameObject *convert_to_typed(const GDObject *obj) {
     GameObject *typed = malloc(sizeof(GameObject));
     if (!typed) return NULL;
@@ -593,7 +607,7 @@ GameObject *convert_to_typed(const GDObject *obj) {
 
     typed->id = obj->values[0].i;
     // Temporarily convert user coins (added in 2.0) into secret coins
-    if (typed->id == 1329) typed->id = SECRET_COIN;
+    typed->id = convert_object(typed->id);
 
     typed->zsheetlayer = objects[typed->id].spritesheet_layer;
     typed->zlayer = objects[typed->id].def_zlayer;
@@ -601,8 +615,9 @@ GameObject *convert_to_typed(const GDObject *obj) {
 
     typed->random = rand();
 
-    typed->main_col_channel = get_main_channel_id(typed->id);
-    typed->detail_col_channel = get_detail_channel_id(typed->id);
+    typed->main_col_channel = 0;
+    typed->detail_col_channel = 0;
+    typed->u1p9_col_channel = 0;
 
     for (int i = 0; i < obj->propCount; i++) {
         int key = obj->keys[i];
@@ -653,12 +668,12 @@ GameObject *convert_to_typed(const GDObject *obj) {
                 if (type == GD_VAL_BOOL) typed->blending = val.b;
                 break;
             case 19: // 1.9 channel id
-                if (type == GD_VAL_INT) typed->detail_col_channel = convert_1p9_channel(val.i);
+                if (type == GD_VAL_INT) typed->u1p9_col_channel = convert_1p9_channel(val.i);
                 break;
-            case 21: // 1.9 channel id
+            case 21: // Main col channel
                 if (type == GD_VAL_INT) typed->main_col_channel = val.i;
                 break;
-            case 22: // 1.9 channel id
+            case 22: // Detail col channel
                 if (type == GD_VAL_INT) typed->detail_col_channel = val.i;
                 break;
             case 23: // Target color ID
@@ -819,24 +834,43 @@ void free_typed_object_list(GDTypedObjectList *list) {
 int compare_sortable_layers(const void *a, const void *b) {
     GDLayerSortable *layerSortA = *(GDLayerSortable **)a;
     GDLayerSortable *layerSortB = *(GDLayerSortable **)b;
+    
+    GDObjectLayer *GDlayerA = layerSortA->layer;
+    GDObjectLayer *GDlayerB = layerSortB->layer;
 
-    struct ObjectLayer *layerA = layerSortA->layer->layer;
-    struct ObjectLayer *layerB = layerSortB->layer->layer;
+    struct ObjectLayer *layerA = GDlayerA->layer;
+    struct ObjectLayer *layerB = GDlayerB->layer;
 
-    GameObject *objA = layerSortA->layer->obj;
-    GameObject *objB = layerSortB->layer->obj;
+    GameObject *objA = GDlayerA->obj;
+    GameObject *objB = GDlayerB->obj;
 
     int zlayerA = layerSortA->zlayer + layerA->zlayer_offset;
     int zlayerB = layerSortB->zlayer + layerB->zlayer_offset;
-
-    if (zlayerA != zlayerB)
-        return zlayerA - zlayerB; // Ascending
-
+    
     int obj_idA = objA->id;
     int obj_idB = objB->id;
 
     int sheetA = objects[obj_idA].spritesheet_layer;
     int sheetB = objects[obj_idB].spritesheet_layer;
+
+    if (obj_idA != PLAYER_OBJECT && sheetA == SHEET_BLOCKS) {
+        int col_channelA = GDlayerA->col_channel;
+        bool blendingA = channels[col_channelA].blending | GDlayerA->blending;
+        if (blendingA ^ (zlayerA % 2 == 0)) {
+            zlayerA--;
+        }
+    }
+
+    if (obj_idB != PLAYER_OBJECT && sheetB == SHEET_BLOCKS) {
+        int col_channelB = GDlayerB->col_channel;
+        bool blendingB = channels[col_channelB].blending | GDlayerA->blending;
+        if (blendingB ^ (zlayerB % 2 == 0)) {
+            zlayerB--;
+        }
+    }
+    
+    if (zlayerA != zlayerB)
+        return zlayerA - zlayerB; // Ascending
 
     if (sheetA != sheetB)
         return sheetB - sheetA; // Descending
@@ -872,13 +906,6 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
         GameObject *obj = sortable_list[i].layer->obj;
         sortable_list[i].zlayer = obj->zlayer;
         sortable_list[i].zorder = obj->zorder;
-        
-        int zlayer = sortable_list[i].zlayer;
-        int col_channel = sortable_list[i].layer->layer->col_channel;
-        bool blending = channels[col_channel].blending;
-        if (blending ^ (zlayer % 2 == 0)) {
-            sortable_list[i].zlayer--;
-        }
 
         assign_layer_to_section(&sortable_list[i]);
     }
@@ -922,6 +949,8 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
     layer->obj = obj;
     layer->layer = (struct ObjectLayer *) &objects[obj->id].layers[0];
     layer->layerNum = 0;
+    layer->col_channel = WHITE;
+    layer->blending = FALSE;
     GDLayerSortable sortable_layer;
     sortable_layer.layer = layer;
     sortable_layer.originalIndex = 0;
@@ -942,9 +971,38 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
 
         if (obj_id < OBJECT_COUNT)
             for (int j = 0; j < objects[obj->id].num_layers; j++) {
-                layers[count].layer = (struct ObjectLayer *) &objects[obj->id].layers[j];
+                struct ObjectLayer *layer = (struct ObjectLayer *) &objects[obj->id].layers[j];
+                layers[count].layer = layer;
                 layers[count].obj = obj;
                 layers[count].layerNum = j;
+
+                int col_channel = layer->col_channel;
+
+                if (is_modifiable(layer->col_channel)) {
+                    if (obj->u1p9_col_channel > 0) {
+                        if (layer->color_type == COLOR_DETAIL) col_channel = obj->u1p9_col_channel;
+                    } else {
+                        if (obj->main_col_channel > 0) {
+                            if (layer->color_type == COLOR_MAIN) {
+                                col_channel = obj->main_col_channel;  
+                            } else {
+                                if (get_main_channel_id(obj_id) <= 0)col_channel = obj->main_col_channel; 
+                            }
+                        }
+                        if (obj->detail_col_channel > 0) {
+                            if (layer->color_type == COLOR_DETAIL) {
+                                if (get_main_channel_id(obj_id) >= 0) col_channel = obj->detail_col_channel;  
+                            }    
+                        }
+                    }
+                }
+
+                layers[count].blending = FALSE;
+                if (obj->main_col_channel > 0 && col_channel == OBJ_BLENDING) {
+                    col_channel = obj->main_col_channel;
+                    layers[count].blending = TRUE;
+                }
+                layers[count].col_channel = col_channel;
                 count++;
             }
     }
@@ -1302,9 +1360,6 @@ void load_level(char *data) {
         return;
     }
 
-    reset_color_channels();
-    set_color_channels();
-
     sort_layers_by_layer(layersArrayList);
     
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
@@ -1317,6 +1372,11 @@ void load_level(char *data) {
     int rounded_last_obj_x = (int) (level_info.last_obj_x / 30) * 30 + 15;
     level_info.wall_x = (rounded_last_obj_x) + (9.f * 30.f);
     full_init_variables();
+    
+
+    reset_color_channels();
+    set_color_channels();
+
     printf("Finished loading level\n");
 }
 

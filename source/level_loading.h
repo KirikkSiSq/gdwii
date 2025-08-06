@@ -29,6 +29,7 @@ typedef struct {
     u8 p1_color:1;       // key 15
     u8 p2_color:1;       // key 16
     u8 blending:1;       // key 17
+    int u1p9_col_channel; // key 19
     int main_col_channel;   // key 21
     int detail_col_channel; // key 22
     int target_color_id; // key 23
@@ -76,6 +77,8 @@ typedef struct {
 typedef struct {
     GameObject *obj;
     struct ObjectLayer *layer;
+    int col_channel;
+    bool blending;
     int layerNum;
 } GDObjectLayer;
 
@@ -181,6 +184,9 @@ void reload_level();
 void reset_color_channels();
 void set_color_channels();
 void calculate_lbg();
+
+int get_main_channel_id(int id);
+int get_detail_channel_id(int id);
 
 char *extract_gmd_key(const char *data, const char *key, const char *type);
 

@@ -284,6 +284,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             }
             break;
             
+        case WAVE_PORTAL:
         case SHIP_PORTAL: 
             if (!obj->activated[state.current_player]) {
                 state.ground_y = maxf(0, ip1_ceilf((obj->y - 180) / 30.f)) * 30;
@@ -1206,6 +1207,15 @@ float get_rotation_speed(GameObject *obj) {
         case DARKBLADE_BIG:
         case DARKBLADE_MEDIUM:
         case DARKBLADE_SMALL:
+        case DARKCOGWHEEL_BIG:
+        case DARKCOGWHEEL_MEDIUM:
+        case DARKCOGWHEEL_SMALL:
+        case LIGHTBLADE_BIG:
+        case LIGHTBLADE_MEDIUM:
+        case LIGHTBLADE_SMALL:
+        case FADING_BLADE_BIG:
+        case FADING_BLADE_MEDIUM:
+        case FADING_BLADE_SMALL:
             return 360.f;
         
         case SAW_DECO_BIG:
@@ -1264,21 +1274,10 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
     int width = tex->w;
     int height = tex->h;
 
-    int col_channel = objectLayer->col_channel;
-
-    if (is_modifiable(objectLayer->col_channel)) {
-        if (objectLayer->color_type == COLOR_MAIN) {
-            col_channel = obj->main_col_channel;  
-        } else {
-            col_channel = obj->detail_col_channel;  
-        }
-    }
+    int col_channel = layer->col_channel;
 
     int blending;
-    if (col_channel == OBJ_BLENDING) {
-        col_channel = obj->main_col_channel;
-        blending = TRUE;
-    } else if (channels[col_channel].blending) {
+    if (channels[col_channel].blending || layer->blending) {
         blending = GRRLIB_BLEND_ADD;
     } else {
         blending = GRRLIB_BLEND_ALPHA;
@@ -1860,6 +1859,22 @@ void run_trigger(GameObject *obj) {
         case OBJ_2_TRIGGER:
             upload_to_buffer(obj, 1);
             break;
+        
+        case COL2_TRIGGER: // col 2
+            upload_to_buffer(obj, 2);
+            break;
+
+        case COL3_TRIGGER: // col 3
+            upload_to_buffer(obj, 3);
+            break;
+            
+        case COL4_TRIGGER: // col 4
+            upload_to_buffer(obj, 4);
+            break;
+            
+        case THREEDL_TRIGGER: // 3DL
+            upload_to_buffer(obj, THREEDL);
+            break;
 
         case ENABLE_TRAIL:
             p1_trail = TRUE;
@@ -1873,14 +1888,14 @@ void run_trigger(GameObject *obj) {
             upload_to_buffer(obj, obj->target_color_id);
             break;
     }
-    obj->activated[state.current_player] = TRUE;
+    obj->activated[0] = TRUE;
 }
 
 void handle_triggers(GameObject *obj) {
     int obj_id = obj->id;
     Player *player = &state.player;
     
-    if ((objects[obj_id].is_trigger || obj->id > OBJECT_COUNT) && !obj->activated[state.current_player]) {
+    if ((objects[obj_id].is_trigger || obj->id > OBJECT_COUNT) && !obj->activated[0]) {
         if (obj->touchTriggered) {
             if (intersect(
                 player->x, player->y, player->width, player->height, 0, 
@@ -1889,7 +1904,7 @@ void handle_triggers(GameObject *obj) {
                 run_trigger(obj);
             }
         } else {
-            if (obj->x < state.player.x && obj->x > state.old_player.x) {
+            if (obj->x < state.player.x) {
                 run_trigger(obj);
             }
         }
