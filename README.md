@@ -5,9 +5,15 @@ Port made by AleFunky.\
 Geometry Dash and its respective resources are by RobTop Games.
 
 ## Screenshots
-![imagen](https://github.com/user-attachments/assets/890a69c5-71f8-4f3e-a0d2-f1a72a50aff2)![imagen](https://github.com/user-attachments/assets/3c0a640f-a2d7-4d56-829b-830bc5c7d675)
+<img width="638" height="341" alt="imagen" src="https://github.com/user-attachments/assets/2349df82-c52e-4485-9a94-99578aa9270c" />
+<img width="638" height="372" alt="imagen" src="https://github.com/user-attachments/assets/c40da6cc-924c-465b-893f-01f6b2c5f530" />
+<img width="636" height="382" alt="imagen" src="https://github.com/user-attachments/assets/4b49a1ca-0e59-43be-9ccc-ac88049bd638" />
 
-## Useful resources
+## Current features
+* Ability to load levels from the SD card/USB.
+* Gameplay up to version 1.9.
+
+## Decompilations and recreations that helped make this as accurate as possible
 [GDClone](https://github.com/opstic/gdclone) by opstic\
 [GDRender](https://github.com/maxnut/gdrender/) by maxnut\
 [pathfinder](https://github.com/camila314/pathfinder) by camila314\
