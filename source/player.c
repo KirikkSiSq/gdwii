@@ -584,13 +584,17 @@ void wave_gamemode(Player *player) {
     
     wave_trail.positionR = (Vec2){player->x, player->y};  
     wave_trail.startingPositionInitialized = TRUE;
+    wave_trail.opacity = 1.f;
+
+    if (player->buffering_state == BUFFER_READY) player->buffering_state = BUFFER_END;
 
     bool input = (state.input.holdA || state.input.hold2orY);
     player->gravity = 0;
 
     player->vel_y = (input * 2 - 1) * player_speeds[state.speed] * (player->mini ? 2 : 1);
-    
-    if (player->vel_y != state.old_player.vel_y || player->on_ground != state.old_player.on_ground || player->on_ceiling != state.old_player.on_ceiling) MotionTrail_AddWavePoint(&wave_trail);
+    if (player->vel_y != state.old_player.vel_y || player->on_ground != state.old_player.on_ground || player->on_ceiling != state.old_player.on_ceiling) {
+        MotionTrail_AddWavePoint(&wave_trail);
+    }
 }
 
 void run_camera() {
@@ -769,6 +773,7 @@ void run_player(Player *player) {
     player->vel_x = player_speeds[state.speed];
     player->vel_y += player->gravity * STEPS_DT;
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
+    
     player->x += player->vel_x * STEPS_DT;
 
     player->rotation = normalize_angle(player->rotation);
@@ -781,6 +786,13 @@ void run_player(Player *player) {
         player->ceiling_inv_time = 0;
     }
 
+    if (player->gamemode != GAMEMODE_WAVE) {
+        if (wave_trail.opacity > 0) wave_trail.opacity -= 0.02f;
+        else {
+            wave_trail.opacity = 0;
+            wave_trail.nuPoints = 0;
+        }
+    }
     
     bool slopeCheck = player->slope_data.slope && (grav_slope_orient(player->slope_data.slope, player) == 1 || grav_slope_orient(player->slope_data.slope, player) == 2);
 
@@ -793,6 +805,7 @@ void run_player(Player *player) {
         if (slopeCheck) {
             clear_slope_data(player);
         }
+        
         if (player->gamemode != GAMEMODE_WAVE) player->vel_y = 0;
         player->y = state.ground_y + (player->height / 2) + ((player->gamemode == GAMEMODE_WAVE) ? (player->mini ? 3 : 5) : 0);;
     }
@@ -1232,7 +1245,7 @@ void draw_player(Player *player) {
     GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
 
     MotionTrail_Draw(&trail);
-    MotionTrail_Draw(&wave_trail);
+    MotionTrail_DrawWaveTrail(&wave_trail);
 
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);

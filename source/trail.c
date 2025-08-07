@@ -204,15 +204,17 @@ void MotionTrail_Update(MotionTrail* trail, float delta) {
 void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
     if (!trail->waveTrail) return;
     if (!trail->startingPositionInitialized) return;
+
     unsigned int mov = 0;
     unsigned int startIdx = 0;
     trail->offscreenCount = 0;
     
     // Update stroke width
+    float size_value = 20.f * map_range(amplitude, 0.f, 1.f, 0.5f, 1.f);
     if (level_info.custom_song_id <= 0) {
-        trail->stroke = ease_out(trail->stroke, 15.f * map_range(amplitude, 0.f, 1.f, 0.5f, 1.f), 0.25f);
+        trail->stroke = ease_out(trail->stroke, size_value, 0.25f);
     } else {
-        trail->stroke = 15.f * map_range(amplitude, 0.f, 1.f, 0.5f, 1.f);
+        trail->stroke = size_value;
     }
     
     // Get offscreen points
@@ -246,11 +248,12 @@ void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
             memcpy(&trail->colorPointer[newIdx2], &trail->colorPointer[i2], 8);
         }
 
-        // Set full opacity (no fading)
+        // Set opacity
         unsigned int colorIdx = newIdx * 8;
-        trail->colorPointer[colorIdx + 3] = 255;
-        trail->colorPointer[colorIdx + 7] = 255;
+        trail->colorPointer[colorIdx + 3] = 255 * trail->opacity;
+        trail->colorPointer[colorIdx + 7] = 255 * trail->opacity;
     }
+
 
     trail->nuPoints -= mov;
 
@@ -260,6 +263,7 @@ void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
 
     if (trail->nuPoints > 1) {
         ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->nuPoints);
+        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke * 0.4f, trail->centerVertices, 0, trail->nuPoints);
     }
 
     if (trail->nuPoints && trail->previousNuPoints != trail->nuPoints) {
@@ -298,6 +302,7 @@ void MotionTrail_AddWavePoint(MotionTrail* trail) {
 
     if (trail->nuPoints > 1) {
         ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->nuPoints);
+        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke * 0.4f, trail->centerVertices, 0, trail->nuPoints);
     }
 
     // Update tex coords
@@ -348,5 +353,36 @@ void MotionTrail_Draw(MotionTrail* trail) {
     GX_SetVtxDesc(GX_VA_TEX0, GX_NONE);
     GX_SetVtxDesc(GX_VA_POS,  GX_DIRECT);
     GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+}
 
+void MotionTrail_DrawWaveTrail(MotionTrail *trail) {
+    // Outer wide line
+    GX_SetVtxDesc(GX_VA_POS, GX_DIRECT);
+    GX_SetVtxDesc(GX_VA_CLR0, GX_DIRECT);
+    GX_SetVtxDesc(GX_VA_TEX0, GX_NONE);  // No texture
+    GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
+
+    GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, trail->nuPoints * 2);
+    for (int i = 0; i < trail->nuPoints * 2; i++) {
+        Vec2 pos = trail->vertices[i];
+        float calc_x = ((pos.x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
+        float calc_y = screenHeight - ((pos.y - state.camera_y) * SCALE) + 6;
+        u8* color = &trail->colorPointer[i * 4];
+
+        GX_Position3f32(get_mirror_x(calc_x, state.mirror_factor), calc_y, 0.0f);
+        GX_Color4u8(color[0], color[1], color[2], color[3]);
+    }
+    GX_End();
+
+    // Center thin line
+    GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, trail->nuPoints * 2);
+    for (int i = 0; i < trail->nuPoints * 2; i++) {
+        Vec2 pos = trail->centerVertices[i];
+        float calc_x = ((pos.x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
+        float calc_y = screenHeight - ((pos.y - state.camera_y) * SCALE) + 6;
+
+        GX_Position3f32(get_mirror_x(calc_x, state.mirror_factor), calc_y, 0.0f);
+        GX_Color4u8(165, 165, 165, 255 * trail->opacity);
+    }
+    GX_End();
 }

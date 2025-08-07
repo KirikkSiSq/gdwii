@@ -143,7 +143,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     break;
 
                 MotionTrail_ResumeStroke(&trail);
-                if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&trail);
+                if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&wave_trail);
 
                 player->left_ground = TRUE;
 
@@ -234,7 +234,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 player->vel_y = jump_heights_table[state.speed][JUMP_BLUE_ORB][player->gamemode][player->mini];
                 player->upside_down ^= 1;
-                if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&trail);
+                if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&wave_trail);
 
                 flip_other_player(state.current_player);
                 
@@ -326,7 +326,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->vel_y /= -2;
                     player->upside_down = FALSE;
                     player->inverse_rotation = FALSE;
-                    if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&trail);
+                    if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&wave_trail);
                     flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
@@ -353,7 +353,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->vel_y /= -2;
                     player->upside_down = TRUE;
                     player->inverse_rotation = FALSE;
-                    if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&trail);
+                    if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&wave_trail);
                     flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
@@ -603,8 +603,11 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 setup_dual();
                 
                 if (player->gamemode == GAMEMODE_WAVE) {
-                    MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, wave_trail_tex);
-                    MotionTrail_AddWavePoint(&trail_p2);
+                    MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, wave_trail_tex);   
+                    wave_trail_p2.positionR = (Vec2){state.player2.x, state.player2.y};  
+                    wave_trail_p2.startingPositionInitialized = TRUE;
+                    MotionTrail_AddWavePoint(&wave_trail_p2);
+                    MotionTrail_AddWavePoint(&wave_trail_p2);
                 }
                 MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, FALSE, p1, trail_tex);
 

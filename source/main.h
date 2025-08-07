@@ -82,6 +82,7 @@ typedef struct {
     bool noclip;
     int hitbox_display;
     bool dual;
+    bool dual_setup;
     bool dead;
     
     Particle particles[MAX_PARTICLES];

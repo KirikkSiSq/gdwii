@@ -29,6 +29,7 @@ typedef struct {
     int maxPoints;
     int offscreenCount;
 
+    float opacity;
     float fadeDelta;
     float minSeg;
     float stroke;
@@ -43,6 +44,8 @@ typedef struct {
     Vec2 vertices[MAX_TRAIL_POINTS * 2];
     u8 colorPointer[MAX_TRAIL_POINTS * 8]; // RGBA * 2 per point
     Tex2F texCoords[MAX_TRAIL_POINTS * 2];
+    
+    Vec2 centerVertices[MAX_TRAIL_POINTS * 2];
 
     Vec2 lastStopPosition;
     bool wasStopped;
@@ -64,7 +67,7 @@ void MotionTrail_Update(MotionTrail* trail, float delta);
 void MotionTrail_ResumeStroke(MotionTrail* trail);
 void MotionTrail_StopStroke(MotionTrail* trail);
 void MotionTrail_Draw(MotionTrail* trail);
-void MotionTrail_DrawWave(MotionTrail* trail);
+void MotionTrail_DrawWaveTrail(MotionTrail *trail);
 
 void MotionTrail_AddWavePoint(MotionTrail* trail);
 
