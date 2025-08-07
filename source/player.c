@@ -296,6 +296,7 @@ void collide_with_objects(Player *player) {
         clear_slope_data(player);
     }
 
+    float closestDist = 999999.f;
     // Detect if touching slope
     for (int i = 0; i < slope_count; i++) {
         GameObject *obj = slope_buffer[i];
@@ -303,8 +304,12 @@ void collide_with_objects(Player *player) {
             player->x, player->y, player->width, player->height, 0, 
             obj->x, obj->y, obj->width, obj->height, obj->rotation
         )) {
-            player->touching_slope = TRUE;
-            player->potentialSlope = obj;
+            float dist = square_distance(player->x, player->y, obj->x, obj->y);
+            if (dist < closestDist) {
+                player->touching_slope = TRUE;
+                player->potentialSlope = obj;
+                closestDist = dist; 
+            }
             break;
         }
     }

@@ -121,7 +121,7 @@ struct LoadedLevelInfo {
     int pulsing_type;
     int song_id;
     int custom_song_id;
-    int song_offset;
+    float song_offset;
     bool completing;
     int background_id;
     int ground_id;

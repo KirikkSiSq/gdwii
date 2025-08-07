@@ -563,7 +563,7 @@ static void DataTransferCallback(s32 voice)
 #endif
 }
 
-void MP3Player_SetSeconds(int seconds) {
+void MP3Player_SetSeconds(float seconds) {
 	if (!cached_start.valid) skipped = 0;
 	frames_to_skip = seconds * 38.28125;
 }

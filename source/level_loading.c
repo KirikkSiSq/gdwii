@@ -1282,7 +1282,7 @@ void load_level(char *data) {
     
     char *gmd_song_offset = get_metadata_value(level_string, "kA13");
     if (gmd_song_offset) {
-        level_info.song_offset = atoi(gmd_song_offset);
+        level_info.song_offset = atof(gmd_song_offset);
     } else {
         level_info.song_offset = 0;
     }
