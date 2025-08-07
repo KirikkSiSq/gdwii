@@ -8,7 +8,9 @@
 #include "trail.h"
 
 #include "main.h"
+#include "game.h"
 
+#include "custom_mp3player.h"
 
 // Adds "thickness" to a line strip by generating a triangle strip
 void ccVertexLineToPolygon(const Vec2* points, float stroke, Vec2* outVerts, int offset, int count) {
@@ -83,7 +85,7 @@ void MotionTrail_Init(MotionTrail* trail, float fade, float minSeg, float stroke
     trail->stroke = stroke;
     trail->displayedColor = color;
     trail->waveTrail = waveTrail;
-    trail->appendNewPoints = true;
+    if (!waveTrail) trail->appendNewPoints = true;
 }
 
 void MotionTrail_ResumeStroke(MotionTrail* trail) {
@@ -202,50 +204,64 @@ void MotionTrail_Update(MotionTrail* trail, float delta) {
 void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
     if (!trail->waveTrail) return;
     if (!trail->startingPositionInitialized) return;
-
-    // 1. Fade old points
-    delta *= trail->fadeDelta;
     unsigned int mov = 0;
-    for (unsigned int i = 0; i < trail->nuPoints; ++i) {
-        trail->pointState[i] -= delta;
-        if (trail->pointState[i] <= 0.0f) {
-            mov++;
-        } else {
-            unsigned int newIdx = i - mov;
-            if (mov > 0) {
-                trail->pointState[newIdx] = trail->pointState[i];
-                trail->pointVertexes[newIdx] = trail->pointVertexes[i];
+    unsigned int startIdx = 0;
+    trail->offscreenCount = 0;
+    
+    // Update stroke width
+    if (level_info.custom_song_id <= 0) {
+        trail->stroke = ease_out(trail->stroke, 15.f * map_range(amplitude, 0.f, 1.f, 0.5f, 1.f), 0.25f);
+    } else {
+        trail->stroke = 15.f * map_range(amplitude, 0.f, 1.f, 0.5f, 1.f);
+    }
+    
+    // Get offscreen points
+    for (unsigned int i = 0; i < trail->nuPoints; i++) {
+        float x = trail->pointVertexes[i].x;
+        float calc_x = ((x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
 
-                unsigned int i2 = i * 2;
-                unsigned int newIdx2 = newIdx * 2;
-                trail->vertices[newIdx2] = trail->vertices[i2];
-                trail->vertices[newIdx2 + 1] = trail->vertices[i2 + 1];
+        if (calc_x < 0) trail->offscreenCount++;
+    }
 
-                i2 *= 4;
-                newIdx2 *= 4;
-                memcpy(&trail->colorPointer[newIdx2], &trail->colorPointer[i2], 8);
-            }
+    // Remove the first point if two or more points are offscreen
+    if (trail->offscreenCount >= 2 && trail->nuPoints > 0) {
+        startIdx = 1;
+        mov = 1;
+    }
 
-            unsigned int newIdx2 = newIdx * 8;
-            u8 op = (u8)(trail->pointState[newIdx] * 255.0f);
-            trail->colorPointer[newIdx2 + 3] = op;
-            trail->colorPointer[newIdx2 + 7] = op;
+    for (unsigned int i = startIdx; i < trail->nuPoints; ++i) {
+        unsigned int newIdx = i - mov;
+
+        if (mov > 0) {
+            trail->pointState[newIdx] = trail->pointState[i];
+            trail->pointVertexes[newIdx] = trail->pointVertexes[i];
+
+            unsigned int i2 = i * 2;
+            unsigned int newIdx2 = newIdx * 2;
+            trail->vertices[newIdx2] = trail->vertices[i2];
+            trail->vertices[newIdx2 + 1] = trail->vertices[i2 + 1];
+
+            i2 *= 4;
+            newIdx2 *= 4;
+            memcpy(&trail->colorPointer[newIdx2], &trail->colorPointer[i2], 8);
         }
+
+        // Set full opacity (no fading)
+        unsigned int colorIdx = newIdx * 8;
+        trail->colorPointer[colorIdx + 3] = 255;
+        trail->colorPointer[colorIdx + 7] = 255;
     }
 
     trail->nuPoints -= mov;
 
-    // 2. Move head point[0] to current position
     if (trail->nuPoints > 0) {
         trail->pointVertexes[trail->nuPoints - 1] = trail->positionR;
     }
 
-    // 3. Rebuild geometry
     if (trail->nuPoints > 1) {
         ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->nuPoints);
     }
 
-    // 4. Update texCoords
     if (trail->nuPoints && trail->previousNuPoints != trail->nuPoints) {
         float texDelta = 1.0f / trail->nuPoints;
         for (unsigned int i = 0; i < trail->nuPoints; i++) {

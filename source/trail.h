@@ -21,13 +21,13 @@ typedef struct {
 
 typedef struct {
     bool appendNewPoints;
-    bool fastMode;
     bool startingPositionInitialized;
     bool waveTrail;
 
     int nuPoints;
     int previousNuPoints;
     int maxPoints;
+    int offscreenCount;
 
     float fadeDelta;
     float minSeg;

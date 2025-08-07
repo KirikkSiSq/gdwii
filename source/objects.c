@@ -143,6 +143,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     break;
 
                 MotionTrail_ResumeStroke(&trail);
+                if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&trail);
+
                 player->left_ground = TRUE;
 
                 player->gravObj = obj;
@@ -232,6 +234,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 player->vel_y = jump_heights_table[state.speed][JUMP_BLUE_ORB][player->gamemode][player->mini];
                 player->upside_down ^= 1;
+                if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&trail);
+
                 flip_other_player(state.current_player);
                 
                 player->ball_rotation_speed = -1.f;
@@ -322,6 +326,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->vel_y /= -2;
                     player->upside_down = FALSE;
                     player->inverse_rotation = FALSE;
+                    if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&trail);
                     flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
@@ -348,6 +353,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->vel_y /= -2;
                     player->upside_down = TRUE;
                     player->inverse_rotation = FALSE;
+                    if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&trail);
                     flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
@@ -596,6 +602,10 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 state.dual_portal_y = obj->y;
                 setup_dual();
                 
+                if (player->gamemode == GAMEMODE_WAVE) {
+                    MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, wave_trail_tex);
+                    MotionTrail_AddWavePoint(&trail_p2);
+                }
                 MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, FALSE, p1, trail_tex);
 
                 obj->activated[state.current_player] = TRUE;
@@ -620,6 +630,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 if (state.current_player == 1) {
                     memcpy(&state.player, player, sizeof(Player));
                 }
+                
                 switch (state.player.gamemode) {
                     case GAMEMODE_CUBE:
                         state.ground_y = 0;

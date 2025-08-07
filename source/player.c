@@ -587,9 +587,10 @@ void wave_gamemode(Player *player) {
 
     bool input = (state.input.holdA || state.input.hold2orY);
     player->gravity = 0;
+
     player->vel_y = (input * 2 - 1) * player_speeds[state.speed] * (player->mini ? 2 : 1);
     
-    if (player->vel_y != state.old_player.vel_y) MotionTrail_AddWavePoint(&wave_trail);
+    if (player->vel_y != state.old_player.vel_y || player->on_ground != state.old_player.on_ground || player->on_ceiling != state.old_player.on_ceiling) MotionTrail_AddWavePoint(&wave_trail);
 }
 
 void run_camera() {
@@ -792,7 +793,7 @@ void run_player(Player *player) {
         if (slopeCheck) {
             clear_slope_data(player);
         }
-        player->vel_y = 0;
+        if (player->gamemode != GAMEMODE_WAVE) player->vel_y = 0;
         player->y = state.ground_y + (player->height / 2) + ((player->gamemode == GAMEMODE_WAVE) ? (player->mini ? 3 : 5) : 0);;
     }
 
@@ -807,7 +808,7 @@ void run_player(Player *player) {
             clear_slope_data(player);
         }
         
-        player->vel_y = 0;
+        if (player->gamemode != GAMEMODE_WAVE) player->vel_y = 0;
         player->y = state.ceiling_y - (player->height / 2) - ((player->gamemode == GAMEMODE_WAVE) ? (player->mini ? 3 : 5) : 0);;
     } 
     
