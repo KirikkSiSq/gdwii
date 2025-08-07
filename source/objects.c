@@ -724,9 +724,11 @@ void flip_other_player(int current_player) {
         if (current_player == 0) {
             state.player2.upside_down = !state.player.upside_down;
             state.player2.vel_y /= -2;
+            state.player2.ceiling_inv_time = 0.1f;
         } else {
             state.player.upside_down = !state.player2.upside_down;
             state.player.vel_y /= -2;
+            state.player.ceiling_inv_time = 0.1f;
         }
     }
 }

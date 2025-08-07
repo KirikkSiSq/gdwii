@@ -953,6 +953,7 @@ void init_variables() {
     player->on_ground = TRUE;
     player->on_ceiling = FALSE;
     player->inverse_rotation = FALSE;
+    player->mini = level_info.initial_mini;
     player->upside_down = level_info.initial_upsidedown;
     player->timeElapsed = 0.f;
 
