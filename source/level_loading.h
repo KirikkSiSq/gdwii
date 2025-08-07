@@ -132,8 +132,8 @@ struct LoadedLevelInfo {
     bool initial_upsidedown;
 };
 
-#define BG_COUNT 5
-#define G_COUNT 5
+#define BG_COUNT 7
+#define G_COUNT 7
 
 #define SECTION_HASH_SIZE 600
 

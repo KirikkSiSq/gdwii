@@ -23,12 +23,16 @@
 #include "bg_03_png.h"
 #include "bg_04_png.h"
 #include "bg_05_png.h"
+#include "bg_06_png.h"
+#include "bg_07_png.h"
 
 #include "g_01_png.h"
 #include "g_02_png.h"
 #include "g_03_png.h"
 #include "g_04_png.h"
 #include "g_05_png.h"
+#include "g_06_png.h"
+#include "g_07_png.h"
 
 const unsigned char *backgrounds[] = {
     bg_01_png,
@@ -36,6 +40,8 @@ const unsigned char *backgrounds[] = {
     bg_03_png,
     bg_04_png,
     bg_05_png,
+    bg_06_png,
+    bg_07_png,
 };
 
 const unsigned char *grounds[] = {
@@ -44,6 +50,8 @@ const unsigned char *grounds[] = {
     g_03_png,
     g_04_png,
     g_05_png,
+    g_06_png,
+    g_07_png,
 };
 
 struct LoadedLevelInfo level_info;
