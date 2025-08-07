@@ -65,32 +65,16 @@ inline static float gravInternalTop(Player *player) { return player->upside_down
 inline static float grav(Player *player, float val) { return player->upside_down ? -val : val; }
 
 inline static float obj_getTop(GameObject *object)  { 
-    if (positive_fmod(object->rotation, 180.f) >= 90.f) {
-        return object->y + (objects[object->id].hitbox.width / 2); 
-    } else {
-        return object->y + (objects[object->id].hitbox.height / 2); 
-    }
+    return object->y + object->height / 2; 
 }
 inline static float obj_getBottom(GameObject *object)  { 
-    if (positive_fmod(object->rotation, 180.f) >= 90.f) {
-        return object->y - (objects[object->id].hitbox.width / 2); 
-    } else {
-        return object->y - (objects[object->id].hitbox.height / 2);
-    }
+    return object->y - object->height / 2; 
 }
-inline static float obj_getRight(GameObject *object)  { 
-    if (positive_fmod(object->rotation, 180.f) >= 90.f) {
-        return object->x + objects[object->id].hitbox.height / 2;
-    } else {
-        return object->x + objects[object->id].hitbox.width / 2; 
-    }
+inline static float obj_getRight(GameObject *object)  {  
+    return object->x + object->width / 2; 
 }
 inline static float obj_getLeft(GameObject *object)  { 
-    if (positive_fmod(object->rotation, 180.f) >= 90.f) {
-        return object->x - objects[object->id].hitbox.height / 2; 
-    } else {
-        return object->x - objects[object->id].hitbox.width / 2; 
-    }
+    return object->x - object->width / 2; 
 }
 inline static float obj_gravBottom(Player *player, GameObject *object) { return player->upside_down ? -obj_getTop(object) : obj_getBottom(object); }
 inline static float obj_gravTop(Player *player, GameObject *object) { return player->upside_down ? -obj_getBottom(object) : obj_getTop(object); }
@@ -460,9 +444,9 @@ void ship_gamemode(Player *player) {
     float min = player->mini ? -406.566f : -345.6f;
     float max = player->mini ? 508.248f : 432.0f;
 
-    if (player->vel_y < min) {
+    if (player->gravity < 0 && player->vel_y < min) {
         player->vel_y = min;
-    } else if (player->vel_y > max) {
+    } else if (player->gravity > 0 && player->vel_y > max) {
         player->vel_y = max;
     }
 }
@@ -1466,10 +1450,11 @@ void slope_calc(GameObject *obj, Player *player) {
             }
 
             if (player->upside_down) {
-                player->y = MIN(player->y, expected_slope_y(obj, player));
+                player->y = MAX(obj_getBottom(obj) - player->height / 2, expected_slope_y(obj, player));
             } else {
-                player->y = MAX(player->y, expected_slope_y(obj, player));
+                player->y = MIN(obj_getTop(obj) + player->height / 2, expected_slope_y(obj, player));
             }
+
             player->time_since_ground = 0;
             snap_player_to_slope(obj, player);
             
@@ -1480,8 +1465,9 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // Sliding off slope
         if (gravBottom(player) >= obj_gravTop(player, obj)) {
+            float speed_delta = (player_speeds[state.speed] * STEPS_DT) / (player_speeds[SPEED_NORMAL] * STEPS_DT);
             float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
-            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed) * speed_delta, 0.4f, 1.0f);
             
             if (player->gamemode == GAMEMODE_BALL) {
                 vel *= 0.75f;
@@ -1562,10 +1548,11 @@ void slope_calc(GameObject *obj, Player *player) {
             }
 
             if (player->upside_down) {
-                player->y = MAX(player->y, expected_slope_y(obj, player));
+                player->y = MIN(obj_getTop(obj) + player->height / 2, expected_slope_y(obj, player));
             } else {
-                player->y = MIN(player->y, expected_slope_y(obj, player));
+                player->y = MAX(obj_getBottom(obj) - player->height / 2, expected_slope_y(obj, player));
             }
+
             player->time_since_ground = 0;
             snap_player_to_slope(obj, player);
             
@@ -1576,9 +1563,11 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // Sliding off slope
         if (gravTop(player) <= obj_gravBottom(player, obj)) {
+            float speed_delta = (player_speeds[state.speed] * STEPS_DT) / (player_speeds[SPEED_NORMAL] * STEPS_DT);
             float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
-            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed) * speed_delta, 0.4f, 1.0f);
             
+            float orig = vel;
             if (player->gamemode == GAMEMODE_BALL) {
                 vel *= 0.75f;
             }
@@ -1587,7 +1576,6 @@ void slope_calc(GameObject *obj, Player *player) {
                 vel *= 0.75f;
             }
 
-
             if (player->gamemode == GAMEMODE_UFO) {
                 vel *= 0.7499f;
             }
@@ -1595,6 +1583,7 @@ void slope_calc(GameObject *obj, Player *player) {
             vel *= time;
 
             player->vel_y = -vel;
+            printf("vel %.2f orig %.2f time %.2f y %.2f obj_y %.2f\n", -vel, -orig, time, player->y, obj->y);
             player->inverse_rotation = TRUE;
             clear_slope_data(player);
         }
@@ -1849,7 +1838,7 @@ void slope_collide(GameObject *obj, Player *player) {
         bool clip = slope_touching(obj, player);
         bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult > 0 && player->x - obj_getLeft(obj) > 0;
 
-        printf("p %d - hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
+        printf("p %d - slope angle %.2f - hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, slope_angle(obj,player), hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
         
         if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
             player->on_ground = TRUE;
