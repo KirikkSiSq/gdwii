@@ -1628,7 +1628,7 @@ void slope_calc(GameObject *obj, Player *player) {
             }
         }
 
-        if (obj_gravTop(player, obj) <= grav(player, player->y)) {
+        if (obj_gravTop(player, obj) <= grav(player, player->y) || getLeft(player) - obj_getRight(obj) > 0) {
             float vel = falls[state.speed] * ((float) obj->height / obj->width);
             player->vel_y = vel;
             clear_slope_data(player);

@@ -266,9 +266,12 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 state.ground_y = 0;
                 state.ceiling_y = 999999;
                 if (player->gamemode != GAMEMODE_CUBE) {
-                    if (player->gamemode != GAMEMODE_BALL) MotionTrail_StopStroke(&trail);
+                    if (player->gamemode != GAMEMODE_BALL) {
+                        MotionTrail_StopStroke(&trail);
+                        player->vel_y /= 2;
+                    }
 
-                    if (player->gamemode != GAMEMODE_BALL) player->vel_y /= 2;
+                    if (player->gamemode == GAMEMODE_WAVE) player->vel_y *= 0.9f;
 
                     player->gamemode = GAMEMODE_CUBE;
                     flip_other_player(state.current_player ^ 1);
@@ -296,7 +299,9 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 set_intended_ceiling();
 
                 if (player->gamemode != GAMEMODE_SHIP) {
-                    player->vel_y /= (player->gamemode == GAMEMODE_UFO) ? 4 : 2;
+                    if (player->gamemode == GAMEMODE_WAVE) player->vel_y *= 0.9f;
+                    player->vel_y /= (player->gamemode == GAMEMODE_UFO || player->gamemode == GAMEMODE_WAVE) ? 4 : 2;
+                    
                     player->gamemode = GAMEMODE_SHIP;
                     player->inverse_rotation = FALSE;
                     flip_other_player(state.current_player ^ 1);
@@ -412,6 +417,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 if (player->gamemode != GAMEMODE_BALL) {
                     player->ball_rotation_speed = -1.f;
 
+                    if (player->gamemode == GAMEMODE_WAVE) player->vel_y *= 0.9f;
                     if (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) player->vel_y /= 2;
                     
                     player->gamemode = GAMEMODE_BALL;
@@ -474,6 +480,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 set_intended_ceiling();
                 
                 if (player->gamemode != GAMEMODE_UFO) {
+                    if (player->gamemode == GAMEMODE_WAVE) player->vel_y *= 0.9f;
                     player->vel_y /= (state.old_player.gamemode == GAMEMODE_SHIP) ? 4 : 2;
                     player->gamemode = GAMEMODE_UFO;
                     player->ufo_last_y = player->y;
