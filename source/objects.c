@@ -719,7 +719,7 @@ void set_dual_bounds() {
     // Shift down if odd height and in the top half
     if (height % 2 != 0) {
         if (in_block_y < 15) {
-            state.ground_y -= 30;
+            state.ground_y = maxf(0, state.ground_y - 30);
         }
     }
 
