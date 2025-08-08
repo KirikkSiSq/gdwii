@@ -305,6 +305,15 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->gamemode = GAMEMODE_SHIP;
                     player->inverse_rotation = FALSE;
                     flip_other_player(state.current_player ^ 1);
+                    
+                    float min = player->mini ? -406.566f : -345.6f;
+                    float max = player->mini ? 508.248f : 432.0f;
+
+                    if (player->vel_y < min) {
+                        player->vel_y = min;
+                    } else if (player->vel_y > max) {
+                        player->vel_y = max;
+                    }
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
@@ -613,7 +622,6 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, wave_trail_tex);   
                     wave_trail_p2.positionR = (Vec2){state.player2.x, state.player2.y};  
                     wave_trail_p2.startingPositionInitialized = TRUE;
-                    MotionTrail_AddWavePoint(&wave_trail_p2);
                     MotionTrail_AddWavePoint(&wave_trail_p2);
                 }
                 MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, FALSE, p1, trail_tex);

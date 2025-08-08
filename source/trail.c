@@ -210,7 +210,7 @@ void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
     trail->offscreenCount = 0;
     
     // Update stroke width
-    float size_value = 20.f * map_range(amplitude, 0.f, 1.f, 0.5f, 1.f);
+    float size_value = 20.f * map_range(amplitude, 0.f, 1.f, 0.2f, 1.f);
     if (level_info.custom_song_id <= 0) {
         trail->stroke = ease_out(trail->stroke, size_value, 0.25f);
     } else {
@@ -218,15 +218,17 @@ void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
     }
     
     // Get offscreen points
-    for (unsigned int i = 0; i < trail->nuPoints; i++) {
+    for (unsigned int i = 0; i < trail->actualNuPoints; i++) {
         float x = trail->pointVertexes[i].x;
         float calc_x = ((x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
 
         if (calc_x < 0) trail->offscreenCount++;
+        
+        printf("Point %d y %.2f\n", i, trail->pointVertexes[i].y);
     }
 
     // Remove the first point if two or more points are offscreen
-    if (trail->offscreenCount >= 2 && trail->nuPoints > 0) {
+    if (trail->offscreenCount >= 2 && trail->nuPoints > 1) {
         startIdx = 1;
         mov = 1;
     }
@@ -254,33 +256,23 @@ void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
         trail->colorPointer[colorIdx + 7] = 255 * trail->opacity;
     }
 
-
     trail->nuPoints -= mov;
 
-    if (trail->nuPoints > 0) {
-        trail->pointVertexes[trail->nuPoints - 1] = trail->positionR;
+    trail->actualNuPoints = trail->nuPoints + 1;
+
+    if (trail->actualNuPoints > 0) {
+        trail->pointVertexes[trail->nuPoints] = trail->positionR;
     }
 
-    if (trail->nuPoints > 1) {
-        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->nuPoints);
-        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke * 0.4f, trail->centerVertices, 0, trail->nuPoints);
-    }
-
-    if (trail->nuPoints && trail->previousNuPoints != trail->nuPoints) {
-        float texDelta = 1.0f / trail->nuPoints;
-        for (unsigned int i = 0; i < trail->nuPoints; i++) {
-            trail->texCoords[i * 2].u = 0;
-            trail->texCoords[i * 2].v = texDelta * i;
-            trail->texCoords[i * 2 + 1].u = 1;
-            trail->texCoords[i * 2 + 1].v = texDelta * i;
-        }
-        trail->previousNuPoints = trail->nuPoints;
+    if (trail->actualNuPoints > 1) {
+        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->actualNuPoints);
+        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke * 0.4f, trail->centerVertices, 0, trail->actualNuPoints);
     }
 }
 
 void MotionTrail_AddWavePoint(MotionTrail* trail) {
     if (!trail->waveTrail) return;
-    if (trail->nuPoints >= trail->maxPoints) return;
+    if (trail->actualNuPoints >= trail->maxPoints) return;
 
     unsigned int idx = trail->nuPoints;
 
@@ -301,17 +293,8 @@ void MotionTrail_AddWavePoint(MotionTrail* trail) {
     trail->nuPoints++;
 
     if (trail->nuPoints > 1) {
-        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->nuPoints);
-        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke * 0.4f, trail->centerVertices, 0, trail->nuPoints);
-    }
-
-    // Update tex coords
-    float texDelta = 1.0f / trail->nuPoints;
-    for (unsigned int i = 0; i < trail->nuPoints; i++) {
-        trail->texCoords[i * 2].u = 0;
-        trail->texCoords[i * 2].v = texDelta * i;
-        trail->texCoords[i * 2 + 1].u = 1;
-        trail->texCoords[i * 2 + 1].v = texDelta * i;
+        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke, trail->vertices, 0, trail->actualNuPoints);
+        ccVertexLineToPolygonWave(trail->pointVertexes, trail->stroke * 0.4f, trail->centerVertices, 0, trail->actualNuPoints);
     }
 
     trail->previousNuPoints = trail->nuPoints;
@@ -362,8 +345,8 @@ void MotionTrail_DrawWaveTrail(MotionTrail *trail) {
     GX_SetVtxDesc(GX_VA_TEX0, GX_NONE);  // No texture
     GX_SetTevOp(GX_TEVSTAGE0, GX_PASSCLR);
 
-    GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, trail->nuPoints * 2);
-    for (int i = 0; i < trail->nuPoints * 2; i++) {
+    GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, trail->actualNuPoints * 2);
+    for (int i = 0; i < trail->actualNuPoints * 2; i++) {
         Vec2 pos = trail->vertices[i];
         float calc_x = ((pos.x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
         float calc_y = screenHeight - ((pos.y - state.camera_y) * SCALE) + 6;
@@ -375,8 +358,8 @@ void MotionTrail_DrawWaveTrail(MotionTrail *trail) {
     GX_End();
 
     // Center thin line
-    GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, trail->nuPoints * 2);
-    for (int i = 0; i < trail->nuPoints * 2; i++) {
+    GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, trail->actualNuPoints * 2);
+    for (int i = 0; i < trail->actualNuPoints * 2; i++) {
         Vec2 pos = trail->centerVertices[i];
         float calc_x = ((pos.x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
         float calc_y = screenHeight - ((pos.y - state.camera_y) * SCALE) + 6;

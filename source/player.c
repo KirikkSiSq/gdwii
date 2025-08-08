@@ -1332,11 +1332,12 @@ GRRLIB_texImg *get_p1_trail_tex() {
         case GAMEMODE_CUBE:
             return icon_l1;
         
-        case GAMEMODE_SHIP:
-            return icon_l1;
-        
         case GAMEMODE_BALL:
             return ball_l1;
+
+        case GAMEMODE_WAVE:
+            return wave_l1;
+        
     }
     return icon_l1;
 }

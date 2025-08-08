@@ -26,6 +26,7 @@ typedef struct {
 
     int nuPoints;
     int previousNuPoints;
+    int actualNuPoints;
     int maxPoints;
     int offscreenCount;
 
