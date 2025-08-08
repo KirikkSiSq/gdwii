@@ -1353,6 +1353,9 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
     }
 
     u32 color = RGBA(channels[col_channel].color.r, channels[col_channel].color.g, channels[col_channel].color.b, opacity);
+
+    // If it is invisible because of blending, skip
+    if ((blending == GRRLIB_BLEND_ADD && !(color & ~0xff)) || opacity == 0) return;
         
     float angle_rad = DegToRad(obj->rotation); // Convert degrees to radians
     float cos_a = cosf(angle_rad);
