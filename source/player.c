@@ -1429,6 +1429,13 @@ float expected_slope_y(GameObject *obj, Player *player) {
     }
 }
 
+const float slope_multiplier[SPEED_COUNT] = {
+    0.7f,
+    0.9f,
+    1.1f,
+    1.3f,
+};
+
 void slope_calc(GameObject *obj, Player *player) {
     int orientation = grav_slope_orient(obj, player);
     if (orientation == 0) {
@@ -1467,7 +1474,7 @@ void slope_calc(GameObject *obj, Player *player) {
         // Sliding off slope
         if (gravBottom(player) >= obj_gravTop(player, obj)) {
             float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
-            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed) * slope_multiplier[state.speed], 0.4f, 1.0f);
             
             if (player->gamemode == GAMEMODE_BALL) {
                 vel *= 0.75f;
@@ -1564,7 +1571,7 @@ void slope_calc(GameObject *obj, Player *player) {
         // Sliding off slope
         if (gravTop(player) <= obj_gravBottom(player, obj)) {
             float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
-            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+            float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed) * slope_multiplier[state.speed], 0.4f, 1.0f);
             
             float orig = vel;
             if (player->gamemode == GAMEMODE_BALL) {
