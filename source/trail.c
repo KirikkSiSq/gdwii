@@ -223,8 +223,6 @@ void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
         float calc_x = ((x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
 
         if (calc_x < 0) trail->offscreenCount++;
-        
-        printf("Point %d y %.2f\n", i, trail->pointVertexes[i].y);
     }
 
     // Remove the first point if two or more points are offscreen
