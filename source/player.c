@@ -320,7 +320,7 @@ void collide_with_objects(Player *player) {
 }
 
 void cube_gamemode(Player *player) {
-    int mult = (player->upside_down ^ player->inverse_rotation ? -1 : 1);
+    int mult = (player->upside_down ? -1 : 1);
     
     trail.positionR = (Vec2){player->x, player->y};  
     trail.startingPositionInitialized = TRUE;
@@ -331,8 +331,12 @@ void cube_gamemode(Player *player) {
 
     if (player->y > 2794.f) state.dead = TRUE;
 
-
-    player->rotation += 415.3848f * STEPS_DT * mult * (player->mini ? 1.2f : 1.f);
+    if (player->inverse_rotation) {
+        player->rotation -= (415.3848f / 2) * STEPS_DT * mult * (player->mini ? 1.2f : 1.f);
+    } else {
+        player->rotation += 415.3848f * STEPS_DT * mult * (player->mini ? 1.2f : 1.f);
+    }
+    
 
     if (player->on_ground) {
         MotionTrail_StopStroke(&trail);
@@ -529,7 +533,7 @@ void ufo_particles(Player *player) {
 void ufo_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
 
-    if (player->buffering_state == BUFFER_READY && (state.input.pressedA || state.input.pressed2orY)) {
+    if (player->buffering_state == BUFFER_READY && (state.input.pressedA || state.input.pressed2orY || (state.old_player.gamemode == GAMEMODE_SHIP && (state.input.holdA || state.input.hold2orY)))) {
         player->vel_y = maxf(player->vel_y, player->mini ? 358.992 : 371.034);
         player->buffering_state = BUFFER_END;
         player->ufo_last_y = player->y;
@@ -1513,10 +1517,11 @@ void slope_calc(GameObject *obj, Player *player) {
             }
 
             if (player->upside_down) {
-                player->y = MIN(MAX(player->y, expected_slope_y(obj, player)), player->y + player->height / 2);
+                player->y = MIN(expected_slope_y(obj, player), obj_getTop(obj) + player->height / 2);
             } else {
-                player->y = MAX(MIN(player->y, expected_slope_y(obj, player)), player->y - player->height / 2);
+                player->y = MAX(expected_slope_y(obj, player), obj_getBottom(obj) - player->height / 2);
             }
+            
             player->time_since_ground = 0;
             snap_player_to_slope(obj, player);
             if (player->vel_y < 0) {
@@ -1573,7 +1578,7 @@ void slope_calc(GameObject *obj, Player *player) {
             float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
             float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed) * slope_multiplier[state.speed], 0.4f, 1.0f);
             
-            float orig = vel;
+            //float orig = vel;
             if (player->gamemode == GAMEMODE_BALL) {
                 vel *= 0.75f;
             }
@@ -1618,10 +1623,11 @@ void slope_calc(GameObject *obj, Player *player) {
             }
 
             if (player->upside_down) {
-                player->y = MAX(MIN(player->y, expected_slope_y(obj, player)), player->y - player->height / 2);
+                player->y = MAX(expected_slope_y(obj, player), obj_getBottom(obj) - player->height / 2);
             } else {
-                player->y = MIN(MAX(player->y, expected_slope_y(obj, player)), player->y + player->height / 2);
+                player->y = MIN(expected_slope_y(obj, player), obj_getTop(obj) + player->height / 2);
             }
+            
             player->time_since_ground = 0;
             snap_player_to_slope(obj, player);
             if (player->vel_y > 0) {
@@ -1844,7 +1850,7 @@ void slope_collide(GameObject *obj, Player *player) {
         bool clip = slope_touching(obj, player);
         bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult > 0 && player->x - obj_getLeft(obj) > 0;
 
-        //printf("p %d - slope angle %.2f - hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, slope_angle(obj,player), hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
+        //printf("p %d - orient %d, slope angle %.2f - hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, orient, slope_angle(obj,player), hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
         
         if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
             player->on_ground = TRUE;
@@ -1874,13 +1880,13 @@ void slope_collide(GameObject *obj, Player *player) {
 bool slope_touching(GameObject *obj, Player *player) {
     switch (grav_slope_orient(obj, player)) {
         case 0:
-            return grav(player, expected_slope_y(obj, player)) >= grav(player, player->y);
         case 1:
-            return grav(player, expected_slope_y(obj, player)) >= grav(player, player->y);
+            float diff = grav(player, expected_slope_y(obj, player)) - grav(player, player->y);
+            return diff >= 0 && diff <= 10;
         case 2:
-            return grav(player, expected_slope_y(obj, player)) <= grav(player, player->y); 
         case 3:
-            return grav(player, expected_slope_y(obj, player)) <= grav(player, player->y);  
+            float diff_ud = grav(player, player->y) - grav(player, expected_slope_y(obj, player));  
+            return diff_ud >= 0 && diff_ud <= 10;
         default:
             return false;
     }
@@ -1963,6 +1969,7 @@ void draw_hitbox(GameObject *obj) {
     if (hitbox_type == HITBOX_SPIKE) color = RGBA(0xff, 0x00, 0x00, 0xff);
     if (hitbox_type == HITBOX_SOLID) color = RGBA(0x00, 0x00, 0xff, 0xff);
     
+    if (obj == state.player.slope_data.slope || obj == state.player2.slope_data.slope) color = RGBA(0x00, 0xff, 0x00, 0xff);
 
     Vec2D rect[4];
     if (objects[obj->id].is_slope) {
