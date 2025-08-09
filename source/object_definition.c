@@ -12834,7 +12834,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
-        .def_zorder = 1,
+        .def_zorder = 0,
         .is_saw = TRUE,
         .num_layers = 3
     },
@@ -12870,7 +12870,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
-        .def_zorder = 1,
+        .def_zorder = 0,
         .is_saw = TRUE,
         .num_layers = 3
     },
@@ -12906,7 +12906,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         },
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_T1,
-        .def_zorder = 1,
+        .def_zorder = 0,
         .is_saw = TRUE,
         .num_layers = 3
     },

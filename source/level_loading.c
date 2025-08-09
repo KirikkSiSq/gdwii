@@ -1472,6 +1472,9 @@ void set_color_channels() {
                 channels[id].color.g = colorChannel.fromGreen;
                 channels[id].color.b = colorChannel.fromBlue;
                 channels[id].blending = colorChannel.blending;
+
+                if (colorChannel.playerColor == 1) channels[id].color = p1;
+                if (colorChannel.playerColor == 2) channels[id].color = p2;
         }
     }
 }
