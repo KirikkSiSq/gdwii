@@ -11,6 +11,13 @@
 #include "g_01_png.h"
 #include "font_bold_png.h"
 #include "ground_line_png.h"
+#include "easy_png.h"
+#include "normal_png.h"
+#include "hard_png.h"
+#include "harder_png.h"
+#include "insane_png.h"
+#include "demon_png.h"
+#include "auto_png.h"
 
 
 

@@ -8,4 +8,5 @@ build/
 test.py
 level.txt
 decompressed.txt
+out/
 

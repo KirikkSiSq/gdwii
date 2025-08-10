@@ -28,8 +28,6 @@ GRRLIB_texImg *menu_ground;
 GRRLIB_texImg *font_bold;
 GRRLIB_texImg *ground_line_texture;
 
-
-
 int main_levels();
 int sdcard_levels();
 void game_folder_not_found();
@@ -106,6 +104,39 @@ const int default_lvl_colors[NUM_LVL_COLORS] = {
   RGBA(0, 112, 231, 255), // ToE2
 };
 
+#define NUM_LVL_DIFFICULTY 23
+const int default_level_difficulty[NUM_LVL_DIFFICULTY] = {
+  0, // Stereo Madness | easy
+  0, // Back on Track | easy
+  1, // Polargeist | normal
+  1, // Dry Out | i think you get it now
+  2, // Base After Base
+  2, // Cant Let Go
+  3, // Jumper
+  3, // Time Machine
+  3, // Cycles
+  4, // XStep
+  4, // Clutterfunk
+  4, // ToE
+  4, // EA
+  5, // Clubstep
+  4, // Electrodynamix
+  4, // HF
+  3, // BP
+  5, // ToE2
+  0,
+  5,
+  5,
+  5,
+  6,
+};
+
+#define FACES_COUNT 7
+GRRLIB_texImg *difficulty_faces[FACES_COUNT] = {};
+
+
+
+
 void menu_go_left(){
     level_id--;
     if (level_id < 0) level_id = LEVEL_NUM - 1;
@@ -131,6 +162,9 @@ void start_level(){
     GRRLIB_FreeTexture(menu_top_bar);
     GRRLIB_FreeTexture(gradient_texture);
     GRRLIB_FreeTexture(font_bold);
+    for (int i = 0; i < FACES_COUNT; i++){
+        GRRLIB_FreeTexture(difficulty_faces[i]);
+    }
 }
 
 void game_folder_not_found() {
@@ -290,6 +324,15 @@ int menu_loop() {
     ground_line_texture = GRRLIB_LoadTexturePNG(ground_line_png);
     menu_ground = GRRLIB_LoadTexturePNG(g_01_png); //groundgroundgroundgourng
 
+    //difficultty faces
+    difficulty_faces[0] = GRRLIB_LoadTexturePNG(easy_png);
+    difficulty_faces[1] = GRRLIB_LoadTexturePNG(normal_png);
+    difficulty_faces[2] = GRRLIB_LoadTexturePNG(hard_png);
+    difficulty_faces[3] = GRRLIB_LoadTexturePNG(harder_png);
+    difficulty_faces[4] = GRRLIB_LoadTexturePNG(insane_png);
+    difficulty_faces[5] = GRRLIB_LoadTexturePNG(demon_png);
+    difficulty_faces[6] = GRRLIB_LoadTexturePNG(auto_png);
+
     create_button((screenWidth) / 2 - 200, 100, 400, 160,false,menu_arrow,start_level,false,false); //main play button
     create_button(5,200,56,120,true,menu_arrow,menu_go_left,false,false); //left arrow
     create_button((screenWidth) - 61,200,56,120,true,menu_arrow,menu_go_right,true,false); //right arrow
@@ -417,6 +460,9 @@ int sdcard_levels() {
                 GRRLIB_FreeTexture(menu_top_bar);
                 GRRLIB_FreeTexture(gradient_texture);
                 GRRLIB_FreeTexture(font_bold);
+                for (int i = 0; i < FACES_COUNT; i++){
+                GRRLIB_FreeTexture(difficulty_faces[i]);
+                }
                 return 1;
             }
         }
@@ -437,10 +483,8 @@ int main_levels() {
     } else {
         GRRLIB_FillScreen(RGBA(0, 127, 255, 255));
     }
-
     
     GRRLIB_DrawImg(0,0,gradient_texture,0,screenWidth/256.f,screenHeight/256.f,RGBA(255,255,255,127));//bg gradient
-
     for (int i = 0; i < screenWidth; i += 192){
         if (level_id < NUM_LVL_COLORS) {
             GRRLIB_DrawImg(i,screenHeight-64,menu_ground,0,1.5,1.5,default_lvl_colors[level_id]);//add ground
@@ -448,21 +492,20 @@ int main_levels() {
             GRRLIB_DrawImg(i,screenHeight-64,menu_ground,0,1.5,1.5,RGBA(0, 127, 255, 255));//add ground 2: electric boogaloo
         }
     }
-    GRRLIB_DrawImg(screenWidth/2 - 444 * screen_factor_x,screenHeight-64,ground_line_texture,0,screen_factor_x,1,RGBA(255,255,255,255));//ground line
-    
-
-    
+    GRRLIB_DrawImg(screenWidth/2 - 444 * (screen_factor_x * 0.5),screenHeight-64,ground_line_texture,0,screen_factor_x * 0.5,0.75,RGBA(255,255,255,255));//ground line
     GRRLIB_DrawImg(screenWidth/2 - 306 * 0.75,-1,menu_top_bar,0,0.75,0.75,RGBA(255,255,255,255));//the bar at the top
     GRRLIB_DrawImg(0, screenHeight - 143 * 0.75,menu_corner_squares,0,0.75,0.75,RGBA(255,255,255,255));//corner thing left
     GRRLIB_DrawImg(screenWidth, screenHeight - 143 * 0.75,menu_corner_squares,0,-0.75,0.75,RGBA(255,255,255,255));//corner thing right
-    
-            
+          
     GRRLIB_Printf(0, 400, font, RGBA(255,255,255,255), 0.75, "Press 1 to switch to custom levels.");
     
-    custom_rectangle((screenWidth) / 2 - 200, 100, 400, 160, RGBA(0, 0, 0, 127), 1);
-    int textOffset = (strlen(levels[level_id].level_name) * 18) / 2;
+    custom_rectangle((screenWidth) / 2 - 250, 100, 500, 160, RGBA(0, 0, 0, 127), 1);
+    int textOffset = (strlen(levels[level_id].level_name) * 18 - 70) / 2;
     GRRLIB_Printf(screenWidth/2 - textOffset, 160, font_bold, RGBA(0,0,0,255), 0.75, levels[level_id].level_name);
     GRRLIB_Printf(screenWidth/2 - textOffset, 160, font, RGBA(255,255,255,255), 0.75, levels[level_id].level_name);
+
+
+    GRRLIB_DrawImg(screenWidth/2 - textOffset - 70,150,difficulty_faces[default_level_difficulty[level_id]],0,0.75,0.75,RGBA(255,255,255,255));
 
     int dotsStartX = (screenWidth / 2) - ((LEVEL_NUM * 16) / 2);
     int selectedColor = RGBA(255, 255, 255, 255);
@@ -485,10 +528,10 @@ int main_levels() {
 
     GRRLIB_DrawImg(ir_x,ir_y, cursor,0,1,1,RGBA(255,255,255,255)); // draw cursor
 
+    /*
     SYS_STDIO_Report(true);
     printf("ir x: %f, y: %f\n", ir_x, ir_y);
-
-
+    */
 
     if (state.input.pressedDir & INPUT_LEFT) {
         menu_go_left();
