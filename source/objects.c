@@ -170,7 +170,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             break;
         
         case YELLOW_ORB:
-            if (!obj->activated[state.current_player] && (state.input.holdA || state.input.hold2orY) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdJump) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
                 player->vel_y = jump_heights_table[state.speed][JUMP_YELLOW_ORB][player->gamemode][player->mini];
@@ -199,7 +199,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             break;
         
         case PINK_ORB:
-            if (!obj->activated[state.current_player] && (state.input.holdA || state.input.hold2orY) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdJump) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 
                 player->vel_y = jump_heights_table[state.speed][JUMP_PINK_ORB][player->gamemode][player->mini];
@@ -228,7 +228,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             break;
         
         case BLUE_ORB:
-            if (!obj->activated[state.current_player] && (state.input.holdA || state.input.hold2orY) && player->buffering_state == BUFFER_READY) {    
+            if (!obj->activated[state.current_player] && (state.input.holdJump) && player->buffering_state == BUFFER_READY) {    
                 MotionTrail_ResumeStroke(&trail);
                 player->gravObj = obj;
                 

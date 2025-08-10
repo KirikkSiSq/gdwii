@@ -32,6 +32,9 @@ typedef struct {
     u8 pressedMinusOrR:1;
     u8 holdMinusOrR:1;
 
+    u8 pressedJump:1;
+    u8 holdJump:1;
+
     u8 pressedDir;
     u8 holdDir;
 } KeyInput;

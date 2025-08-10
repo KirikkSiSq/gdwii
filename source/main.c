@@ -205,6 +205,9 @@ void update_input() {
     state.input.pressedDir = ((WPAD_ButtonsDown(WPAD_CHAN_0) & wpad_dir_mask) >> 8) | (PAD_ButtonsDown(PAD_CHAN0) & pad_dir_mask);
     state.input.holdDir =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & wpad_dir_mask) >> 8) | (PAD_ButtonsHeld(PAD_CHAN0) & pad_dir_mask);
 
+    state.input.pressedJump = state.input.pressedA || state.input.pressed2orY || state.input.pressedB;
+    state.input.holdJump = state.input.holdA || state.input.hold2orY || state.input.holdB;
+
     WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS_ACC_IR);
 
     WPADData* data = WPAD_Data(0);
