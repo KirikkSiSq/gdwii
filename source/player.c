@@ -29,7 +29,6 @@ GRRLIB_texImg *wave_l1;
 GRRLIB_texImg *wave_l2;
 
 GRRLIB_texImg *trail_tex;
-GRRLIB_texImg *wave_trail_tex;
 
 MotionTrail trail;
 MotionTrail trail_p1;
@@ -897,8 +896,8 @@ void full_init_variables() {
 void init_variables() {
     MotionTrail_Init(&trail_p1, 0.3f, 3, 10.0f, FALSE, p2, trail_tex);
     MotionTrail_Init(&trail_p2, 0.3f, 3, 10.0f, FALSE, p1, trail_tex);
-    MotionTrail_Init(&wave_trail_p1, 3.f, 3, 10.0f, TRUE, p2, wave_trail_tex);
-    MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, wave_trail_tex);
+    MotionTrail_Init(&wave_trail_p1, 3.f, 3, 10.0f, TRUE, p2, trail_tex);
+    MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, trail_tex);
     MotionTrail_StopStroke(&trail_p1);
     MotionTrail_StopStroke(&trail_p2);
     float factor_x;
@@ -1016,7 +1015,7 @@ void load_icons() {
     wave_l2 = GRRLIB_LoadTexturePNG(dart_01_2_001_png);
 
     trail_tex = GRRLIB_LoadTexturePNG(trail_png);
-    wave_trail_tex = GRRLIB_LoadTexturePNG(wave_trail_png);
+    
 
 
     p1.r = 0;
@@ -1041,7 +1040,6 @@ void unload_icons() {
     GRRLIB_FreeTexture(wave_l1);
     GRRLIB_FreeTexture(wave_l2);
     GRRLIB_FreeTexture(trail_tex);
-    GRRLIB_FreeTexture(wave_trail_tex);
 }
 
 void draw_ship(Player *player, float calc_x, float calc_y) {

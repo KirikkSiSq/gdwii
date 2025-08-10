@@ -619,7 +619,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 setup_dual();
                 
                 if (player->gamemode == GAMEMODE_WAVE) {
-                    MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, wave_trail_tex);   
+                    MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, trail_tex);   
                     wave_trail_p2.positionR = (Vec2){state.player2.x, state.player2.y};  
                     wave_trail_p2.startingPositionInitialized = TRUE;
                     MotionTrail_AddWavePoint(&wave_trail_p2);

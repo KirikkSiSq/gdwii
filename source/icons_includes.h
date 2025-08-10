@@ -15,4 +15,3 @@
 #include "dart_01_2_001_png.h"
 
 #include "trail_png.h"
-#include "wave_trail_png.h"
