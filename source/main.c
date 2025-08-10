@@ -157,16 +157,21 @@ void draw_game() {
         float cpu_time = ticks_to_microsecs(last_frame - start_frame) / 1000.f;
         
         char cpu_usage[64];
-        snprintf(cpu_usage, sizeof(cpu_usage), "CPU: %.2f%%", (cpu_time / 16.666666) * 100);
+        snprintf(cpu_usage, sizeof(cpu_usage), "CPU: %.2f%%%%", (cpu_time / 16.666666) * 100);
         GRRLIB_Printf(20, 400, font, RGBA(255,255,255,255), 0.5, cpu_usage);
 
     }
+    
+    char percentage[64];
+    snprintf(percentage, sizeof(percentage), "%d%%%%", (int) state.level_progress);
+    int textOffset = (strlen(percentage) * 18) / 2;
+    GRRLIB_Printf(screenWidth/2 - textOffset, 10, font, RGBA(255,255,255,255), 1, percentage);
     
     draw_time = 0;
     obj_particles_time = 0;
 
     if (state.noclip) {
-        GRRLIB_Printf(400, 20, font, RGBA(255,255,255,255), 0.5, "Noclip activated");
+        GRRLIB_Printf(screenWidth - 200, 20, font, RGBA(255,255,255,255), 0.5, "Noclip activated");
     }
 
     GRRLIB_Render();

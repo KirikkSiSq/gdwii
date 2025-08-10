@@ -1553,3 +1553,9 @@ bool check_song(int id) {
     snprintf(full_path, sizeof(full_path), "%s/%s/%d.mp3", launch_dir, USER_SONGS_FOLDER, id);
     return access(full_path, F_OK) == 0;
 }
+
+void update_percentage() {
+    float progress = (state.player.x / (level_info.last_obj_x + 270.f)) * 100;
+    if (progress > 100) progress = 100;
+    state.level_progress = progress;
+}

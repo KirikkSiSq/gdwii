@@ -87,6 +87,8 @@ typedef struct {
     bool dual;
     bool dual_setup;
     bool dead;
+
+    float level_progress;
     
     Particle particles[MAX_PARTICLES];
 

@@ -194,3 +194,4 @@ char *load_song(const char *file_name, size_t *out_size);
 char *load_user_song(int id, size_t *out_size);
 
 bool check_song(int id);
+void update_percentage();

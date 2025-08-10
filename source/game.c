@@ -104,7 +104,10 @@ int game_loop() {
             particles_time = ticks_to_microsecs(t3 - t2) / 1000.f * 4;
 
             update_beat();
+            
+            update_percentage();
             frame_counter++;
+
 
             if (state.dead) break;
 

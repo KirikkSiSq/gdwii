@@ -1850,9 +1850,9 @@ void slope_collide(GameObject *obj, Player *player) {
         bool clip = slope_touching(obj, player);
         bool snapDown = (orient == 1 || orient == 2) && player->vel_y * mult > 0 && player->x - obj_getLeft(obj) > 0;
 
-        //printf("p %d - orient %d, slope angle %.2f - hasSlope %d, vel_y %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, orient, slope_angle(obj,player), hasSlope, player->vel_y * mult <= 0, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
+        printf("p %d - orient %d, slope angle %.2f - hasSlope %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, orient, slope_angle(obj,player), hasSlope, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
         
-        if (hasSlope ? player->vel_y * mult <= 0 : (projectedHit && clip) || snapDown) {
+        if ((projectedHit && clip) || snapDown) {
             player->on_ground = TRUE;
             player->inverse_rotation = FALSE;
             player->slope_data.slope = obj;
