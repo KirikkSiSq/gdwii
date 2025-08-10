@@ -1878,15 +1878,17 @@ void slope_collide(GameObject *obj, Player *player) {
 }
 
 bool slope_touching(GameObject *obj, Player *player) {
+    float deg = RadToDeg(fabsf(slope_angle(obj, player)));
+    float snap_height = 10 * (deg / 45);
     switch (grav_slope_orient(obj, player)) {
         case 0:
         case 1:
             float diff = grav(player, expected_slope_y(obj, player)) - grav(player, player->y);
-            return diff >= 0 && diff <= 10;
+            return diff >= 0 && diff <= snap_height;
         case 2:
         case 3:
             float diff_ud = grav(player, player->y) - grav(player, expected_slope_y(obj, player));  
-            return diff_ud >= 0 && diff_ud <= 10;
+            return diff_ud >= 0 && diff_ud <= snap_height;
         default:
             return false;
     }
