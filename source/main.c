@@ -164,8 +164,8 @@ void draw_game() {
     
     char percentage[64];
     snprintf(percentage, sizeof(percentage), "%d%%%%", (int) state.level_progress);
-    int textOffset = (strlen(percentage) * 18) / 2;
-    GRRLIB_Printf(screenWidth/2 - textOffset, 10, font, RGBA(255,255,255,255), 1, percentage);
+    int textOffset = (strlen(percentage) * 18 * 0.75) / 2;
+    GRRLIB_Printf(screenWidth/2 - textOffset, 10, font, RGBA(255,255,255,255), 0.75, percentage);
     
     draw_time = 0;
     obj_particles_time = 0;
