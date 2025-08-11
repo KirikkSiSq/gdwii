@@ -37,7 +37,6 @@ typedef struct {
     int zlayer;          // key 24
     int zorder;          // key 25
 
-
     int random;                     // random number assigned to this object
     bool activated[2];              // if it has been activated
     unsigned int hitbox_counter[2]; // number of times the player has entered the hitbox
@@ -51,13 +50,14 @@ typedef struct {
     // Slope
     unsigned char orientation;
 } GameObject;
-
+#pragma pack(push, 1)
 typedef struct {
-    unsigned char keys[15];
-    unsigned char propCount;
-    unsigned char types[15];
     GDValue values[15];
+    unsigned char keys[15];
+    unsigned char types[15];
+    unsigned char propCount;
 } GDObject;
+#pragma pack(pop)
 
 typedef struct {
     GDObject *objects;
@@ -166,6 +166,7 @@ GFXSection *get_or_create_gfx_section(int x, int y);
 void free_sections(void);
 
 char *get_level_name(char *data_ptr);
+char *get_author_name(char *data_ptr);
 int compare_sortable_layers(const void *a, const void *b);
 
 extern struct LoadedLevelInfo level_info;
@@ -178,7 +179,7 @@ extern GameObject *player_game_object;
 
 void free_typed_object_list(GDTypedObjectList *list);
 void free_typed_object_array(GameObject **array, int count);
-void load_level(char *data);
+int load_level(char *data);
 void unload_level();
 void reload_level();
 void reset_color_channels();

@@ -249,7 +249,8 @@ uLongf get_gzip_uncompressed_size(unsigned char *data, int data_len) {
 
 
 char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
-    printf("Decompressing with zlib inflate in GZIP mode...\n");
+    uLongf final_size = get_gzip_uncompressed_size(data, data_len);
+    printf("Decompressing to a final size of %lu bytes...\n", (unsigned long)final_size);
 
     z_stream strm = {0};
     strm.next_in = data;
@@ -260,47 +261,31 @@ char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
         return NULL;
     }
 
-    // Allocate output buffer with some room; grow if needed
-    size_t buffer_size = 8192;
-    char *out = malloc(buffer_size);
+    // Allocate exactly enough memory (+1 for null terminator if needed)
+    char *out = malloc(final_size + 1);
     if (!out) {
-        printf("malloc failed\n");
+        printf("malloc failed for %lu bytes\n", (unsigned long)final_size);
         inflateEnd(&strm);
         return NULL;
     }
 
-    while (1) {
-        if (strm.total_out >= buffer_size) {
-            buffer_size *= 2;
-            out = realloc(out, buffer_size);
-            if (!out) {
-                printf("realloc failed\n");
-                inflateEnd(&strm);
-                return NULL;
-            }
-        }
+    strm.next_out = (Bytef *)out;
+    strm.avail_out = final_size;
 
-        strm.next_out = (Bytef *)(out + strm.total_out);
-        strm.avail_out = buffer_size - strm.total_out;
-
-        int ret = inflate(&strm, Z_NO_FLUSH);
-        if (ret == Z_STREAM_END) break;
-        if (ret != Z_OK) {
-            printf("inflate failed with code %d\n", ret);
-            free(out);
-            inflateEnd(&strm);
-            return NULL;
-        }
+    int ret = inflate(&strm, Z_FINISH);
+    if (ret != Z_STREAM_END) {
+        printf("inflate failed with code %d\n", ret);
+        free(out);
+        inflateEnd(&strm);
+        return NULL;
     }
 
     *out_len = strm.total_out;
+    out[*out_len] = '\0'; // Null-terminate if treating as string
+
     inflateEnd(&strm);
 
-    // Final shrink to fit
-    out = realloc(out, *out_len + 1); // +1 for null terminator
-    out[*out_len] = '\0';
-
-    printf("Decompressed %lu bytes successfully\n", *out_len);
+    printf("Decompressed %lu bytes successfully\n", (unsigned long)*out_len);
     return out;
 }
 
@@ -531,7 +516,7 @@ int parse_gd_object(const char *objStr, GDObject *obj) {
 
     obj->propCount = 0;
 
-    for (int i = 0; i + 1 < count && obj->propCount < 20; i += 2) {
+    for (int i = 0; i + 1 < count && obj->propCount < 15; i += 2) {
         int key = atoi(tokens[i]);
         const char *valStr = tokens[i + 1];
         GDValueType type = get_value_type_for_key(key);
@@ -802,6 +787,7 @@ GDObjectList *parse_string(const char *levelString) {
 
     printf("Size of gdobjects %d bytes\n", sizeof(GDObject) * objectCount);
     if (objects == NULL) {
+        free_string_array(sections, sectionCount);
         printf("Couldn't allocate GD Objects\n");
         return NULL;
     }
@@ -1251,12 +1237,12 @@ GDObjectLayerList *layersArrayList = NULL;
 int channelCount = 0;
 GDColorChannel *colorChannels = NULL;
 
-void load_level(char *data) {
+int load_level(char *data) {
     char *level_string = decompress_level(data);
 
     if (level_string == NULL) {
         printf("Failed decompressing the level.\n");
-        return;
+        return 1;
     }
 
     level_info.last_obj_x = 545.f;
@@ -1349,7 +1335,7 @@ void load_level(char *data) {
 
     if (objectsList == NULL) {
         printf("Failed parsing the objects.\n");
-        return;
+        return 2;
     }
 
     objectsArrayList = convert_all_to_typed(objectsList);
@@ -1357,7 +1343,7 @@ void load_level(char *data) {
 
     if (objectsArrayList == NULL) {
         printf("Failed converting objects to typed structs.\n");
-        return;
+        return 3;
     }
 
     layersArrayList = fill_layers_array(objectsArrayList);
@@ -1365,7 +1351,7 @@ void load_level(char *data) {
     if (layersArrayList == NULL) {
         printf("Couldn't sort layers\n");
         free_typed_object_list(objectsArrayList);
-        return;
+        return 4;
     }
 
     sort_layers_by_layer(layersArrayList);
@@ -1386,6 +1372,8 @@ void load_level(char *data) {
     set_color_channels();
 
     printf("Finished loading level\n");
+
+    return 0;
 }
 
 void unload_level() {
@@ -1481,6 +1469,10 @@ void set_color_channels() {
 
 char *get_level_name(char *data_ptr) {
     return extract_gmd_key((const char *) data_ptr, "k2", "s");
+}
+
+char *get_author_name(char *data_ptr) {
+    return extract_gmd_key((const char *) data_ptr, "k5", "s");
 }
 
 void reload_level() {

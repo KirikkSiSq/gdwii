@@ -81,6 +81,7 @@ int create_button(int x, int y, int width, int height, bool show, GRRLIB_texImg 
 }
 
 bool exit_menu = false;
+int error_code = 0;
 
 #define NUM_LVL_COLORS 18
 const int default_lvl_colors[NUM_LVL_COLORS] = {
@@ -134,9 +135,6 @@ const int default_level_difficulty[NUM_LVL_DIFFICULTY] = {
 #define FACES_COUNT 7
 GRRLIB_texImg *difficulty_faces[FACES_COUNT] = {};
 
-
-
-
 void menu_go_left(){
     level_id--;
     if (level_id < 0) level_id = LEVEL_NUM - 1;
@@ -155,15 +153,17 @@ void start_level(){
         update_input();
         VIDEO_WaitVSync();
     }
-    load_level((char *) levels[level_id].data_ptr);
-    exit_menu = true;
-    GRRLIB_FreeTexture(menu_arrow);
-    GRRLIB_FreeTexture(menu_corner_squares);
-    GRRLIB_FreeTexture(menu_top_bar);
-    GRRLIB_FreeTexture(gradient_texture);
-    GRRLIB_FreeTexture(font_bold);
-    for (int i = 0; i < FACES_COUNT; i++){
-        GRRLIB_FreeTexture(difficulty_faces[i]);
+    int code = load_level((char *) levels[level_id].data_ptr);
+    if (!code) {
+        exit_menu = true;
+        GRRLIB_FreeTexture(menu_arrow);
+        GRRLIB_FreeTexture(menu_corner_squares);
+        GRRLIB_FreeTexture(menu_top_bar);
+        GRRLIB_FreeTexture(gradient_texture);
+        GRRLIB_FreeTexture(font_bold);
+        for (int i = 0; i < FACES_COUNT; i++){
+            GRRLIB_FreeTexture(difficulty_faces[i]);
+        }
     }
 }
 
@@ -352,7 +352,7 @@ int menu_loop() {
                 // Read first gmd
                 char *level_data = read_file(sd_level_paths[level_id].name, &outsize);
                 if (level_data) {
-                    snprintf(current_level_name, 255, "%s", get_level_name(level_data));
+                    snprintf(current_level_name, 255, "%s - by %s", get_level_name(level_data), get_author_name(level_data));
                     
                     check_custom_song(level_data);
                     
@@ -383,6 +383,7 @@ int menu_loop() {
 
 void refresh_sdcard_levels() {
     memset(current_level_name, 0, 255);
+    error_code = 0;
                 
     if (sd_level_paths[level_id].is_dir) {
         snprintf(current_level_name, 255, "%s", sd_level_paths[level_id].name);
@@ -390,7 +391,7 @@ void refresh_sdcard_levels() {
 
     char *level_data = read_file(sd_level_paths[level_id].name, &outsize);
     if (level_data) {
-        snprintf(current_level_name, 255, "%s", get_level_name(level_data));
+        snprintf(current_level_name, 255, "%s - by %s", get_level_name(level_data), get_author_name(level_data));
         
         check_custom_song(level_data);
 
@@ -414,6 +415,10 @@ int sdcard_levels() {
 
             GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
             if (custom_song_id >= 0) print_custom_song(custom_song_id);
+        }
+
+        if (error_code) {
+            GRRLIB_Printf(0, 300, font, RGBA(255,255,255,255), 0.75, "Failed to load the level with code %d\n", error_code);
         }
 
         if (state.input.pressedDir & INPUT_LEFT) {
@@ -453,17 +458,22 @@ int sdcard_levels() {
                 }
                 
                 char *level = read_file(sd_level_paths[level_id].name, &outsize);
-                load_level(level);
+                int code = load_level(level);
                 free(level);
-                GRRLIB_FreeTexture(menu_arrow);
-                GRRLIB_FreeTexture(menu_corner_squares);
-                GRRLIB_FreeTexture(menu_top_bar);
-                GRRLIB_FreeTexture(gradient_texture);
-                GRRLIB_FreeTexture(font_bold);
-                for (int i = 0; i < FACES_COUNT; i++){
-                GRRLIB_FreeTexture(difficulty_faces[i]);
+
+                if (!code) {
+                    GRRLIB_FreeTexture(menu_arrow);
+                    GRRLIB_FreeTexture(menu_corner_squares);
+                    GRRLIB_FreeTexture(menu_top_bar);
+                    GRRLIB_FreeTexture(gradient_texture);
+                    GRRLIB_FreeTexture(font_bold);
+                    for (int i = 0; i < FACES_COUNT; i++){
+                        GRRLIB_FreeTexture(difficulty_faces[i]);
+                    }
+                    return 1;
                 }
-                return 1;
+                error_code = code;
+                return 0;
             }
         }
     } else {
