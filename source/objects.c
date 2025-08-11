@@ -1825,6 +1825,7 @@ void handle_col_triggers() {
 
             if (buffer->time_run > buffer->seconds) {
                 buffer->active = FALSE;
+                channels[chan].color = buffer->new_color;
             }
         }
     }
