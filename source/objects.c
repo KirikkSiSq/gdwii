@@ -272,7 +272,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     }
 
                     if (player->gamemode == GAMEMODE_WAVE) player->vel_y *= 0.9f;
-
+                    
+                    player->ceiling_inv_time = 0.1f;
                     player->gamemode = GAMEMODE_CUBE;
                     flip_other_player(state.current_player ^ 1);
 
