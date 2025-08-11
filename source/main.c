@@ -127,11 +127,11 @@ void draw_game() {
         GRRLIB_Printf(20, 50, font, RGBA(255,255,255,255), 0.5, layerText);
         old_frame_counter = frame_counter;
         char player_x[64];
-        snprintf(player_x, sizeof(player_x), "X: %.2f", state.player.x);
+        snprintf(player_x, sizeof(player_x), "X: %.2f VX: %.2f", state.player.x, state.player.vel_x);
         GRRLIB_Printf(20, 80, font, RGBA(255,255,255,255), 0.5, player_x);
 
         char player_y[64];
-        snprintf(player_y, sizeof(player_y), "Y: %.2f", state.player.y);
+        snprintf(player_y, sizeof(player_y), "Y: %.2f VY: %.2f", state.player.y, state.player.vel_y);
         GRRLIB_Printf(20, 110, font, RGBA(255,255,255,255), 0.5, player_y);
         
         char obj_layer[64];

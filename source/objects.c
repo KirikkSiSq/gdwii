@@ -1246,12 +1246,13 @@ int get_opacity(GameObject *obj, float x) {
 }
 
 float get_fading_obj_fade(GameObject *obj, float x, float right_edge) {
+    float fading_obj_width = FADING_OBJ_WIDTH * screen_factor_x;
     if (x < FADING_OBJ_PADDING || x > right_edge - FADING_OBJ_PADDING)
         return 1.f;
-    else if (x < FADING_OBJ_PADDING + FADING_OBJ_WIDTH)
-        return clampf(1.f - ((x - FADING_OBJ_PADDING) / FADING_OBJ_WIDTH), 0.05f, 1.f);
-    else if (x > right_edge - FADING_OBJ_WIDTH - FADING_OBJ_PADDING)
-        return clampf(1.f - ((right_edge - (x + FADING_OBJ_PADDING)) / FADING_OBJ_WIDTH), 0.05f, 1.f);
+    else if (x < FADING_OBJ_PADDING + fading_obj_width)
+        return clampf(1.f - ((x - FADING_OBJ_PADDING) / fading_obj_width), 0.05f, 1.f);
+    else if (x > right_edge - fading_obj_width - FADING_OBJ_PADDING)
+        return clampf(1.f - ((right_edge - (x + FADING_OBJ_PADDING)) / fading_obj_width), 0.05f, 1.f);
     else
         return 0.05f;
 }

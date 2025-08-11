@@ -13,7 +13,7 @@
 
 #define FADE_WIDTH 75
 
-#define FADING_OBJ_WIDTH 150
+#define FADING_OBJ_WIDTH 180
 #define FADING_OBJ_PADDING 90
 
 enum Objects {
