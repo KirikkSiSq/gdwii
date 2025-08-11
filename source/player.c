@@ -1455,10 +1455,6 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // On slope
         if (gravBottom(player) != obj_gravTop(player, obj)) {
-            if (is_spike_slope(obj)) {
-                state.dead = TRUE;
-            }
-
             if (player->upside_down) {
                 player->y = MAX(obj_getBottom(obj) - player->height / 2, expected_slope_y(obj, player));
             } else {
@@ -1510,10 +1506,6 @@ void slope_calc(GameObject *obj, Player *player) {
         }
 
         if (gravBottom(player) != obj_gravTop(player, obj) || player->slope_data.snapDown) {
-            if (is_spike_slope(obj)) {
-                state.dead = TRUE;
-            }
-
             if (player->upside_down) {
                 player->y = MIN(expected_slope_y(obj, player), obj_getTop(obj) + player->height / 2);
             } else {
@@ -1553,10 +1545,6 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // On slope
         if (gravBottom(player) != obj_gravTop(player, obj)) {
-            if (is_spike_slope(obj)) {
-                state.dead = TRUE;
-            }
-
             if (player->upside_down) {
                 player->y = MIN(obj_getTop(obj) + player->height / 2, expected_slope_y(obj, player));
             } else {
@@ -1616,10 +1604,6 @@ void slope_calc(GameObject *obj, Player *player) {
         }
 
         if (gravTop(player) != obj_gravBottom(player, obj) || player->slope_data.snapDown) {
-            if (is_spike_slope(obj)) {
-                state.dead = TRUE;
-            }
-
             if (player->upside_down) {
                 player->y = MAX(expected_slope_y(obj, player), obj_getBottom(obj) - player->height / 2);
             } else {
@@ -1855,6 +1839,10 @@ void slope_collide(GameObject *obj, Player *player) {
             player->inverse_rotation = FALSE;
             player->slope_data.slope = obj;
             snap_player_to_slope(obj, player);
+
+            if (is_spike_slope(obj)) {
+                state.dead = TRUE;
+            }
 
             if (snapDown && !hasSlope) {
                 if (orient == 1 && player->vel_y <= 0) {
