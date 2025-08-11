@@ -1447,12 +1447,6 @@ void slope_calc(GameObject *obj, Player *player) {
             return;
         }
 
-        if (player->gamemode == GAMEMODE_WAVE) {
-            state.dead = TRUE;
-            clear_slope_data(player);
-            return;
-        }
-
         // On slope
         if (gravBottom(player) != obj_gravTop(player, obj)) {
             if (player->upside_down) {
@@ -1498,12 +1492,6 @@ void slope_calc(GameObject *obj, Player *player) {
             clear_slope_data(player);
             return;
         }
-        
-        if (player->gamemode == GAMEMODE_WAVE) {
-            state.dead = TRUE;
-            clear_slope_data(player);
-            return;
-        }
 
         if (gravBottom(player) != obj_gravTop(player, obj) || player->slope_data.snapDown) {
             if (player->upside_down) {
@@ -1535,12 +1523,6 @@ void slope_calc(GameObject *obj, Player *player) {
         
         if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
             state.dead = TRUE;
-        }
-
-        if (player->gamemode == GAMEMODE_WAVE) {
-            state.dead = TRUE;
-            clear_slope_data(player);
-            return;
         }
 
         // On slope
@@ -1595,12 +1577,6 @@ void slope_calc(GameObject *obj, Player *player) {
         
         if (player->gamemode == GAMEMODE_CUBE && !gravSnap) {
             state.dead = TRUE;
-        }
-        
-        if (player->gamemode == GAMEMODE_WAVE) {
-            state.dead = TRUE;
-            clear_slope_data(player);
-            return;
         }
 
         if (gravTop(player) != obj_gravBottom(player, obj) || player->slope_data.snapDown) {
@@ -1835,6 +1811,11 @@ void slope_collide(GameObject *obj, Player *player) {
         printf("p %d - orient %d, slope angle %.2f - hasSlope %d, projectedHit %d clip %d snapDown %d (clip val %.2f)\n", state.current_player, orient, slope_angle(obj,player), hasSlope, projectedHit, clip, snapDown, grav(player, player->y) - grav(player, expected_slope_y(obj, player)));
         
         if ((projectedHit && clip) || snapDown) {
+            if (player->gamemode == GAMEMODE_WAVE) {
+                state.dead = TRUE;
+                return;
+            }
+            
             player->on_ground = TRUE;
             player->inverse_rotation = FALSE;
             player->slope_data.slope = obj;
