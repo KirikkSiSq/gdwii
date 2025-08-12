@@ -509,14 +509,14 @@ int main_levels() {
           
     GRRLIB_Printf(0, 400, font, RGBA(255,255,255,255), 0.75, "Press 1 to switch to custom levels.");
     
+    //level name display
     custom_rectangle((screenWidth) / 2 - 250, 100, 500, 160, RGBA(0, 0, 0, 127), 1);
     int textOffset = (strlen(levels[level_id].level_name) * 18 - 70) / 2;
     GRRLIB_Printf(screenWidth/2 - textOffset, 160, font_bold, RGBA(0,0,0,255), 0.75, levels[level_id].level_name);
     GRRLIB_Printf(screenWidth/2 - textOffset, 160, font, RGBA(255,255,255,255), 0.75, levels[level_id].level_name);
-
-
     GRRLIB_DrawImg(screenWidth/2 - textOffset - 70,150,difficulty_faces[default_level_difficulty[level_id]],0,0.75,0.75,RGBA(255,255,255,255));
 
+    //the circles at the bottom of the screen
     int dotsStartX = (screenWidth / 2) - ((LEVEL_NUM * 16) / 2);
     int selectedColor = RGBA(255, 255, 255, 255);
     int otherColor = RGBA(127, 127, 127, 255);
@@ -538,11 +538,6 @@ int main_levels() {
 
     GRRLIB_DrawImg(ir_x,ir_y, cursor,0,1,1,RGBA(255,255,255,255)); // draw cursor
 
-    /*
-    SYS_STDIO_Report(true);
-    printf("ir x: %f, y: %f\n", ir_x, ir_y);
-    */
-
     if (state.input.pressedDir & INPUT_LEFT) {
         menu_go_left();
     }
@@ -552,7 +547,7 @@ int main_levels() {
     }
     
     if (state.input.pressedA) {
-        // ale is gonna kill me
+        // ale is no longer going to kill me
         for (int i = 0; i < button_count; i++){
             if (GRRLIB_PtInRect(button_list[i].x,button_list[i].y,button_list[i].width,button_list[i].height,ir_x,ir_y)){
             button_list[i].func();
@@ -563,9 +558,8 @@ int main_levels() {
         start_level();
         return 1;
     }
-
+    
     if (exit_menu) return 1;
-
     return 0;
 }
 
