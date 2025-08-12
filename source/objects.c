@@ -427,8 +427,15 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 if (player->gamemode != GAMEMODE_BALL) {
                     player->ball_rotation_speed = -1.f;
 
-                    if (player->gamemode == GAMEMODE_WAVE) player->vel_y *= 0.9f;
-                    if (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_UFO) player->vel_y /= 2;
+                    switch (player->gamemode) {
+                        case GAMEMODE_WAVE:
+                            player->vel_y *= 0.9f;
+                            player->vel_y /= 2;
+                        case GAMEMODE_SHIP:
+                        case GAMEMODE_UFO:
+                            player->vel_y /= 2;
+                            break;
+                    }
                     
                     player->gamemode = GAMEMODE_BALL;
                     player->inverse_rotation = FALSE;
@@ -491,7 +498,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 if (player->gamemode != GAMEMODE_UFO) {
                     if (player->gamemode == GAMEMODE_WAVE) player->vel_y *= 0.9f;
-                    player->vel_y /= (state.old_player.gamemode == GAMEMODE_SHIP) ? 4 : 2;
+                    player->vel_y /= (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_WAVE) ? 4 : 2;
                     player->gamemode = GAMEMODE_UFO;
                     player->ufo_last_y = player->y;
                     player->inverse_rotation = FALSE;
