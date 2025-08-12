@@ -236,27 +236,45 @@ int base64_decode(const char *in, unsigned char *out) {
     return len;
 }
 
-uLongf get_gzip_uncompressed_size(unsigned char *data, int data_len) {
-    if (data_len < 4) return 0;
+uLongf get_uncompressed_size(unsigned char *data, int data_len) {
+    z_stream strm;
+    memset(&strm, 0, sizeof(strm));
+    strm.next_in = data;
+    strm.avail_in = data_len;
 
-    // GZIP footer stores original size in last 4 bytes, little-endian
-    uint32_t size = data[data_len - 4]
-                  | (data[data_len - 3] << 8)
-                  | (data[data_len - 2] << 16)
-                  | (data[data_len - 1] << 24);
-    return (uLongf)size;
+    if (inflateInit2(&strm, 15 | 32) != Z_OK) {  // auto-detect gzip/zlib
+        return 0;
+    }
+
+    uLongf total_out = 0;
+    unsigned char buf[4096];
+
+    do {
+        strm.next_out = buf;
+        strm.avail_out = sizeof(buf);
+        int ret = inflate(&strm, Z_NO_FLUSH);
+        if (ret == Z_STREAM_ERROR || ret == Z_DATA_ERROR || ret == Z_MEM_ERROR) {
+            inflateEnd(&strm);
+            return 0;
+        }
+        total_out += sizeof(buf) - strm.avail_out;
+        if (ret == Z_STREAM_END) break;
+    } while (strm.avail_in > 0);
+
+    inflateEnd(&strm);
+    return total_out;
 }
 
 
 char *decompress_data(unsigned char *data, int data_len, uLongf *out_len) {
-    uLongf final_size = get_gzip_uncompressed_size(data, data_len);
+    uLongf final_size = get_uncompressed_size(data, data_len);
     printf("Decompressing to a final size of %lu bytes...\n", (unsigned long)final_size);
 
     z_stream strm = {0};
     strm.next_in = data;
     strm.avail_in = data_len;
 
-    if (inflateInit2(&strm, 15 | 32) != Z_OK) {  // 16 + MAX_WBITS enables gzip decoding
+    if (inflateInit2(&strm, 15 | 32) != Z_OK) {   // auto-detect gzip/zlib
         printf("Failed to initialize zlib stream for GZIP\n");
         return NULL;
     }
