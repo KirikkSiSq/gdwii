@@ -454,6 +454,13 @@ void ship_gamemode(Player *player) {
     }
 }
 
+static float ballJumpHeights[] = {
+    -172.044007,
+    -181.11601,
+    -185.00401,
+    -181.92601
+};
+
 void ball_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
     
@@ -476,7 +483,7 @@ void ball_gamemode(Player *player) {
     // Jump
     if ((state.input.holdJump) && (player->on_ground || player->on_ceiling || player->slope_data.slope) && player->buffering_state == BUFFER_READY) {
         player->upside_down ^= 1;
-        set_p_velocity(player, -181.11601);
+        set_p_velocity(player, ballJumpHeights[state.speed]);
 
         player->buffering_state = BUFFER_END;
         
@@ -1846,6 +1853,11 @@ void slope_collide(GameObject *obj, Player *player) {
 
 bool slope_touching(GameObject *obj, Player *player) {
     bool hasSlope = player->slope_data.slope;
+
+    if (hasSlope) {
+        int mult = grav_slope_orient(player->slope_data.slope, player) >= 2 ? -1 : 1;
+        hasSlope = hasSlope && player->vel_y * mult <= 0;
+    }
     float deg = RadToDeg(fabsf(slope_angle(obj, player)));
     float snap_height = 20 * (deg / 45);
     float min = hasSlope ? -3 : 0;
