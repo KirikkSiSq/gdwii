@@ -504,7 +504,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->inverse_rotation = FALSE;
                     flip_other_player(state.current_player ^ 1);
 
-                    if (state.old_player.gamemode == GAMEMODE_SHIP) {
+                    if (state.old_player.gamemode == GAMEMODE_SHIP || state.old_player.gamemode == GAMEMODE_CUBE) {
                         player->buffering_state = BUFFER_READY;
                     }
 

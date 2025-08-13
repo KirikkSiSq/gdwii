@@ -538,8 +538,8 @@ void ufo_particles(Player *player) {
 
 void ufo_gamemode(Player *player) {
     int mult = (player->upside_down ? -1 : 1);
-
-    if (player->buffering_state == BUFFER_READY && (state.input.pressedJump || (state.old_player.gamemode == GAMEMODE_SHIP && (state.input.holdJump)))) {
+    bool buffering_check = ((state.old_player.gamemode == GAMEMODE_SHIP || state.old_player.gamemode == GAMEMODE_CUBE) && (state.input.holdJump));
+    if (player->buffering_state == BUFFER_READY && (state.input.pressedJump || buffering_check)) {
         player->vel_y = maxf(player->vel_y, player->mini ? 358.992 : 371.034);
         player->buffering_state = BUFFER_END;
         player->ufo_last_y = player->y;
