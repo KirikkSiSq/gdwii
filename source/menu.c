@@ -305,7 +305,7 @@ int menu_loop() {
     // Read first gmd
     char *level_data = read_file(sd_level_paths[level_id].name, &outsize);
     if (level_data) {
-        snprintf(current_level_name, 255, "%s", get_level_name(level_data));
+        snprintf(current_level_name, 255, "%s - by %s", get_level_name(level_data), get_author_name(level_data));
         free(level_data);
     }
 
