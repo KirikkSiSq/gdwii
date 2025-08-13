@@ -134,7 +134,7 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(info OFILES = $(OFILES))
+
 # Put the response file in the build dir so it gets cleaned with other intermediates
 OBJFILE := $(DEPSDIR)/objects.rsp
 

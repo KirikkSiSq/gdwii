@@ -1433,7 +1433,7 @@ float expected_slope_y(GameObject *obj, Player *player) {
 
 const float slope_multiplier[SPEED_COUNT] = {
     0.7f,
-    0.9f,
+    1.f,
     1.1f,
     1.3f,
 };
@@ -1845,17 +1845,19 @@ void slope_collide(GameObject *obj, Player *player) {
 }
 
 bool slope_touching(GameObject *obj, Player *player) {
+    bool hasSlope = player->slope_data.slope;
     float deg = RadToDeg(fabsf(slope_angle(obj, player)));
     float snap_height = 20 * (deg / 45);
+    float min = hasSlope ? -3 : 0;
     switch (grav_slope_orient(obj, player)) {
         case 0:
         case 1:
             float diff = grav(player, expected_slope_y(obj, player)) - grav(player, player->y);
-            return diff >= 0 && diff <= snap_height;
+            return diff >= min && diff <= snap_height;
         case 2:
         case 3:
             float diff_ud = grav(player, player->y) - grav(player, expected_slope_y(obj, player));  
-            return diff_ud >= 0 && diff_ud <= snap_height;
+            return diff_ud >= min && diff_ud <= snap_height;
         default:
             return false;
     }
