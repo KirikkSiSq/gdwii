@@ -21,7 +21,7 @@ jobs:
           make -C GRRLIB clean all install
       - name: Make application
         run: |
-          make
+          make -j4
       - name: Prepare for build publishing
         run: |
           mkdir -p out/rom
