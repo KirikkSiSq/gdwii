@@ -7,7 +7,6 @@ ifeq ($(strip $(DEVKITPPC)),)
 $(error "Please set DEVKITPPC in your environment. export DEVKITPPC=<path to>devkitPPC")
 endif
 
-include $(DEVKITPPC)/wii_rules
 
 #---------------------------------------------------------------------------------
 # TARGET is the name of the output
@@ -20,6 +19,8 @@ BUILD		:=	build
 SOURCES		:=	source libraries
 DATA		:=	data data/objects data/portals data/glow data/icons data/levels data/sfx data/back_grounds data/perspective data/menu
 INCLUDES	:=  libraries
+
+include $(patsubst %/$(BUILD),%,$(CURDIR))/wii_rules
 
 #---------------------------------------------------------------------------------
 # options for code generation
@@ -133,11 +134,28 @@ DEPENDS	:=	$(OFILES:.o=.d)
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
+$(info OFILES = $(OFILES))
+# Put the response file in the build dir so it gets cleaned with other intermediates
+OBJFILE := $(DEPSDIR)/objects.rsp
+
+# Helper for a newline
+define NL :=
+
+
+endef
+
 $(OUTPUT).dol: $(OUTPUT).elf
-$(OUTPUT).elf: $(OFILES)
+
+$(OUTPUT).elf: $(OBJFILE) 
+	$(SILENTMSG) linking ... $(notdir $@)
+	$(SILENTCMD)$(LD) @$(OBJFILE) $(LDFLAGS) $(LIBPATHS) $(LIBS) -o $@
+
+$(OBJFILE): $(OFILES)
+	$(SILENTMSG) objecting ... $(notdir $@)
+	@$(file >$@,$(foreach o,$(OFILES),$(o)$(NL)))
+
 
 $(OFILES_SOURCES) : $(HFILES)
-
 
 #---------------------------------------------------------------------------------
 # This rule links in binary data with the .ogg extension

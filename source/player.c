@@ -1789,7 +1789,7 @@ void slope_collide(GameObject *obj, Player *player) {
                     (grav_slope_orient(slope, player) == 2 && grav_slope_orient(obj, player) == 3)
                 )
             ) 
-        ) && slope_touching(obj, player) && colliding && obj_gravTop(player, obj) - gravBottom(player) > 0.06
+        ) && slope_touching(obj, player) && colliding && obj_gravTop(player, obj) - gravBottom(player) > 1
     ) {
         
         if (slope && slope_angle(obj, player) < slope_angle(slope, player)) return;
