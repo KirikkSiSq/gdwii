@@ -7,6 +7,7 @@
 #include "game.h"
 #include "player.h"
 #include "main.h"
+#include "easing.h"
 
 float positive_fmod(float n, float divisor) {
     float value = fmod(n, divisor);

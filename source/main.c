@@ -74,8 +74,6 @@ float draw_time = 0;
 float layer_sorting = 0;
 float player_draw_time = 0;
 
-
-
 int number_of_collisions = 0;
 int number_of_collisions_checks = 0;
 
