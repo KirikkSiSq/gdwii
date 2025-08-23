@@ -17,6 +17,8 @@
 
 #include "menu.h"
 
+#include "game.h"
+
 #include <stdio.h>
 
 GRRLIB_texImg *menu_top_bar;
@@ -337,8 +339,13 @@ int menu_loop() {
     create_button(5,200,56,120,true,menu_arrow,menu_go_left,false,false); //left arrow
     create_button((screenWidth) - 61,200,56,120,true,menu_arrow,menu_go_right,true,false); //right arrow
 
+    u64 prevTicks = gettime();
+
     while (1) {
+        start_frame = gettime();
         update_input();
+        float frameTime = ticks_to_secs_float(start_frame - prevTicks);
+        dt = frameTime;
 
         if (!MP3Player_IsPlaying() && menuLoop) {
             MP3Player_PlayBuffer(menuLoop, size, NULL);

@@ -149,5 +149,7 @@ extern GRRLIB_texImg *cursor;
 extern float ir_x;
 extern float ir_y;
 
+extern float dt;
+
 void draw_game();
 void update_input();
