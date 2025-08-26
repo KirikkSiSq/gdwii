@@ -1380,6 +1380,7 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
 
     get_fade_vars(obj, x, &fade_x, &fade_y, &fade_scale);
 
+    // Get scaling because of music
     if (layer_pulses(obj, layer)) {
         if (level_info.custom_song_id <= 0) {
             obj->ampl_scaling = ease_out(obj->ampl_scaling, get_object_pulse(amplitude, obj), 0.25f);
@@ -1391,6 +1392,7 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
 
     float rotation = adjust_angle(obj->rotation, 0, state.mirror_mult < 0);
 
+    // Handle rod ball spawn
     switch(obj_id) {
         case ROD_BIG:
         case ROD_MEDIUM:
@@ -1402,6 +1404,7 @@ static inline void put_object_layer(GameObject *obj, float x, float y, GDObjectL
             }
     }
 
+    // Handle special fade types
     if (obj->transition_applied == FADE_DOWN_STATIONARY || obj->transition_applied == FADE_UP_STATIONARY) {
         if (unmodified_opacity < 255) {
             if (x > screenWidth / 2) {
@@ -1494,6 +1497,7 @@ void draw_end_wall() {
             int height = image->h;
             set_texture(image);
 
+            // Draw each wall block
             for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX * 2; i += BLOCK_SIZE_PX) {
                 custom_drawImg(
                     get_mirror_x(calc_x + 6, state.mirror_factor) - (width/2), 
@@ -1517,6 +1521,7 @@ void draw_end_wall() {
 void draw_ground(f32 y, bool is_ceiling) {
     int mult = (is_ceiling ? -1 : 1);
 
+    // First draw the ground
     float calc_x = 0 - positive_fmod(state.ground_x * SCALE, GROUND_SIZE);
     float calc_y = screenHeight - ((y - state.camera_y) * SCALE);
 
@@ -1530,6 +1535,7 @@ void draw_ground(f32 y, bool is_ceiling) {
         );
     }
 
+    // Then draw the line
     if (channels[LINE].blending) {
         GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
     }
@@ -1650,6 +1656,7 @@ void draw_all_object_layers() {
                 if (calc_x > -90 && calc_x < screen_x_max) {        
                     if (calc_y > -90 && calc_y < screen_y_max) {    
                         if (visible_count < MAX_VISIBLE_LAYERS) {
+                            // Add to visible layers, as it can be seen
                             visible_layers[visible_count++] = sec->layers[i];
                         }
                     }
@@ -1658,8 +1665,11 @@ void draw_all_object_layers() {
         }
     }
 
-    // Sort globally
+    // Sort layers
     qsort(visible_layers, visible_count, sizeof(GDLayerSortable*), compare_sortable_layers);
+
+
+    // Sort same ID objects so instead of layer 0 layer 1 layer 0 layer 1, its layer 0, layer 0, layer 1, layer 1
     int i = 0;
     while (i < visible_count) {
         int obj_id = visible_layers[i]->layer->obj->id;
@@ -1695,6 +1705,7 @@ void draw_all_object_layers() {
         int obj_id = obj->id;
 
         if (obj_id == PLAYER_OBJECT) {
+            // Draw player related stuff
             u64 t2 = gettime();
             draw_particles(DEATH_CIRCLE);
             draw_particles(DEATH_PARTICLES);
@@ -1744,8 +1755,10 @@ void draw_all_object_layers() {
             bool fade_edge = (fade_val == 255 || fade_val == 0);
             bool is_layer0 = (layer->layerNum == 0);
 
+            // Fade objects
             if (is_layer0 && fade_edge) handle_special_fading(obj, calc_x, calc_y);
             
+            // If saw, rotate
             if (is_layer0 && objects[obj_id].is_saw) {
                 obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
             }

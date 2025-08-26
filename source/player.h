@@ -94,6 +94,13 @@ enum PlayerSpeeds {
     SPEED_COUNT
 };
 
+enum SlopeOrientations {
+    ORIENT_NORMAL_UP,
+    ORIENT_NORMAL_DOWN,
+    ORIENT_UD_DOWN,
+    ORIENT_UD_UP
+};
+
 extern Color p1;
 extern Color p2;
 

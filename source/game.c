@@ -72,17 +72,19 @@ int game_loop() {
             trail = trail_p1;
             wave_trail = wave_trail_p1;
             if (death_timer <= 0)  {
+                // Run first player
                 handle_player(&state.player);
                 
                 run_camera();
                 handle_mirror_transition();
+
                 trail_p1 = trail;
                 wave_trail_p1 = wave_trail;
-                
 
                 if (state.dead) break;
 
                 if (state.dual) {
+                    // Run second player
                     state.old_player = state.player2;
                     trail = trail_p2;
                     wave_trail = wave_trail_p2;
@@ -107,7 +109,6 @@ int game_loop() {
             
             update_percentage();
             frame_counter++;
-
 
             if (state.dead) break;
 

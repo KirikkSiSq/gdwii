@@ -455,6 +455,7 @@ int parse_color_channels(const char *colorString, GDColorChannel **outArray) {
     if (!colorString || !outArray) return 0;
 
     int count = 0;
+    // Split string into each channel
     char **entries = split_string(colorString, '|', &count);
     if (!entries) return 0;
 
@@ -492,6 +493,8 @@ GDValueType get_value_type_for_key(int key) {
         case 16: return GD_VAL_BOOL;   // (Trigger) Player 2 color
         case 17: return GD_VAL_BOOL;   // (Trigger) Blending
         case 19: return GD_VAL_INT;    // 1.9 color channel
+        case 21: return GD_VAL_INT;    // Main col channel
+        case 22: return GD_VAL_INT;    // Detail col channel
         case 23: return GD_VAL_INT;    // (Trigger) Target color ID
         case 24: return GD_VAL_INT;    // Zlayer
         case 25: return GD_VAL_INT;    // Zorder
@@ -526,6 +529,7 @@ __unused void print_prop(int key, GDValueType type, GDValue value) {
 
 int parse_gd_object(const char *objStr, GDObject *obj) {
     int count = 0;
+    // Split object into each key
     char **tokens = split_string(objStr, ',', &count);
     if (count < 1) {
         free_string_array(tokens, count);
@@ -534,6 +538,7 @@ int parse_gd_object(const char *objStr, GDObject *obj) {
 
     obj->propCount = 0;
 
+    // Iterate through all keys, up to 15
     for (int i = 0; i + 1 < count && obj->propCount < 15; i += 2) {
         int key = atoi(tokens[i]);
         const char *valStr = tokens[i + 1];
@@ -595,6 +600,7 @@ int convert_1p9_channel(int channel) {
     return 0;
 }
 
+// Convert some 2.0 objects into the 1.9 ones, blame robtop for making GD convert those to 2.0
 int convert_object(int id) {
     switch (id) {
         case 1734:
@@ -609,26 +615,28 @@ int convert_object(int id) {
     return id;
 }
 
-GameObject *convert_to_typed(const GDObject *obj) {
-    GameObject *typed = malloc(sizeof(GameObject));
-    if (!typed) return NULL;
+GameObject *convert_to_game_object(const GDObject *obj) {
+    GameObject *object = malloc(sizeof(GameObject));
+    if (!object) return NULL;
 
-    // Initialize all fields to default values:
-    memset(typed, 0, sizeof(GameObject));
+    // Initialize all fields to 0
+    memset(object, 0, sizeof(GameObject));
 
-    typed->id = obj->values[0].i;
+    object->id = obj->values[0].i;
+
     // Temporarily convert user coins (added in 2.0) into secret coins
-    typed->id = convert_object(typed->id);
+    object->id = convert_object(object->id);
 
-    typed->zsheetlayer = objects[typed->id].spritesheet_layer;
-    typed->zlayer = objects[typed->id].def_zlayer;
-    typed->zorder = objects[typed->id].def_zorder;
+    object->zsheetlayer = objects[object->id].spritesheet_layer;
+    object->zlayer = objects[object->id].def_zlayer;
+    object->zorder = objects[object->id].def_zorder;
 
-    typed->random = rand();
+    // Get a random value for this object
+    object->random = rand();
 
-    typed->main_col_channel = 0;
-    typed->detail_col_channel = 0;
-    typed->u1p9_col_channel = 0;
+    object->main_col_channel = 0;
+    object->detail_col_channel = 0;
+    object->u1p9_col_channel = 0;
 
     for (int i = 0; i < obj->propCount; i++) {
         int key = obj->keys[i];
@@ -637,67 +645,65 @@ GameObject *convert_to_typed(const GDObject *obj) {
 
         switch (key) {
             case 2:  // X
-                if (type == GD_VAL_FLOAT) typed->x = val.f;
+                if (type == GD_VAL_FLOAT) object->x = val.f;
                 break;
             case 3:  // Y
-                if (type == GD_VAL_FLOAT) typed->y = val.f;
+                if (type == GD_VAL_FLOAT) object->y = val.f;
                 break;
             case 4:  // FlippedH
-                if (type == GD_VAL_BOOL) typed->flippedH = val.b;
+                if (type == GD_VAL_BOOL) object->flippedH = val.b;
                 break;
             case 5:  // FlippedV
-                if (type == GD_VAL_BOOL) typed->flippedV = val.b;
+                if (type == GD_VAL_BOOL) object->flippedV = val.b;
                 break;
             case 6:  // Rotation
-                if (type == GD_VAL_FLOAT) typed->rotation = val.f;
+                if (type == GD_VAL_FLOAT) object->rotation = val.f;
                 break;
             case 7:  // Color R
-                if (type == GD_VAL_INT) typed->trig_colorR = val.i;
+                if (type == GD_VAL_INT) object->trig_colorR = val.i;
                 break;
             case 8:  // Color G
-                if (type == GD_VAL_INT) typed->trig_colorG = val.i;
+                if (type == GD_VAL_INT) object->trig_colorG = val.i;
                 break;
             case 9:  // Color B
-                if (type == GD_VAL_INT) typed->trig_colorB = val.i;
+                if (type == GD_VAL_INT) object->trig_colorB = val.i;
                 break;
             case 10: // Duration
-                if (type == GD_VAL_FLOAT) typed->trig_duration = val.f;
+                if (type == GD_VAL_FLOAT) object->trig_duration = val.f;
                 break;
             case 11: // Touch Triggered
-                if (type == GD_VAL_BOOL) typed->touchTriggered = val.b;
+                if (type == GD_VAL_BOOL) object->touchTriggered = val.b;
                 break;
             case 14: // Tint Ground
-                if (type == GD_VAL_BOOL) typed->tintGround = val.b;
+                if (type == GD_VAL_BOOL) object->tintGround = val.b;
                 break;
             case 15: // Player 1 color
-                if (type == GD_VAL_BOOL) typed->p1_color = val.b;
+                if (type == GD_VAL_BOOL) object->p1_color = val.b;
                 break;
             case 16: // Player 2 color
-                if (type == GD_VAL_BOOL) typed->p2_color = val.b;
+                if (type == GD_VAL_BOOL) object->p2_color = val.b;
                 break;
             case 17: // Blending
-                if (type == GD_VAL_BOOL) typed->blending = val.b;
+                if (type == GD_VAL_BOOL) object->blending = val.b;
                 break;
             case 19: // 1.9 channel id
-                if (type == GD_VAL_INT) typed->u1p9_col_channel = convert_1p9_channel(val.i);
+                if (type == GD_VAL_INT) object->u1p9_col_channel = convert_1p9_channel(val.i);
                 break;
             case 21: // Main col channel
-                if (type == GD_VAL_INT) typed->main_col_channel = val.i;
+                if (type == GD_VAL_INT) object->main_col_channel = val.i;
                 break;
             case 22: // Detail col channel
-                if (type == GD_VAL_INT) typed->detail_col_channel = val.i;
+                if (type == GD_VAL_INT) object->detail_col_channel = val.i;
                 break;
             case 23: // Target color ID
-                if (type == GD_VAL_INT) typed->target_color_id = val.i;
+                if (type == GD_VAL_INT) object->target_color_id = val.i;
                 break;
             case 24: // Z layer
-                if (type == GD_VAL_INT) typed->zlayer = val.i;
+                if (type == GD_VAL_INT) object->zlayer = val.i;
                 break;
             case 25: // Z order
-                if (type == GD_VAL_INT) typed->zorder = val.i;
+                if (type == GD_VAL_INT) object->zorder = val.i;
                 break;
-
-            // Add more keys here as needed
 
             default:
                 // Unknown keys ignored here
@@ -705,80 +711,81 @@ GameObject *convert_to_typed(const GDObject *obj) {
         }
     }
     
-    if (typed->x > level_info.last_obj_x) {
-        level_info.last_obj_x = typed->x;
+    // Modify level ending pos
+    if (object->x > level_info.last_obj_x) {
+        level_info.last_obj_x = object->x;
     }
 
     // Setup slope
-    if (objects[typed->id].is_slope) {
-        int orientation = typed->rotation / 90;
-        if (typed->flippedH && typed->flippedV) orientation += 2;
-        else if (typed->flippedH) orientation += 1;
-        else if (typed->flippedV) orientation += 3;
+    if (objects[object->id].is_slope) {
+        int orientation = object->rotation / 90;
+        if (object->flippedH && object->flippedV) orientation += 2;
+        else if (object->flippedH) orientation += 1;
+        else if (object->flippedV) orientation += 3;
         
         orientation = orientation % 4;
         if (orientation < 0) orientation += 4;
 
-        typed->orientation = orientation;
+        object->orientation = orientation;
     }
 
-    ObjectHitbox hitbox = objects[typed->id].hitbox;
+    ObjectHitbox hitbox = objects[object->id].hitbox;
 
-    if ((int) fabsf(typed->rotation) % 180 != 0) {
-        typed->width = hitbox.height;
-        typed->height = hitbox.width;
+    // Modify height and width depending on rotation
+    if ((int) fabsf(object->rotation) % 180 != 0) {
+        object->width = hitbox.height;
+        object->height = hitbox.width;
     } else {
-        typed->width = hitbox.width;
-        typed->height = hitbox.height;
+        object->width = hitbox.width;
+        object->height = hitbox.height;
     }
 
 
-    return typed;
+    return object;
 }
 
-void free_typed_object(GameObject *obj) {
+void free_game_object(GameObject *obj) {
     if (!obj) return;
-    //if (obj->text) free(obj->text);
     free(obj);
 }
 
-GDTypedObjectList *convert_all_to_typed(GDObjectList *objList) {
+GDGameObjectList *convert_all_to_game_objects(GDObjectList *objList) {
     if (!objList) return NULL;
 
-    GameObject **typedArray = malloc(sizeof(GameObject *) * objList->objectCount);
-    if (!typedArray) return NULL;
+    GameObject **objectArray = malloc(sizeof(GameObject *) * objList->objectCount);
+    if (!objectArray) return NULL;
 
     printf("Converting objects...\n");
 
     for (int i = 0; i < objList->objectCount; i++) {
-        typedArray[i] = convert_to_typed(&objList->objects[i]);
-        assign_object_to_section(typedArray[i]);
-        if (!typedArray[i]) {
+        objectArray[i] = convert_to_game_object(&objList->objects[i]);
+        assign_object_to_section(objectArray[i]);
+        if (!objectArray[i]) {
             printf("Failed to convert object %d\n", i);
             for (int j = 0; j < i; j++) {
-                free_typed_object(typedArray[j]);
+                free_game_object(objectArray[j]);
             }
-            free(typedArray);
+            free(objectArray);
             return NULL;
         }
     }
 
     printf("Allocating list...\n");
 
-    GDTypedObjectList *typedList = malloc(sizeof(GDTypedObjectList));
-    if (!typedList) {
-        printf("Failed to allocate the typed list");
+    GDGameObjectList *gameObjectList = malloc(sizeof(GDGameObjectList));
+    if (!gameObjectList) {
+        printf("Failed to allocate the game object list");
         for (int i = 0; i < objList->objectCount; i++) {
-            free_typed_object(typedArray[i]);
+            free_game_object(objectArray[i]);
         }
-        free(typedArray);
+        free(objectArray);
         return NULL;
     }
 
-    typedList->count = objList->objectCount;
-    typedList->objects = typedArray;
+    gameObjectList->count = objList->objectCount;
+    gameObjectList->objects = objectArray;
 
-    return typedList;
+    return gameObjectList;
 }
 
 void free_gd_object_list(GDObjectList *list) {
@@ -788,6 +795,8 @@ void free_gd_object_list(GDObjectList *list) {
 
 GDObjectList *parse_string(const char *levelString) {
     int sectionCount = 0;
+
+    // Split the string in object sections
     char **sections = split_string(levelString, ';', &sectionCount);
 
     if (sectionCount < 3) {
@@ -801,6 +810,7 @@ GDObjectList *parse_string(const char *levelString) {
     int objectCount = sectionCount - 1;
     printf("%d\n", objectCount);
     
+    // Allocate GD objects
     GDObject *objects = (GDObject *)malloc(sizeof(GDObject) * objectCount);
 
     printf("Size of gdobjects %d bytes\n", sizeof(GDObject) * objectCount);
@@ -833,11 +843,11 @@ GDObjectList *parse_string(const char *levelString) {
     return objectList;
 }
 
-void free_typed_object_list(GDTypedObjectList *list) {
+void free_game_object_list(GDGameObjectList *list) {
     if (!list) return;
 
     for (int i = 0; i < list->count; i++) {
-        free_typed_object(list->objects[i]);
+        free_game_object(list->objects[i]);
     }
     free(list->objects);
     free(list);
@@ -865,6 +875,7 @@ int compare_sortable_layers(const void *a, const void *b) {
     int sheetA = objects[obj_idA].spritesheet_layer;
     int sheetB = objects[obj_idB].spritesheet_layer;
 
+    // Get blending zlayer modifier, don't affect player and only affect normal objects
     if (obj_idA != PLAYER_OBJECT && sheetA == SHEET_BLOCKS) {
         int col_channelA = GDlayerA->col_channel;
         bool blendingA = channels[col_channelA].blending | GDlayerA->blending;
@@ -923,15 +934,15 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
     }
 }
 
-void free_typed_object_array(GameObject **array, int count) {
+void free_game_object_array(GameObject **array, int count) {
     if (!array) return;
     for (int i = 0; i < count; i++) {
-        free_typed_object(array[i]);
+        free_game_object(array[i]);
     }
     free(array); // Free the array of pointers itself
 }
 
-GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
+GDObjectLayerList *fill_layers_array(GDGameObjectList *objList) {
     // Count layers
     int layerCount = 0;
     for (int i = 0; i < objList->count; i++) {
@@ -951,7 +962,7 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
         return NULL;
     }
 
-    // Put player
+    // Add player for rendering, not used for gameplay
     GameObject *obj = malloc(sizeof(GameObject));
     obj->id = PLAYER_OBJECT;
     obj->zlayer = LAYER_T1-1;
@@ -990,10 +1001,13 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
 
                 int col_channel = layer->col_channel;
 
+                // Get layer's color channel
                 if (is_modifiable(layer->col_channel)) {
                     if (obj->u1p9_col_channel > 0) {
+                        // Get 1.9 color channel
                         if (layer->color_type == COLOR_DETAIL) col_channel = obj->u1p9_col_channel;
-                    } else {
+                    } else { 
+                        // 2.0+ color channels
                         if (obj->main_col_channel > 0) {
                             if (layer->color_type == COLOR_MAIN) {
                                 col_channel = obj->main_col_channel;  
@@ -1010,6 +1024,8 @@ GDObjectLayerList *fill_layers_array(GDTypedObjectList *objList) {
                 }
 
                 layers[count].blending = FALSE;
+
+                // Convert object glow color channel into main color channel
                 if (obj->main_col_channel > 0 && col_channel == OBJ_BLENDING) {
                     col_channel = obj->main_col_channel;
                     layers[count].blending = TRUE;
@@ -1250,25 +1266,12 @@ int parse_old_channels(char *level_string, GDColorChannel **outArray) {
     return i;
 }
 
-GDTypedObjectList *objectsArrayList = NULL;
+GDGameObjectList *objectsArrayList = NULL;
 GDObjectLayerList *layersArrayList = NULL;
 int channelCount = 0;
 GDColorChannel *colorChannels = NULL;
 
-int load_level(char *data) {
-    char *level_string = decompress_level(data);
-
-    if (level_string == NULL) {
-        printf("Failed decompressing the level.\n");
-        return 1;
-    }
-
-    level_info.last_obj_x = 545.f;
-
-    // Get colors
-    char *metaStr = get_metadata_value(level_string, "kS38");
-    channelCount = parse_color_channels(metaStr, &colorChannels);
-
+void load_level_info(char *data, char *level_string) {
     char *gmd_song_id = extract_gmd_key((const char *) data, "k8", "i");
     if (!gmd_song_id) {
         level_info.song_id = 0; // Stereo Madness
@@ -1282,7 +1285,6 @@ int load_level(char *data) {
     } else {
         level_info.custom_song_id = atoi(gmd_custom_song_id); // Custom song id
     }
-
     
     char *gmd_song_offset = get_metadata_value(level_string, "kA13");
     if (gmd_song_offset) {
@@ -1341,11 +1343,28 @@ int load_level(char *data) {
     } else {
         level_info.initial_upsidedown = 0; 
     }
+}
 
-    // Fallback to pre 2.0 keys
+int load_level(char *data) {
+    char *level_string = decompress_level(data);
+
+    if (level_string == NULL) {
+        printf("Failed decompressing the level.\n");
+        return 1;
+    }
+
+    level_info.last_obj_x = 545.f;
+
+    // Get level starting colors
+    char *metaStr = get_metadata_value(level_string, "kS38");
+    channelCount = parse_color_channels(metaStr, &colorChannels);
+
+    // Fallback to pre 2.0 color keys
     if (!channelCount) {
         channelCount = parse_old_channels(level_string, &colorChannels);
     }
+    
+    load_level_info(data, level_string);
 
     GDObjectList *objectsList = parse_string(level_string);
 
@@ -1356,11 +1375,11 @@ int load_level(char *data) {
         return 2;
     }
 
-    objectsArrayList = convert_all_to_typed(objectsList);
+    objectsArrayList = convert_all_to_game_objects(objectsList);
     free_gd_object_list(objectsList);
 
     if (objectsArrayList == NULL) {
-        printf("Failed converting objects to typed structs.\n");
+        printf("Failed converting objects to game object structs.\n");
         return 3;
     }
 
@@ -1368,7 +1387,7 @@ int load_level(char *data) {
 
     if (layersArrayList == NULL) {
         printf("Couldn't sort layers\n");
-        free_typed_object_list(objectsArrayList);
+        free_game_object_list(objectsArrayList);
         return 4;
     }
 
@@ -1378,13 +1397,13 @@ int load_level(char *data) {
 
     level_info.pulsing_type = random_int(0,2);
 
+    // Load level's bg and ground texture
     bg = GRRLIB_LoadTexturePNG(backgrounds[level_info.background_id]);
     ground = GRRLIB_LoadTexturePNG(grounds[level_info.ground_id]);
 
     int rounded_last_obj_x = (int) (level_info.last_obj_x / 30) * 30 + 15;
     level_info.wall_x = (rounded_last_obj_x) + (9.f * 30.f);
     full_init_variables();
-    
 
     reset_color_channels();
     set_color_channels();
@@ -1399,7 +1418,7 @@ void unload_level() {
     free(sortable_list);
     sortable_list = NULL;
     layersArrayList = NULL;
-    free_typed_object_list(objectsArrayList);
+    free_game_object_list(objectsArrayList);
     objectsArrayList = NULL;
     if (colorChannels) {
         free(colorChannels);

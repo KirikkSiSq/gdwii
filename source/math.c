@@ -54,7 +54,6 @@ float approachf(float current, float target, float speed, float smoothing) {
     return current + step + (diff > 0 ? speed : -speed);
 }
 
-
 // This one only works for drawing
 void rotate_point_around_center_gfx(
     float x, float y,               // anchor position on screen
@@ -195,11 +194,15 @@ float iSlerp(float a, float b, float ratio, float dt) {
 	return slerp(a, b, iRatio);
 }
 
+// Generic easing out function, not from GD
 float ease_out(float current, float target, float smoothing) {
     return current + (target - current) * smoothing;
 }
 
 static guVector axis = (guVector){0.0f, 0.0f, 1.0f};
+
+
+// Custom GRRLIB functions for maximum performance (so it can be batched)
 
 void set_texture(const GRRLIB_texImg *tex) {
     

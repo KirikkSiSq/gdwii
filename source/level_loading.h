@@ -67,7 +67,7 @@ typedef struct {
 typedef struct {
     int count;
     GameObject **objects;
-} GDTypedObjectList;
+} GDGameObjectList;
 
 typedef struct {
     GameObject *obj;
@@ -171,14 +171,14 @@ int compare_sortable_layers(const void *a, const void *b);
 
 extern struct LoadedLevelInfo level_info;
 
-extern GDTypedObjectList *objectsArrayList;
+extern GDGameObjectList *objectsArrayList;
 extern GDObjectLayerList *layersArrayList;
 
 extern GDLayerSortable gfx_player_layer;
 extern GameObject *player_game_object;
 
-void free_typed_object_list(GDTypedObjectList *list);
-void free_typed_object_array(GameObject **array, int count);
+void free_game_object_list(GDGameObjectList *list);
+void free_game_object_array(GameObject **array, int count);
 int load_level(char *data);
 void unload_level();
 void reload_level();

@@ -5,7 +5,6 @@
 #include <grrlib.h>
 #include "math.h"
 
-
 void get_corners(float cx, float cy, float w, float h, float angle, Vec2D out[4]) {
     float hw = w / 2.0f, hh = h / 2.0f;
     angle = -angle; // Make it clockwise
@@ -69,31 +68,31 @@ bool intersect(float x1, float y1, float w1, float h1, float angle1,
 
 bool intersect_rect_circle(float rx, float ry, float rw, float rh, float rangle,
                           float cx, float cy, float cradius) {
-    // Quick exit: if centers are too far apart, no collision
+    // If centers are too far apart, no collision
     float max_dim = fmaxf(rw, rh);
     float max_dist = (max_dim / 2.0f) + cradius;
     if (fabsf(rx - cx) > max_dist || fabsf(ry - cy) > max_dist) {
         return false;
     }
 
-    // 1. Transform circle center into rectangle's local space
+    // Transform circle center into rectangle's local space
     float rad = -DegToRad(rangle); // negative for inverse rotation
     float cos_a = cosf(rad), sin_a = sinf(rad);
 
     float local_cx = cos_a * (cx - rx) - sin_a * (cy - ry) + rx;
     float local_cy = sin_a * (cx - rx) + cos_a * (cy - ry) + ry;
 
-    // 2. Rectangle bounds
+    // Rectangle bounds
     float left   = rx - rw / 2.0f;
     float right  = rx + rw / 2.0f;
     float top    = ry - rh / 2.0f;
     float bottom = ry + rh / 2.0f;
 
-    // 3. Find closest point on rectangle to circle center
+    // Find closest point on rectangle to circle center
     float closest_x = fmaxf(left, fminf(local_cx, right));
     float closest_y = fmaxf(top,  fminf(local_cy, bottom));
 
-    // 4. Distance from circle center to closest point
+    // Distance from circle center to closest point
     float dx = local_cx - closest_x;
     float dy = local_cy - closest_y;
     float dist_sq = dx * dx + dy * dy;
