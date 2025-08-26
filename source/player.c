@@ -435,12 +435,12 @@ void ship_gamemode(Player *player) {
     if (state.dual) {
         if (state.input.holdJump) {
             player->buffering_state = BUFFER_END;
-            if (player->vel_y <= 103.485492f)
+            if (player->vel_y <= 101.541492f)
                 player->gravity = player->mini ? 1643.5872f : 1397.0491f;
             else
                 player->gravity = player->mini ? 1314.86976f : 1117.64328f;
         } else {
-            if (player->vel_y >= 103.485492f)
+            if (player->vel_y >= 101.541492f)
                 player->gravity = player->mini ? -1577.85408f : -1341.1719f;
             else
                 player->gravity = player->mini ? -1051.8984f : -894.11464f;
@@ -448,12 +448,12 @@ void ship_gamemode(Player *player) {
     } else {
         if (state.input.holdJump) {
             player->buffering_state = BUFFER_END;
-            if (player->vel_y <= grav(player, 103.485492f))
+            if (player->vel_y <= grav(player, 101.541492f))
                 player->gravity = player->mini ? 1643.5872f : 1397.0491f;
             else
                 player->gravity = player->mini ? 1314.86976f : 1117.64328f;
         } else {
-            if (player->vel_y >= grav(player, 103.485492f))
+            if (player->vel_y >= grav(player, 101.541492f))
                 player->gravity = player->mini ? -1577.85408f : -1341.1719f;
             else
                 player->gravity = player->mini ? -1051.8984f : -894.11464f;
@@ -1369,13 +1369,6 @@ GRRLIB_texImg *get_p1_trail_tex() {
     return icon_l1;
 }
 
-const float ejections[SPEED_COUNT] = {
-    316.4617f,
-    392.5909f,
-    488.149356f,
-    589.68013f
-};
-
 const float falls[SPEED_COUNT] = {
     226.044054,
     280.422108,
@@ -1540,7 +1533,7 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // Sliding off slope
         if (gravBottom(player) >= obj_gravTop(player, obj)) {
-            float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
+            float vel = 0.9f * MIN(1.12 / slope_angle(obj, player), 1.54) * (obj->height * player_speeds[state.speed] / obj->width);
             float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed) * slope_multiplier[state.speed], 0.4f, 1.0f);
             
             //float orig = vel;
@@ -1599,7 +1592,7 @@ void slope_calc(GameObject *obj, Player *player) {
 
         // Sliding off slope
         if (gravTop(player) <= obj_gravBottom(player, obj)) {
-            float vel = ejections[state.speed] * ((float) obj->height / obj->width) * MIN(1.1f, 0.8f / slope_angle(obj, player));
+            float vel = 0.9f * MIN(1.12 / slope_angle(obj, player), 1.54) * (obj->height * player_speeds[state.speed] / obj->width);
             float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed) * slope_multiplier[state.speed], 0.4f, 1.0f);
             
             //float orig = vel;
