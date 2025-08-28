@@ -72,7 +72,7 @@ void *input_loop(void *arg) {
 
         KeyInput input = input_buffer.inputs[input_buffer.write_index];
 
-        if (input.pressedJump) printf("INPUT THREAD - Step n %d jump is %d\n", input_buffer.write_index, input.pressedJump);
+        //if (input.pressedJump) printf("INPUT THREAD - Step n %d jump is %d\n", input_buffer.write_index, input.pressedJump);
         
         if (input.pressed1orX) state.noclip ^= 1;
         if (input.pressedDir & INPUT_LEFT) {
@@ -204,7 +204,7 @@ int game_loop() {
             } else {
                  // No input available, wait
                 usleep(100);
-                accumulator -= STEPS_DT;
+                accumulator -= 100/1000000.f;
             }
         }
         u64 t1 = gettime();
