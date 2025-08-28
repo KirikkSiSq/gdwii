@@ -37,6 +37,8 @@
 #include "game.h"
 #include "menu.h"
 
+#include "trail.h"
+
 // Declare Static Functions
 static void ExitGame(void);
 
@@ -171,7 +173,7 @@ void draw_game() {
     if (state.noclip) {
         GRRLIB_Printf(screenWidth - 200, 20, font, RGBA(255,255,255,255), 0.5, "Noclip activated");
     }
-
+    
     GRRLIB_Render();
     layersDrawn = 0;
 }
@@ -179,37 +181,41 @@ void draw_game() {
 #include <mad.h>
 
 void update_input() {
+    update_external_input(&state.input);
+}
+
+void update_external_input(KeyInput *input) {
     WPAD_ScanPads();
     PAD_ScanPads();
 
-    state.input.pressedA = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_A)) > 0;
-    state.input.holdA =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_A)) > 0;
+    input->pressedA = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_A) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_A)) > 0;
+    input->holdA =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_A) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_A)) > 0;
 
-    state.input.pressedB = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_B) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_B)) > 0;
-    state.input.holdB =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_B) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_B)) > 0;
+    input->pressedB = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_B) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_B)) > 0;
+    input->holdB =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_B) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_B)) > 0;
 
-    state.input.pressedHome = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_HOME) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_MENU)) > 0;
+    input->pressedHome = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_HOME) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_MENU)) > 0;
     
-    state.input.pressed1orX = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_1) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_X)) > 0;
-    state.input.hold1orX =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_1) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_X)) > 0;
+    input->pressed1orX = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_1) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_X)) > 0;
+    input->hold1orX =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_1) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_X)) > 0;
 
-    state.input.pressed2orY = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_2) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_Y)) > 0;
-    state.input.hold2orY =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_2) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_Y)) > 0;
+    input->pressed2orY = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_2) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_BUTTON_Y)) > 0;
+    input->hold2orY =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_2) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_BUTTON_Y)) > 0;
     
-    state.input.pressedPlusOrL = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_PLUS) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_TRIGGER_L)) > 0;
-    state.input.holdPlusOrL =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_PLUS) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_TRIGGER_L)) > 0;
+    input->pressedPlusOrL = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_PLUS) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_TRIGGER_L)) > 0;
+    input->holdPlusOrL =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_PLUS) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_TRIGGER_L)) > 0;
 
-    state.input.pressedMinusOrR = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_MINUS) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_TRIGGER_R)) > 0;
-    state.input.holdMinusOrR =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_MINUS) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_TRIGGER_R)) > 0;
+    input->pressedMinusOrR = ((WPAD_ButtonsDown(WPAD_CHAN_0) & WPAD_BUTTON_MINUS) | (PAD_ButtonsDown(PAD_CHAN0) & PAD_TRIGGER_R)) > 0;
+    input->holdMinusOrR =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & WPAD_BUTTON_MINUS) | (PAD_ButtonsHeld(PAD_CHAN0) & PAD_TRIGGER_R)) > 0;
 
     unsigned int const wpad_dir_mask = WPAD_BUTTON_UP | WPAD_BUTTON_DOWN | WPAD_BUTTON_RIGHT | WPAD_BUTTON_LEFT; 
     unsigned int const pad_dir_mask =  PAD_BUTTON_UP  | PAD_BUTTON_DOWN  | PAD_BUTTON_RIGHT  | PAD_BUTTON_LEFT; 
 
-    state.input.pressedDir = ((WPAD_ButtonsDown(WPAD_CHAN_0) & wpad_dir_mask) >> 8) | (PAD_ButtonsDown(PAD_CHAN0) & pad_dir_mask);
-    state.input.holdDir =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & wpad_dir_mask) >> 8) | (PAD_ButtonsHeld(PAD_CHAN0) & pad_dir_mask);
+    input->pressedDir = ((WPAD_ButtonsDown(WPAD_CHAN_0) & wpad_dir_mask) >> 8) | (PAD_ButtonsDown(PAD_CHAN0) & pad_dir_mask);
+    input->holdDir =    ((WPAD_ButtonsHeld(WPAD_CHAN_0) & wpad_dir_mask) >> 8) | (PAD_ButtonsHeld(PAD_CHAN0) & pad_dir_mask);
 
-    state.input.pressedJump = state.input.pressedA || state.input.pressed2orY || state.input.pressedB;
-    state.input.holdJump = state.input.holdA || state.input.hold2orY || state.input.holdB;
+    input->pressedJump = input->pressedA || input->pressed2orY || input->pressedB;
+    input->holdJump = input->holdA || input->hold2orY || input->holdB;
 
     WPAD_SetDataFormat(WPAD_CHAN_ALL, WPAD_FMT_BTNS_ACC_IR);
 

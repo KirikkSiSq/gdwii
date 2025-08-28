@@ -153,3 +153,4 @@ extern float dt;
 
 void draw_game();
 void update_input();
+void update_external_input(KeyInput *input);

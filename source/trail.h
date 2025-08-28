@@ -8,7 +8,7 @@
 
 #include "objects.h"
 
-#define MAX_TRAIL_POINTS 64
+#define MAX_TRAIL_POINTS 128
 #define TRAIL_CLEAR_DISTANCE 30.f
 
 typedef struct {
