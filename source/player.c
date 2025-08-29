@@ -156,7 +156,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 break;
             }
             
-            bool safeZone = (obj_gravTop(player, obj) - gravBottom(player) <= clip) || (gravTop(player) - obj_gravBottom(player, obj) <= clip);
+            bool safeZone = player->mini && ((obj_gravTop(player, obj) - gravBottom(player) <= clip) || (gravTop(player) - obj_gravBottom(player, obj) <= clip));
             
             if ((player->gamemode == GAMEMODE_WAVE || (!gravSnap && !safeZone)) && intersect(
                 player->x, player->y, internal.width, internal.height, 0, 
