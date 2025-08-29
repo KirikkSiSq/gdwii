@@ -28,7 +28,8 @@ float death_timer = 0.0f;
 char *current_song_pointer = NULL;
 
 static lwp_t input_thread;
-static volatile bool exit_flag;
+static volatile bool input_thread_active;
+static volatile bool complete_level_flag;
 static volatile bool exit_level_flag;
 static volatile bool exit_game_flag;
 
@@ -53,14 +54,15 @@ void init_input_buffer() {
 
 void *input_loop(void *arg) {
     printf("Starting input thread\n");
-    while (!exit_flag) {
+    input_thread_active = TRUE;
+    while (1) {
         u64 t0 = gettime();
 
         // Get next write position
         u32 write_pos = (input_buffer.write_index + 1) & INPUT_BUFFER_MASK;
         
         // Wait if buffer full
-        while (write_pos == input_buffer.read_index && !exit_flag) {
+        while (write_pos == input_buffer.read_index) {
             usleep(100);
         }
         
@@ -74,6 +76,11 @@ void *input_loop(void *arg) {
 
         //if (input.pressedJump) printf("INPUT THREAD - Step n %d jump is %d\n", input_buffer.write_index, input.pressedJump);
         
+        if (level_info.completing) {
+            complete_level_flag = TRUE;
+            break;
+        }
+
         if (input.pressed1orX) state.noclip ^= 1;
         if (input.pressedDir & INPUT_LEFT) {
             state.hitbox_display++;
@@ -100,6 +107,7 @@ void *input_loop(void *arg) {
 
         if (calc_time > 0) usleep(calc_time);
     }
+    input_thread_active = FALSE;
     printf("Exiting input thread\n");
     return NULL;
 }
@@ -116,8 +124,6 @@ int game_loop() {
         MP3Player_SetSeconds(level_info.song_offset);
         MP3Player_PlayBuffer(current_song_pointer, size, seek_filter);
     }
-
-    exit_flag = FALSE;
 
     init_input_buffer();
     LWP_CreateThread(&input_thread, input_loop, NULL, NULL, 0, 100);
@@ -138,7 +144,6 @@ int game_loop() {
         
         accumulator += frameTime;
 
-        
         u64 t0 = gettime();
         while (accumulator >= STEPS_DT) {
             if (input_buffer.read_index != input_buffer.write_index) {
@@ -205,20 +210,12 @@ int game_loop() {
                  // No input available, wait
                 usleep(100);
                 accumulator -= 100/1000000.f;
+
+                if (!input_thread_active) break;
             }
         }
         u64 t1 = gettime();
         physics_time = ticks_to_microsecs(t1 - t0) / 1000.f;
-        
-        if (level_info.completing) {
-            PlayOgg(endStart_02_ogg, endStart_02_ogg_size, 0, OGG_ONE_TIME);
-            handle_completion();
-            MP3Player_Stop();
-            if (current_song_pointer) free(current_song_pointer);
-            gameRoutine = ROUTINE_MENU;
-            exit_level_flag = FALSE;
-            break;
-        }
 
         if (state.dead && death_timer <= 0.f) {
             death_timer = 1.f;
@@ -243,6 +240,16 @@ int game_loop() {
             }
         }
 
+        if (complete_level_flag) {
+            PlayOgg(endStart_02_ogg, endStart_02_ogg_size, 0, OGG_ONE_TIME);
+            handle_completion();
+            MP3Player_Stop();
+            complete_level_flag = FALSE;
+            if (current_song_pointer) free(current_song_pointer);
+            gameRoutine = ROUTINE_MENU;
+            break;
+        }
+
         if (exit_level_flag) {
             MP3Player_Stop();
             MP3Player_Volume(255);
@@ -260,7 +267,6 @@ int game_loop() {
         draw_game();
     }
 
-    exit_flag = TRUE;
     unload_level();
 
     return FALSE;
