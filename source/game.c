@@ -216,6 +216,7 @@ int game_loop() {
             MP3Player_Stop();
             if (current_song_pointer) free(current_song_pointer);
             gameRoutine = ROUTINE_MENU;
+            exit_level_flag = FALSE;
             break;
         }
 
