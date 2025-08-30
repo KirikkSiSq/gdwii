@@ -6970,8 +6970,8 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
             .type = HITBOX_SOLID,
         },
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
+        .def_zlayer = LAYER_B2,
+        .def_zorder = -7,
         .num_layers = 2
     },
     { // 1.6 slab slope 22/66 connector
@@ -6997,8 +6997,8 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
             .type = HITBOX_SOLID,
         },
         .spritesheet_layer = SHEET_BLOCKS,
-        .def_zlayer = LAYER_T1,
-        .def_zorder = 2,
+        .def_zlayer = LAYER_B2,
+        .def_zorder = -7,
         .num_layers = 2
     },
     unknown, // 330
