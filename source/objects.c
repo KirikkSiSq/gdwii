@@ -274,6 +274,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     if (player->gamemode == GAMEMODE_WAVE) player->vel_y *= 0.9f;
                     
                     player->ceiling_inv_time = 0.1f;
+                    player->snap_rotation = TRUE;
                     player->gamemode = GAMEMODE_CUBE;
                     flip_other_player(state.current_player ^ 1);
 
@@ -305,6 +306,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     
                     player->gamemode = GAMEMODE_SHIP;
                     player->inverse_rotation = FALSE;
+                    player->snap_rotation = TRUE;
                     flip_other_player(state.current_player ^ 1);
                     
                     float min = player->mini ? -406.566f : -345.6f;
@@ -341,6 +343,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->vel_y /= -2;
                     player->upside_down = FALSE;
                     player->inverse_rotation = FALSE;
+                    player->snap_rotation = TRUE;
                     if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&wave_trail);
                     flip_other_player(state.current_player);
                     player->left_ground = TRUE;
@@ -439,6 +442,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     
                     player->gamemode = GAMEMODE_BALL;
                     player->inverse_rotation = FALSE;
+                    player->snap_rotation = TRUE;
                     flip_other_player(state.current_player ^ 1);
 
                     particle_templates[USE_EFFECT].start_scale = 80;
@@ -502,6 +506,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     player->gamemode = GAMEMODE_UFO;
                     player->ufo_last_y = player->y;
                     player->inverse_rotation = FALSE;
+                    player->snap_rotation = TRUE;
                     flip_other_player(state.current_player ^ 1);
 
                     if (state.old_player.gamemode == GAMEMODE_SHIP || state.old_player.gamemode == GAMEMODE_CUBE) {
@@ -683,6 +688,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 if (player->gamemode != GAMEMODE_WAVE) {
                     player->gamemode = GAMEMODE_WAVE;
                     player->inverse_rotation = FALSE;
+                    player->snap_rotation = TRUE;
                     flip_other_player(state.current_player ^ 1);
                     wave_trail.positionR = (Vec2){player->x, player->y};  
                     wave_trail.startingPositionInitialized = TRUE;

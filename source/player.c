@@ -801,15 +801,22 @@ void run_player(Player *player) {
     }
     
     player->time_since_ground += STEPS_DT;
+
+    player->rotation = normalize_angle(player->rotation);
     
-    if (player->gamemode == GAMEMODE_UFO) {
-        if (player->slope_data.slope) {
-            player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.05f, STEPS_DT);
-        } else {
-            player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.1f, STEPS_DT);
-        }
+    if (player->snap_rotation) {
+        player->lerp_rotation = player->rotation;
+        player->snap_rotation = FALSE;
     } else {
-        player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
+        if (player->gamemode == GAMEMODE_UFO) {
+            if (player->slope_data.slope) {
+                player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.05f, STEPS_DT);
+            } else {
+                player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.1f, STEPS_DT);
+            }
+        } else {
+            player->lerp_rotation = iSlerp(player->lerp_rotation, player->rotation, 0.2f, STEPS_DT);
+        }
     }
     
     player->vel_x = player_speeds[state.speed];
@@ -817,8 +824,6 @@ void run_player(Player *player) {
     player->y += player_get_vel(player, player->vel_y) * STEPS_DT;
     
     player->x += player->vel_x * STEPS_DT;
-
-    player->rotation = normalize_angle(player->rotation);
 
     player->left_ground = FALSE;
 

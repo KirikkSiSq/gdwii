@@ -49,6 +49,7 @@ typedef struct {
     bool upside_down;
     bool touching_slope;
     bool inverse_rotation;
+    bool snap_rotation;
     
     GameObject *potentialSlope;
 
