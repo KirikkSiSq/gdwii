@@ -60,13 +60,26 @@ float ease_out(float current, float target, float smoothing);
 void  custom_drawImg (const f32 xpos, const f32 ypos, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color);
 void  custom_drawPart (const f32 xpos, const f32 ypos, const f32 partx, const f32 party, const f32 partw, const f32 parth, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color);
 void  custom_circle (const f32 x, const f32 y, const f32 radius,
-                     const u32 color, const u8 filled);
+                     const u32 color);
+void  custom_circunference (const f32 x, const f32 y, const f32 radius,
+                     const u32 color, const f32 lineWidth);
 void  custom_rectangle (const f32 x,      const f32 y,
     const f32 width,  const f32 height,
     const u32 color, const bool filled);
+void custom_rounded_rectangle(float x, float y,
+                                     float width, float height,
+                                     float radius,
+                                     u32 color);
 void custom_line (const f32 x1, const f32 y1,
     const f32 x2, const f32 y2, const u32 color);
-void draw_thick_line(const float x1, const float y1, const float x2, const float y2, const float thickness, const uint32_t color);
+void draw_thick_line(const float x1, const float y1, const float x2, const float y2, const float thickness, const u32 color);
+void draw_hitbox_line_inward(Vec2D rect[4], 
+                             const float x1, const float y1,
+                             const float x2, const float y2,
+                             const float thickness,
+                             const float cx, const float cy,
+                             const u32 color);
+void draw_polygon_inward_mitered(Vec2D *poly, int n, float thickness, u32 color);
 
 void set_texture(const GRRLIB_texImg *tex);
 float normalize_angle(float angle);

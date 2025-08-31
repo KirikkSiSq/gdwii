@@ -517,7 +517,7 @@ int main_levels() {
     GRRLIB_Printf(0, 400, font, RGBA(255,255,255,255), 0.75, "Press 1 to switch to custom levels.");
     
     //level name display
-    custom_rectangle((screenWidth) / 2 - 250, 100, 500, 160, RGBA(0, 0, 0, 127), 1);
+    custom_rounded_rectangle((screenWidth) / 2 - 250, 100, 500, 160, 30, RGBA(0, 0, 0, 127));
     int textOffset = (strlen(levels[level_id].level_name) * 18 - 70) / 2;
     GRRLIB_Printf(screenWidth/2 - textOffset, 160, font_bold, RGBA(0,0,0,255), 0.75, levels[level_id].level_name);
     GRRLIB_Printf(screenWidth/2 - textOffset, 160, font, RGBA(255,255,255,255), 0.75, levels[level_id].level_name);
@@ -528,7 +528,7 @@ int main_levels() {
     int selectedColor = RGBA(255, 255, 255, 255);
     int otherColor = RGBA(127, 127, 127, 255);
     for (int i = 0; i < LEVEL_NUM; i++) {
-        custom_circle(dotsStartX + i * 16, screenHeight - 32, 4, level_id == i?selectedColor:otherColor, 1);
+        custom_circle(dotsStartX + i * 16, screenHeight - 32, 4, level_id == i?selectedColor:otherColor);
     }
 
     //buttons

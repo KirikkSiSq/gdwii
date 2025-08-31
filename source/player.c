@@ -928,6 +928,10 @@ void handle_player(Player *player) {
     u32 t1 = gettime();
     collision_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
     
+    if (state.noclip) state.dead = FALSE;
+    
+    if (state.dead) return;
+
     t0 = gettime();
     run_player(player);
     t1 = gettime();
@@ -937,7 +941,6 @@ void handle_player(Player *player) {
 
     if (state.hitbox_display == 2) add_new_hitbox(player);
 
-    if (state.noclip) state.dead = FALSE;
 }
 
 void full_init_variables() {
@@ -2001,20 +2004,30 @@ void draw_triangle_from_rect(Vec2D rect[4], int skip_index, uint32_t color) {
     // Collect 3 points that are not the skipped one
     for (int i = 0; i < 4; ++i) {
         if (i == skip_index) continue;
-        tri[ti++] = rect[i];
+        tri[ti].x = calc_x_on_screen(rect[i].x);
+        tri[ti++].y = calc_y_on_screen(rect[i].y);
     }
 
-    // Draw 3 lines to form a closed triangle
-    for (int i = 0; i < 3; ++i) {
-        Vec2D a = tri[i];
-        Vec2D b = tri[(i + 1) % 3];  // Wrap around to connect last to first
-        draw_thick_line(
-            calc_x_on_screen(a.x), calc_y_on_screen(a.y),
-            calc_x_on_screen(b.x), calc_y_on_screen(b.y),
-            2, color
+    draw_polygon_inward_mitered(tri, 3, 2.f, color);
+}
+
+void draw_square(Vec2D rect[4], uint32_t color) {
+    Vec2D center = {
+        (rect[0].x + rect[1].x + rect[2].x + rect[3].x) / 4.f,
+        (rect[0].y + rect[1].y + rect[2].y + rect[3].y) / 4.f
+    };
+
+    for (int i = 0; i < 4; i++) {
+        int j = (i + 1) % 4;
+
+        draw_hitbox_line_inward(rect,
+            calc_x_on_screen(rect[i].x), calc_y_on_screen(rect[i].y),
+            calc_x_on_screen(rect[j].x), calc_y_on_screen(rect[j].y),
+            2.0f, center.x, center.y, color
         );
     }
 }
+
 void draw_hitbox(GameObject *obj) {
     ObjectHitbox hitbox = objects[obj->id].hitbox;
 
@@ -2044,16 +2057,12 @@ void draw_hitbox(GameObject *obj) {
 
         float calc_radius = hitbox.radius * SCALE;
 
-        custom_circle(calc_x_on_screen(x), calc_y_on_screen(y), calc_radius, color, FALSE);
-        custom_circle(calc_x_on_screen(x), calc_y_on_screen(y), calc_radius - 1, color, FALSE);
+        custom_circunference(calc_x_on_screen(x), calc_y_on_screen(y), calc_radius, color, 2.f);
     } else {
         if (w == 0 || h == 0) return;
 
         get_corners(x, y, w, h, angle, rect);
-        draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, color);
-        draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, color);
-        draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, color);
-        draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, color);
+        draw_square(rect, color);
     }
 }
 
@@ -2098,29 +2107,19 @@ void draw_player_hitbox(Player *player) {
     // Rotated hitbox
     get_corners(player->x, player->y, player->width, player->height, player->rotation, rect);
 
-    draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0x7f, 0x00, 0x00, 0xff));
+    draw_square(rect, RGBA(0x7f, 0x00, 0x00, 0xff));
 
     // Internal hitbox
     get_corners(player->x, player->y, internal.width, internal.height, 0, rect);
 
-    draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0x00, 0x00, 0x7f, 0xff));
-    
+    draw_square(rect, RGBA(0x00, 0x00, 0x7f, 0xff));
+
     // Circle hitbox
     float calc_radius = (player->width / 2) * SCALE;
-    custom_circle(calc_x_on_screen(player->x), calc_y_on_screen(player->y), calc_radius, RGBA(0xff, 0x00, 0x00, 0xff), FALSE);
-    custom_circle(calc_x_on_screen(player->x), calc_y_on_screen(player->y), calc_radius - 1, RGBA(0xff, 0x00, 0x00, 0xff), FALSE);
+    custom_circunference(calc_x_on_screen(player->x), calc_y_on_screen(player->y), calc_radius, RGBA(0xff, 0x00, 0x00, 0xff), 2.f);
 
     // Unrotated hitbox
     get_corners(player->x, player->y, player->width, player->height, 0, rect);
 
-    draw_thick_line(calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[1].x), calc_y_on_screen(rect[1].y), calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[2].x), calc_y_on_screen(rect[2].y), calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
-    draw_thick_line(calc_x_on_screen(rect[3].x), calc_y_on_screen(rect[3].y), calc_x_on_screen(rect[0].x), calc_y_on_screen(rect[0].y), 2, RGBA(0xff, 0x00, 0x00, 0xff));
+    draw_square(rect, RGBA(0xff, 0x00, 0x00, 0xff));
 }

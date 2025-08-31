@@ -651,25 +651,13 @@ void draw_particles(int group_id) {
                             p->color.g,
                             p->color.b,
                             p->color.a
-                        ),
-                        TRUE
+                        )
                     );
                     break;
                 case PARTICLE_CIRCUNFERENCE:
-                    custom_circle(
+                    custom_circunference(
                         get_mirror_x(calc_x, state.mirror_factor), calc_y,
                         p->scale,
-                        RGBA(
-                            p->color.r,
-                            p->color.g,
-                            p->color.b,
-                            p->color.a
-                        ),
-                        FALSE
-                    );
-                    custom_circle(
-                        get_mirror_x(calc_x, state.mirror_factor), calc_y,
-                        p->scale-1,
                         RGBA(
                             p->color.r,
                             p->color.g,
@@ -777,12 +765,11 @@ void draw_obj_particles(int group_id, GameObject *parent_obj) {
                             p->color.g,
                             p->color.b,
                             p->color.a * (get_fade_value(x, screenWidth) / 255.f)
-                        ),
-                        TRUE
+                        )
                     );
                     break;
                 case PARTICLE_CIRCUNFERENCE:
-                    custom_circle(
+                    custom_circunference(
                         get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
                         p->scale,
                         RGBA(
@@ -791,18 +778,7 @@ void draw_obj_particles(int group_id, GameObject *parent_obj) {
                             p->color.b,
                             p->color.a * (get_fade_value(x, screenWidth) / 255.f)
                         ),
-                        FALSE
-                    );
-                    custom_circle(
-                        get_mirror_x(calc_x, state.mirror_factor) + 6 + fade_x, calc_y + 6 + fade_y,
-                        p->scale - 1,
-                        RGBA(
-                            p->color.r,
-                            p->color.g,
-                            p->color.b,
-                            p->color.a * (get_fade_value(x, screenWidth) / 255.f)
-                        ),
-                        FALSE
+                        2
                     );
                     break;
             }

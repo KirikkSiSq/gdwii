@@ -9,6 +9,19 @@
 #include "main.h"
 #include "easing.h"
 
+Vec2D normalize(Vec2D v) {
+    float len = sqrtf(v.x*v.x + v.y*v.y);
+    return (Vec2D){ v.x / len, v.y / len };
+}
+
+float dot_vec(Vec2D a, Vec2D b) {
+    return a.x * b.x + a.y * b.y;
+}
+
+Vec2D perpendicular(Vec2D v) {
+    return (Vec2D){ -v.y, v.x };
+}
+
 float positive_fmod(float n, float divisor) {
     float value = fmod(n, divisor);
     return value + (value < 0 ? divisor : 0);
@@ -263,7 +276,12 @@ void  custom_drawImg (const f32 xpos, const f32 ypos, const GRRLIB_texImg *tex, 
 }
 
 void  custom_gxengine (const guVector v[], const u32 color[], const u16 n,
-                       const u8 fmt) {
+                       const u8 fmt, const float lineWidth) {
+    // Set line width if using line primitives
+    if (fmt == GX_LINESTRIP || fmt == GX_LINES) {
+        GX_SetLineWidth(lineWidth * 8, fmt);
+    }
+    
     GX_Begin(fmt, GX_VTXFMT0, n);
     for (u16 i = 0; i < n; i++) {
         GX_Position3f32(v[i].x, v[i].y, v[i].z);
@@ -272,32 +290,49 @@ void  custom_gxengine (const guVector v[], const u32 color[], const u16 n,
     GX_End();
 }
 
-void  custom_ellipse (const f32 x, const f32 y, const f32 radiusX,
-                      const f32 radiusY, const u32 color, const u8 filled) {
-    guVector v[36];
-    u32 ncolor[36];
-    const f32 G_DTOR = M_DTOR * 10;
+void custom_ellipse(const float x, const float y, const float radiusX,
+                    const float radiusY, const u32 color, const u8 filled,
+                    const float lineWidth) {
+    int segments = (int)(MAX(radiusX, radiusY) * 0.75f); // tweak factor for smoothness
+    if (segments < 12) segments = 12;       // minimum
+    guVector v[segments + 1];  // +1 to close the loop
+    u32 ncolor[segments + 1];
 
-    for (u32 a = 0; a < 36; a++) {
-        const f32 ra = a * G_DTOR;
-
-        v[a].x = cos(ra) * radiusX + x;
-        v[a].y = sin(ra) * radiusY + y;
-        v[a].z = 0.0f;
-        ncolor[a] = color;
+    for (int i = 0; i < segments; i++) {
+        float angle = i * 2 * M_PI / segments;
+        v[i].x = cosf(angle) * radiusX + x;
+        v[i].y = sinf(angle) * radiusY + y;
+        v[i].z = 0;
+        ncolor[i] = color;
+        
+        if (!filled) {
+            Vec2D dir = { x - v[i].x, y - v[i].y };
+            dir = normalize(dir);
+            
+            v[i].x += dir.x * (lineWidth - 1);
+            v[i].y += dir.y * (lineWidth - 1);
+        }
     }
 
+    // Close the loop for line mode
+    v[segments] = v[0];
+    ncolor[segments] = color;
+    
     if (filled == false) {
-        custom_gxengine(v, ncolor, 36, GX_LINESTRIP  );
-    }
-    else {
-        custom_gxengine(v, ncolor, 36, GX_TRIANGLEFAN);
+        custom_gxengine(v, ncolor, segments + 1, GX_LINESTRIP, lineWidth);
+    } else {
+        custom_gxengine(v, ncolor, segments, GX_TRIANGLEFAN, 0);
     }
 }
 
 void  custom_circle (const f32 x, const f32 y, const f32 radius,
-                     const u32 color, const u8 filled) {
-    custom_ellipse(x, y, radius, radius, color, filled);
+                     const u32 color) {
+    custom_ellipse(x, y, radius, radius, color, TRUE, 1);
+}
+
+void  custom_circunference (const f32 x, const f32 y, const f32 radius,
+                     const u32 color, const f32 lineWidth) {
+    custom_ellipse(x, y, radius, radius, color, FALSE, lineWidth);
 }
 
 void  custom_drawPart (const f32 xpos, const f32 ypos, const f32 partx, const f32 party, const f32 partw, const f32 parth, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color) {
@@ -386,6 +421,111 @@ void  custom_rectangle (const f32 x,      const f32 y,
     }
 }
 
+void custom_rounded_rectangle(float x, float y,
+                              float width, float height,
+                              float radius,
+                              u32 color) {
+    // Clamp radius
+    if (radius > width * 0.5f) radius = width * 0.5f;
+    if (radius > height * 0.5f) radius = height * 0.5f;
+
+    const int cornerSegments = 8; // number of points per corner
+    guVector v[cornerSegments + 2]; // +1 for corner center, +1 for closing the fan
+    u32 ncolor[cornerSegments + 2];
+
+    float cornerCentersX[4] = { x + radius, x + width - radius, x + width - radius, x + radius };
+    float cornerCentersY[4] = { y + radius, y + radius, y + height - radius, y + height - radius };
+    float startAngles[4]   = { M_PI, -M_PI/2, 0, M_PI/2 }; // TL, TR, BR, BL
+
+    for (int corner = 0; corner < 4; corner++) {
+        guVector center = { cornerCentersX[corner], cornerCentersY[corner], 0.0f };
+        for (int i = 0; i <= cornerSegments; i++) {
+            float t = (float)i / cornerSegments;
+            float angle = startAngles[corner] + t * (M_PI/2);
+            v[i].x = cosf(angle) * radius + center.x;
+            v[i].y = sinf(angle) * radius + center.y;
+            v[i].z = 0.0f;
+            ncolor[i] = color;
+        }
+
+        // Draw triangle fan for this corner
+        v[cornerSegments + 1] = center; // corner center at the end
+        ncolor[cornerSegments + 1] = color;
+
+        GX_Begin(GX_TRIANGLEFAN, GX_VTXFMT0, cornerSegments + 2);
+        for (int k = 0; k <= cornerSegments + 1; k++) {
+            GX_Position3f32(v[k].x, v[k].y, v[k].z);
+            GX_Color1u32(ncolor[k]);
+        }
+        GX_End();
+    }
+
+    float left   = x;
+    float right  = x + width;
+    float top    = y;
+    float bottom = y + height;
+
+    // Top edge
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+        GX_Position3f32(left + radius, top, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right - radius, top, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right - radius, top + radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(left + radius, top + radius, 0.0f);
+        GX_Color1u32(color);
+    GX_End();
+
+    // Bottom edge
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+        GX_Position3f32(left + radius, bottom - radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right - radius, bottom - radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right - radius, bottom, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(left + radius, bottom, 0.0f);
+        GX_Color1u32(color);
+    GX_End();
+
+    // Left edge
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+        GX_Position3f32(left, top + radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(left + radius, top + radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(left + radius, bottom - radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(left, bottom - radius, 0.0f);
+        GX_Color1u32(color);
+    GX_End();
+
+    // Right edge
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+        GX_Position3f32(right - radius, top + radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right, top + radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right, bottom - radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right - radius, bottom - radius, 0.0f);
+        GX_Color1u32(color);
+    GX_End();
+
+    // Center rectangle
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+        GX_Position3f32(left + radius, top + radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right - radius, top + radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(right - radius, bottom - radius, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(left + radius, bottom - radius, 0.0f);
+        GX_Color1u32(color);
+    GX_End();
+}
+
 float normalize_angle(float angle) {
     angle = fmodf(angle, 360.0f);
     if (angle < 0) angle += 360.0f;
@@ -413,7 +553,7 @@ void custom_line (const f32 x1, const f32 y1,
         GX_Color1u32(color);
     GX_End();
 }
-void draw_thick_line(const float x1, const float y1, const float x2, const float y2, const float thickness, const uint32_t color) {
+void draw_thick_line(const float x1, const float y1, const float x2, const float y2, const float thickness, const u32 color) {
     float dx = x2 - x1;
     float dy = y2 - y1;
     float length = sqrtf(dx * dx + dy * dy);
@@ -454,4 +594,135 @@ void draw_thick_line(const float x1, const float y1, const float x2, const float
     GX_Color1u32(color);
 
     GX_End();
+}
+
+// Returns true if vertices are counter-clockwise
+bool is_ccw(Vec2D *poly, int n) {
+    float sum = 0.0f;
+    for (int i = 0; i < n; i++) {
+        int j = (i + 1) % n;
+        sum += (poly[j].x - poly[i].x) * (poly[j].y + poly[i].y);
+    }
+    return sum < 0.0f; // CCW if sum < 0
+}
+
+
+void draw_hitbox_line_inward(Vec2D rect[4], 
+                             const float x1, const float y1,
+                             const float x2, const float y2,
+                             const float thickness,
+                             const float cx, const float cy,
+                             const u32 color) {
+
+    float ex = x2 - x1;
+    float ey = y2 - y1;
+    float length = sqrtf(ex * ex + ey * ey);
+
+    // Inward normal depends on winding
+    float nx, ny;
+    if (is_ccw(rect, 4)) {
+        nx = -ey / length;
+        ny =  ex / length;
+    } else {
+        nx =  ey / length;
+        ny = -ex / length;
+    }
+
+    // Flip it to point inward if not mirror
+    if (state.mirror_factor < 0.5f) {
+        nx = -nx;
+        ny = -ny;
+    }
+
+    // Offset inward
+    float ox = nx * thickness;
+    float oy = ny * thickness;
+
+    // Build quad
+    float x1a = x1;
+    float y1a = y1;
+    float x2a = x2;
+    float y2a = y2;
+
+    float x1b = x1 + ox;
+    float y1b = y1 + oy;
+    float x2b = x2 + ox;
+    float y2b = y2 + oy;
+
+    GX_Begin(GX_TRIANGLES, GX_VTXFMT0, 6);
+
+    GX_Position3f32(x1a, y1a, 0.0f);
+    GX_Color1u32(color);
+    GX_Position3f32(x2a, y2a, 0.0f);
+    GX_Color1u32(color);
+    GX_Position3f32(x2b, y2b, 0.0f);
+    GX_Color1u32(color);
+
+    GX_Position3f32(x2b, y2b, 0.0f);
+    GX_Color1u32(color);
+    GX_Position3f32(x1b, y1b, 0.0f);
+    GX_Color1u32(color);
+    GX_Position3f32(x1a, y1a, 0.0f);
+    GX_Color1u32(color);
+
+    GX_End();
+}
+
+void compute_mitered_offsets(Vec2D *poly, Vec2D *offsets, int n, float thickness, bool ccw) {
+    for (int i = 0; i < n; i++) {
+        int prev = (i + n - 1) % n;
+        int next = (i + 1) % n;
+
+        // Edge vectors
+        Vec2D e_prev = { poly[i].x - poly[prev].x, poly[i].y - poly[prev].y };
+        Vec2D e_next = { poly[next].x - poly[i].x, poly[next].y - poly[i].y };
+
+        // Normals
+        Vec2D n_prev = normalize(perpendicular(e_prev));
+        Vec2D n_next = normalize(perpendicular(e_next));
+
+        // Flip to point inward if mirror
+        if (state.mirror_factor < 0.5f) { n_prev.x = -n_prev.x; n_prev.y = -n_prev.y; n_next.x = -n_next.x; n_next.y = -n_next.y; }
+
+        // Miter = normalize(n_prev + n_next)
+        Vec2D miter = normalize((Vec2D){ n_prev.x + n_next.x, n_prev.y + n_next.y });
+
+        // Compute miter length to preserve thickness
+        float cos_half_angle = dot_vec(miter, n_next); // cos(theta/2)
+        float miter_length = thickness / cos_half_angle;
+
+        offsets[i].x = poly[i].x + miter.x * miter_length;
+        offsets[i].y = poly[i].y + miter.y * miter_length;
+    }
+}
+
+void draw_polygon_inward_mitered(Vec2D *poly, int n, float thickness, u32 color) {
+    bool ccw = is_ccw(poly, n);
+    Vec2D offsets[n];
+    compute_mitered_offsets(poly, offsets, n, thickness, ccw);
+
+    for (int i = 0; i < n; i++) {
+        int j = (i + 1) % n;
+
+        GX_Begin(GX_TRIANGLES, GX_VTXFMT0, 6);
+
+        // Original vertices
+        GX_Position3f32(poly[i].x, poly[i].y, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(poly[j].x, poly[j].y, 0.0f);
+        GX_Color1u32(color);
+
+        // Offset vertices (inward)
+        GX_Position3f32(offsets[j].x, offsets[j].y, 0.0f);
+        GX_Color1u32(color);
+
+        GX_Position3f32(offsets[j].x, offsets[j].y, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(offsets[i].x, offsets[i].y, 0.0f);
+        GX_Color1u32(color);
+        GX_Position3f32(poly[i].x, poly[i].y, 0.0f);
+        GX_Color1u32(color);
+
+        GX_End();
+    }
 }
