@@ -452,7 +452,11 @@ void update_ship_rotation(Player *player) {
     float diff_x = (player->x - state.old_player.x);
     float diff_y = (player->y - state.old_player.y);
     float angle_rad = atan2f(-diff_y, diff_x);
-    player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.05f, STEPS_DT);
+    if (player->snap_rotation) {
+        player->rotation = angle_rad;
+    } else {
+        player->rotation = iSlerp(player->rotation, RadToDeg(angle_rad), 0.05f, STEPS_DT);
+    }
 }
 
 void ship_gamemode(Player *player) {
@@ -806,7 +810,6 @@ void run_player(Player *player) {
     
     if (player->snap_rotation) {
         player->lerp_rotation = player->rotation;
-        player->snap_rotation = FALSE;
     } else {
         if (player->gamemode == GAMEMODE_UFO) {
             if (player->slope_data.slope) {
@@ -846,7 +849,6 @@ void run_player(Player *player) {
     if (getGroundBottom(player) < state.ground_y) {
         if (player->ceiling_inv_time <= 0 && player->gamemode == GAMEMODE_CUBE && player->upside_down) {
             state.dead = TRUE;
-            return;
         }
 
         if (slopeCheck) {
@@ -861,7 +863,6 @@ void run_player(Player *player) {
     if (getGroundTop(player) > state.ceiling_y) {
         if (player->ceiling_inv_time <= 0 && player->gamemode == GAMEMODE_CUBE && !player->upside_down) {
             state.dead = TRUE;
-            return;
         }
 
         if (slopeCheck) {
@@ -883,6 +884,7 @@ void run_player(Player *player) {
     if (player->x > level_info.wall_x + 30) {
         level_info.completing = TRUE;
     }
+    player->snap_rotation = FALSE;
 }
 
 void handle_mirror_transition() {
@@ -936,6 +938,8 @@ void handle_player(Player *player) {
     run_player(player);
     t1 = gettime();
     player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
+    
+    if (state.noclip) state.dead = FALSE;
     
     do_ball_reflection();
 

@@ -119,7 +119,7 @@ void draw_game() {
 
         // Render FPS
         char fpsText[64];
-        snprintf(fpsText, sizeof(fpsText), "FPS: %.2f Steps: %d Objs: %d Layers: %d", fps, frame_counter - old_frame_counter, objectsArrayList->count, layersArrayList->count);
+        snprintf(fpsText, sizeof(fpsText), "FPS: %.2f Steps: %d Objs: %d Layers: %d", fps, frame_counter - old_frame_counter, level_info.object_count, layersArrayList->count);
         GRRLIB_Printf(20, 20, font, RGBA(255,255,255,255), 0.5, fpsText);  // White tex
         
         char layerText[64];

@@ -118,6 +118,10 @@ typedef struct {
 struct LoadedLevelInfo {
     float last_obj_x;
     float wall_x;
+
+    int object_count;
+    int layer_count;
+
     int pulsing_type;
     int song_id;
     int custom_song_id;
@@ -130,6 +134,7 @@ struct LoadedLevelInfo {
     unsigned char initial_speed;
     bool initial_dual;
     bool initial_upsidedown;
+    bool level_is_empty;
 };
 
 #define BG_COUNT 7

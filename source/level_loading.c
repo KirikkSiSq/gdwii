@@ -346,8 +346,8 @@ char *decompress_level(char *data) {
 
     char *b64 = extract_gmd_key((const char *) data, "k4", "s");
     if (!b64) {
-        printf("Could not extract base64 data\n");
-        return NULL;
+        // Empty level
+        return data;
     }
 
     fix_base64_url(b64);
@@ -845,11 +845,12 @@ GDObjectList *parse_string(const char *levelString) {
 
 void free_game_object_list(GDGameObjectList *list) {
     if (!list) return;
-
-    for (int i = 0; i < list->count; i++) {
-        free_game_object(list->objects[i]);
+    if (list->objects) {
+        for (int i = 0; i < list->count; i++) {
+            free_game_object(list->objects[i]);
+        }
+        free(list->objects);
     }
-    free(list->objects);
     free(list);
 }
 
@@ -1353,45 +1354,60 @@ int load_level(char *data) {
         return 1;
     }
 
-    level_info.last_obj_x = 545.f;
+    level_info.last_obj_x = 570.f;
 
-    // Get level starting colors
-    char *metaStr = get_metadata_value(level_string, "kS38");
-    channelCount = parse_color_channels(metaStr, &colorChannels);
+    // Ignore empty levels
+    if (level_string != data) {
 
-    // Fallback to pre 2.0 color keys
-    if (!channelCount) {
-        channelCount = parse_old_channels(level_string, &colorChannels);
+        // Get level starting colors
+        char *metaStr = get_metadata_value(level_string, "kS38");
+        channelCount = parse_color_channels(metaStr, &colorChannels);
+
+        // Fallback to pre 2.0 color keys
+        if (!channelCount) {
+            channelCount = parse_old_channels(level_string, &colorChannels);
+        }
+        
+        load_level_info(data, level_string);
+
+        GDObjectList *objectsList = parse_string(level_string);
+
+        free(level_string);
+
+        if (objectsList == NULL) {
+            printf("Failed parsing the objects.\n");
+            return 2;
+        }
+
+        objectsArrayList = convert_all_to_game_objects(objectsList);
+        free_gd_object_list(objectsList);
+
+        if (objectsArrayList == NULL) {
+            printf("Failed converting objects to game object structs.\n");
+            return 3;
+        }
+
+        layersArrayList = fill_layers_array(objectsArrayList);
+
+        if (layersArrayList == NULL) {
+            printf("Couldn't sort layers\n");
+            free_game_object_list(objectsArrayList);
+            return 4;
+        }
+
+        sort_layers_by_layer(layersArrayList);
+        level_info.level_is_empty = FALSE;
+        level_info.object_count = objectsArrayList->count;
+        level_info.layer_count = layersArrayList->count;
+    } else {
+        level_info.level_is_empty = TRUE;
+        level_info.object_count = 0;
+        level_info.layer_count = 1; // Player
+        objectsArrayList = malloc(sizeof(GDGameObjectList));
+        objectsArrayList->count = 0;
+        objectsArrayList->objects = NULL;
+        layersArrayList = fill_layers_array(objectsArrayList);
     }
-    
-    load_level_info(data, level_string);
-
-    GDObjectList *objectsList = parse_string(level_string);
-
-    free(level_string);
-
-    if (objectsList == NULL) {
-        printf("Failed parsing the objects.\n");
-        return 2;
-    }
-
-    objectsArrayList = convert_all_to_game_objects(objectsList);
-    free_gd_object_list(objectsList);
-
-    if (objectsArrayList == NULL) {
-        printf("Failed converting objects to game object structs.\n");
-        return 3;
-    }
-
-    layersArrayList = fill_layers_array(objectsArrayList);
-
-    if (layersArrayList == NULL) {
-        printf("Couldn't sort layers\n");
-        free_game_object_list(objectsArrayList);
-        return 4;
-    }
-
-    sort_layers_by_layer(layersArrayList);
     
     memset(trigger_buffer, 0, sizeof(trigger_buffer));
 
@@ -1402,7 +1418,7 @@ int load_level(char *data) {
     ground = GRRLIB_LoadTexturePNG(grounds[level_info.ground_id]);
 
     int rounded_last_obj_x = (int) (level_info.last_obj_x / 30) * 30 + 15;
-    level_info.wall_x = (rounded_last_obj_x) + (9.f * 30.f);
+    level_info.wall_x = (rounded_last_obj_x) + (11.f * 30.f);
     full_init_variables();
 
     reset_color_channels();
@@ -1414,12 +1430,19 @@ int load_level(char *data) {
 }
 
 void unload_level() {
-    free_layer_list(layersArrayList);
-    free(sortable_list);
-    sortable_list = NULL;
-    layersArrayList = NULL;
-    free_game_object_list(objectsArrayList);
-    objectsArrayList = NULL;
+    
+    if (layersArrayList) {
+        free_layer_list(layersArrayList);
+        layersArrayList = NULL;
+    }
+    if (sortable_list) {
+        free(sortable_list);
+        sortable_list = NULL;
+    }
+    if (objectsArrayList) {
+        free_game_object_list(objectsArrayList);
+        objectsArrayList = NULL;
+    }
     if (colorChannels) {
         free(colorChannels);
         colorChannels = NULL;
@@ -1584,7 +1607,7 @@ bool check_song(int id) {
 }
 
 void update_percentage() {
-    float progress = (state.player.x / (level_info.last_obj_x + 270.f)) * 100;
+    float progress = (state.player.x / (level_info.last_obj_x + (11 * 30.f))) * 100;
     if (progress > 100) progress = 100;
     state.level_progress = progress;
 }
