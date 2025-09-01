@@ -118,6 +118,7 @@ typedef struct {
 struct LoadedLevelInfo {
     float last_obj_x;
     float wall_x;
+    float wall_y;
 
     int object_count;
     int layer_count;

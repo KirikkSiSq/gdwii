@@ -4,6 +4,8 @@
 #include <ogc/lwp.h>
 #include <ogc/lwp_mutex.h>
 
+#include "math.h"
+
 #define STEPS_HZ 240
 #define STEPS_DT (1.0f / STEPS_HZ) // 1/240 seconds per physics step
 
@@ -17,6 +19,26 @@ extern float amplitude;
 extern float dt;
 extern float death_timer;
 
+extern float completion_timer;
+extern bool completion_shake;
+
 extern u64 start_frame;
 
+#define MAX_RAYS 8
+
+typedef struct {
+    float x, y;
+    float angle;
+    float startWidth, endWidth;
+    float length;
+    float elapsed;
+    float duration;
+    u32 color;
+    bool active;
+} Ray;
+
 int game_loop();
+
+void draw_rays();
+void create_ray(float x, float y, float angle, float length, float startWidth, float endWidth, float duration, u32 color);
+void erase_rays();

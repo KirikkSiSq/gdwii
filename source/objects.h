@@ -1065,6 +1065,8 @@ typedef struct {
 
 #define MAX_VISIBLE_LAYERS 4096
 
+#define COMPLETE_TEXT_IN_TIME 0.5f
+
 extern const struct ObjectLayer player_layer;
 extern int current_fading_effect;
 extern bool p1_trail;
@@ -1095,6 +1097,9 @@ int get_fade_value(float x, int right_edge);
 void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox);
 float get_mirror_x(float x, float factor);
 GRRLIB_texImg *get_coin_particle_texture();
+
+extern GRRLIB_texImg *level_complete_texture;
+extern float complete_text_elapsed;
 
 void draw_all_object_layers();
 void draw_background(f32 x, f32 y);

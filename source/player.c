@@ -16,6 +16,8 @@
 #include "oggplayer.h"
 #include "explode_11_ogg.h"
 
+#include "easing.h"
+
 GRRLIB_texImg *icon_l1;
 GRRLIB_texImg *icon_l2;
 GRRLIB_texImg *ship_l1;
@@ -647,7 +649,7 @@ void run_camera() {
     Player *player = &state.player;
 
     // Cap at camera_x
-    if (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x) {
+    if (completion_shake || state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x) {
         state.camera_x = level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA);
     } else {
         state.camera_x += player->vel_x * STEPS_DT;
@@ -664,34 +666,48 @@ void run_camera() {
 
     state.ground_y_gfx = ease_out(state.ground_y_gfx, calc_height, 0.02f);
 
-    if (player->gamemode == GAMEMODE_CUBE && !state.dual) {
-        float distance = state.camera_y_lerp + (SCREEN_HEIGHT_AREA / 2) - player->y;
-        float distance_abs = fabsf(distance);
-
-        int mult = (distance >= 0 ? 1 : -1);
-
-        float difference = player->y - state.old_player.y;
-
-        if (distance_abs > 60.f && (difference * -mult > 0 || player->on_ground)) {
-            float lerp_ratio = 0.1f;
-            if (player->on_ground) {
-                // Slowly make player in bounds (60 units from player center)
-                state.camera_y_lerp = player->y + 60.f * mult - (SCREEN_HEIGHT_AREA / 2);
-                lerp_ratio = 0.2f;
-            } else {
-                // Move camera
-                state.camera_y_lerp += difference;
-            }
-            // Lerp so the camera doesn't go all the way when not moving
-            state.intermediate_camera_y = ease_out(state.intermediate_camera_y, state.camera_y_lerp, lerp_ratio);
-        } else {
-            state.camera_y_lerp = state.intermediate_camera_y;
+    if (level_info.wall_y == 0) {
+        if (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x - (11 * 30.f)) {
+            level_info.wall_y = MAX(state.camera_y, -30) + (SCREEN_HEIGHT_AREA / 2);
         }
+    }
 
-        if (state.camera_y_lerp < -180.f) state.camera_y_lerp = -90.f;
-        if (state.camera_y_lerp > MAX_LEVEL_HEIGHT) state.camera_y_lerp = MAX_LEVEL_HEIGHT;
+    if (player->gamemode == GAMEMODE_CUBE && !state.dual) {
+        if (level_info.wall_y != 0 && (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x - 30)) {
+            state.camera_y = ease_out(state.camera_y, level_info.wall_y - (SCREEN_HEIGHT_AREA / 2), 0.007f);
+            if (completion_shake) {
+                state.camera_x = (level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA)) + 3.f * random_float(-1, 1);
+                state.camera_y = (level_info.wall_y - (SCREEN_HEIGHT_AREA / 2)) + 3.f * random_float(-1, 1);
+            }
+        } else {
+            float distance = state.camera_y_lerp + (SCREEN_HEIGHT_AREA / 2) - player->y;
+            float distance_abs = fabsf(distance);
 
-        state.camera_y = ease_out(state.camera_y, state.intermediate_camera_y, 0.07f);
+            int mult = (distance >= 0 ? 1 : -1);
+
+            float difference = player->y - state.old_player.y;
+
+            if (distance_abs > 60.f && (difference * -mult > 0 || player->on_ground)) {
+                float lerp_ratio = 0.1f;
+                if (player->on_ground) {
+                    // Slowly make player in bounds (60 units from player center)
+                    state.camera_y_lerp = player->y + 60.f * mult - (SCREEN_HEIGHT_AREA / 2);
+                    lerp_ratio = 0.2f;
+                } else {
+                    // Move camera
+                    state.camera_y_lerp += difference;
+                }
+                // Lerp so the camera doesn't go all the way when not moving
+                state.intermediate_camera_y = ease_out(state.intermediate_camera_y, state.camera_y_lerp, lerp_ratio);
+            } else {
+                state.camera_y_lerp = state.intermediate_camera_y;
+            }
+
+            if (state.camera_y_lerp < -180.f) state.camera_y_lerp = -90.f;
+            if (state.camera_y_lerp > MAX_LEVEL_HEIGHT) state.camera_y_lerp = MAX_LEVEL_HEIGHT;
+
+            state.camera_y = ease_out(state.camera_y, state.intermediate_camera_y, 0.07f);
+        }
     } else {
         state.camera_y = ease_out(state.camera_y, state.camera_intended_y, 0.02f);
         state.camera_y_lerp = state.camera_y;
@@ -702,7 +718,7 @@ void run_camera() {
 void spawn_glitter_particles() {
     if ((frame_counter & 0b1111) == 0) {
         particle_templates[GLITTER_EFFECT].angle = random_float(0, 360);
-        spawn_particle(GLITTER_EFFECT, state.camera_x + SCREEN_WIDTH_AREA, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
+        spawn_particle(GLITTER_EFFECT, state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA / 2, state.camera_y + (SCREEN_HEIGHT_AREA / 2), NULL);
     }
 }
 
@@ -806,6 +822,8 @@ void run_player(Player *player) {
     
     player->time_since_ground += STEPS_DT;
 
+    if (state.cutscene_timer > 0) return;
+
     player->rotation = normalize_angle(player->rotation);
     
     if (player->snap_rotation) {
@@ -877,14 +895,44 @@ void run_player(Player *player) {
         slope_calc(player->slope_data.slope, player);
     }
     
-    // Ground
     if (player->gamemode == GAMEMODE_SHIP || player->gamemode == GAMEMODE_WAVE) update_ship_rotation(player);
 
-    // End level
-    if (player->x > level_info.wall_x + 30) {
-        level_info.completing = TRUE;
-    }
     player->snap_rotation = FALSE;
+}
+
+void anim_player_to_wall(Player *player) {
+    float t = CLAMP(easeValue(QUAD_IN, 0, 1, state.cutscene_timer, END_ANIMATION_TIME, 0), 0, 1);
+
+    // (1 - t) and powers
+    float one_minus_t = 1.0f - t;
+    float one_minus_t_squared = one_minus_t * one_minus_t;
+    float t_squared = t * t;
+
+    // Final destination point (offscreen to the right, mid-screen vertically)
+    float final_x = level_info.wall_x + 30.f;
+    float final_y = level_info.wall_y - 15.f;
+
+    // Control point (slightly above and to the right of starting point)
+    float height_diff = fabsf(player->cutscene_initial_player_y - (level_info.wall_y + (SCREEN_HEIGHT_AREA / 2)));
+    float offset = height_diff * 0.5f;
+
+    float top_x = level_info.wall_x - (END_ANIMATION_X_START * (2.f / 3));
+    float top_y = level_info.wall_y + offset;
+
+    // Start point
+    float start_x = player->cutscene_initial_player_x;
+    float start_y = player->cutscene_initial_player_y;
+
+    // Quadratic Bézier interpolation
+    player->x = 
+        one_minus_t_squared * start_x +
+        2.0f * one_minus_t * t * top_x +
+        t_squared * final_x;
+
+    player->y = 
+        one_minus_t_squared * start_y +
+        2.0f * one_minus_t * t * top_y +
+        t_squared * final_y;
 }
 
 void handle_mirror_transition() {
@@ -935,7 +983,25 @@ void handle_player(Player *player) {
     if (state.dead) return;
 
     t0 = gettime();
+
+    if (player->x >= level_info.wall_x - END_ANIMATION_X_START) {
+        p1_trail = TRUE;
+        if (state.cutscene_timer == 0) {
+            player->cutscene_initial_player_x = player->x;
+            player->cutscene_initial_player_y = player->y;
+        }
+        anim_player_to_wall(player);
+        state.cutscene_timer += STEPS_DT;
+        player->lerp_rotation += 415.3848f * STEPS_DT;
+        
+        // End level
+        if (player->x > level_info.wall_x) {
+            level_info.completing = TRUE;
+        }
+    } 
+    
     run_player(player);
+    
     t1 = gettime();
     player_time = ticks_to_microsecs(t1 - t0) / 1000.f * 4.f;
     
@@ -952,6 +1018,9 @@ void full_init_variables() {
     state.background_x = 0;
 
     set_particle_color(GLITTER_EFFECT, p1.r, p1.g, p1.b);
+    set_particle_color(END_WALL_PARTICLES, p1.r, p1.g, p1.b);
+    set_particle_color(END_WALL_COLL_CIRCLE, p1.r, p1.g, p1.b);
+    set_particle_color(END_WALL_COMPLETE_CIRCLES, p2.r, p2.g, p2.b);
     init_variables();
 }
 
@@ -989,6 +1058,7 @@ void init_variables() {
     memset(&state.player, 0, sizeof(Player));
     memset(&state.hitbox_trail_players, 0, sizeof(state.hitbox_trail_players));
     state.last_hitbox_trail = 0;
+    state.cutscene_timer = 0;
 
     state.dual = FALSE;
     state.dead = FALSE;
@@ -1013,6 +1083,9 @@ void init_variables() {
 
     player->internal_hitbox.height = 9;
     player->internal_hitbox.width = 9;
+
+    player->cutscene_initial_player_x = 0;
+    player->cutscene_initial_player_y = 0;
 
     switch (level_info.initial_gamemode) {
         case GAMEMODE_SHIP:

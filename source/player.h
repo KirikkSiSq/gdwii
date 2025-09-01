@@ -13,6 +13,9 @@
 
 #define MAX_COLLIDED_OBJECTS 4096
 
+#define END_ANIMATION_TIME 1.f
+#define END_ANIMATION_X_START (9.f * 30.f)
+
 typedef struct {
     GameObject *slope;
     float elapsed;
@@ -69,6 +72,9 @@ typedef struct {
 
     GameObject *gravObj;
 
+    float cutscene_initial_player_x;
+    float cutscene_initial_player_y;
+
     SlopeData slope_data;
 } Player;
 
@@ -108,7 +114,7 @@ extern Color p2;
 extern const float player_speeds[SPEED_COUNT];
 
 extern GRRLIB_texImg *trail_tex;
-
+void anim_player_to_wall(Player *player);
 void handle_death();
 void init_variables();
 void full_init_variables();

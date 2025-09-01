@@ -4,6 +4,7 @@
 #include "stdio.h"
 #include "object_includes.h"
 #include "ground_line_png.h"
+#include "levelCompleteText_png.h"
 #include "main.h"
 #include "math.h"
 #include <math.h>
@@ -13,6 +14,7 @@
 #include "trail.h"
 #include "level.h"
 #include "collision.h"
+#include "easing.h"
 
 #include <wiiuse/wpad.h>
 #include "particles.h"
@@ -795,6 +797,7 @@ void do_ball_reflection() {
 GRRLIB_texImg *bg;
 GRRLIB_texImg *ground;
 GRRLIB_texImg *ground_line;
+GRRLIB_texImg *level_complete_texture;
 GRRLIB_texImg *object_images[OBJECT_COUNT][MAX_OBJECT_LAYERS]; 
 
 int current_fading_effect = FADE_NONE;
@@ -818,6 +821,7 @@ int find_existing_texture(int curr_object, const unsigned char *texture) {
 void load_spritesheet() {
     // Load Textures 
     ground_line = GRRLIB_LoadTexturePNG(ground_line_png);
+    level_complete_texture = GRRLIB_LoadTexturePNG(levelCompleteText_png);
 
     for (s32 object = 1; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < MAX_OBJECT_LAYERS; layer++) {
@@ -1489,13 +1493,30 @@ void draw_background(f32 x, f32 y) {
     }
 }
 
-void draw_end_wall() {
+float complete_text_elapsed = 0;
+void draw_end_wall() {  
+    if (level_info.wall_y > 0) {
+        spawn_particle(END_WALL_PARTICLES, level_info.wall_x, level_info.wall_y, NULL);
+        spawn_particle(END_WALL_PARTICLES, level_info.wall_x, level_info.wall_y, NULL);
+        draw_particles(END_WALL_PARTICLES);
+        draw_particles(END_WALL_COLL_CIRCLE);
+        draw_particles(END_WALL_COMPLETE_CIRCLES);
+
+        // Render rays
+        draw_rays();
+
+        if (completion_timer > 2) {
+            float text_scale = easeValue(ELASTIC_OUT, 0, 0.75f, complete_text_elapsed, COMPLETE_TEXT_IN_TIME, 0.6f);
+            GRRLIB_SetHandle(level_complete_texture, level_complete_texture->w / 2, level_complete_texture->h / 2);
+            GRRLIB_DrawImg(screenWidth / 2 - (level_complete_texture->w / 2), screenHeight / 2 - (level_complete_texture->h / 2), level_complete_texture, 0, text_scale, text_scale, 0xffffffff);
+            complete_text_elapsed += dt;
+        }
+    }
+
     float calc_x = ((level_info.wall_x - state.camera_x) * SCALE) - widthAdjust;
-    float calc_y =  positive_fmod(state.camera_y * SCALE, BLOCK_SIZE_PX) + screenHeight;    
-    
+    float calc_y =  positive_fmod(state.camera_y * SCALE, BLOCK_SIZE_PX) + screenHeight;  
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
-
     if (calc_x < screenWidth + 20) {
         for (s32 j = 0; j < objects[CHECKER_EDGE].num_layers; j++) {
             GRRLIB_texImg *image = object_images[CHECKER_EDGE][j];
@@ -1506,7 +1527,7 @@ void draw_end_wall() {
             // Draw each wall block
             for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX * 2; i += BLOCK_SIZE_PX) {
                 custom_drawImg(
-                    get_mirror_x(calc_x + 6, state.mirror_factor) - (width/2), 
+                    get_mirror_x(calc_x, state.mirror_factor) - (width/2) + 6, 
                     calc_y + 6 - i - (height/2),    
                     image,
                     adjust_angle(270, 0, state.mirror_mult < 0),
@@ -1515,8 +1536,27 @@ void draw_end_wall() {
                 );
             }
         }
-    }
-    
+        GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
+        
+        calc_x = ((level_info.wall_x - 25 - state.camera_x) * SCALE) - widthAdjust;
+
+        // Draw glow
+        GRRLIB_texImg *image = object_images[GLOW][0];
+        int width = image->w;
+        int height = image->h;
+        set_texture(image);
+        for (float i = -BLOCK_SIZE_PX; i < screenHeight + BLOCK_SIZE_PX * 2; i += BLOCK_SIZE_PX) {
+            custom_drawImg(
+                get_mirror_x(calc_x, state.mirror_factor) - (width/2) + 6, 
+                calc_y + 6 - i - (height/2),    
+                image,
+                adjust_angle(270, 0, state.mirror_mult < 0),
+                BASE_SCALE * state.mirror_mult, BASE_SCALE,
+                RGBA(p1.r, p1.g, p1.b, 255) 
+            );
+        }
+    }   
+    GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
     GX_SetTevOp  (GX_TEVSTAGE0, GX_PASSCLR);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
 }

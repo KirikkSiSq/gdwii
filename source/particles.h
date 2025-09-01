@@ -25,6 +25,7 @@ typedef struct {
     int texture_id;
     bool blending;
     bool lock_to_player;
+    float elapsed;
     int player_id;
 } Particle;
 
@@ -82,6 +83,9 @@ enum ParticleGroupID {
     SPEED_PORTAL_AMBIENT,
     SPEEDUP,
     DUAL_BALL_HITBOX_EFFECT,
+    END_WALL_PARTICLES,
+    END_WALL_COLL_CIRCLE,
+    END_WALL_COMPLETE_CIRCLES,
 };
 
 extern ParticleTemplate particle_templates[];

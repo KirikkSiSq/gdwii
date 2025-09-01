@@ -6,6 +6,7 @@
 #include "math.h"
 #include "game.h"
 #include <stdio.h>
+#include "easing.h"
 GRRLIB_texImg *particleTex = NULL;
 
 ParticleTemplate particle_templates[] = {
@@ -484,9 +485,83 @@ ParticleTemplate particle_templates[] = {
         .lock_to_player = TRUE,
         .texture_id = PARTICLE_CIRCUNFERENCE
     },
+    [END_WALL_PARTICLES] = {
+        .angle = 180, .angleVar = 80,
+        .speed = -300, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = -100,
+        .rel_gravity = TRUE,
+        .life = 0.6f, .lifeVar = 0,
+        .start_scale = 0.4, .start_scaleVar = 0,
+        .end_scale = 0.05, .end_scaleVar = 0,
+        .start_color = {0,0,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {0,0,0,255},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 150,
+        .maxRadius = 250,
+        .texture_id = PARTICLE_SQUARE
+    },
+    [END_WALL_COLL_CIRCLE] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 0, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
+        .life = 0.4f, .lifeVar = 0,
+        .start_scale = 0, .start_scaleVar = 0,
+        .end_scale = 300, .end_scaleVar = 0,
+        .start_color = {0,0,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {0,0,0,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_CIRCLE
+    },
+    [END_WALL_COMPLETE_CIRCLES] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 0, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
+        .life = 0.4f, .lifeVar = 0,
+        .start_scale = 0, .start_scaleVar = 0,
+        .end_scale = 50, .end_scaleVar = 0,
+        .start_color = {0,0,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {0,0,0,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 240, .sourcePosVarY = 160,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_CIRCLE
+    },
 };
 
 void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
+    if (state.paused) return;
+
     ParticleTemplate *tpl = &particle_templates[group_id];
     Particle *particles = state.particles;
     for (int i = 0; i < MAX_PARTICLES; i++) {
@@ -531,6 +606,7 @@ void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
             particles[i].gravity_x = tpl->gravity_x;
             particles[i].gravity_y = tpl->gravity_y;
             particles[i].life = life;
+            particles[i].elapsed = 0;
 
             // Color interpolation
             particles[i].start_color.r = sc.r + scv.r * random_float(-1, 1);
@@ -598,13 +674,13 @@ void update_particles() {
                 }
             }
 
-            p->scale += p->scale_delta * STEPS_DT;
+            p->scale = easeValue(EASE_OUT, p->start_scale, p->end_scale, p->elapsed, p->life, 2.f);
             p->color.r += p->color_delta.r * STEPS_DT;
             p->color.g += p->color_delta.g * STEPS_DT;
             p->color.b += p->color_delta.b * STEPS_DT;
             p->color.a += p->color_delta.a * STEPS_DT;
-            p->life -= STEPS_DT;
-            if (p->life <= 0 || p->scale <= 0) {
+            p->elapsed += STEPS_DT;
+            if (p->elapsed >= p->life) {
                 p->active = FALSE;
             }
         }
@@ -664,7 +740,7 @@ void draw_particles(int group_id) {
                             p->color.b,
                             p->color.a
                         ),
-                        FALSE
+                        2.f
                     );
                     break;
                 case PARTICLE_P1_TRAIL:

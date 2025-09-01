@@ -1,6 +1,10 @@
 typedef enum {
     LINEAR,
 
+    EASE_IN,
+    EASE_OUT,
+    EASE_IN_OUT,
+
     SINE_IN,
     SINE_OUT,
     SINE_IN_OUT,
@@ -48,9 +52,13 @@ typedef enum {
     EASING_COUNT,
 } EaseTypes;
 
-float easeValue(EaseTypes ease, float start, float end, float elapsed, float duration);
+float easeValue(EaseTypes ease, float start, float end, float elapsed, float duration, float period);
 
 float linear(float time);
+
+float easeIn(float time, float rate);
+float easeOut(float time, float rate);
+float easeInOut(float time, float rate);
 
 float sineEaseIn(float time);
 float sineEaseOut(float time);

@@ -345,7 +345,8 @@
         "trail_png.h": "c",
         "custom_mp3player.h": "c",
         "bg_05_png.h": "c",
-        "g_05_png.h": "c"
+        "g_05_png.h": "c",
+        "menu.h": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

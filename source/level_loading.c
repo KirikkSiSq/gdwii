@@ -1512,7 +1512,8 @@ int load_level(char *data) {
     ground = GRRLIB_LoadTexturePNG(grounds[level_info.ground_id]);
 
     int rounded_last_obj_x = (int) (level_info.last_obj_x / 30) * 30 + 15;
-    level_info.wall_x = (rounded_last_obj_x) + (11.f * 30.f);
+    level_info.wall_x = (rounded_last_obj_x) + (11.f * 30.f) - 3;
+    level_info.wall_y = 0;
     full_init_variables();
 
     reset_color_channels();
@@ -1524,23 +1525,27 @@ int load_level(char *data) {
 }
 
 void unload_level() {
-    
+
     if (layersArrayList) {
         free_layer_list(layersArrayList);
         layersArrayList = NULL;
     }
+
     if (sortable_list) {
         free(sortable_list);
         sortable_list = NULL;
     }
+
     if (objectsArrayList) {
         free_game_object_list(objectsArrayList);
         objectsArrayList = NULL;
     }
+
     if (colorChannels) {
         free(colorChannels);
         colorChannels = NULL;
     }
+    
 
     GRRLIB_FreeTexture(bg);
     GRRLIB_FreeTexture(ground);

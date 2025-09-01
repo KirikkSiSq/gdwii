@@ -30,6 +30,7 @@ GRRLIB_texImg *menu_ground;
 GRRLIB_texImg *font_bold;
 GRRLIB_texImg *ground_line_texture;
 
+
 int main_levels();
 int sdcard_levels();
 void game_folder_not_found();
@@ -349,6 +350,7 @@ int menu_loop() {
 
         if (!MP3Player_IsPlaying() && menuLoop) {
             MP3Player_PlayBuffer(menuLoop, size, NULL);
+            MP3Player_Volume(255);
         }
                     
         if (state.input.pressed1orX) {

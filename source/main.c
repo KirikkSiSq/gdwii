@@ -21,6 +21,7 @@
 #include <unistd.h>
 
 #include "main.h"
+#include "game.h"
 
 #include "custom_mp3player.h"
 #include "oggplayer.h"
@@ -172,6 +173,12 @@ void draw_game() {
 
     if (state.noclip) {
         GRRLIB_Printf(screenWidth - 200, 20, font, RGBA(255,255,255,255), 0.5, "Noclip activated");
+    }
+
+    if (state.paused) {
+        GRRLIB_FillScreen(RGBA(0, 0, 0, 127));
+        textOffset = (strlen("PAUSED") * 18 * 0.75) / 2;
+        GRRLIB_Printf(screenWidth / 2 - textOffset, screenHeight / 2, font, RGBA(255,255,255,255), 0.5, "PAUSED");
     }
     
     GRRLIB_Render();

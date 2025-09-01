@@ -18,6 +18,7 @@
 #include <system.h>
 #include <ogcsys.h>
 #include <malloc.h>
+#include <unistd.h>
 
 #include "math.h"
 
@@ -27,6 +28,7 @@
 static s32 have_samples = 0;
 static u32 mp3_volume = 255;
 static volatile float mp3_amplitude = 0.0f;
+static volatile int paused = FALSE;
 
 static int frames_to_skip = 0; // ~1153 frames
 static int skipped = 0;
@@ -290,6 +292,7 @@ void MP3Player_Stop(void)
 	skipped = 0;
 	frames_to_skip = 0;
 	memset(&cached_start,0,sizeof(cached_start));
+    MP3Player_Unpause();
 	MP3Player_Reset();
 }
 
@@ -349,7 +352,7 @@ static void *StreamPlay(void *arg)
 	}
 
 	while (!atend && thr_running) {
-		if ((Stream.buffer == NULL || Stream.error == MAD_ERROR_BUFLEN) && !using_cache) {
+		if (!paused && (Stream.buffer == NULL || Stream.error == MAD_ERROR_BUFLEN) && !using_cache) {
 			u8 *ReadStart;
 			s32 ReadSize, Remaining;
 
@@ -374,8 +377,8 @@ static void *StreamPlay(void *arg)
 
 			mad_stream_buffer(&Stream, InputBuffer, ReadSize + Remaining);
 		}
-
-		while (!mad_frame_decode(&Frame, &Stream) && thr_running) {
+		
+		while (!paused && !mad_frame_decode(&Frame, &Stream) && thr_running) {
 			if (mp3filterfunc && mp3filterfunc(&Stream, &Frame)) {
 				if (skipped == frames_to_skip && !cached_start.valid) {
 					cached_start.frame_size = Stream.bufend - Stream.this_frame;
@@ -388,12 +391,13 @@ static void *StreamPlay(void *arg)
 				continue;
 			}
 
-			mad_timer_add(&Timer, Frame.header.duration);
-			mad_synth_frame(&Synth, &Frame);
-
-			Resample(&Synth.pcm, eqs, (MAD_NCHANNELS(&Frame.header) == 2), Frame.header.samplerate);
+			if (!paused) {
+				mad_timer_add(&Timer, Frame.header.duration);
+				mad_synth_frame(&Synth, &Frame);
+				Resample(&Synth.pcm, eqs, (MAD_NCHANNELS(&Frame.header) == 2), Frame.header.samplerate);
+			}
 		}
-
+		
 		if (MAD_RECOVERABLE(Stream.error)) {
 			if (Stream.error != MAD_ERROR_LOSTSYNC || Stream.this_frame != GuardPtr)
 				continue;
@@ -548,6 +552,7 @@ static void DataTransferCallback(s32 voice)
 		MP3Playing = (buf_get(&OutputRingBuffer,OutputBuffer[CurrentBuffer],ADMA_BUFFERSIZE)>0);
 		return;
 	}
+
 	if(have_samples==1) {
 		if(SND_AddVoice(mp3_voice,(void*)OutputBuffer[CurrentBuffer],ADMA_BUFFERSIZE)==SND_OK) {
 			have_samples = 0;
@@ -561,6 +566,22 @@ static void DataTransferCallback(s32 voice)
 		}
 	}
 #endif
+}
+
+void MP3Player_Pause() {
+	if (!paused) {
+		paused = TRUE;
+		SND_PauseVoice(mp3_voice, 1);
+		AUDIO_StopDMA();
+	}
+}
+
+void MP3Player_Unpause() {
+	if (paused) {
+		paused = FALSE;
+		AUDIO_StartDMA();
+		SND_PauseVoice(mp3_voice, 0); // resume
+	}
 }
 
 void MP3Player_SetSeconds(float seconds) {

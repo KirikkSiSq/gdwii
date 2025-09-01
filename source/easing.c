@@ -5,10 +5,17 @@
 #define M_PI_X2 (M_PI * 2)
 
 
-float executeEase(EaseTypes ease, float time) {
+float executeEase(EaseTypes ease, float time, float period) {
     switch (ease) {
         case LINEAR:
             return linear(time);
+
+        case EASE_IN:
+            return easeOut(time, period);
+        case EASE_OUT:
+            return easeOut(time, period);
+        case EASE_IN_OUT:
+            return easeInOut(time, period);
 
         case SINE_IN:
             return sineEaseIn(time);
@@ -60,11 +67,11 @@ float executeEase(EaseTypes ease, float time) {
             return circEaseInOut(time);
 
         case ELASTIC_IN:
-            return elasticEaseIn(time, 0.3f);
+            return elasticEaseIn(time, period);
         case ELASTIC_OUT:
-            return elasticEaseOut(time, 0.3f);
+            return elasticEaseOut(time, period);
         case ELASTIC_IN_OUT:
-            return elasticEaseInOut(time, 0.3f);
+            return elasticEaseInOut(time, period);
 
         case BACK_IN:
             return backEaseIn(time);
@@ -92,16 +99,39 @@ float executeEase(EaseTypes ease, float time) {
     }
 }
 
-float easeValue(EaseTypes ease, float start, float end, float elapsed, float duration) {
+float easeValue(EaseTypes ease, float start, float end, float elapsed, float duration, float period) {
     if (duration <= 0.0f) return end;
 
     float t = elapsed / duration;    
     if (t < 0.0f) t = 0.0f;
     if (t > 1.0f) t = 1.0f;
 
-    float easedT = executeEase(ease, t);
+    float easedT = executeEase(ease, t, period);
 
     return start + (end - start) * easedT;
+}
+
+float easeIn(float time, float rate)
+{
+    return powf(time, rate);
+}
+
+float easeOut(float time, float rate)
+{
+    return powf(time, 1 / rate);
+}
+
+float easeInOut(float time, float rate)
+{
+    time *= 2;
+    if (time < 1)
+    {
+        return 0.5f * powf(time, rate);
+    }
+    else
+    {
+        return (1.0f - 0.5f * powf(2 - time, rate));
+    }
 }
 
 
