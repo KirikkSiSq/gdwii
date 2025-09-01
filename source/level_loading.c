@@ -603,14 +603,108 @@ int convert_1p9_channel(int channel) {
 // Convert some 2.0 objects into the 1.9 ones, blame robtop for making GD convert those to 2.0
 int convert_object(int id) {
     switch (id) {
+        // Saws
         case 1734:
             return DARKCOGWHEEL_BIG;
         case 1735:
             return DARKCOGWHEEL_MEDIUM;
         case 1736:
             return DARKCOGWHEEL_SMALL;
+        case 1705:
+            return SAW_BIG;
+        case 1706:
+            return SAW_MEDIUM;
+        case 1707:
+            return SAW_SMALL;
+        case 1708:
+            return DARKBLADE_BIG;
+        case 1709:
+            return DARKBLADE_MEDIUM;
+        case 1710:
+            return DARKBLADE_SMALL;
+
+        // User coin
         case 1329:
             return SECRET_COIN;
+
+        // Slopes
+        case 1743:
+            return CHECKER_SLOPE_45;
+        case 1744:
+            return CHECKER_SLOPE_22_66;
+
+        case 1745:
+            return B13_SLOPE_45;
+        case 1746:
+            return B13_SLOPE_22_66;
+
+        case 1747:
+            return BLACK_SLOPE_45;
+        case 1748:
+            return BLACK_SLOPE_22_66;
+
+        case 1749:
+            return B15_SLOPE_45;
+        case 1750:
+            return B15_SLOPE_22_66;
+        
+        case 1338:
+            return OUTLINE_SLOPE_45;
+        case 1339:
+            return OUTLINE_SLOPE_45;
+
+        // Ground spikes
+
+        case 1715:
+            return GROUND_SPIKE;
+
+        case 1719:
+            return WAVY_GROUND_SPIKE;
+
+        case 1720:
+            return WAVY_PIT_RIGHT;
+        case 1721:
+            return WAVY_PIT_LEFT;
+        
+        case 1716:
+            return GROUND_SPIKE_NO_GRADIENT;
+        case 1717:
+            return GROUND_SPIKE_SLOPE_45;
+        case 1718:
+            return GROUND_SPIKE_SLOPE_22_66;
+
+        case 1722:
+            return WAVY_GROUND_SPIKE_NO_GRADIENT;
+        case 1723:
+            return WAVY_GROUND_SPIKE_SLOPE_45;
+        case 1724:
+            return WAVY_GROUND_SPIKE_SLOPE_22_66;
+
+        case 1725:
+            return SPIKE_PIT;
+        case 1726:
+            return SPIKE_PIT_END;
+        
+        case 1728:
+            return SEMICIRCLE_PIT;
+        case 1729:
+            return SEMICIRCLE_PIT_END;
+        
+        case 1730:
+            return SQUARE_PIT;
+        case 1731:
+            return SQUARE_PIT_EDGE;
+
+        // Fake spikes
+        case 1889:
+            return FAKE_SPIKE;
+        case 1890:
+            return FAKE_HALF_SPIKE;
+        case 1891:
+            return FAKE_MEDIUM_SPIKE;
+        case 1892:
+            return MINI_FAKE_SPIKE;
+        
     }
     return id;
 }
