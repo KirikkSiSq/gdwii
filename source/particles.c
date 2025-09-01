@@ -678,7 +678,15 @@ void update_particles() {
             p->color.r += p->color_delta.r * STEPS_DT;
             p->color.g += p->color_delta.g * STEPS_DT;
             p->color.b += p->color_delta.b * STEPS_DT;
-            p->color.a = easeValue(EASE_OUT, p->start_color.a, p->end_color.a, p->elapsed, p->life, 2.f);
+            if (p->group_id == USE_EFFECT) {
+                if (p->elapsed / p->life < 0.5f) {
+                    p->color.a = easeValue(EASE_IN, p->start_color.a, p->end_color.a, p->elapsed, p->life / 2, 2.f);
+                } else {
+                    p->color.a = easeValue(EASE_OUT, p->end_color.a, p->start_color.a, p->elapsed - (p->life / 2), p->life / 2, 2.f);
+                }
+            } else {
+                p->color.a = easeValue(EASE_OUT, p->start_color.a, p->end_color.a, p->elapsed, p->life, 2.f);
+            }
             p->elapsed += STEPS_DT;
             if (p->elapsed >= p->life) {
                 p->active = FALSE;

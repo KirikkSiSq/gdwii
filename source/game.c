@@ -37,7 +37,6 @@ static lwp_t input_thread;
 static volatile bool input_thread_active;
 static volatile bool complete_level_flag;
 static volatile bool exit_level_flag;
-static volatile bool exit_game_flag;
 
 typedef struct InputBuffer {
     KeyInput inputs[INPUT_BUFFER_SIZE];
@@ -92,11 +91,6 @@ void *input_loop(void *arg) {
         if (input.pressedDir & INPUT_LEFT) {
             state.hitbox_display++;
             if (state.hitbox_display > 2) state.hitbox_display = 0;
-        }
-
-        if (input.pressedHome) {
-            exit_game_flag = TRUE;
-            break;
         }
 
         if (input.pressedDir & INPUT_RIGHT) {

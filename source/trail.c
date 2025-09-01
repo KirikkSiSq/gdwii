@@ -210,7 +210,7 @@ void MotionTrail_UpdateWaveTrail(MotionTrail* trail, float delta) {
     trail->offscreenCount = 0;
     
     // Update stroke width
-    float size_value = 15.f * map_range(amplitude, 0.f, 1.f, 0.1f, 1.f);
+    float size_value = 15.f * map_range(amplitude, 0.f, 1.f, 0.2f, 1.f);
     if (level_info.custom_song_id <= 0) {
         trail->stroke = ease_out(trail->stroke, size_value, 0.25f);
     } else {
