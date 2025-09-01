@@ -20,7 +20,7 @@ ParticleTemplate particle_templates[] = {
         .end_scale = 0, .end_scaleVar = 0,
         .start_color = {0,0,0,255},
         .start_colorVar = {0,0,0,0},
-        .end_color = {0,0,0,255},
+        .end_color = {0,0,0,64},
         .end_colorVar = {0,0,0,0},
         .blending = TRUE,
         .sourcePosVarX = 1, .sourcePosVarY = 0,
