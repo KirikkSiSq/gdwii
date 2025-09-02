@@ -632,7 +632,7 @@ void wave_gamemode(Player *player) {
     
     wave_trail.positionR = (Vec2){player->x, player->y};  
     wave_trail.startingPositionInitialized = TRUE;
-    wave_trail.opacity = 1.f;
+    if (player->cutscene_timer == 0) wave_trail.opacity = 1.f;
 
     if (player->buffering_state == BUFFER_READY) player->buffering_state = BUFFER_END;
 
@@ -826,6 +826,15 @@ void run_player(Player *player) {
     
     player->time_since_ground += STEPS_DT;
 
+    if (player->gamemode != GAMEMODE_WAVE || player->cutscene_timer > 0) {
+        if (wave_trail.opacity > 0) wave_trail.opacity -= 0.02f;
+        
+        if (wave_trail.opacity <= 0) {
+            wave_trail.opacity = 0;
+            wave_trail.nuPoints = 0;
+        }
+    }
+
     if (player->cutscene_timer > 0) return;
 
     player->rotation = normalize_angle(player->rotation);
@@ -856,14 +865,6 @@ void run_player(Player *player) {
         player->ceiling_inv_time -= STEPS_DT;
     } else {
         player->ceiling_inv_time = 0;
-    }
-
-    if (player->gamemode != GAMEMODE_WAVE) {
-        if (wave_trail.opacity > 0) wave_trail.opacity -= 0.02f;
-        else {
-            wave_trail.opacity = 0;
-            wave_trail.nuPoints = 0;
-        }
     }
     
     bool slopeCheck = player->slope_data.slope && (grav_slope_orient(player->slope_data.slope, player) == ORIENT_NORMAL_DOWN || grav_slope_orient(player->slope_data.slope, player) == ORIENT_UD_DOWN);
@@ -991,6 +992,9 @@ void handle_player(Player *player) {
     if (player->x >= level_info.wall_x - END_ANIMATION_X_START) {
         p1_trail = TRUE;
         if (player->cutscene_timer == 0) {
+            // Add a trail point for wave
+            if (player->gamemode == GAMEMODE_WAVE) MotionTrail_AddWavePoint(&wave_trail);
+
             player->cutscene_initial_player_x = player->x;
             player->cutscene_initial_player_y = player->y;
         }
