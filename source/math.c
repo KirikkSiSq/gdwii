@@ -294,7 +294,7 @@ void custom_ellipse(const float x, const float y, const float radiusX,
                     const float radiusY, const u32 color, const u8 filled,
                     const float lineWidth) {
     int segments = (int)(MAX(radiusX, radiusY) * 0.75f); // tweak factor for smoothness
-    if (segments < 12) segments = 12;       // minimum
+    segments = CLAMP(segments, 12, 256);                 // minimum and maximum
     guVector v[segments + 1];  // +1 to close the loop
     u32 ncolor[segments + 1];
 

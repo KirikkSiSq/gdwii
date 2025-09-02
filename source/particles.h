@@ -25,6 +25,7 @@ typedef struct {
     int texture_id;
     bool blending;
     bool lock_to_player;
+    bool trifading;
     float elapsed;
     int player_id;
 } Particle;
@@ -41,6 +42,7 @@ typedef struct {
     ColorAlpha end_color, end_colorVar;
     bool blending;
     bool lock_to_player;
+    bool trifading;
     float sourcePosVarX, sourcePosVarY;
     float rotatePerSecond;
     float rotatePerSecondVariance;
@@ -85,7 +87,10 @@ enum ParticleGroupID {
     DUAL_BALL_HITBOX_EFFECT,
     END_WALL_PARTICLES,
     END_WALL_COLL_CIRCLE,
+    END_WALL_COLL_CIRCUNFERENCE,
     END_WALL_COMPLETE_CIRCLES,
+    END_WALL_FIREWORK,
+    END_WALL_TEXT_EFFECT,
 };
 
 extern ParticleTemplate particle_templates[];

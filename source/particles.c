@@ -192,7 +192,7 @@ ParticleTemplate particle_templates[] = {
         .speed = 0, .speedVar = 0,
         .gravity_x = 0, .gravity_y = 0,
         .rel_gravity = FALSE,
-        .life = 0.3f, .lifeVar = 0,
+        .life = 0.4f, .lifeVar = 0,
         .start_scale = 40, .start_scaleVar = 0,
         .end_scale = 0.0, .end_scaleVar = 0,
         .start_color = {255,255,0,63},
@@ -209,6 +209,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .trifading = TRUE,
         .texture_id = PARTICLE_CIRCLE
     },
     [ORB_HITBOX_EFFECT] = {
@@ -533,6 +534,30 @@ ParticleTemplate particle_templates[] = {
         .maxRadius = 0,
         .texture_id = PARTICLE_CIRCLE
     },
+    [END_WALL_COLL_CIRCUNFERENCE] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 0, .speedVar = 0,
+        .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = FALSE,
+        .life = 1.6f, .lifeVar = 0,
+        .start_scale = 0, .start_scaleVar = 0,
+        .end_scale = 2400, .end_scaleVar = 0,
+        .start_color = {0,0,0,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {0,0,0,255},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_CIRCUNFERENCE
+    },
     [END_WALL_COMPLETE_CIRCLES] = {
         .angle = 0, .angleVar = 0,
         .speed = 0, .speedVar = 0,
@@ -546,7 +571,7 @@ ParticleTemplate particle_templates[] = {
         .end_color = {0,0,0,0},
         .end_colorVar = {0,0,0,0},
         .blending = TRUE,
-        .sourcePosVarX = 240, .sourcePosVarY = 160,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
         .rotatePerSecond = 0,
         .rotatePerSecondVariance = 0,
         .rotationStart = 0,
@@ -557,6 +582,54 @@ ParticleTemplate particle_templates[] = {
         .maxRadius = 0,
         .texture_id = PARTICLE_CIRCLE
     },
+    [END_WALL_FIREWORK] = {
+        .angle = 0, .angleVar = 0,
+        .speed = 200, .speedVar = 20,
+        .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = TRUE,
+        .life = 0.5f, .lifeVar = 0,
+        .start_scale = 0.5, .start_scaleVar = 0.1,
+        .end_scale = 0, .end_scaleVar = 0,
+        .start_color = {255,255,255,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {255,255,255,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE
+    },
+    [END_WALL_TEXT_EFFECT] = {
+        .angle = 0, .angleVar = 360,
+        .speed = 100, .speedVar = 20,
+        .gravity_x = 0, .gravity_y = 0,
+        .rel_gravity = TRUE,
+        .life = 0.5f, .lifeVar = 0,
+        .start_scale = 0.5, .start_scaleVar = 0.1,
+        .end_scale = 0, .end_scaleVar = 0,
+        .start_color = {255,255,255,255},
+        .start_colorVar = {0,0,0,0},
+        .end_color = {255,255,255,0},
+        .end_colorVar = {0,0,0,0},
+        .blending = TRUE,
+        .sourcePosVarX = 0, .sourcePosVarY = 0,
+        .rotatePerSecond = 0,
+        .rotatePerSecondVariance = 0,
+        .rotationStart = 0,
+        .rotationStartVariance = 0,
+        .rotationEnd = 0,
+        .rotationEndVariance = 0,
+        .minRadius = 0,
+        .maxRadius = 0,
+        .texture_id = PARTICLE_SQUARE
+    }
 };
 
 void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
@@ -635,6 +708,8 @@ void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
             particles[i].rel_gravity = tpl->rel_gravity;
             particles[i].parent_obj = parent_obj;
 
+            particles[i].trifading = tpl->trifading;
+
             particles[i].texture_id = tpl->texture_id;
             particles[i].lock_to_player = tpl->lock_to_player;
             particles[i].player_id = state.current_player;
@@ -678,7 +753,7 @@ void update_particles() {
             p->color.r += p->color_delta.r * STEPS_DT;
             p->color.g += p->color_delta.g * STEPS_DT;
             p->color.b += p->color_delta.b * STEPS_DT;
-            if (p->group_id == USE_EFFECT) {
+            if (p->trifading) {
                 if (p->elapsed / p->life < 0.5f) {
                     p->color.a = easeValue(EASE_IN, p->start_color.a, p->end_color.a, p->elapsed, p->life / 2, 2.f);
                 } else {

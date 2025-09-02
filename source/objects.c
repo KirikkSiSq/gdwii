@@ -101,6 +101,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
+                particle_templates[USE_EFFECT].trifading = FALSE;
 
                 set_particle_color(USE_EFFECT, 255, 255, 0);
                 particle_templates[USE_EFFECT].start_color.a = 255;
@@ -123,6 +124,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
+                particle_templates[USE_EFFECT].trifading = FALSE;
 
                 set_particle_color(USE_EFFECT, 255, 31, 255);
                 particle_templates[USE_EFFECT].start_color.a = 255;
@@ -160,6 +162,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 
                 particle_templates[USE_EFFECT].start_scale = 0;
                 particle_templates[USE_EFFECT].end_scale = 60;
+                particle_templates[USE_EFFECT].trifading = FALSE;
 
                 set_particle_color(USE_EFFECT, 56, 200, 255);
                 particle_templates[USE_EFFECT].start_color.a = 255;
@@ -186,8 +189,9 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 player->buffering_state = BUFFER_END;
                 player->ufo_last_y = player->y;
 
-                particle_templates[USE_EFFECT].start_scale = 50;
+                particle_templates[USE_EFFECT].start_scale = 70;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 255, 255, 0);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -215,8 +219,9 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 player->buffering_state = BUFFER_END;
                 player->ufo_last_y = player->y;
 
-                particle_templates[USE_EFFECT].start_scale = 50;
+                particle_templates[USE_EFFECT].start_scale = 70;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 255, 31, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -249,8 +254,9 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 player->buffering_state = BUFFER_END;
                 player->ufo_last_y = player->y;
 
-                particle_templates[USE_EFFECT].start_scale = 50;
+                particle_templates[USE_EFFECT].start_scale = 70;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 56, 200, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -282,6 +288,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
+                    particle_templates[USE_EFFECT].trifading = TRUE;
 
                     set_particle_color(USE_EFFECT, 0, 255, 50);
                     particle_templates[USE_EFFECT].start_color.a = 0;
@@ -321,7 +328,8 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     }
 
                     particle_templates[USE_EFFECT].start_scale = 80;
-                    particle_templates[USE_EFFECT].end_scale = 0;
+                    particle_templates[USE_EFFECT].end_scale = 0; 
+                    particle_templates[USE_EFFECT].trifading = TRUE;
 
                     set_particle_color(USE_EFFECT, 255, 31, 255);
                     particle_templates[USE_EFFECT].start_color.a = 0;
@@ -350,10 +358,10 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                     flip_other_player(state.current_player);
                     player->left_ground = TRUE;
                     player->ufo_last_y = player->y;
-                    
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
+                    particle_templates[USE_EFFECT].trifading = TRUE;
 
                     set_particle_color(USE_EFFECT, 56, 200, 255);
                     particle_templates[USE_EFFECT].start_color.a = 0;
@@ -380,6 +388,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
+                    particle_templates[USE_EFFECT].trifading = TRUE;
 
                     set_particle_color(USE_EFFECT, 255, 255, 0);
                     particle_templates[USE_EFFECT].start_color.a = 0;
@@ -394,6 +403,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             if (!obj->activated[state.current_player]) {
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 255, 94, 0);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -410,6 +420,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             if (!obj->activated[state.current_player]) {
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 56, 200, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -449,6 +460,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
+                    particle_templates[USE_EFFECT].trifading = TRUE;
 
                     set_particle_color(USE_EFFECT, 255, 0, 0);
                     particle_templates[USE_EFFECT].start_color.a = 0;
@@ -469,6 +481,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 0, 255, 50);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -486,6 +499,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 255, 31, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -517,6 +531,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
+                    particle_templates[USE_EFFECT].trifading = TRUE;
 
                     set_particle_color(USE_EFFECT, 255, 127, 0);
                     particle_templates[USE_EFFECT].start_color.a = 0;
@@ -544,6 +559,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 // Use particles
                 particle_templates[USE_EFFECT].start_scale = 60;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 255, 255, 0);
                 particle_templates[USE_EFFECT].start_color.a = 255;
@@ -621,6 +637,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             if (!obj->activated[state.current_player] && !state.dual) {
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 255, 94, 0);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -649,6 +666,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
             if (!obj->activated[state.current_player]) {
                 particle_templates[USE_EFFECT].start_scale = 80;
                 particle_templates[USE_EFFECT].end_scale = 0;
+                particle_templates[USE_EFFECT].trifading = TRUE;
 
                 set_particle_color(USE_EFFECT, 56, 200, 255);
                 particle_templates[USE_EFFECT].start_color.a = 0;
@@ -698,6 +716,7 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
 
                     particle_templates[USE_EFFECT].start_scale = 80;
                     particle_templates[USE_EFFECT].end_scale = 0;
+                    particle_templates[USE_EFFECT].trifading = TRUE;
 
                     set_particle_color(USE_EFFECT, 56, 200, 255);
                     particle_templates[USE_EFFECT].start_color.a = 0;
@@ -1500,15 +1519,23 @@ void draw_end_wall() {
         spawn_particle(END_WALL_PARTICLES, level_info.wall_x, level_info.wall_y, NULL);
         draw_particles(END_WALL_PARTICLES);
         draw_particles(END_WALL_COLL_CIRCLE);
+        draw_particles(END_WALL_COLL_CIRCUNFERENCE);
         draw_particles(END_WALL_COMPLETE_CIRCLES);
+        draw_particles(END_WALL_FIREWORK);
+        draw_particles(END_WALL_TEXT_EFFECT);
 
         // Render rays
         draw_rays();
 
         if (completion_timer > 2) {
-            float text_scale = easeValue(ELASTIC_OUT, 0, 0.75f, complete_text_elapsed, COMPLETE_TEXT_IN_TIME, 0.6f);
+            float mult = 0.5625f * screen_factor_x;
+
+            float offset_x = (level_complete_texture->w / 2);
+            float offset_y = (level_complete_texture->h / 2);
+
+            float text_scale = easeValue(ELASTIC_OUT, 0, mult, complete_text_elapsed, COMPLETE_TEXT_IN_TIME, 0.6f);
             GRRLIB_SetHandle(level_complete_texture, level_complete_texture->w / 2, level_complete_texture->h / 2);
-            GRRLIB_DrawImg(screenWidth / 2 - (level_complete_texture->w / 2), screenHeight / 2 - (level_complete_texture->h / 2), level_complete_texture, 0, text_scale, text_scale, 0xffffffff);
+            GRRLIB_DrawImg(screenWidth / 2 - offset_x, screenHeight / 2 - offset_y, level_complete_texture, 0, text_scale, text_scale, 0xffffffff);
             complete_text_elapsed += dt;
         }
     }
@@ -1805,7 +1832,7 @@ void draw_all_object_layers() {
             if (is_layer0 && fade_edge) handle_special_fading(obj, calc_x, calc_y);
             
             // If saw, rotate
-            if (is_layer0 && objects[obj_id].is_saw) {
+            if (is_layer0 && objects[obj_id].is_saw && !state.paused) {
                 obj->rotation += ((obj->random & 1) ? -get_rotation_speed(obj) : get_rotation_speed(obj)) * dt;
             }
 

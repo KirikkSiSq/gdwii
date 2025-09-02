@@ -1020,7 +1020,9 @@ void full_init_variables() {
     set_particle_color(GLITTER_EFFECT, p1.r, p1.g, p1.b);
     set_particle_color(END_WALL_PARTICLES, p1.r, p1.g, p1.b);
     set_particle_color(END_WALL_COLL_CIRCLE, p1.r, p1.g, p1.b);
+    set_particle_color(END_WALL_COLL_CIRCUNFERENCE, p1.r, p1.g, p1.b);
     set_particle_color(END_WALL_COMPLETE_CIRCLES, p2.r, p2.g, p2.b);
+    set_particle_color(END_WALL_FIREWORK, p1.r, p1.g, p1.b);
     init_variables();
 }
 

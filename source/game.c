@@ -418,16 +418,24 @@ void draw_rays() {
 int rays_spawned = 0;
 float first_angle = 0;
 int circles_spawned = 0;
+int circunferences_spawned = 0;
 int handle_wall_cutscene() {
     if (completion_timer == 0) {
         completion_shake = TRUE;
         circles_spawned = 0;
         rays_spawned = 0;
+        circunferences_spawned = 0;
+        first_angle = 0;
         
         particle_templates[END_WALL_COLL_CIRCLE].end_scale = 400;
         particle_templates[END_WALL_COLL_CIRCLE].life = 0.5f;
         spawn_particle(END_WALL_COLL_CIRCLE, level_info.wall_x, level_info.wall_y, NULL);
+        spawn_particle(END_WALL_COLL_CIRCUNFERENCE, level_info.wall_x, level_info.wall_y, NULL);
+        circunferences_spawned++;
         PlayOgg(endStart_02_ogg, endStart_02_ogg_size, 0, OGG_ONE_TIME);
+    } else if (completion_timer <= 0.2 && circunferences_spawned < 5) {
+        spawn_particle(END_WALL_COLL_CIRCUNFERENCE, level_info.wall_x, level_info.wall_y, NULL);
+        circunferences_spawned++;
     }
 
     if (completion_timer > 0.2) {
@@ -457,14 +465,50 @@ int handle_wall_cutscene() {
     if (completion_timer > 2) {
         // Big circle
         if (circles_spawned == 0) {
+            float screen_middle_x = state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA / 2;
+            float screen_middle_y = state.camera_y + SCREEN_HEIGHT_AREA / 2;
+
             particle_templates[END_WALL_COLL_CIRCLE].end_scale = 400;
             particle_templates[END_WALL_COLL_CIRCLE].life = 0.5f;
+
+            spawn_particle(END_WALL_COLL_CIRCUNFERENCE, level_info.wall_x, level_info.wall_y, NULL); // Comes from wall
+            circunferences_spawned++;
+
             spawn_particle(END_WALL_COLL_CIRCLE, level_info.wall_x, level_info.wall_y, NULL); // Comes from wall
-            spawn_particle(END_WALL_COLL_CIRCLE, state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA / 2, state.camera_y + SCREEN_HEIGHT_AREA / 2, NULL); // Comes from complete text
+            spawn_particle(END_WALL_COLL_CIRCLE, screen_middle_x, screen_middle_y, NULL); // Comes from complete text
+
+            for (s32 i = 0; i < 120; i++) {
+                float x = random_float(screen_middle_x - 120 * screen_factor_x, screen_middle_x + 120 * screen_factor_x);
+                float y = random_float(screen_middle_y - 10, screen_middle_y + 10);
+                int color = random_int(0,1);
+                if (color) {
+                    set_particle_color(END_WALL_TEXT_EFFECT, p1.r, p1.g, p1.b);
+                } else {
+                    set_particle_color(END_WALL_TEXT_EFFECT, p2.r, p2.g, p2.b);
+                }
+
+                spawn_particle(END_WALL_TEXT_EFFECT, x, y, NULL);
+            }
+
             circles_spawned++;
         } else {
+            if (circunferences_spawned < 10) {
+                spawn_particle(END_WALL_COLL_CIRCUNFERENCE, level_info.wall_x, level_info.wall_y, NULL);
+                circunferences_spawned++;
+            }
+
+            // Fireworks
             if (completion_timer > 2 + (circles_spawned * 0.1)) {
-                spawn_particle(END_WALL_COMPLETE_CIRCLES, state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA / 2, state.camera_y + SCREEN_HEIGHT_AREA / 2, NULL); // Comes from complete text
+                float x = random_float(state.camera_x, state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA);
+                float y = random_float(state.camera_y, state.camera_y + SCREEN_HEIGHT_AREA);
+                spawn_particle(END_WALL_COMPLETE_CIRCLES, x, y, NULL);
+                
+                for (int i = 0; i < 6; i++) {
+                    particle_templates[END_WALL_FIREWORK].angle = random_float(0, 360);
+                    spawn_particle(END_WALL_FIREWORK, x, y, NULL);
+                    spawn_particle(END_WALL_FIREWORK, x, y, NULL);
+                }
+                
                 circles_spawned++;
             }
         }
