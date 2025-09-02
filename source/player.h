@@ -60,6 +60,8 @@ typedef struct {
 
     float ball_rotation_speed;
 
+    float cutscene_timer;
+
     int buffering_state;
 
     float time_since_ground;

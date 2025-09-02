@@ -90,8 +90,6 @@ typedef struct {
 
     bool paused;
 
-    float cutscene_timer;
-
     float level_progress;
     
     Particle particles[MAX_PARTICLES];

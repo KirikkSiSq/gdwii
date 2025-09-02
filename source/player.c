@@ -826,7 +826,7 @@ void run_player(Player *player) {
     
     player->time_since_ground += STEPS_DT;
 
-    if (state.cutscene_timer > 0) return;
+    if (player->cutscene_timer > 0) return;
 
     player->rotation = normalize_angle(player->rotation);
     
@@ -905,7 +905,7 @@ void run_player(Player *player) {
 }
 
 void anim_player_to_wall(Player *player) {
-    float t = CLAMP(easeValue(QUAD_IN, 0, 1, state.cutscene_timer, END_ANIMATION_TIME, 0), 0, 1);
+    float t = CLAMP(easeValue(QUAD_IN, 0, 1, player->cutscene_timer, END_ANIMATION_TIME, 0), 0, 1);
 
     // (1 - t) and powers
     float one_minus_t = 1.0f - t;
@@ -990,13 +990,14 @@ void handle_player(Player *player) {
 
     if (player->x >= level_info.wall_x - END_ANIMATION_X_START) {
         p1_trail = TRUE;
-        if (state.cutscene_timer == 0) {
+        if (player->cutscene_timer == 0) {
             player->cutscene_initial_player_x = player->x;
             player->cutscene_initial_player_y = player->y;
         }
         anim_player_to_wall(player);
-        state.cutscene_timer += STEPS_DT;
+        player->cutscene_timer += STEPS_DT;
         player->lerp_rotation += 415.3848f * STEPS_DT;
+        player->rotation = player->lerp_rotation;
         
         // End level
         if (player->x > level_info.wall_x) {
@@ -1064,12 +1065,12 @@ void init_variables() {
     memset(&state.player, 0, sizeof(Player));
     memset(&state.hitbox_trail_players, 0, sizeof(state.hitbox_trail_players));
     state.last_hitbox_trail = 0;
-    state.cutscene_timer = 0;
 
     state.dual = FALSE;
     state.dead = FALSE;
 
     Player *player = &state.player;
+    player->cutscene_timer = 0;
     player->width = 30;
     player->height = 30;
     state.speed = level_info.initial_speed;
