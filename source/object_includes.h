@@ -289,6 +289,11 @@
 #include "secretCoin_01_003_png.h"
 #include "secretCoin_01_004_png.h"
 
+#include "secretCoin_2_01_001_png.h"
+#include "secretCoin_2_01_002_png.h"
+#include "secretCoin_2_01_003_png.h"
+#include "secretCoin_2_01_004_png.h"
+
 #include "boost_01_001_png.h"
 #include "boost_02_001_png.h"
 #include "boost_03_001_png.h"

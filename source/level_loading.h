@@ -44,8 +44,8 @@ typedef struct {
     float ampl_scaling;             // the amplitude scaling for pulsing objects
     u8 transition_applied;          // the transition applied to the object
     bool toggled;                   // if its enabled or disabled
-    int width;
-    int height;
+    float width;
+    float height;
 
     // Slope
     unsigned char orientation;
@@ -136,6 +136,7 @@ struct LoadedLevelInfo {
     bool initial_dual;
     bool initial_upsidedown;
     bool level_is_empty;
+    bool level_is_custom;
 };
 
 #define BG_COUNT 7
@@ -185,7 +186,7 @@ extern GameObject *player_game_object;
 
 void free_game_object_list(GDGameObjectList *list);
 void free_game_object_array(GameObject **array, int count);
-int load_level(char *data);
+int load_level(char *data, bool is_custom);
 void unload_level();
 void reload_level();
 void reset_color_channels();

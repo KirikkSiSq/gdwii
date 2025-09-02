@@ -24,6 +24,8 @@
 GRRLIB_texImg *prev_tex = NULL;
 int prev_blending = GRRLIB_BLEND_ALPHA;
 
+GRRLIB_texImg *current_coin_texture[4];
+
 const int dual_gamemode_heights[GAMEMODE_COUNT] = {
     9,  // Cube
     10, // Ship
@@ -559,9 +561,13 @@ void handle_special_hitbox(Player *player, GameObject *obj, ObjectHitbox *hitbox
                 // Use particles
                 particle_templates[USE_EFFECT].start_scale = 60;
                 particle_templates[USE_EFFECT].end_scale = 0;
-                particle_templates[USE_EFFECT].trifading = TRUE;
+                particle_templates[USE_EFFECT].trifading = FALSE;
 
-                set_particle_color(USE_EFFECT, 255, 255, 0);
+                if (level_info.level_is_custom) {
+                    set_particle_color(USE_EFFECT, 255, 255, 255);
+                } else {
+                    set_particle_color(USE_EFFECT, 255, 255, 0);
+                }
                 particle_templates[USE_EFFECT].start_color.a = 255;
                 particle_templates[USE_EFFECT].end_color.a = 0;
 
@@ -1077,6 +1083,12 @@ void handle_pre_draw_object_particles(GameObject *obj, GDObjectLayer *layer) {
             break;
         case SECRET_COIN:
             if (!obj->activated[state.current_player]) {
+                if (level_info.level_is_custom) {
+                    set_particle_color(COIN_PARTICLES, 255, 255, 255);
+                } else {
+                    set_particle_color(COIN_PARTICLES, 255, 255, 0);
+                }
+                
                 spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
                 spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
                 spawn_particle(COIN_PARTICLES, obj->x - 2, obj->y, obj);
@@ -1235,7 +1247,7 @@ GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GameObject *obj, GDO
             break;
         case SECRET_COIN:
             int index = (frame_counter & 0b1100000) >> 5;
-            return object_images[SECRET_COIN][index];
+            return current_coin_texture[index];
         case BUSH_GROUND_SPIKE:
             return object_images[BUSH_GROUND_SPIKE][obj->random & 0b11];
     }
@@ -1245,7 +1257,27 @@ GRRLIB_texImg *get_randomized_texture(GRRLIB_texImg *image, GameObject *obj, GDO
 
 GRRLIB_texImg *get_coin_particle_texture() {
     int index = (frame_counter & 0b110000) >> 4;
-    return object_images[SECRET_COIN][index];
+    return current_coin_texture[index];
+}
+
+void load_coin_texture() {
+    for (s32 i = 0; i < NUM_COIN_FRAMES; i++) {
+        if (level_info.level_is_custom) {
+            current_coin_texture[i] = GRRLIB_LoadTexturePNG(user_coin_layer[i].texture);
+        } else {
+            current_coin_texture[i] = GRRLIB_LoadTexturePNG(secret_coin_layer[i].texture);
+        }
+        GRRLIB_SetHandle(current_coin_texture[i], current_coin_texture[i]->w / 2, current_coin_texture[i]->h / 2);
+    }
+}
+
+void unload_coin_texture() {
+    for (s32 i = 0; i < NUM_COIN_FRAMES; i++) {
+        if (current_coin_texture[i]) {
+            GRRLIB_FreeTexture(current_coin_texture[i]);
+            current_coin_texture[i] = NULL;
+        }
+    }
 }
 
 int get_opacity(GameObject *obj, float x) {

@@ -26,6 +26,7 @@ typedef struct {
     bool blending;
     bool lock_to_player;
     bool trifading;
+    int priority;
     float elapsed;
     int player_id;
 } Particle;
@@ -50,6 +51,7 @@ typedef struct {
     float rotationStartVariance;
     float rotationEnd;
     float rotationEndVariance;
+    int priority;
     float minRadius;
     float maxRadius;
     int texture_id;

@@ -1440,7 +1440,9 @@ void load_level_info(char *data, char *level_string) {
     }
 }
 
-int load_level(char *data) {
+int load_level(char *data, bool is_custom) {
+    level_info.level_is_custom = is_custom;
+
     char *level_string = decompress_level(data);
 
     if (level_string == NULL) {
@@ -1519,6 +1521,8 @@ int load_level(char *data) {
     reset_color_channels();
     set_color_channels();
 
+    load_coin_texture();
+
     printf("Finished loading level\n");
 
     return 0;
@@ -1553,6 +1557,8 @@ void unload_level() {
     memset(&state.particles, 0, sizeof(state.particles));
     free_sections();
     full_init_variables();
+
+    unload_coin_texture();
 }
 
 void reset_color_channels() {

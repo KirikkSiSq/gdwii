@@ -1067,7 +1067,13 @@ typedef struct {
 
 #define COMPLETE_TEXT_IN_TIME 0.5f
 
+#define NUM_COIN_FRAMES 4
+
 extern const struct ObjectLayer player_layer;
+
+extern const struct ObjectLayer secret_coin_layer[NUM_COIN_FRAMES];
+extern const struct ObjectLayer user_coin_layer[NUM_COIN_FRAMES];
+
 extern int current_fading_effect;
 extern bool p1_trail;
 
@@ -1090,6 +1096,9 @@ extern GRRLIB_texImg *ground;
 void update_beat();
 void draw_end_wall();
 void setup_dual();
+
+void load_coin_texture();
+void unload_coin_texture();
 
 void get_fade_vars(GameObject *obj, float x, int *fade_x, int *fade_y, float *fade_scale);
 int get_fade_value(float x, int right_edge);

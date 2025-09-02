@@ -27,6 +27,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_SQUARE
     },
     [SHIP_TRAIL] = {
@@ -46,6 +47,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_SQUARE
     },
     [HOLDING_SHIP_TRAIL] = {
@@ -65,6 +67,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_SQUARE
     },
     [SHIP_DRAG] = {
@@ -89,6 +92,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 70,
         .texture_id = PARTICLE_SQUARE
     }, 
     [ORB_PARTICLES] = {
@@ -113,6 +117,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 20,
         .maxRadius = 20,
+        .priority = 15,
         .texture_id = PARTICLE_SQUARE
     }, 
     [PAD_PARTICLES] = {
@@ -137,6 +142,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 15,
         .texture_id = PARTICLE_SQUARE
     }, 
     [GLITTER_EFFECT] = {
@@ -161,6 +167,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 70,
         .texture_id = PARTICLE_SQUARE
     },
     [PORTAL_PARTICLES] = {
@@ -185,6 +192,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 45,
         .maxRadius = 45,
+        .priority = 30,
         .texture_id = PARTICLE_SQUARE
     },
     [USE_EFFECT] = {
@@ -210,6 +218,7 @@ ParticleTemplate particle_templates[] = {
         .minRadius = 0,
         .maxRadius = 0,
         .trifading = TRUE,
+        .priority = 100,
         .texture_id = PARTICLE_CIRCLE
     },
     [ORB_HITBOX_EFFECT] = {
@@ -234,6 +243,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 70,
         .texture_id = PARTICLE_CIRCUNFERENCE
     },
     [P1_TRAIL] = {
@@ -258,6 +268,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_P1_TRAIL
     },
     [UFO_JUMP] = {
@@ -277,6 +288,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 70,
         .texture_id = PARTICLE_SQUARE
     },
     [UFO_TRAIL] = {
@@ -296,6 +308,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 70,
         .texture_id = PARTICLE_SQUARE
     },
     [DEATH_PARTICLES] = {
@@ -315,6 +328,7 @@ ParticleTemplate particle_templates[] = {
         .rotatePerSecond = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_SQUARE
     },
     [DEATH_CIRCLE] = {
@@ -339,6 +353,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_CIRCLE
     },
     [BREAKABLE_BRICK_PARTICLES] = {
@@ -363,6 +378,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 70,
         .texture_id = PARTICLE_SQUARE
     },
     [COIN_PARTICLES] = {
@@ -370,11 +386,11 @@ ParticleTemplate particle_templates[] = {
         .speed = 70, .speedVar = 10,
         .gravity_x = 0, .gravity_y = 0,
         .rel_gravity = FALSE,
-        .life = 0.45f, .lifeVar = 0.15f,
+        .life = 0.6f, .lifeVar = 0.15f,
         .start_scale = 0.15, .start_scaleVar = 0.1,
         .end_scale = 0, .end_scaleVar = 0,
         .start_color = {255,255,0,255},
-        .start_colorVar = {0,0,0,127},
+        .start_colorVar = {0,0,0,63},
         .end_color = {0,0,0,0},
         .end_colorVar = {0,0,0,0},
         .blending = TRUE,
@@ -387,6 +403,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 50,
         .texture_id = PARTICLE_SQUARE
     },
     [COIN_OBJ] = {
@@ -411,6 +428,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_COIN
     },
     [SPEED_PORTAL_AMBIENT] = {
@@ -435,6 +453,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 20,
         .texture_id = PARTICLE_SQUARE
     },
     [SPEEDUP] = {
@@ -459,6 +478,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_SQUARE
     },
     [DUAL_BALL_HITBOX_EFFECT] = {
@@ -484,6 +504,7 @@ ParticleTemplate particle_templates[] = {
         .minRadius = 0,
         .maxRadius = 0,
         .lock_to_player = TRUE,
+        .priority = 100,
         .texture_id = PARTICLE_CIRCUNFERENCE
     },
     [END_WALL_PARTICLES] = {
@@ -508,6 +529,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 150,
         .maxRadius = 250,
+        .priority = 100,
         .texture_id = PARTICLE_SQUARE
     },
     [END_WALL_COLL_CIRCLE] = {
@@ -532,6 +554,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_CIRCLE
     },
     [END_WALL_COLL_CIRCUNFERENCE] = {
@@ -556,6 +579,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_CIRCUNFERENCE
     },
     [END_WALL_COMPLETE_CIRCLES] = {
@@ -580,6 +604,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_CIRCLE
     },
     [END_WALL_FIREWORK] = {
@@ -604,6 +629,7 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_SQUARE
     },
     [END_WALL_TEXT_EFFECT] = {
@@ -628,98 +654,120 @@ ParticleTemplate particle_templates[] = {
         .rotationEndVariance = 0,
         .minRadius = 0,
         .maxRadius = 0,
+        .priority = 100,
         .texture_id = PARTICLE_SQUARE
     }
 };
+
+void add_particle(int i, int group_id, float x, float y, GameObject *parent_obj) {
+    ParticleTemplate *tpl = &particle_templates[group_id];
+    Particle *particles = state.particles;
+
+    float angle = tpl->angle + tpl->angleVar * random_float(-1, 1);
+    float speed = tpl->speed + tpl->speedVar * random_float(-1, 1);
+
+    angle = positive_fmod(angle, 360);
+
+    particles[i].velocity_angle = angle;
+    particles[i].velocity_magnitude = speed;
+    particles[i].rotate_per_second = tpl->rotatePerSecond + tpl->rotatePerSecondVariance * random_float(-1, 1);
+
+    float vx = cosf(DegToRad(angle)) * speed;
+    float vy = sinf(DegToRad(angle)) * speed;
+    
+    float radius = tpl->minRadius;
+    if (tpl->maxRadius > tpl->minRadius) {
+        radius += (tpl->maxRadius - tpl->minRadius) * random_float(0, 1);
+    }
+
+    float angled_var_x = tpl->sourcePosVarY * cosf(DegToRad(angle)) - tpl->sourcePosVarX * sinf(DegToRad(angle));
+    float angled_var_y = tpl->sourcePosVarY * sinf(DegToRad(angle)) + tpl->sourcePosVarX * cosf(DegToRad(angle));
+
+    float px = x + radius * cosf(DegToRad(angle)) + angled_var_x * random_float(-1, 1);
+    float py = y + radius * sinf(DegToRad(angle)) + angled_var_y * random_float(-1, 1);
+
+    float life = tpl->life + tpl->lifeVar * random_float(-1, 1);
+
+    ColorAlpha sc = tpl->start_color;
+    ColorAlpha scv = tpl->start_colorVar;
+    ColorAlpha ec = tpl->end_color;
+    ColorAlpha ecv = tpl->end_colorVar;
+
+    particles[i].group_id = group_id;
+    particles[i].x = px;
+    particles[i].y = py;
+    particles[i].vx = vx;
+    particles[i].vy = vy;
+    particles[i].ax = 0;
+    particles[i].ay = 0;
+    particles[i].gravity_x = tpl->gravity_x;
+    particles[i].gravity_y = tpl->gravity_y;
+    particles[i].life = life;
+    particles[i].elapsed = 0;
+
+    // Color interpolation
+    particles[i].start_color.r = sc.r + scv.r * random_float(-1, 1);
+    particles[i].start_color.g = sc.g + scv.g * random_float(-1, 1);
+    particles[i].start_color.b = sc.b + scv.b * random_float(-1, 1);
+    particles[i].start_color.a = sc.a + scv.a * random_float(-1, 1);
+    particles[i].end_color.r = ec.r + ecv.r * random_float(-1, 1);
+    particles[i].end_color.g = ec.g + ecv.g * random_float(-1, 1);
+    particles[i].end_color.b = ec.b + ecv.b * random_float(-1, 1);
+    particles[i].end_color.a = ec.a + ecv.a * random_float(-1, 1);
+
+    particles[i].color = particles[i].start_color;
+    particles[i].color_delta.r = (particles[i].end_color.r - particles[i].start_color.r) / life;
+    particles[i].color_delta.g = (particles[i].end_color.g - particles[i].start_color.g) / life;
+    particles[i].color_delta.b = (particles[i].end_color.b - particles[i].start_color.b) / life;
+    particles[i].color_delta.a = (particles[i].end_color.a - particles[i].start_color.a) / life;
+
+    // Scale interpolation
+    particles[i].start_scale = (tpl->start_scale + tpl->start_scaleVar * random_float(-1, 1)) * screen_factor_y;
+    particles[i].end_scale = (tpl->end_scale + tpl->end_scaleVar * random_float(-1, 1)) * screen_factor_y;
+    particles[i].scale = particles[i].start_scale;
+    particles[i].scale_delta = (particles[i].end_scale - particles[i].start_scale) / life;
+
+    particles[i].blending = tpl->blending;
+    particles[i].active = TRUE;
+    particles[i].rel_gravity = tpl->rel_gravity;
+    particles[i].parent_obj = parent_obj;
+
+    particles[i].trifading = tpl->trifading;
+
+    particles[i].texture_id = tpl->texture_id;
+    particles[i].lock_to_player = tpl->lock_to_player;
+    particles[i].player_id = state.current_player;
+
+    particles[i].priority = tpl->priority;
+
+    particles[i].rotation = 0;
+
+    if (group_id == P1_TRAIL) particles[i].rotation = state.player.lerp_rotation;
+}
 
 void spawn_particle(int group_id, float x, float y, GameObject *parent_obj) {
     if (state.paused) return;
 
     ParticleTemplate *tpl = &particle_templates[group_id];
     Particle *particles = state.particles;
+
+    float priority = tpl->priority;
+    int lowest = priority;
+    int lowest_index = -1;
+
     for (int i = 0; i < MAX_PARTICLES; i++) {
         if (!particles[i].active) {
-            float angle = tpl->angle + tpl->angleVar * random_float(-1, 1);
-            float speed = tpl->speed + tpl->speedVar * random_float(-1, 1);
-
-            angle = positive_fmod(angle, 360);
-
-            particles[i].velocity_angle = angle;
-            particles[i].velocity_magnitude = speed;
-            particles[i].rotate_per_second = tpl->rotatePerSecond + tpl->rotatePerSecondVariance * random_float(-1, 1);
-
-            float vx = cosf(DegToRad(angle)) * speed;
-            float vy = sinf(DegToRad(angle)) * speed;
-            
-            float radius = tpl->minRadius;
-            if (tpl->maxRadius > tpl->minRadius) {
-                radius += (tpl->maxRadius - tpl->minRadius) * random_float(0, 1);
-            }
-
-            float angled_var_x = tpl->sourcePosVarY * cosf(DegToRad(angle)) - tpl->sourcePosVarX * sinf(DegToRad(angle));
-            float angled_var_y = tpl->sourcePosVarY * sinf(DegToRad(angle)) + tpl->sourcePosVarX * cosf(DegToRad(angle));
-
-            float px = x + radius * cosf(DegToRad(angle)) + angled_var_x * random_float(-1, 1);
-            float py = y + radius * sinf(DegToRad(angle)) + angled_var_y * random_float(-1, 1);
-
-            float life = tpl->life + tpl->lifeVar * random_float(-1, 1);
-
-            ColorAlpha sc = tpl->start_color;
-            ColorAlpha scv = tpl->start_colorVar;
-            ColorAlpha ec = tpl->end_color;
-            ColorAlpha ecv = tpl->end_colorVar;
-
-            particles[i].group_id = group_id;
-            particles[i].x = px;
-            particles[i].y = py;
-            particles[i].vx = vx;
-            particles[i].vy = vy;
-            particles[i].ax = 0;
-            particles[i].ay = 0;
-            particles[i].gravity_x = tpl->gravity_x;
-            particles[i].gravity_y = tpl->gravity_y;
-            particles[i].life = life;
-            particles[i].elapsed = 0;
-
-            // Color interpolation
-            particles[i].start_color.r = sc.r + scv.r * random_float(-1, 1);
-            particles[i].start_color.g = sc.g + scv.g * random_float(-1, 1);
-            particles[i].start_color.b = sc.b + scv.b * random_float(-1, 1);
-            particles[i].start_color.a = sc.a + scv.a * random_float(-1, 1);
-            particles[i].end_color.r = ec.r + ecv.r * random_float(-1, 1);
-            particles[i].end_color.g = ec.g + ecv.g * random_float(-1, 1);
-            particles[i].end_color.b = ec.b + ecv.b * random_float(-1, 1);
-            particles[i].end_color.a = ec.a + ecv.a * random_float(-1, 1);
-
-            particles[i].color = particles[i].start_color;
-            particles[i].color_delta.r = (particles[i].end_color.r - particles[i].start_color.r) / life;
-            particles[i].color_delta.g = (particles[i].end_color.g - particles[i].start_color.g) / life;
-            particles[i].color_delta.b = (particles[i].end_color.b - particles[i].start_color.b) / life;
-            particles[i].color_delta.a = (particles[i].end_color.a - particles[i].start_color.a) / life;
-
-            // Scale interpolation
-            particles[i].start_scale = (tpl->start_scale + tpl->start_scaleVar * random_float(-1, 1)) * screen_factor_y;
-            particles[i].end_scale = (tpl->end_scale + tpl->end_scaleVar * random_float(-1, 1)) * screen_factor_y;
-            particles[i].scale = particles[i].start_scale;
-            particles[i].scale_delta = (particles[i].end_scale - particles[i].start_scale) / life;
-
-            particles[i].blending = tpl->blending;
-            particles[i].active = TRUE;
-            particles[i].rel_gravity = tpl->rel_gravity;
-            particles[i].parent_obj = parent_obj;
-
-            particles[i].trifading = tpl->trifading;
-
-            particles[i].texture_id = tpl->texture_id;
-            particles[i].lock_to_player = tpl->lock_to_player;
-            particles[i].player_id = state.current_player;
-
-            particles[i].rotation = 0;
-
-            if (group_id == P1_TRAIL) particles[i].rotation = state.player.lerp_rotation;
-
-            break;
+            add_particle(i, group_id, x, y, parent_obj);
+            return;
+        } else if (particles[i].priority < priority && particles[i].priority < lowest) {
+            // Set as new lowest priority
+            lowest = particles[i].priority;
+            lowest_index = i;
         }
+    }
+    // If all full, replace lowest priority
+    if (lowest_index >= 0) {
+        add_particle(lowest_index, group_id, x, y, parent_obj);
     }
 }
 

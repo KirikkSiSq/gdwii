@@ -156,7 +156,7 @@ void start_level(){
         update_input();
         VIDEO_WaitVSync();
     }
-    int code = load_level((char *) levels[level_id].data_ptr);
+    int code = load_level((char *) levels[level_id].data_ptr, FALSE);
     if (!code) {
         exit_menu = true;
         GRRLIB_FreeTexture(menu_arrow);
@@ -467,7 +467,7 @@ int sdcard_levels() {
                 }
                 
                 char *level = read_file(sd_level_paths[level_id].name, &outsize);
-                int code = load_level(level);
+                int code = load_level(level, TRUE);
                 free(level);
 
                 if (!code) {
