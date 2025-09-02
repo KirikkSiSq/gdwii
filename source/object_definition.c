@@ -10881,7 +10881,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 08 02
@@ -10898,7 +10898,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 08 03
@@ -10915,7 +10915,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 08 04
@@ -10932,7 +10932,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 08 05
@@ -10949,7 +10949,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 08 06
@@ -10966,7 +10966,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 08 07
@@ -10983,7 +10983,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 08 08
@@ -11000,7 +11000,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 08 09
@@ -11017,7 +11017,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 01
@@ -11034,7 +11034,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 02
@@ -11051,7 +11051,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 03
@@ -11068,7 +11068,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 04
@@ -11085,7 +11085,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 05
@@ -11102,7 +11102,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 06
@@ -11119,7 +11119,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 07
@@ -11136,7 +11136,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 08
@@ -11153,7 +11153,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 09 09
@@ -11170,7 +11170,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 01
@@ -11187,7 +11187,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 02
@@ -11204,7 +11204,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 03
@@ -11221,7 +11221,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 04
@@ -11238,7 +11238,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 05
@@ -11255,7 +11255,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 06
@@ -11272,7 +11272,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 07
@@ -11289,7 +11289,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 08
@@ -11306,7 +11306,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 10 09
@@ -11323,7 +11323,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 01
@@ -11340,7 +11340,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 02
@@ -11357,7 +11357,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 03
@@ -11374,7 +11374,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 04
@@ -11391,7 +11391,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 05
@@ -11408,7 +11408,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 06
@@ -11425,7 +11425,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 07
@@ -11442,7 +11442,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 08
@@ -11459,7 +11459,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 11 09
@@ -11476,7 +11476,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 01
@@ -11493,7 +11493,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 02
@@ -11510,7 +11510,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 03
@@ -11527,7 +11527,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 04
@@ -11544,7 +11544,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 05
@@ -11561,7 +11561,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 06
@@ -11578,7 +11578,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 07
@@ -11595,7 +11595,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 08
@@ -11612,7 +11612,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 12 09
@@ -11629,7 +11629,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
         .hitbox = no_hitbox,
         .spritesheet_layer = SHEET_BLOCKS,
         .def_zlayer = LAYER_B2,
-        .def_zorder = -7,
+        .def_zorder = -6,
         .num_layers = 1
     },
     { // Persp 13 01
