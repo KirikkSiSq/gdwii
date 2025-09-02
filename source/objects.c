@@ -1305,6 +1305,8 @@ int get_opacity(GameObject *obj, float x) {
         case COLORED_PILLAR:
         case COLORED_SLOPE_45:
         case COLORED_SLOPE_22_66:
+        case COLOR_SLOPE_45_NOOUT:
+        case COLOR_SLOPE_22_66_NOOUT:
             bool blending = channels[obj->detail_col_channel].blending;
             if (!blending && obj->transition_applied == FADE_NONE) opacity = 255;
             break;

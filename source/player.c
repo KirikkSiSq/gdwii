@@ -712,10 +712,11 @@ void run_camera() {
         state.camera_y = ease_out(state.camera_y, state.camera_intended_y, 0.02f);
         if (completion_shake) {
             state.camera_x = (level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA)) + 3.f * random_float(-1, 1);
-            state.camera_y = (level_info.wall_y - (SCREEN_HEIGHT_AREA / 2)) + 3.f * random_float(-1, 1);
+            state.camera_y = (state.camera_y_lerp) + 3.f * random_float(-1, 1);
+        } else {
+            state.camera_y_lerp = state.camera_y;
+            state.intermediate_camera_y = state.camera_y;
         }
-        state.camera_y_lerp = state.camera_y;
-        state.intermediate_camera_y = state.camera_y;
     }
 }
 
