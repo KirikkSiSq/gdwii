@@ -484,7 +484,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
                 .x_offset = 0,
                 .y_offset = -50,
                 .col_channel = P1,
-                .zlayer_offset = 0,
+                .zlayer_offset = 3,
                 .color_type = COLOR_DETAIL,
                 .texture = rod_ball_01_001_png
             },
@@ -492,7 +492,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
                 .x_offset = 0,
                 .y_offset = -50,
                 .col_channel = P1,
-                .zlayer_offset = 0,
+                .zlayer_offset = 3,
                 .color_type = COLOR_DETAIL,
                 .texture = rod_ball_02_001_png
             },
@@ -500,7 +500,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
                 .x_offset = 0,
                 .y_offset = -50,
                 .col_channel = P1,
-                .zlayer_offset = 0,
+                .zlayer_offset = 3,
                 .color_type = COLOR_DETAIL,
                 .texture = rod_ball_03_001_png
             }
@@ -524,7 +524,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
                 .x_offset = 0,
                 .y_offset = -40,
                 .col_channel = P1,
-                .zlayer_offset = 0,
+                .zlayer_offset = 3,
                 .color_type = COLOR_DETAIL,
                 .texture = rod_ball_01_001_png
             }
@@ -548,7 +548,7 @@ const ObjectDefinition objects[OBJECT_COUNT] = {
                 .x_offset = 0,
                 .y_offset = -30,
                 .col_channel = P1,
-                .zlayer_offset = 0,
+                .zlayer_offset = 3,
                 .color_type = COLOR_DETAIL,
                 .texture = rod_ball_01_001_png
             }
