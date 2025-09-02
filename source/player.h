@@ -77,6 +77,10 @@ typedef struct {
     float cutscene_initial_player_x;
     float cutscene_initial_player_y;
 
+    int slope_slide_coyote_time;
+
+    SlopeData coyote_slope;
+
     SlopeData slope_data;
 } Player;
 

@@ -389,12 +389,18 @@ void cube_gamemode(Player *player) {
         spawn_particle(CUBE_DRAG, getLeft(player) + 4, (player->upside_down ? getTop(player) - 2 : getBottom(player) + 2), NULL);
     }
 
-    if ((player->slope_data.slope || player->on_ground) && (state.input.holdJump)) {
-        if (player->slope_data.slope) {
+    SlopeData slope_data = player->slope_data;
+
+    // If not currently on slope, look at the last frame
+    if (!player->slope_data.slope && player->slope_slide_coyote_time) {
+        slope_data = player->coyote_slope;
+    }
+    if ((slope_data.slope || player->on_ground) && (state.input.holdJump)) {
+        if (slope_data.slope) {
             // Slope jump
-            int orient = grav_slope_orient(player->slope_data.slope, player);
+            int orient = grav_slope_orient(slope_data.slope, player);
             if (orient == ORIENT_NORMAL_UP || orient == ORIENT_UD_UP) {
-                float time = clampf(10 * (player->timeElapsed - player->slope_data.elapsed), 0.4f, 1.0f);
+                float time = clampf(10 * (player->timeElapsed - slope_data.elapsed), 0.4f, 1.0f);
                 set_p_velocity(player, 0.25f * time * slopeHeights[state.speed] + cube_jump_heights[state.speed]);
             } else {
                 set_p_velocity(player, cube_jump_heights[state.speed]);
@@ -897,6 +903,15 @@ void run_player(Player *player) {
         player->y = state.ceiling_y - (player->height / 2) - ((player->gamemode == GAMEMODE_WAVE) ? (player->mini ? 3 : 5) : 0);;
     } 
     
+    if (player->slope_slide_coyote_time) {
+        player->slope_slide_coyote_time--;
+        if (!player->slope_slide_coyote_time) {
+            player->coyote_slope.slope = NULL;
+            player->coyote_slope.elapsed = 0;
+            player->coyote_slope.snapDown = FALSE;
+        }
+    }
+
     if (player->slope_data.slope) {
         slope_calc(player->slope_data.slope, player);
     }
@@ -1669,6 +1684,8 @@ void slope_calc(GameObject *obj, Player *player) {
             //printf("%d - vel %.2f orig %.2f time %.2f elapsed %.2f %.2f y %.2f obj_y %.2f\n", state.current_player, -vel, -orig, time, player->timeElapsed, player->slope_data.elapsed, player->y, obj->y);
             player->vel_y = vel;
             player->inverse_rotation = TRUE;
+            player->coyote_slope = player->slope_data;
+            player->slope_slide_coyote_time = 2;
             clear_slope_data(player);
         }
     } else if (orientation == ORIENT_NORMAL_DOWN) { // Normal - down
@@ -1729,6 +1746,8 @@ void slope_calc(GameObject *obj, Player *player) {
             //printf("%d - vel %.2f orig %.2f time %.2f elapsed %.2f %.2f y %.2f obj_y %.2f\n", state.current_player, -vel, -orig, time, player->timeElapsed, player->slope_data.elapsed, player->y, obj->y);
 
             player->inverse_rotation = TRUE;
+            player->coyote_slope = player->slope_data;
+            player->slope_slide_coyote_time = 2;
             clear_slope_data(player);
         }
     } else if (orientation == ORIENT_UD_DOWN) { // Upside down - down
