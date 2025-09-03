@@ -1822,6 +1822,8 @@ void draw_all_object_layers() {
             draw_particles(UFO_JUMP);
             draw_particles(UFO_TRAIL);
             draw_particles(DUAL_BALL_HITBOX_EFFECT);
+            draw_particles(P1_TRAIL);
+            
             if (death_timer <= 0) {
                 trail = trail_p1;
                 wave_trail = wave_trail_p1;

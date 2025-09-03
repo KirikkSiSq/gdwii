@@ -1428,8 +1428,6 @@ void draw_player(Player *player) {
 
     GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
 
-    draw_particles(P1_TRAIL);
-
     float scale = (player->mini) ? 0.6f : 1.f;
 
     switch (player->gamemode) {
