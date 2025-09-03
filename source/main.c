@@ -84,8 +84,6 @@ char launch_dir[256] = SDCARD_FOLDER;
 float ir_x;
 float ir_y;
 
-
-
 void draw_game() {
     draw_background(state.background_x / 8, -(state.camera_y / 8) + 416);
 

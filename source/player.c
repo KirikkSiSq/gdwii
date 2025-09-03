@@ -1151,16 +1151,26 @@ void init_variables() {
             state.camera_intended_y = -95.f;
     }
     
-    // Set camera vertical pos
-    state.camera_y = state.camera_intended_y;
-    state.camera_y_lerp = state.camera_y;
-    state.intermediate_camera_y = state.camera_y;
-
     if (level_info.initial_dual) {
         state.dual = TRUE;
         state.dual_portal_y = 0.f;
         setup_dual();
     }
+
+    // Set camera vertical pos
+    state.camera_y = state.camera_intended_y;
+    state.camera_y_lerp = state.camera_y;
+    state.intermediate_camera_y = state.camera_y;
+
+    float playable_height = state.ceiling_y - state.ground_y;
+    float calc_height = 0;
+
+    if (state.player.gamemode != GAMEMODE_CUBE || state.dual) {
+        calc_height = (SCREEN_HEIGHT_AREA - playable_height) / 2;
+    }
+
+    state.ground_y_gfx = calc_height;
+
 }
 
 void handle_death() {
