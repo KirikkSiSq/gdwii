@@ -787,6 +787,7 @@ void fade_in_level() {
         if (opacity < 0) opacity = 0;
         
         while (accumulator >= STEPS_DT) {
+            update_percentage();
             handle_objects();
             update_particles();
             accumulator -= STEPS_DT;
