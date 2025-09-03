@@ -149,13 +149,6 @@ int paused_loop() {
 }
 
 int game_loop() {
-    set_camera_x(15 - CAMERA_X_OFFSET);
-    draw_game();
-    fade_in_level();
-
-    // Wait 0.5 seconds before starting first attempt
-    wait_initial_time();
-
     size_t size;
     if (level_info.custom_song_id >= 0) {
         current_song_pointer = load_user_song(level_info.custom_song_id, &size);
@@ -164,8 +157,18 @@ int game_loop() {
     }
 
     if (current_song_pointer) {
-        MP3Player_SetSeconds(level_info.song_offset);
-        MP3Player_PlayBuffer(current_song_pointer, size, seek_filter);
+        MP3Player_PreloadOffset(current_song_pointer, size, level_info.song_offset);
+    }
+    
+    set_camera_x(15 - CAMERA_X_OFFSET);
+    draw_game();
+    fade_in_level();
+
+    // Wait 0.5 seconds before starting first attempt
+    wait_initial_time();
+    
+    if (current_song_pointer) {
+        MP3Player_PlayBuffer(current_song_pointer, size, NULL);
     }
 
     init_input_buffer();
@@ -277,7 +280,7 @@ int game_loop() {
                 if (current_song_pointer) {
                     MP3Player_Reset();
                     MP3Player_SetSeconds(level_info.song_offset);
-                    MP3Player_PlayBuffer(current_song_pointer, size, seek_filter);
+                    MP3Player_PlayBuffer(current_song_pointer, size, NULL);
                     MP3Player_Volume(255);
                 }
                 update_input();

@@ -409,6 +409,14 @@ int menu_loop() {
         GRRLIB_FreeTexture(difficulty_faces[i]);
     }
     if (menuLoop) free(menuLoop);
+    
+    if (level_info.song_offset > 0) {
+        int textOffset = (strlen("Loading...") * 18 * 0.75);
+        GRRLIB_Printf(screenWidth - textOffset - 30 * 2, screenHeight - 30, font, RGBA(255,255,255,255), 0.75, "Loading...");
+    }
+
+    GRRLIB_Render();
+    GRRLIB_Render();
 
     return exit_code;
 }

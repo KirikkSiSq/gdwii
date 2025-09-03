@@ -29,6 +29,7 @@ static s32 have_samples = 0;
 static u32 mp3_volume = 255;
 static volatile float mp3_amplitude = 0.0f;
 static volatile int paused = FALSE;
+static volatile int preloaded = FALSE;
 
 static int frames_to_skip = 0; // ~1153 frames
 static int skipped = 0;
@@ -89,6 +90,9 @@ static void* StreamPlay(void *);
 static u8 StreamPlay_Stack[STACKSIZE];
 static lwp_t hStreamPlay;
 static lwpq_t thQueue;
+
+static struct mad_stream Stream;
+static struct mad_frame Frame;
 
 static int mp3_voice = 1;  // Default voice is 1, but changeable
 
@@ -292,6 +296,7 @@ void MP3Player_Stop(void)
 	skipped = 0;
 	frames_to_skip = 0;
 	memset(&cached_start,0,sizeof(cached_start));
+	preloaded = FALSE;
     MP3Player_Unpause();
 	MP3Player_Reset();
 }
@@ -313,8 +318,6 @@ static void *StreamPlay(void *arg)
 {
 	bool atend;
 	u8 *GuardPtr = NULL;
-	struct mad_stream Stream;
-	struct mad_frame Frame;
 	struct mad_synth Synth;
 	mad_timer_t Timer;
 	EQState eqs[2];
@@ -335,8 +338,10 @@ static void *StreamPlay(void *arg)
 	AUDIO_RegisterDMACallback(DataTransferCallback);
 #endif
 
-	mad_stream_init(&Stream);
-	mad_frame_init(&Frame);
+	if (!preloaded)  {
+		mad_stream_init(&Stream);
+		mad_frame_init(&Frame);
+	}
 	mad_synth_init(&Synth);
 	mad_timer_reset(&Timer);
 
@@ -596,6 +601,70 @@ bool seek_filter(struct mad_stream *stream, struct mad_frame *frame) {
     } else {
         return false;
     }
+}
+
+void MP3Player_PreloadOffset(const void *buffer, s32 len, float seconds) {
+	MP3Player_SetSeconds(seconds);
+	if (seconds == 0) return;
+	
+	rambuffer.buf_addr = buffer;
+	rambuffer.len = len;
+	rambuffer.pos = 0;
+
+	mp3cb_data = &rambuffer;
+	mp3read = _mp3ramcopy;
+
+	mad_stream_init(&Stream);
+	mad_frame_init(&Frame);
+	
+	u8 *GuardPtr = NULL;
+
+	bool exit = FALSE;
+	bool atend = FALSE;
+	while (!exit && !atend) {
+		if ((Stream.buffer == NULL || Stream.error == MAD_ERROR_BUFLEN)) {
+			u8 *ReadStart;
+			s32 ReadSize, Remaining;
+
+			if (Stream.next_frame != NULL) {
+				Remaining = Stream.bufend - Stream.next_frame;
+				memmove(InputBuffer, Stream.next_frame, Remaining);
+				ReadStart = InputBuffer + Remaining;
+				ReadSize = DATABUFFER_SIZE - Remaining;
+			} else {
+				ReadSize = DATABUFFER_SIZE;
+				ReadStart = InputBuffer;
+				Remaining = 0;
+			}
+
+			ReadSize = mp3read(mp3cb_data, ReadStart, ReadSize);
+			if (ReadSize <= 0) {
+				GuardPtr = ReadStart;
+				memset(GuardPtr, 0, MAD_BUFFER_GUARD);
+				ReadSize = MAD_BUFFER_GUARD;
+				atend = true;
+			}
+
+			mad_stream_buffer(&Stream, InputBuffer, ReadSize + Remaining);
+		}
+		
+		while (!mad_frame_decode(&Frame, &Stream)) {
+			if (seek_filter(&Stream, &Frame)) {
+				if (skipped == frames_to_skip && !cached_start.valid) {
+					cached_start.frame_size = Stream.bufend - Stream.this_frame;
+					memcpy(cached_start.frame_data, Stream.this_frame, cached_start.frame_size);
+					cached_start.valid = true;
+					struct _rambuffer *rb = (struct _rambuffer *)mp3cb_data;
+					s32 remaining_bytes = Stream.bufend - Stream.this_frame;
+					cached_start.byte_offset = rb->pos - remaining_bytes;
+					exit = TRUE;
+					break;
+				}
+				continue;
+			}
+		}
+	}
+	preloaded = TRUE;
 }
 
 

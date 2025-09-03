@@ -17,6 +17,7 @@ s32 MP3Player_PlayBuffer(const void *buffer,s32 len,bool (*filterfunc)(struct ma
 s32 MP3Player_PlayFile(void *cb_data,s32 (*reader)(void *,void *,s32),bool (*filterfunc)(struct mad_stream *,struct mad_frame *));
 float MP3Player_GetAmplitude(void);
 void MP3Player_SetSeconds(float seconds);
+void MP3Player_PreloadOffset(const void *buffer, s32 len, float seconds);
 void MP3Player_Pause();
 void MP3Player_Unpause();
 bool seek_filter(struct mad_stream *stream, struct mad_frame *frame);

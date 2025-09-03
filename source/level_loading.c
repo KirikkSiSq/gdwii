@@ -1557,7 +1557,6 @@ void unload_level() {
     memset(&state.particles, 0, sizeof(state.particles));
     free_sections();
     full_init_variables();
-
     unload_coin_texture();
 }
 
@@ -1621,13 +1620,15 @@ void set_color_channels() {
                 break;
 
             default:
-                channels[id].color.r = colorChannel.fromRed;
-                channels[id].color.g = colorChannel.fromGreen;
-                channels[id].color.b = colorChannel.fromBlue;
-                channels[id].blending = colorChannel.blending;
+                if (id < COL_CHANNEL_COUNT) {
+                    channels[id].color.r = colorChannel.fromRed;
+                    channels[id].color.g = colorChannel.fromGreen;
+                    channels[id].color.b = colorChannel.fromBlue;
+                    channels[id].blending = colorChannel.blending;
 
-                if (colorChannel.playerColor == 1) channels[id].color = p1;
-                if (colorChannel.playerColor == 2) channels[id].color = p2;
+                    if (colorChannel.playerColor == 1) channels[id].color = p1;
+                    if (colorChannel.playerColor == 2) channels[id].color = p2;
+                }
         }
     }
 }
