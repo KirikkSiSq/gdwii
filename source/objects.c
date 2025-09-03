@@ -1578,7 +1578,7 @@ void draw_end_wall() {
     float calc_y =  positive_fmod(state.camera_y * SCALE, BLOCK_SIZE_PX) + screenHeight;  
     GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
     GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
-    if (calc_x < screenWidth + 20) {
+    if (level_info.wall_y > 0) {
         for (s32 j = 0; j < objects[CHECKER_EDGE].num_layers; j++) {
             GRRLIB_texImg *image = object_images[CHECKER_EDGE][j];
             int width = image->w;
