@@ -8,6 +8,7 @@
 #define SCREEN_WIDTH_AREA ((screenWidth / BLOCK_SIZE_PX) * 30) 
 #define WIDTH_ADJUST_AREA ((widthAdjust / BLOCK_SIZE_PX) * 30)
 #define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
+#define CAMERA_X_OFFSET (WIDTH_ADJUST_AREA - 4)
 
 #define MAX_LEVEL_HEIGHT 2400.f
 
@@ -122,14 +123,17 @@ extern const float player_speeds[SPEED_COUNT];
 extern GRRLIB_texImg *trail_tex;
 void anim_player_to_wall(Player *player);
 void handle_death();
+
+void set_camera_x(float x);
 void init_variables();
 void full_init_variables();
+float get_camera_x_scroll_pos();
+
 void load_icons();
 void unload_icons();
 void draw_player(Player *player);
 void handle_mirror_transition();
 void handle_player(Player *player);
-void handle_completion();
 void set_p_velocity(Player *player, float vel);
 GRRLIB_texImg *get_p1_trail_tex();
 float slope_angle(GameObject *obj, Player *player);

@@ -346,7 +346,11 @@
         "custom_mp3player.h": "c",
         "bg_05_png.h": "c",
         "g_05_png.h": "c",
-        "menu.h": "c"
+        "menu.h": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "ranges": "c",
+        "span": "c"
     },
     "cmake.ignoreCMakeListsMissing": true
 }

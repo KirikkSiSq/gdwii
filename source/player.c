@@ -654,13 +654,17 @@ void wave_gamemode(Player *player) {
 void run_camera() {
     Player *player = &state.player;
 
-    // Cap at camera_x
-    if (completion_shake || state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x) {
-        state.camera_x = level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA);
-    } else {
-        state.camera_x += player->vel_x * STEPS_DT;
-        state.ground_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
-        state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
+    float calc_x = ((player->x - state.camera_x) * SCALE) - widthAdjust;
+
+    if (calc_x >= get_camera_x_scroll_pos()) {
+        // Cap at camera_x
+        if (completion_shake || state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x) {
+            state.camera_x = level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA);
+        } else {
+            state.camera_x += player->vel_x * STEPS_DT;
+            state.ground_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
+            state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
+        }
     }
 
     float playable_height = state.ceiling_y - state.ground_y;
@@ -673,7 +677,7 @@ void run_camera() {
     state.ground_y_gfx = ease_out(state.ground_y_gfx, calc_height, 0.02f);
 
     if (level_info.wall_y == 0) {
-        if (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x - (11 * 30.f)) {
+        if (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x - (9 * 30.f)) {
             level_info.wall_y = MAX(state.camera_y, -30) + (SCREEN_HEIGHT_AREA / 2);
         }
     }
@@ -1015,9 +1019,9 @@ void handle_player(Player *player) {
             player->cutscene_initial_player_y = player->y;
         }
         anim_player_to_wall(player);
-        player->cutscene_timer += STEPS_DT;
-        player->lerp_rotation += 415.3848f * STEPS_DT;
+        player->lerp_rotation += easeValue(EASE_IN, 0, 415.3848f, player->cutscene_timer, 0.5f, 2.f) * STEPS_DT;
         player->rotation = player->lerp_rotation;
+        player->cutscene_timer += STEPS_DT;
         
         // End level
         if (player->x > level_info.wall_x) {
@@ -1036,6 +1040,20 @@ void handle_player(Player *player) {
 
     if (state.hitbox_display == 2) add_new_hitbox(player);
 
+}
+
+void set_camera_x(float x) {
+    state.camera_x = x;
+    state.camera_x_lerp = x;
+}
+
+float get_camera_x_scroll_pos() {
+    float factor_x;
+    if (screenWidth <= 640)
+        factor_x = 1.0f;
+    else
+        factor_x = 1.0f + 0.00535714f * (screenWidth - 640);
+    return 120 * factor_x;
 }
 
 void full_init_variables() {
@@ -1058,14 +1076,8 @@ void init_variables() {
     MotionTrail_Init(&wave_trail_p2, 3.f, 3, 10.0f, TRUE, p1, trail_tex);
     MotionTrail_StopStroke(&trail_p1);
     MotionTrail_StopStroke(&trail_p2);
-    float factor_x;
-    if (screenWidth <= 640)
-        factor_x = 1.0f;
-    else
-        factor_x = 1.0f + 0.00535714f * (screenWidth - 640);
 
-    state.camera_x = -120 * factor_x;
-    state.camera_x_lerp = -120 * factor_x;
+    set_camera_x(-get_camera_x_scroll_pos());
     state.camera_y = -90;
     state.camera_y_lerp = -90;
     state.intermediate_camera_y = -90;
@@ -1088,7 +1100,8 @@ void init_variables() {
 
     state.dual = FALSE;
     state.dead = FALSE;
-
+    state.mirror_mult = 1;
+    
     Player *player = &state.player;
     player->cutscene_timer = 0;
     player->width = 30;
@@ -1155,12 +1168,6 @@ void handle_death() {
 
     MP3Player_Volume(0);
     PlayOgg(explode_11_ogg, explode_11_ogg_size, 0, OGG_ONE_TIME);
-}
-
-void handle_completion() {
-    for (s32 i = 0; i < 240; i++) {
-        draw_game();
-    }
 }
 
 void load_icons() {

@@ -122,6 +122,8 @@ int paused_loop() {
     while (1) {
         start_frame = gettime();
         update_input();
+        draw_game();
+
         if (state.input.pressedMinusOrR) {
             MP3Player_Stop();
             MP3Player_Volume(0);
@@ -138,7 +140,7 @@ int paused_loop() {
             break;
         }
 
-        draw_game();
+        GRRLIB_Render();
     }
     MP3Player_Unpause();
     LWP_ResumeThread(input_thread);
@@ -147,6 +149,13 @@ int paused_loop() {
 }
 
 int game_loop() {
+    set_camera_x(15 - CAMERA_X_OFFSET);
+    draw_game();
+    fade_in_level();
+
+    // Wait 0.5 seconds before starting first attempt
+    wait_initial_time();
+
     size_t size;
     if (level_info.custom_song_id >= 0) {
         current_song_pointer = load_user_song(level_info.custom_song_id, &size);
@@ -161,7 +170,7 @@ int game_loop() {
 
     init_input_buffer();
     LWP_CreateThread(&input_thread, input_loop, NULL, NULL, 0, 100);
-    
+
     double accumulator = 0.0f;
     u64 prevTicks = gettime();
     while (1) {
@@ -286,7 +295,9 @@ int game_loop() {
         }
 
         draw_game();
+        GRRLIB_Render();
     }
+    fade_out();
     
     LWP_JoinThread(input_thread, NULL);
 
@@ -524,6 +535,7 @@ int handle_wall_cutscene() {
         if (current_song_pointer) free(current_song_pointer);
         gameRoutine = ROUTINE_MENU;
         erase_rays();
+        draw_game();
         return TRUE;
     }
 

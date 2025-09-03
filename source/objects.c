@@ -1565,7 +1565,7 @@ void draw_end_wall() {
             float mult = 0.5625f * screen_factor_x;
 
             float offset_x = (level_complete_texture->w / 2);
-            float offset_y = (level_complete_texture->h / 2);
+            float offset_y = (level_complete_texture->h / 2) + 50 * screen_factor_y;
 
             float text_scale = easeValue(ELASTIC_OUT, 0, mult, complete_text_elapsed, COMPLETE_TEXT_IN_TIME, 0.6f);
             GRRLIB_SetHandle(level_complete_texture, level_complete_texture->w / 2, level_complete_texture->h / 2);

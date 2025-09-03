@@ -726,3 +726,99 @@ void draw_polygon_inward_mitered(Vec2D *poly, int n, float thickness, u32 color)
         GX_End();
     }
 }
+
+float opacity = 0;
+
+void draw_fade() {
+    GRRLIB_FillScreen(RGBA(0,0,0, (int) opacity));
+    GRRLIB_Render();
+}
+
+
+void fade_out() {
+    GRRLIB_texImg *framebuffer = GRRLIB_CreateEmptyTextureFmt(rmode->fbWidth, rmode->efbHeight, GX_TF_RGBA8);
+    GRRLIB_Screen2Texture(0, 0, framebuffer, FALSE);
+
+    u64 prevTicks = gettime();
+    while (opacity < 255) {
+        start_frame = gettime();
+        float frameTime = ticks_to_secs_float(start_frame - prevTicks);
+        dt = frameTime;
+        prevTicks = start_frame;
+
+        opacity += FADE_SPEED * dt;
+        if (opacity > 255) opacity = 255;
+        GRRLIB_DrawImg(0, 0, framebuffer, 0, 1 * screen_factor_x, 1, 0xffffffff);
+        draw_fade();
+    }
+    GRRLIB_FreeTexture(framebuffer);
+}
+
+void fade_in() {
+    GRRLIB_texImg *framebuffer = GRRLIB_CreateEmptyTextureFmt(rmode->fbWidth, rmode->efbHeight, GX_TF_RGBA8);
+    GRRLIB_Screen2Texture(0, 0, framebuffer, FALSE);
+
+    u64 prevTicks = gettime();
+    while (opacity > 0) {
+        start_frame = gettime();
+        float frameTime = ticks_to_secs_float(start_frame - prevTicks);
+        dt = frameTime;
+        prevTicks = start_frame;
+        opacity -= FADE_SPEED * dt;
+        if (opacity < 0) opacity = 0;
+        GRRLIB_DrawImg(0, 0, framebuffer, 0, 1 * screen_factor_x, 1, 0xffffffff);
+        draw_fade();
+    }
+    GRRLIB_FreeTexture(framebuffer);
+}
+
+void fade_in_level() {
+    u64 prevTicks = gettime();
+    double accumulator = 0.0;
+    while (opacity > 0) {
+        start_frame = gettime();
+        float frameTime = ticks_to_secs_float(start_frame - prevTicks);
+        dt = frameTime;
+        
+        accumulator += frameTime;
+
+        prevTicks = start_frame;
+        opacity -= FADE_SPEED * dt;
+        if (opacity < 0) opacity = 0;
+        
+        while (accumulator >= STEPS_DT) {
+            update_particles();
+            accumulator -= STEPS_DT;
+        }
+        
+        draw_game();
+        draw_fade();
+    }
+}
+
+void wait_initial_time() {
+    u64 prevTicks = gettime();
+    double accumulator = 0.0;
+    float time_elapsed = 0.f;
+    while (time_elapsed < 0.5f) {
+        start_frame = gettime();
+        float frameTime = ticks_to_secs_float(start_frame - prevTicks);
+        dt = frameTime;
+        
+        accumulator += frameTime;
+        time_elapsed += frameTime;
+
+        prevTicks = start_frame;
+        opacity -= FADE_SPEED * dt;
+        if (opacity < 0) opacity = 0;
+
+        while (accumulator >= STEPS_DT) {
+            update_particles();
+            update_beat();
+            accumulator -= STEPS_DT;
+        }
+        
+        draw_game();
+        draw_fade();
+    }
+}

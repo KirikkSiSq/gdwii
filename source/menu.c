@@ -159,14 +159,6 @@ void start_level(){
     int code = load_level((char *) levels[level_id].data_ptr, FALSE);
     if (!code) {
         exit_menu = true;
-        GRRLIB_FreeTexture(menu_arrow);
-        GRRLIB_FreeTexture(menu_corner_squares);
-        GRRLIB_FreeTexture(menu_top_bar);
-        GRRLIB_FreeTexture(gradient_texture);
-        GRRLIB_FreeTexture(font_bold);
-        for (int i = 0; i < FACES_COUNT; i++){
-            GRRLIB_FreeTexture(difficulty_faces[i]);
-        }
     }
 }
 
@@ -288,6 +280,14 @@ void go_back_directory(char *path) {
     }
 }
 
+void draw_menu() {
+    if (level_mode == 0) {
+        main_levels();
+    } else {
+        sdcard_levels();
+    }
+}
+
 int menu_loop() {
     exit_menu = false;
     if (!fatInitDefault()) {
@@ -340,20 +340,27 @@ int menu_loop() {
     create_button(5,200,56,120,true,menu_arrow,menu_go_left,false,false); //left arrow
     create_button((screenWidth) - 61,200,56,120,true,menu_arrow,menu_go_right,true,false); //right arrow
 
+    draw_menu();
+    fade_in();
+
     u64 prevTicks = gettime();
+
+    bool exit_code = FALSE;
 
     while (1) {
         start_frame = gettime();
-        update_input();
         float frameTime = ticks_to_secs_float(start_frame - prevTicks);
         dt = frameTime;
 
+        update_input();
         if (!MP3Player_IsPlaying() && menuLoop) {
             MP3Player_PlayBuffer(menuLoop, size, NULL);
             MP3Player_Volume(255);
         }
-                    
+        
         if (state.input.pressed1orX) {
+            draw_menu();
+            fade_out();
             level_id = 0;
             level_mode ^= 1;
 
@@ -368,26 +375,42 @@ int menu_loop() {
                     free(level_data);
                 }
             }
+            
+            draw_menu();
+            fade_in();
         }
         
         if (level_mode == 0) {
-            if (main_levels()) break;
+            if (main_levels()) {
+                fade_out();
+                break;
+            }
         } else {
-            if (sdcard_levels()) break;
+            if (sdcard_levels()) {
+                fade_out();
+                break;
+            }
         }
 
         if (state.input.pressedHome) {
-            if (menuLoop) free(menuLoop);
-
-            return TRUE;
+            exit_code = TRUE;
+            break;
         }
 
         GRRLIB_Render();
     }
-    
+
+    GRRLIB_FreeTexture(menu_arrow);
+    GRRLIB_FreeTexture(menu_corner_squares);
+    GRRLIB_FreeTexture(menu_top_bar);
+    GRRLIB_FreeTexture(gradient_texture);
+    GRRLIB_FreeTexture(font_bold);
+    for (int i = 0; i < FACES_COUNT; i++){
+        GRRLIB_FreeTexture(difficulty_faces[i]);
+    }
     if (menuLoop) free(menuLoop);
 
-    return FALSE;
+    return exit_code;
 }
 
 void refresh_sdcard_levels() {
@@ -471,14 +494,6 @@ int sdcard_levels() {
                 free(level);
 
                 if (!code) {
-                    GRRLIB_FreeTexture(menu_arrow);
-                    GRRLIB_FreeTexture(menu_corner_squares);
-                    GRRLIB_FreeTexture(menu_top_bar);
-                    GRRLIB_FreeTexture(gradient_texture);
-                    GRRLIB_FreeTexture(font_bold);
-                    for (int i = 0; i < FACES_COUNT; i++){
-                        GRRLIB_FreeTexture(difficulty_faces[i]);
-                    }
                     return 1;
                 }
                 error_code = code;

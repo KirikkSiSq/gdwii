@@ -180,8 +180,6 @@ void draw_game() {
         textOffset = (strlen("PAUSED") * 18 * 0.75) / 2;
         GRRLIB_Printf(screenWidth / 2 - textOffset, screenHeight / 2, font, RGBA(255,255,255,255), 0.5, "PAUSED");
     }
-    
-    GRRLIB_Render();
     layersDrawn = 0;
 }
 

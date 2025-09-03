@@ -5,6 +5,9 @@
 #define SAME_SIGN(v1,v2) (v1>=0)==(v2>=0)
 #define DIFFERENT_SIGN(v1,v2) (v1>=0)!=(v2>=0)
 
+#define FADE_DURATION 0.25f
+#define FADE_SPEED (255 / FADE_DURATION)
+
 typedef struct {
     float x, y;
 } Vec2D;
@@ -84,3 +87,8 @@ void draw_polygon_inward_mitered(Vec2D *poly, int n, float thickness, u32 color)
 void set_texture(const GRRLIB_texImg *tex);
 float normalize_angle(float angle);
 float ip1_ceilf(float x);
+
+void fade_in();
+void fade_out();
+void fade_in_level();
+void wait_initial_time();
