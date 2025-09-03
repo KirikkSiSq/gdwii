@@ -656,17 +656,6 @@ void run_camera() {
 
     float calc_x = ((player->x - state.camera_x) * SCALE) - widthAdjust;
 
-    if (calc_x >= get_camera_x_scroll_pos()) {
-        // Cap at camera_x
-        if (completion_shake || state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x) {
-            state.camera_x = level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA);
-        } else {
-            state.camera_x += player->vel_x * STEPS_DT;
-            state.ground_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
-            state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
-        }
-    }
-
     float playable_height = state.ceiling_y - state.ground_y;
     float calc_height = 0;
 
@@ -677,56 +666,76 @@ void run_camera() {
     state.ground_y_gfx = ease_out(state.ground_y_gfx, calc_height, 0.02f);
 
     if (level_info.wall_y == 0) {
-        if (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x - (9 * 30.f)) {
+        if (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x - (4.5f * 30.f)) {
             level_info.wall_y = MAX(state.camera_y, -30) + (SCREEN_HEIGHT_AREA / 2);
         }
     }
 
-    if (player->gamemode == GAMEMODE_CUBE && !state.dual) {
-        if (level_info.wall_y != 0 && (state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA >= level_info.wall_x - 30)) {
-            state.camera_y = ease_out(state.camera_y, level_info.wall_y - (SCREEN_HEIGHT_AREA / 2), 0.007f);
-            if (completion_shake) {
-                state.camera_x = (level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA)) + 3.f * random_float(-1, 1);
-                state.camera_y = (level_info.wall_y - (SCREEN_HEIGHT_AREA / 2)) + 3.f * random_float(-1, 1);
+    float camera_x_right = state.camera_x + WIDTH_ADJUST_AREA + SCREEN_WIDTH_AREA;
+
+    if (calc_x >= get_camera_x_scroll_pos()) {
+        // Cap at camera_x
+        if (level_info.wall_y > 0 && (camera_x_right >= level_info.wall_x - CAMERA_X_WALL_OFFSET)) {
+            if (state.camera_wall_timer == 0) {
+                state.background_wall_initial_x = state.background_x;
+                state.ground_wall_initial_x = state.ground_x;
             }
+            state.background_x = easeValue(EASE_IN_OUT, state.background_wall_initial_x, state.background_wall_initial_x + CAMERA_X_WALL_OFFSET * state.mirror_speed_factor, state.camera_wall_timer, 1.f, 2.0f);            
+            state.ground_x = easeValue(EASE_IN_OUT, state.ground_wall_initial_x, state.ground_wall_initial_x + CAMERA_X_WALL_OFFSET * state.mirror_speed_factor, state.camera_wall_timer, 1.f, 2.0f);            
         } else {
-            float distance = state.camera_y_lerp + (SCREEN_HEIGHT_AREA / 2) - player->y;
-            float distance_abs = fabsf(distance);
-
-            int mult = (distance >= 0 ? 1 : -1);
-
-            float difference = player->y - state.old_player.y;
-
-            if (distance_abs > 60.f && (difference * -mult > 0 || player->on_ground)) {
-                float lerp_ratio = 0.1f;
-                if (player->on_ground) {
-                    // Slowly make player in bounds (60 units from player center)
-                    state.camera_y_lerp = player->y + 60.f * mult - (SCREEN_HEIGHT_AREA / 2);
-                    lerp_ratio = 0.2f;
-                } else {
-                    // Move camera
-                    state.camera_y_lerp += difference;
-                }
-                // Lerp so the camera doesn't go all the way when not moving
-                state.intermediate_camera_y = ease_out(state.intermediate_camera_y, state.camera_y_lerp, lerp_ratio);
-            } else {
-                state.camera_y_lerp = state.intermediate_camera_y;
-            }
-
-            if (state.camera_y_lerp < -180.f) state.camera_y_lerp = -90.f;
-            if (state.camera_y_lerp > MAX_LEVEL_HEIGHT) state.camera_y_lerp = MAX_LEVEL_HEIGHT;
-
-            state.camera_y = ease_out(state.camera_y, state.intermediate_camera_y, 0.07f);
+            state.camera_x += player->vel_x * STEPS_DT;
+            state.ground_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
+            state.background_x += player->vel_x * STEPS_DT * state.mirror_speed_factor;
         }
+    }
+
+    if (level_info.wall_y > 0 && (camera_x_right >= level_info.wall_x - CAMERA_X_WALL_OFFSET)) {
+        if (state.camera_wall_timer == 0) {
+            state.camera_wall_initial_y = state.camera_y;
+        }
+
+        float final_camera_x_wall = level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA);
+        float final_camera_y_wall = level_info.wall_y - (SCREEN_HEIGHT_AREA / 2);   
+
+        state.camera_x = easeValue(EASE_IN_OUT, final_camera_x_wall - CAMERA_X_WALL_OFFSET, final_camera_x_wall, state.camera_wall_timer, CAMERA_WALL_ANIM_DURATION, 2.0f);
+        state.camera_y = easeValue(EASE_IN_OUT, state.camera_wall_initial_y, final_camera_y_wall, state.camera_wall_timer, CAMERA_WALL_ANIM_DURATION, 2.0f);
+        state.camera_wall_timer += STEPS_DT;
+        if (completion_shake) {
+            state.camera_x = final_camera_x_wall + 3.f * random_float(-1, 1);
+            state.camera_y = final_camera_y_wall + 3.f * random_float(-1, 1);
+        }
+    } else if (player->gamemode == GAMEMODE_CUBE && !state.dual) {
+        float distance = state.camera_y_lerp + (SCREEN_HEIGHT_AREA / 2) - player->y;
+        float distance_abs = fabsf(distance);
+
+        int mult = (distance >= 0 ? 1 : -1);
+
+        float difference = player->y - state.old_player.y;
+
+        if (distance_abs > 60.f && (difference * -mult > 0 || player->on_ground)) {
+            float lerp_ratio = 0.1f;
+            if (player->on_ground) {
+                // Slowly make player in bounds (60 units from player center)
+                state.camera_y_lerp = player->y + 60.f * mult - (SCREEN_HEIGHT_AREA / 2);
+                lerp_ratio = 0.2f;
+            } else {
+                // Move camera
+                state.camera_y_lerp += difference;
+            }
+            // Lerp so the camera doesn't go all the way when not moving
+            state.intermediate_camera_y = ease_out(state.intermediate_camera_y, state.camera_y_lerp, lerp_ratio);
+        } else {
+            state.camera_y_lerp = state.intermediate_camera_y;
+        }
+
+        if (state.camera_y_lerp < -180.f) state.camera_y_lerp = -90.f;
+        if (state.camera_y_lerp > MAX_LEVEL_HEIGHT) state.camera_y_lerp = MAX_LEVEL_HEIGHT;
+
+        state.camera_y = ease_out(state.camera_y, state.intermediate_camera_y, 0.07f);
     } else {
         state.camera_y = ease_out(state.camera_y, state.camera_intended_y, 0.02f);
-        if (completion_shake) {
-            state.camera_x = (level_info.wall_x - (SCREEN_WIDTH_AREA + WIDTH_ADJUST_AREA)) + 3.f * random_float(-1, 1);
-            state.camera_y = (state.camera_y_lerp) + 3.f * random_float(-1, 1);
-        } else {
-            state.camera_y_lerp = state.camera_y;
-            state.intermediate_camera_y = state.camera_y;
-        }
+        state.camera_y_lerp = state.camera_y;
+        state.intermediate_camera_y = state.camera_y;
     }
 }
 
@@ -1078,6 +1087,8 @@ void init_variables() {
     MotionTrail_StopStroke(&trail_p2);
 
     set_camera_x(-get_camera_x_scroll_pos());
+    state.camera_wall_timer = 0;
+    state.camera_wall_initial_y = 0;
     state.camera_y = -90;
     state.camera_y_lerp = -90;
     state.intermediate_camera_y = -90;
@@ -1101,7 +1112,7 @@ void init_variables() {
     state.dual = FALSE;
     state.dead = FALSE;
     state.mirror_mult = 1;
-    
+
     Player *player = &state.player;
     player->cutscene_timer = 0;
     player->width = 30;

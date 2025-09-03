@@ -58,9 +58,15 @@ typedef struct {
     float camera_y_lerp;
 
     float intermediate_camera_y;
+    
+    float camera_wall_timer;
+    float camera_wall_initial_y;
 
     float ground_x;
+    float ground_wall_initial_x;
+
     float background_x;
+    float background_wall_initial_x;
     
     Player player;
     Player player2;

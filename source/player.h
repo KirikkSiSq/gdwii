@@ -8,11 +8,15 @@
 #define SCREEN_WIDTH_AREA ((screenWidth / BLOCK_SIZE_PX) * 30) 
 #define WIDTH_ADJUST_AREA ((widthAdjust / BLOCK_SIZE_PX) * 30)
 #define SCREEN_HEIGHT_AREA ((screenHeight / BLOCK_SIZE_PX) * 30 + 8) 
+
 #define CAMERA_X_OFFSET (WIDTH_ADJUST_AREA - 4)
+#define CAMERA_X_WALL_OFFSET (2 * 30.F)
+#define CAMERA_WALL_ANIM_DURATION 1.f
 
 #define MAX_LEVEL_HEIGHT 2400.f
 
 #define MAX_COLLIDED_OBJECTS 4096
+
 
 #define END_ANIMATION_TIME 1.f
 #define END_ANIMATION_X_START (9.f * 30.f)
@@ -121,6 +125,7 @@ extern Color p2;
 extern const float player_speeds[SPEED_COUNT];
 
 extern GRRLIB_texImg *trail_tex;
+
 void anim_player_to_wall(Player *player);
 void handle_death();
 
