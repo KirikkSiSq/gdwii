@@ -194,6 +194,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                         if (!gravSnap) player->on_ceiling = TRUE;
                         player->inverse_rotation = FALSE;
                         player->time_since_ground = 0;
+                        player->ceiling_inv_time = 0;
                         player->y = grav(player, obj_gravBottom(player, obj)) - grav(player, player->height / 2);
                     }
                 }
@@ -1089,9 +1090,6 @@ void init_variables() {
     set_camera_x(-get_camera_x_scroll_pos());
     state.camera_wall_timer = 0;
     state.camera_wall_initial_y = 0;
-    state.camera_y = -90;
-    state.camera_y_lerp = -90;
-    state.intermediate_camera_y = -90;
 
     state.ground_y_gfx = 0;
     state.mirror_factor = 0;
@@ -1148,7 +1146,15 @@ void init_variables() {
         case GAMEMODE_BALL:
             state.ceiling_y = state.ground_y + 240;
             set_intended_ceiling();
+            break;
+        case GAMEMODE_CUBE:
+            state.camera_intended_y = -95.f;
     }
+    
+    // Set camera vertical pos
+    state.camera_y = state.camera_intended_y;
+    state.camera_y_lerp = state.camera_y;
+    state.intermediate_camera_y = state.camera_y;
 
     if (level_info.initial_dual) {
         state.dual = TRUE;
