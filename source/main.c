@@ -114,6 +114,19 @@ void draw_game() {
         frameCount = 0;
         startTime = currentTime;
     }
+    
+    
+    char percentage[64];
+    snprintf(percentage, sizeof(percentage), "%d%%%%", (int) state.level_progress);
+    int textOffset = (get_text_length(big_font, 0.5, percentage)) / 2;
+    draw_text(big_font, big_font_text, screenWidth/2 - textOffset, 10, 0.5, percentage);
+    
+    draw_time = 0;
+    obj_particles_time = 0;
+
+    if (state.noclip) {
+        draw_text(big_font, big_font_text, screenWidth - 200, 20, 0.25, "Noclip activated");
+    }
 
     if (enable_info) {    
         t0 = gettime();
@@ -162,18 +175,6 @@ void draw_game() {
         snprintf(cpu_usage, sizeof(cpu_usage), "CPU: %.2f%%%%", (cpu_time / 16.666666) * 100);
         draw_text(big_font, big_font_text, 20, 400, 0.25, cpu_usage);
 
-    }
-    
-    char percentage[64];
-    snprintf(percentage, sizeof(percentage), "%d%%%%", (int) state.level_progress);
-    int textOffset = (get_text_length(big_font, 0.5, percentage)) / 2;
-    draw_text(big_font, big_font_text, screenWidth/2 - textOffset, 10, 0.5, percentage);
-    
-    draw_time = 0;
-    obj_particles_time = 0;
-
-    if (state.noclip) {
-        draw_text(big_font, big_font_text, screenWidth - 200, 20, 0.25, "Noclip activated");
     }
 
     if (state.paused) {
