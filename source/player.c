@@ -410,6 +410,7 @@ void cube_gamemode(Player *player) {
             // Normal jump
             set_p_velocity(player, cube_jump_heights[state.speed]);
         }
+        player->inverse_rotation = FALSE;
 
         player->on_ground = FALSE;
         player->buffering_state = BUFFER_END;
