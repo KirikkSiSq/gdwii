@@ -882,6 +882,7 @@ void load_spritesheet() {
 void unload_spritesheet() {
     // Free all memory used by textures.
     GRRLIB_FreeTexture(ground_line);
+    GRRLIB_FreeTexture(big_font_text);
 
     for (s32 object = 0; object < OBJECT_COUNT; object++) {
         for (s32 layer = 0; layer < objects[object].num_layers; layer++) {

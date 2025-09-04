@@ -8,6 +8,8 @@
 #include "player.h"
 #include "main.h"
 #include "easing.h"
+#include "font_stuff.h"
+#include <stdio.h>
 
 Vec2D normalize(Vec2D v) {
     float len = sqrtf(v.x*v.x + v.y*v.y);
@@ -822,5 +824,140 @@ void wait_initial_time() {
         
         draw_game();
         draw_fade();
+    }
+}
+
+void  draw_glyph (const f32 xpos, const f32 ypos, const f32 partx, const f32 party, const f32 partw, const f32 parth, const GRRLIB_texImg *tex, const f32 degrees, const f32 scaleX, const f32 scaleY, const u32 color) {
+    GXTexObj  texObj;
+    Mtx       m, m1, m2, mv;
+
+    if (tex == NULL || tex->data == NULL)
+        return;
+
+    // The 0.001f/x is the frame correction formula by spiffen
+    const f32 s1 = (partx / tex->w) + (0.001f / tex->w);
+    const f32 s2 = ((partx + partw) / tex->w) - (0.001f / tex->w);
+    const f32 t1 = (party / tex->h) + (0.001f / tex->h);
+    const f32 t2 = ((party + parth) / tex->h) - (0.001f / tex->h);
+
+    GX_InitTexObj(&texObj, tex->data,
+                  tex->w, tex->h,
+                  tex->format, GX_CLAMP, GX_CLAMP, GX_FALSE);
+
+    if (GRRLIB_Settings.antialias == false) {
+        GX_InitTexObjLOD(&texObj, GX_NEAR, GX_NEAR,
+                         0.0f, 0.0f, 0.0f, 0, 0, GX_ANISO_1);
+        GX_SetCopyFilter(GX_FALSE, rmode->sample_pattern, GX_FALSE, rmode->vfilter);
+    }
+    else {
+        GX_SetCopyFilter(rmode->aa, rmode->sample_pattern, GX_TRUE, rmode->vfilter);
+    }
+
+    GX_LoadTexObj(&texObj,      GX_TEXMAP0);
+    GX_SetTevOp  (GX_TEVSTAGE0, GX_MODULATE);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+
+    const f32 width  = partw * 0.5f;
+    const f32 height = parth * 0.5f;
+
+    guMtxIdentity  (m1);
+    guMtxScaleApply(m1, m1, scaleX, scaleY, 1.0f);
+    guMtxRotAxisDeg(m2, &axis, degrees);
+    guMtxConcat    (m2, m1, m);
+
+    guMtxTransApply(m, m,
+        xpos +width*scaleX  +tex->handlex
+            -tex->offsetx +( scaleX *(-tex->handley *sin(-DegToRad(degrees))
+                                      -tex->handlex *cos(-DegToRad(degrees))) ),
+        ypos +height*scaleY +tex->handley
+            -tex->offsety +( scaleY *(-tex->handley *cos(-DegToRad(degrees))
+                                      +tex->handlex *sin(-DegToRad(degrees))) ),
+        0);
+
+    guMtxConcat(GXmodelView2D, m, mv);
+
+    GX_LoadPosMtxImm(mv, GX_PNMTX0);
+    GX_Begin(GX_QUADS, GX_VTXFMT0, 4);
+        GX_Position3f32(-width, -height, 0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(s1, t1);
+
+        GX_Position3f32(width, -height,  0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(s2, t1);
+
+        GX_Position3f32(width, height,  0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(s2, t2);
+
+        GX_Position3f32(-width, height,  0.0f);
+        GX_Color1u32   (color);
+        GX_TexCoord2f32(s1, t2);
+    GX_End();
+    GX_LoadPosMtxImm(GXmodelView2D, GX_PNMTX0);
+
+    GX_SetTevOp  (GX_TEVSTAGE0, GX_PASSCLR);
+    GX_SetVtxDesc(GX_VA_TEX0,   GX_NONE);
+}
+
+struct glyph *get_glyph(struct charset font, char character) {
+    for (int i = 0; i < font.char_num; i++) {
+        if (character == font.chars[i].id) return &font.chars[i];
+    }
+    return NULL;
+}
+
+float get_text_length(struct charset font, const float zoom, const char *text, ...) {
+    
+    char tmp[1024];
+
+    va_list argp;
+    va_start(argp, text);
+    const int size = vsnprintf(tmp, sizeof(tmp), text, argp);
+    va_end(argp);
+    
+    float text_length = 0;
+    for (int i = 0; i < size; i++) {
+        struct glyph *character = get_glyph(font, tmp[i]);
+
+        if (character != NULL) {
+            float xadvance = character->xadvance * zoom;
+
+            text_length += xadvance;
+        }
+    }
+    return text_length;
+}
+
+void draw_text(struct charset font, GRRLIB_texImg *tex, const float x, const float y, const float zoom, const char *text, ...) {
+    if (!text || !tex || !tex->data) {
+        return;
+    }
+    GRRLIB_SetHandle(tex, tex->w / 2, tex->h / 2);
+
+    char tmp[1024];
+
+    va_list argp;
+    va_start(argp, text);
+    const int size = vsnprintf(tmp, sizeof(tmp), text, argp);
+    va_end(argp);
+
+    float offset = 0;
+    for (int i = 0; i < size; i++) {
+        struct glyph *character = get_glyph(font, tmp[i]);
+
+        if (character != NULL) {
+            int tile_x = character->x;
+            int tile_y = character->y;
+            int width = character->width;
+            int height = character->height;
+            float xoffset = character->xoffset * zoom;
+            float yoffset = character->yoffset * zoom;
+            float xadvance = character->xadvance * zoom;
+
+            draw_glyph(x + offset + xoffset, y + yoffset, tile_x, tile_y, width, height, tex, 0, zoom, zoom, 0xffffffff);
+            
+            offset += xadvance;
+        }
     }
 }

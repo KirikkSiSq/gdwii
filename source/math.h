@@ -1,6 +1,7 @@
 #pragma once
 #include <grrlib.h>
 #include "level_loading.h"
+#include "font_stuff.h"
 
 #define SAME_SIGN(v1,v2) (v1>=0)==(v2>=0)
 #define DIFFERENT_SIGN(v1,v2) (v1>=0)!=(v2>=0)
@@ -92,3 +93,6 @@ void fade_in();
 void fade_out();
 void fade_in_level();
 void wait_initial_time();
+
+float get_text_length(struct charset font, const float zoom, const char *text, ...);
+void draw_text(struct charset font, GRRLIB_texImg *tex, const float x, const float y, const float zoom, const char *text, ...);

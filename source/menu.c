@@ -21,6 +21,8 @@
 
 #include <stdio.h>
 
+#include "font_stuff.h"
+
 GRRLIB_texImg *menu_top_bar;
 GRRLIB_texImg *menu_corner_squares;
 GRRLIB_texImg *menu_arrow;
@@ -29,7 +31,6 @@ GRRLIB_texImg *gradient_texture;
 GRRLIB_texImg *menu_ground;
 GRRLIB_texImg *font_bold;
 GRRLIB_texImg *ground_line_texture;
-
 
 int main_levels();
 int sdcard_levels();
@@ -172,12 +173,12 @@ void game_folder_not_found() {
         GRRLIB_FillScreen(RGBA(0, 127, 255, 255));
 
         
-        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, "Couldn't find the game folder.");
-        GRRLIB_Printf(0, 45, font, RGBA(255,255,255,255), 0.75, "Make sure the resources folder");
-        GRRLIB_Printf(0, 70, font, RGBA(255,255,255,255), 0.75, "and boot.dol is in the following");
-        GRRLIB_Printf(0, 95, font, RGBA(255,255,255,255), 0.75, "path:");
-        GRRLIB_Printf(0, 120, font, RGBA(255,255,255,255), 0.75, path);
-        GRRLIB_Printf(0, 155, font, RGBA(255,255,255,255), 0.75, "Press home to exit.");
+        draw_text(big_font, big_font_text, 0, 20, 0.5, "Couldn't find the game folder.");
+        draw_text(big_font, big_font_text, 0, 45, 0.5, "Make sure the resources folder");
+        draw_text(big_font, big_font_text, 0, 70, 0.5, "and boot.dol is in the following");
+        draw_text(big_font, big_font_text, 0, 95, 0.5, "path:");
+        draw_text(big_font, big_font_text, 0, 120, 0.5,  path);
+        draw_text(big_font, big_font_text, 0, 155, 0.5,  "Press home to exit.");
                 
         if (state.input.pressedHome) {
             break;
@@ -195,11 +196,12 @@ int custom_song_id = -1;
 void print_custom_song(int song_id) {
     char text[269];
     snprintf(text, sizeof(text), "Level uses song: %d.mp3", song_id);
-    GRRLIB_Printf(0, 270, font, RGBA(255,255,255,255), 0.75, text);
+    
+    draw_text(big_font, big_font_text, 0, 270, 0.5, text);
 
     if (!check_song(song_id)) {
-        GRRLIB_Printf(0, 300, font, RGBA(255,255,255,255), 0.75, "Song not found.");
-        GRRLIB_Printf(0, 330, font, RGBA(255,255,255,255), 0.75, "Add it in the \"user_songs\" folder.");
+        draw_text(big_font, big_font_text, 0, 300, 0.5, "Song not found.");
+        draw_text(big_font, big_font_text, 0, 330, 0.5, "Add it in the \"%s\" folder.", USER_SONGS_FOLDER);
     }
 }
 
@@ -326,6 +328,7 @@ int menu_loop() {
     gradient_texture = GRRLIB_LoadTexturePNG(gradient_png);
     ground_line_texture = GRRLIB_LoadTexturePNG(ground_line_png);
     menu_ground = GRRLIB_LoadTexturePNG(g_01_png); //groundgroundgroundgourng
+    
 
     //difficultty faces
     difficulty_faces[0] = GRRLIB_LoadTexturePNG(easy_png);
@@ -411,12 +414,13 @@ int menu_loop() {
     if (menuLoop) free(menuLoop);
     
     if (level_info.song_offset > 0) {
-        int textOffset = (strlen("Loading...") * 18 * 0.75);
-        GRRLIB_Printf(screenWidth - textOffset - 30 * 2, screenHeight - 30, font, RGBA(255,255,255,255), 0.75, "Loading...");
+        int textOffset = (get_text_length(big_font, 0.5, "Loading..."));
+        
+        draw_text(big_font, big_font_text, screenWidth - textOffset - 30 * 2, screenHeight - 30, 0.5, "Loading...");
     }
 
     GRRLIB_Render();
-    GRRLIB_Render();
+    GRRLIB_Render();;
 
     return exit_code;
 }
@@ -442,23 +446,23 @@ void refresh_sdcard_levels() {
 int sdcard_levels() {
     GRRLIB_FillScreen(RGBA(0, 127, 0, 255));
             
-    GRRLIB_Printf(0, 400, font, RGBA(255,255,255,255), 0.75, "Press 1 to switch to main levels.");
+    draw_text(big_font, big_font_text, 0, 400, 0.5, "Press 1 to switch to main levels.");
     
     if (sd_level_count > 0) {
         char text[269];
         if (sd_level_paths[level_id].is_dir) {
             snprintf(text, sizeof(text), "FOLDER - %s", current_level_name);
 
-            GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
+            draw_text(big_font, big_font_text, 0, 20, 0.5, text);
         } else {
             snprintf(text, sizeof(text), "%d - %s", level_id + 1, current_level_name);
 
-            GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, text);
+            draw_text(big_font, big_font_text, 0, 20, 0.5, text);
             if (custom_song_id >= 0) print_custom_song(custom_song_id);
         }
 
         if (error_code) {
-            GRRLIB_Printf(0, 300, font, RGBA(255,255,255,255), 0.75, "Failed to load the level with code %d\n", error_code);
+            draw_text(big_font, big_font_text, 0, 300, 0.5, "Failed to load the level with code %d\n", error_code);
         }
 
         if (state.input.pressedDir & INPUT_LEFT) {
@@ -511,10 +515,10 @@ int sdcard_levels() {
     } else {
         char path[512];
         snprintf(path, sizeof(path), "%s/%s", launch_dir, USER_LEVELS_FOLDER);
-        GRRLIB_Printf(0, 20, font, RGBA(255,255,255,255), 0.75, "Put levels in:");
-        GRRLIB_Printf(0, 45, font, RGBA(255,255,255,255), 0.75, path);
-        GRRLIB_Printf(0, 70, font, RGBA(255,255,255,255), 0.75, "For getting levels, use the mod");
-        GRRLIB_Printf(0, 95, font, RGBA(255,255,255,255), 0.75, "\"GDShare\" for exporting.");
+        draw_text(big_font, big_font_text, 0, 20, 0.5, "Put levels in:");
+        draw_text(big_font, big_font_text, 0, 45, 0.5, path);
+        draw_text(big_font, big_font_text, 0, 70, 0.5, "For getting levels, use the mod");
+        draw_text(big_font, big_font_text, 0, 95, 0.5, "\"GDShare\" for exporting.");
     }
     return 0;
 }
@@ -539,13 +543,15 @@ int main_levels() {
     GRRLIB_DrawImg(0, screenHeight - 143 * 0.75,menu_corner_squares,0,0.75,0.75,RGBA(255,255,255,255));//corner thing left
     GRRLIB_DrawImg(screenWidth, screenHeight - 143 * 0.75,menu_corner_squares,0,-0.75,0.75,RGBA(255,255,255,255));//corner thing right
           
-    GRRLIB_Printf(0, 400, font, RGBA(255,255,255,255), 0.75, "Press 1 to switch to custom levels.");
+    draw_text(big_font, big_font_text, 0, 400, 0.5, "Press 1 to switch to custom levels.");
     
     //level name display
     custom_rounded_rectangle((screenWidth) / 2 - 250, 100, 500, 160, 10, RGBA(0, 0, 0, 127));
-    int textOffset = (strlen(levels[level_id].level_name) * 18 - 70) / 2;
-    GRRLIB_Printf(screenWidth/2 - textOffset, 160, font_bold, RGBA(0,0,0,255), 0.75, levels[level_id].level_name);
-    GRRLIB_Printf(screenWidth/2 - textOffset, 160, font, RGBA(255,255,255,255), 0.75, levels[level_id].level_name);
+    int textOffset = (get_text_length(big_font, 0.5, levels[level_id].level_name) - 70) / 2;
+    //GRRLIB_Printf(screenWidth/2 - textOffset, 160, font_bold, RGBA(0,0,0,255), 0.75, levels[level_id].level_name);
+    //GRRLIB_Printf(screenWidth/2 - textOffset, 160, font, RGBA(255,255,255,255), 0.75, levels[level_id].level_name);
+    draw_text(big_font, big_font_text, screenWidth/2 - textOffset, 160, 0.5, levels[level_id].level_name);
+    
     GRRLIB_DrawImg(screenWidth/2 - textOffset - 70,150,difficulty_faces[default_level_difficulty[level_id]],0,0.75,0.75,RGBA(255,255,255,255));
 
     //the circles at the bottom of the screen

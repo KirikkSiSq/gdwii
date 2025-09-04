@@ -39,6 +39,7 @@
 #include "menu.h"
 
 #include "trail.h"
+#include "bigFont_png.h"
 
 // Declare Static Functions
 static void ExitGame(void);
@@ -59,6 +60,7 @@ GameState state;
 
 GRRLIB_texImg *font = NULL;
 GRRLIB_texImg *cursor = NULL;
+GRRLIB_texImg *big_font_text = NULL;
 
 int frame_counter = 0;
 int old_frame_counter = 0;
@@ -119,64 +121,65 @@ void draw_game() {
         // Render FPS
         char fpsText[64];
         snprintf(fpsText, sizeof(fpsText), "FPS: %.2f Steps: %d Objs: %d Layers: %d", fps, frame_counter - old_frame_counter, level_info.object_count, layersArrayList->count);
-        GRRLIB_Printf(20, 20, font, RGBA(255,255,255,255), 0.5, fpsText);  // White tex
+        draw_text(big_font, big_font_text, 20, 20, 0.25, fpsText);  // White tex
         
         char layerText[64];
         snprintf(layerText, sizeof(layerText), "Drawn layers: %d", layersDrawn);
-        GRRLIB_Printf(20, 50, font, RGBA(255,255,255,255), 0.5, layerText);
+        draw_text(big_font, big_font_text, 20, 50, 0.25, layerText);
         old_frame_counter = frame_counter;
+        
         char player_x[64];
         snprintf(player_x, sizeof(player_x), "X: %.2f VX: %.2f", state.player.x, state.player.vel_x);
-        GRRLIB_Printf(20, 80, font, RGBA(255,255,255,255), 0.5, player_x);
+        draw_text(big_font, big_font_text, 20, 80, 0.25, player_x);
 
         char player_y[64];
         snprintf(player_y, sizeof(player_y), "Y: %.2f VY: %.2f", state.player.y, state.player.vel_y);
-        GRRLIB_Printf(20, 110, font, RGBA(255,255,255,255), 0.5, player_y);
+        draw_text(big_font, big_font_text, 20, 110, 0.25, player_y);
         
         char obj_layer[64];
         snprintf(obj_layer, sizeof(obj_layer), "GFX: %.2f ms (Pl: %.2f Pt: %.2f, St: %.2f, D: %.2f)", obj_layer_time, player_draw_time, obj_particles_time, layer_sorting, draw_time);
-        GRRLIB_Printf(20, 140, font, RGBA(255,255,255,255), 0.5, obj_layer);
+        draw_text(big_font, big_font_text, 20, 140, 0.25, obj_layer);
         
         char physics[128];
         snprintf(physics, sizeof(physics), "Physics: %.2f ms (P: %.2f Obj: %.2f E: %.2f)", physics_time, player_time, triggers_time, particles_time);
-        GRRLIB_Printf(20, 170, font, RGBA(255,255,255,255), 0.5, physics);
+        draw_text(big_font, big_font_text, 20, 170, 0.25, physics);
 
         char collision[128];
         snprintf(collision, sizeof(collision), "Collision: %.2f ms (Checks: %d Succeded: %d)", collision_time, number_of_collisions_checks, number_of_collisions);
-        GRRLIB_Printf(20, 200, font, RGBA(255,255,255,255), 0.5, collision);
+        draw_text(big_font, big_font_text, 20, 200, 0.25, collision);
 
         t1 = gettime();
         float text = ticks_to_microsecs(t1 - t0) / 1000.f;
         
         char text_ms[64];
         snprintf(text_ms, sizeof(text_ms), "Text: %.2f ms", text);
-        GRRLIB_Printf(20, 230, font, RGBA(255,255,255,255), 0.5, text_ms);
+        draw_text(big_font, big_font_text, 20, 230, 0.25, text_ms);
 
         u64 last_frame = gettime();
         float cpu_time = ticks_to_microsecs(last_frame - start_frame) / 1000.f;
         
         char cpu_usage[64];
         snprintf(cpu_usage, sizeof(cpu_usage), "CPU: %.2f%%%%", (cpu_time / 16.666666) * 100);
-        GRRLIB_Printf(20, 400, font, RGBA(255,255,255,255), 0.5, cpu_usage);
+        draw_text(big_font, big_font_text, 20, 400, 0.25, cpu_usage);
 
     }
     
     char percentage[64];
     snprintf(percentage, sizeof(percentage), "%d%%%%", (int) state.level_progress);
-    int textOffset = (strlen(percentage) * 18 * 0.75) / 2;
-    GRRLIB_Printf(screenWidth/2 - textOffset, 10, font, RGBA(255,255,255,255), 0.75, percentage);
+    int textOffset = (get_text_length(big_font, 0.5, percentage)) / 2;
+    draw_text(big_font, big_font_text, screenWidth/2 - textOffset, 10, 0.5, percentage);
     
     draw_time = 0;
     obj_particles_time = 0;
 
     if (state.noclip) {
-        GRRLIB_Printf(screenWidth - 200, 20, font, RGBA(255,255,255,255), 0.5, "Noclip activated");
+        draw_text(big_font, big_font_text, screenWidth - 200, 20, 0.25, "Noclip activated");
     }
 
     if (state.paused) {
         GRRLIB_FillScreen(RGBA(0, 0, 0, 127));
-        textOffset = (strlen("PAUSED") * 18 * 0.75) / 2;
-        GRRLIB_Printf(screenWidth / 2 - textOffset, screenHeight / 2, font, RGBA(255,255,255,255), 0.5, "PAUSED");
+        textOffset = (get_text_length(big_font, 0.5, "PAUSED")) / 2;
+        draw_text(big_font, big_font_text, screenWidth / 2 - textOffset, screenHeight / 2 - 15, 0.5, "PAUSED");
     }
     layersDrawn = 0;
 }
@@ -279,6 +282,7 @@ int main(int argc, char **argv) {
     font = GRRLIB_LoadTexturePNG(font_png);
     GRRLIB_InitTileSet(font, 24, 36, 32);
     cursor = GRRLIB_LoadTexturePNG(cursor_png);
+    big_font_text = GRRLIB_LoadTexturePNG(bigFont_png);
 
     // hopefully this fixes the ir position
     WPAD_SetVRes(WPAD_CHAN_0,screenWidth,screenHeight);

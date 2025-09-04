@@ -151,6 +151,7 @@ extern int frameCount;
 
 extern GameState state;
 
+extern GRRLIB_texImg *big_font_text;
 extern GRRLIB_texImg *font;
 extern GRRLIB_texImg *cursor;
 

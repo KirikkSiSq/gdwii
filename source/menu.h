@@ -19,8 +19,6 @@
 #include "demon_png.h"
 #include "auto_png.h"
 
-
-
 extern int level_id;
 
 int menu_loop();
