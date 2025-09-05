@@ -1308,7 +1308,7 @@ int get_opacity(GameObject *obj, float x) {
         case COLORED_SLOPE_22_66:
         case COLOR_SLOPE_45_NOOUT:
         case COLOR_SLOPE_22_66_NOOUT:
-            bool blending = channels[obj->detail_col_channel].blending;
+            bool blending = channels[obj->object.detail_col_channel].blending;
             if (!blending && obj->transition_applied == FADE_NONE) opacity = 255;
             break;
     }
@@ -1941,12 +1941,17 @@ void handle_col_triggers() {
 
         if (buffer->active) {
             Color lerped_color;
+            Color color_to_lerp = buffer->new_color;
+
+            if (buffer->copy_channel_id) {
+                color_to_lerp = channels[buffer->copy_channel_id].color;
+            }
 
             if (buffer->seconds > 0) {
                 float multiplier = buffer->time_run / buffer->seconds;
-                lerped_color = color_lerp(buffer->old_color, buffer->new_color, multiplier);
+                lerped_color = color_lerp(buffer->old_color, color_to_lerp, multiplier);
             } else {
-                lerped_color = buffer->new_color;
+                lerped_color = color_to_lerp;
             }
 
             channels[chan].color = lerped_color;
@@ -1955,7 +1960,10 @@ void handle_col_triggers() {
 
             if (buffer->time_run > buffer->seconds) {
                 buffer->active = FALSE;
-                channels[chan].color = buffer->new_color;
+                if (buffer->copy_channel_id) {
+                    channels[chan].copy_color_id = buffer->copy_channel_id;
+                }
+                channels[chan].color = color_to_lerp;
             }
         }
     }
@@ -1975,23 +1983,29 @@ void upload_to_buffer(GameObject *obj, int channel) {
     struct TriggerBuffer *buffer = &trigger_buffer[channel];
     buffer->active = TRUE;
     buffer->old_color = channels[channel].color;
-    if (obj->p1_color) {
+    if (obj->trigger.col_trigger.p1_color) {
         buffer->new_color.r = p1.r;
         buffer->new_color.g = p1.g;
         buffer->new_color.b = p1.b;
-    } else if (obj->p2_color) {
+    } else if (obj->trigger.col_trigger.p2_color) {
         buffer->new_color.r = p2.r;
         buffer->new_color.g = p2.g;
         buffer->new_color.b = p2.b;
     } else {
-        buffer->new_color.r = obj->trig_colorR;
-        buffer->new_color.g = obj->trig_colorG;
-        buffer->new_color.b = obj->trig_colorB;
+        buffer->new_color.r = obj->trigger.col_trigger.trig_colorR;
+        buffer->new_color.g = obj->trigger.col_trigger.trig_colorG;
+        buffer->new_color.b = obj->trigger.col_trigger.trig_colorB;
     }
+
+    int copy_color_id = obj->trigger.col_trigger.copied_color_id;
+    if (copy_color_id > 0) {
+       buffer->copy_channel_id = copy_color_id;
+    }
+
     if (channel < BG) {
-        channels[channel].blending = obj->blending;
+        channels[channel].blending = obj->trigger.col_trigger.blending;
     }
-    buffer->seconds = obj->trig_duration;
+    buffer->seconds = obj->trigger.col_trigger.trig_duration;
     buffer->time_run = 0;
 }
 
@@ -2043,7 +2057,7 @@ void run_trigger(GameObject *obj) {
 
         case BG_TRIGGER:
             upload_to_buffer(obj, BG);
-            if (!obj->tintGround) break;
+            if (!obj->trigger.col_trigger.tintGround) break;
         
         case GROUND_TRIGGER:
             upload_to_buffer(obj, GROUND);
@@ -2087,7 +2101,7 @@ void run_trigger(GameObject *obj) {
             break;
 
         case 899: // 2.0 color trigger
-            upload_to_buffer(obj, obj->target_color_id);
+            upload_to_buffer(obj, obj->trigger.col_trigger.target_color_id);
             break;
     }
     obj->activated[0] = TRUE;
@@ -2098,7 +2112,7 @@ void handle_triggers(GameObject *obj) {
     Player *player = &state.player;
     
     if ((objects[obj_id].is_trigger || obj->id > OBJECT_COUNT) && !obj->activated[0]) {
-        if (obj->touchTriggered) {
+        if (obj->trigger.touchTriggered) {
             if (intersect(
                 player->x, player->y, player->width, player->height, 0, 
                 obj->x, obj->y, 30, 30, obj->rotation

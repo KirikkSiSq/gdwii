@@ -483,21 +483,22 @@ GDValueType get_value_type_for_key(int key) {
         case 4:  return GD_VAL_BOOL;   // Flipped Horizontally
         case 5:  return GD_VAL_BOOL;   // Flipped Vertically
         case 6:  return GD_VAL_FLOAT;  // Rotation
-        case 7:  return GD_VAL_INT;    // (Trigger) Red
-        case 8:  return GD_VAL_INT;    // (Trigger) Green
-        case 9:  return GD_VAL_INT;    // (Trigger) Blue
-        case 10: return GD_VAL_FLOAT;  // (Trigger) Duration
-        case 11: return GD_VAL_BOOL;   // (Trigger) Touch Triggered
-        case 14: return GD_VAL_BOOL;   // (Trigger) Tint ground
-        case 15: return GD_VAL_BOOL;   // (Trigger) Player 1 color
-        case 16: return GD_VAL_BOOL;   // (Trigger) Player 2 color
-        case 17: return GD_VAL_BOOL;   // (Trigger) Blending
+        case 7:  return GD_VAL_INT;    // (Color trigger) Red
+        case 8:  return GD_VAL_INT;    // (Color trigger) Green
+        case 9:  return GD_VAL_INT;    // (Color trigger) Blue
+        case 10: return GD_VAL_FLOAT;  // (Color trigger) Duration
+        case 11: return GD_VAL_BOOL;   // (Color trigger) Touch Triggered
+        case 14: return GD_VAL_BOOL;   // (Color trigger) Tint ground
+        case 15: return GD_VAL_BOOL;   // (Color trigger) Player 1 color
+        case 16: return GD_VAL_BOOL;   // (Color trigger) Player 2 color
+        case 17: return GD_VAL_BOOL;   // (Color trigger) Blending
         case 19: return GD_VAL_INT;    // 1.9 color channel
         case 21: return GD_VAL_INT;    // Main col channel
         case 22: return GD_VAL_INT;    // Detail col channel
-        case 23: return GD_VAL_INT;    // (Trigger) Target color ID
+        case 23: return GD_VAL_INT;    // (Color Trigger) Target color ID
         case 24: return GD_VAL_INT;    // Zlayer
         case 25: return GD_VAL_INT;    // Zorder
+        case 50: return GD_VAL_INT;    // (Color trigger) Copy color id
         default:
             return GD_VAL_INT; // Default fallback
     }
@@ -709,6 +710,25 @@ int convert_object(int id) {
     return id;
 }
 
+ObjectType obtain_type_from_id(int id) {
+    switch (id) {
+        case BG_TRIGGER:
+        case GROUND_TRIGGER:
+        case LINE_TRIGGER:
+        case OBJ_TRIGGER:
+        case OBJ_2_TRIGGER:
+        case COL2_TRIGGER:
+        case COL3_TRIGGER:
+        case COL4_TRIGGER:
+        case THREEDL_TRIGGER:
+        case 899: // 2.0 col trigger
+        case 915: // 2.0 line trigger
+            return COL_TRIGGER;
+
+    }
+    return NORMAL_OBJECT;
+}
+
 GameObject *convert_to_game_object(const GDObject *obj) {
     GameObject *object = malloc(sizeof(GameObject));
     if (!object) return NULL;
@@ -717,26 +737,27 @@ GameObject *convert_to_game_object(const GDObject *obj) {
     memset(object, 0, sizeof(GameObject));
 
     object->id = obj->values[0].i;
+    object->type = obtain_type_from_id(object->id);
+    
+    if (object->type == NORMAL_OBJECT) {
+        // Set to default colors
+        object->object.main_col_channel = 0;
+        object->object.detail_col_channel = 0;
+        object->object.u1p9_col_channel = 0;
+    }
 
     // Temporarily convert user coins (added in 2.0) into secret coins
     object->id = convert_object(object->id);
-
-    object->zsheetlayer = objects[object->id].spritesheet_layer;
-    object->zlayer = objects[object->id].def_zlayer;
-    object->zorder = objects[object->id].def_zorder;
-
+    
     // Get a random value for this object
     object->random = rand();
-
-    object->main_col_channel = 0;
-    object->detail_col_channel = 0;
-    object->u1p9_col_channel = 0;
 
     for (int i = 0; i < obj->propCount; i++) {
         int key = obj->keys[i];
         GDValueType type = obj->types[i];
         GDValue val = obj->values[i];
 
+        // Default members
         switch (key) {
             case 2:  // X
                 if (type == GD_VAL_FLOAT) object->x = val.f;
@@ -753,56 +774,70 @@ GameObject *convert_to_game_object(const GDObject *obj) {
             case 6:  // Rotation
                 if (type == GD_VAL_FLOAT) object->rotation = val.f;
                 break;
-            case 7:  // Color R
-                if (type == GD_VAL_INT) object->trig_colorR = val.i;
-                break;
-            case 8:  // Color G
-                if (type == GD_VAL_INT) object->trig_colorG = val.i;
-                break;
-            case 9:  // Color B
-                if (type == GD_VAL_INT) object->trig_colorB = val.i;
-                break;
-            case 10: // Duration
-                if (type == GD_VAL_FLOAT) object->trig_duration = val.f;
-                break;
-            case 11: // Touch Triggered
-                if (type == GD_VAL_BOOL) object->touchTriggered = val.b;
-                break;
-            case 14: // Tint Ground
-                if (type == GD_VAL_BOOL) object->tintGround = val.b;
-                break;
-            case 15: // Player 1 color
-                if (type == GD_VAL_BOOL) object->p1_color = val.b;
-                break;
-            case 16: // Player 2 color
-                if (type == GD_VAL_BOOL) object->p2_color = val.b;
-                break;
-            case 17: // Blending
-                if (type == GD_VAL_BOOL) object->blending = val.b;
-                break;
-            case 19: // 1.9 channel id
-                if (type == GD_VAL_INT) object->u1p9_col_channel = convert_1p9_channel(val.i);
-                break;
-            case 21: // Main col channel
-                if (type == GD_VAL_INT) object->main_col_channel = val.i;
-                break;
-            case 22: // Detail col channel
-                if (type == GD_VAL_INT) object->detail_col_channel = val.i;
-                break;
-            case 23: // Target color ID
-                if (type == GD_VAL_INT) object->target_color_id = val.i;
-                break;
-            case 24: // Z layer
-                if (type == GD_VAL_INT) object->zlayer = val.i;
-                break;
-            case 25: // Z order
-                if (type == GD_VAL_INT) object->zorder = val.i;
-                break;
-
-            default:
-                // Unknown keys ignored here
-                break;
         }
+
+        // Col trigger members
+        if (object->type == NORMAL_OBJECT) {
+            switch (key) {
+                case 19: // 1.9 channel id
+                    if (type == GD_VAL_INT) object->object.u1p9_col_channel = convert_1p9_channel(val.i);
+                    break;
+                case 21: // Main col channel
+                    if (type == GD_VAL_INT) object->object.main_col_channel = val.i;
+                    break;
+                case 22: // Detail col channel
+                    if (type == GD_VAL_INT) object->object.detail_col_channel = val.i;
+                    break;
+                case 24: // Z layer
+                    if (type == GD_VAL_INT) object->object.zlayer = val.i;
+                    break;
+                case 25: // Z order
+                    if (type == GD_VAL_INT) object->object.zorder = val.i;
+                    break;
+            }
+        } else {
+            if (key == 11) { // Touch triggered
+                if (type == GD_VAL_BOOL) object->trigger.touchTriggered = val.b;
+            }
+            switch (object->type) {
+                case COL_TRIGGER:
+                    switch (key) {
+                        case 7:  // Color R
+                            if (type == GD_VAL_INT) object->trigger.col_trigger.trig_colorR = val.i;
+                            break;
+                        case 8:  // Color G
+                            if (type == GD_VAL_INT) object->trigger.col_trigger.trig_colorG = val.i;
+                            break;
+                        case 9:  // Color B
+                            if (type == GD_VAL_INT) object->trigger.col_trigger.trig_colorB = val.i;
+                            break;
+                        case 10: // Duration
+                            if (type == GD_VAL_FLOAT) object->trigger.col_trigger.trig_duration = val.f;
+                            break;
+                        case 14: // Tint Ground
+                            if (type == GD_VAL_BOOL) object->trigger.col_trigger.tintGround = val.b;
+                            break;
+                        case 15: // Player 1 color
+                            if (type == GD_VAL_BOOL) object->trigger.col_trigger.p1_color = val.b;
+                            break;
+                        case 16: // Player 2 color
+                            if (type == GD_VAL_BOOL) object->trigger.col_trigger.p2_color = val.b;
+                            break;
+                        case 17: // Blending
+                            if (type == GD_VAL_BOOL) object->trigger.col_trigger.blending = val.b;
+                            break;
+                        case 23: // Target color ID
+                            if (type == GD_VAL_INT) object->trigger.col_trigger.target_color_id = val.i;
+                            break;
+                        case 50: // Copy color ID
+                            if (type == GD_VAL_INT) object->trigger.col_trigger.copied_color_id = val.i;
+                            break;
+                    }
+                default:
+                    break;
+            }
+        }
+        
     }
     
     // Modify level ending pos
@@ -810,18 +845,25 @@ GameObject *convert_to_game_object(const GDObject *obj) {
         level_info.last_obj_x = object->x;
     }
 
-    // Setup slope
-    if (objects[object->id].is_slope) {
-        int orientation = object->rotation / 90;
-        if (object->flippedH && object->flippedV) orientation += 2;
-        else if (object->flippedH) orientation += 1;
-        else if (object->flippedV) orientation += 3;
-        
-        orientation = orientation % 4;
-        if (orientation < 0) orientation += 4;
+    if (object->type == NORMAL_OBJECT) {
+        object->object.zsheetlayer = objects[object->id].spritesheet_layer;
+        object->object.zlayer = objects[object->id].def_zlayer;
+        object->object.zorder = objects[object->id].def_zorder;
 
-        object->orientation = orientation;
+        // Setup slope
+        if (objects[object->id].is_slope) {
+            int orientation = object->rotation / 90;
+            if (object->flippedH && object->flippedV) orientation += 2;
+            else if (object->flippedH) orientation += 1;
+            else if (object->flippedV) orientation += 3;
+            
+            orientation = orientation % 4;
+            if (orientation < 0) orientation += 4;
+
+            object->object.orientation = orientation;
+        }
     }
+    
 
     ObjectHitbox hitbox = objects[object->id].hitbox;
 
@@ -1022,8 +1064,8 @@ void sort_layers_by_layer(GDObjectLayerList *list) {
         sortable_list[i].layerNum = list->layers[i]->layerNum;
         
         GameObject *obj = sortable_list[i].layer->obj;
-        sortable_list[i].zlayer = obj->zlayer;
-        sortable_list[i].zorder = obj->zorder;
+        sortable_list[i].zlayer = obj->object.zlayer;
+        sortable_list[i].zorder = obj->object.zorder;
 
         assign_layer_to_section(&sortable_list[i]);
     }
@@ -1060,9 +1102,10 @@ GDObjectLayerList *fill_layers_array(GDGameObjectList *objList) {
     // Add player for rendering, not used for gameplay
     GameObject *obj = malloc(sizeof(GameObject));
     obj->id = PLAYER_OBJECT;
-    obj->zlayer = LAYER_T1-1;
-    obj->zorder = 0;
-    obj->zsheetlayer = 0;
+    obj->type = NORMAL_OBJECT;
+    obj->object.zlayer = LAYER_T1-1;
+    obj->object.zorder = 0;
+    obj->object.zsheetlayer = 0;
     GDObjectLayer *layer = malloc(sizeof(GDObjectLayer));
     layer->obj = obj;
     layer->layer = (struct ObjectLayer *) &objects[obj->id].layers[0];
@@ -1072,8 +1115,8 @@ GDObjectLayerList *fill_layers_array(GDGameObjectList *objList) {
     GDLayerSortable sortable_layer;
     sortable_layer.layer = layer;
     sortable_layer.originalIndex = 0;
-    sortable_layer.zlayer = obj->zlayer;
-    sortable_layer.zorder = obj->zorder;
+    sortable_layer.zlayer = obj->object.zlayer;
+    sortable_layer.zorder = obj->object.zorder;
 
     gfx_player_layer = sortable_layer;
     player_game_object = obj;
@@ -1086,8 +1129,9 @@ GDObjectLayerList *fill_layers_array(GDGameObjectList *objList) {
         GameObject *obj = objList->objects[i];
 
         int obj_id = obj->id;
+        int obj_type = obj->type;
 
-        if (obj_id < OBJECT_COUNT)
+        if (obj_id < OBJECT_COUNT && obj_type == NORMAL_OBJECT)
             for (int j = 0; j < objects[obj->id].num_layers; j++) {
                 struct ObjectLayer *layer = (struct ObjectLayer *) &objects[obj->id].layers[j];
                 layers[count].layer = layer;
@@ -1098,21 +1142,21 @@ GDObjectLayerList *fill_layers_array(GDGameObjectList *objList) {
 
                 // Get layer's color channel
                 if (is_modifiable(layer->col_channel)) {
-                    if (obj->u1p9_col_channel > 0) {
+                    if (obj->object.u1p9_col_channel > 0) {
                         // Get 1.9 color channel
-                        if (layer->color_type == COLOR_DETAIL) col_channel = obj->u1p9_col_channel;
+                        if (layer->color_type == COLOR_DETAIL) col_channel = obj->object.u1p9_col_channel;
                     } else { 
                         // 2.0+ color channels
-                        if (obj->main_col_channel > 0) {
+                        if (obj->object.main_col_channel > 0) {
                             if (layer->color_type == COLOR_MAIN) {
-                                col_channel = obj->main_col_channel;  
+                                col_channel = obj->object.main_col_channel;  
                             } else {
-                                if (get_main_channel_id(obj_id) <= 0)col_channel = obj->main_col_channel; 
+                                if (get_main_channel_id(obj_id) <= 0)col_channel = obj->object.main_col_channel; 
                             }
                         }
-                        if (obj->detail_col_channel > 0) {
+                        if (obj->object.detail_col_channel > 0) {
                             if (layer->color_type == COLOR_DETAIL) {
-                                if (get_main_channel_id(obj_id) >= 0) col_channel = obj->detail_col_channel;  
+                                if (get_main_channel_id(obj_id) >= 0) col_channel = obj->object.detail_col_channel;  
                             }    
                         }
                     }
@@ -1121,8 +1165,8 @@ GDObjectLayerList *fill_layers_array(GDGameObjectList *objList) {
                 layers[count].blending = FALSE;
 
                 // Convert object glow color channel into main color channel
-                if (obj->main_col_channel > 0 && col_channel == OBJ_BLENDING) {
-                    col_channel = obj->main_col_channel;
+                if (obj->object.main_col_channel > 0 && col_channel == OBJ_BLENDING) {
+                    col_channel = obj->object.main_col_channel;
                     layers[count].blending = TRUE;
                 }
                 layers[count].col_channel = col_channel;

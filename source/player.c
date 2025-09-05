@@ -150,7 +150,7 @@ void handle_collision(Player *player, GameObject *obj, ObjectHitbox *hitbox) {
                 }
             }
 
-            bool slope_condition = player->touching_slope && !slope_touching(player->potentialSlope, player) && slope_height_check && (player->potentialSlope->orientation == ORIENT_NORMAL_DOWN || player->potentialSlope->orientation == ORIENT_UD_DOWN);
+            bool slope_condition = player->touching_slope && !slope_touching(player->potentialSlope, player) && slope_height_check && (player->potentialSlope->object.orientation == ORIENT_NORMAL_DOWN || player->potentialSlope->object.orientation == ORIENT_UD_DOWN);
 
             // Snap the player to the potential slope when the player is touching the slope
             if (player->touching_slope && slope_touching(player->potentialSlope, player) && slope_height_check) {
@@ -1551,7 +1551,7 @@ void clear_slope_data(Player *player) {
 }
 
 int grav_slope_orient(GameObject *obj, Player *player) {
-    int orient = obj->orientation;
+    int orient = obj->object.orientation;
 
     if (player->upside_down) {
         // Flip vertically slope orientation
@@ -1595,7 +1595,7 @@ float get_slope_angle(GameObject *obj) {
 
 float slope_snap_angle(GameObject *obj, Player *player) {
     float angle = slope_angle(obj, player);
-    int orient = obj->orientation;
+    int orient = obj->object.orientation;
 
     if (orient == ORIENT_NORMAL_UP) angle = -fabsf(angle);
     if (orient == ORIENT_NORMAL_DOWN) angle = fabsf(angle);
@@ -1813,7 +1813,7 @@ void slope_calc(GameObject *obj, Player *player) {
 
 bool player_circle_touches_slope(GameObject *obj, Player *player) {
     float x1, y1, x2, y2;
-    int orientation = obj->orientation;
+    int orientation = obj->object.orientation;
 
     float hw = obj->width / 2.f, hh = obj->height / 2.f;
 
@@ -2013,7 +2013,7 @@ void slope_collide(GameObject *obj, Player *player) {
 
         // Check if the old slope and this slope have the same orientation, if not, then the player doesn't have an slope
         if (hasSlope && slope) {
-            hasSlope = state.old_player.slope_data.slope->orientation == slope->orientation;
+            hasSlope = state.old_player.slope_data.slope->object.orientation == slope->object.orientation;
         }
         
 
@@ -2192,7 +2192,7 @@ void draw_hitbox(GameObject *obj) {
         h = obj->height;
         get_corners(x, y, w, h, 0, rect);
 
-        draw_triangle_from_rect(rect, 3 - obj->orientation,color);
+        draw_triangle_from_rect(rect, 3 - obj->object.orientation,color);
     } else if (objects[obj->id].is_saw) {
         if (hitbox.radius == 0) return;
 

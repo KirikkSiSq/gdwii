@@ -14,28 +14,60 @@ typedef union {
 } GDValue;
 
 typedef struct {
+    u8 trig_colorR;      // key 7
+    u8 trig_colorG;      // key 8
+    u8 trig_colorB;      // key 9
+    u8 tintGround:1;     // key 14
+    u8 p1_color:1;       // key 15
+    u8 p2_color:1;       // key 16
+    u8 blending:1;       // key 17
+    
+    float trig_duration; // key 10
+    
+    int target_color_id; // key 23
+    int copied_color_id; // key 50
+} ColTrigger;
+
+typedef struct {
+    u8 touchTriggered; // key 11
+    union {
+        ColTrigger col_trigger;
+    };
+} Trigger;
+
+typedef struct {
+    int u1p9_col_channel; // key 19
+    int main_col_channel;   // key 21
+    int detail_col_channel; // key 22
+
+    int zsheetlayer;     // no key has this, but used internally
+    int zlayer;          // key 24
+    int zorder;          // key 25
+
+    // Slope
+    unsigned char orientation;
+} NormalObject;
+
+typedef enum {
+    NORMAL_OBJECT,
+    COL_TRIGGER
+} ObjectType;
+
+typedef struct {
     int id;              // key 1
+
+    ObjectType type;     // Defines the type
+
     float x;             // key 2
     float y;             // key 3
     bool flippedH;       // key 4
     bool flippedV;       // key 5
     float rotation;      // key 6
-    u8 trig_colorR;      // key 7
-    u8 trig_colorG;      // key 8
-    u8 trig_colorB;      // key 9
-    float trig_duration; // key 10
-    u8 touchTriggered:1; // key 11
-    u8 tintGround:1;     // key 14
-    u8 p1_color:1;       // key 15
-    u8 p2_color:1;       // key 16
-    u8 blending:1;       // key 17
-    int u1p9_col_channel; // key 19
-    int main_col_channel;   // key 21
-    int detail_col_channel; // key 22
-    int target_color_id; // key 23
-    int zsheetlayer;     // no key has this, but used internally
-    int zlayer;          // key 24
-    int zorder;          // key 25
+    
+    union {
+        NormalObject object;
+        Trigger trigger;
+    };
 
     int random;                     // random number assigned to this object
     bool activated[2];              // if it has been activated
@@ -46,9 +78,6 @@ typedef struct {
     bool toggled;                   // if its enabled or disabled
     float width;
     float height;
-
-    // Slope
-    unsigned char orientation;
 } GameObject;
 #pragma pack(push, 1)
 typedef struct {

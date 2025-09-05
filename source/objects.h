@@ -1011,6 +1011,7 @@ struct TriggerBuffer {
     bool active;
     Color old_color;
     Color new_color;
+    int copy_channel_id;
     float seconds;
     float time_run;
 };
