@@ -358,7 +358,6 @@ void draw_rays() {
     GRRLIB_SetBlend(GRRLIB_BLEND_ADD);
 
     for (int ray = 0; ray < MAX_RAYS; ray++) {
-        
         if (!end_rays[ray].active) continue;
 
         float angle = end_rays[ray].angle;
@@ -379,53 +378,69 @@ void draw_rays() {
         float t = elapsed / duration;
 
         if (t > 1.0f) t = 1.0f;
-        if (t < 0) t = 0;
-        
+        if (t < 0.0f) t = 0.0f;
+
         float rad = DegToRad(angle);
         float cosA = cosf(rad);
         float sinA = sinf(rad);
-        
-        Vec2 vertices[4];
 
-        // Set vertices
-        vertices[0].x = x;
-        vertices[0].y = y + startWidth / 2;
+        // Adaptive segmentation
+        float effectiveLength = length * t;
+        int segments = (int)(effectiveLength / 120.0f);
+        if (segments < 2) segments = 2;
+        if (segments > 64) segments = 64;
 
-        vertices[1].x = x;
-        vertices[1].y = y - startWidth / 2;
+        for (int s = 0; s < segments; s++) {
+            float t0 = (float)s / (float)segments * t;
+            float t1 = (float)(s + 1) / (float)segments * t;
 
-        vertices[2].x = x - length * t;
-        vertices[2].y = y + (startWidth + (endWidth - startWidth) * t) / 2;
+            float len0 = length * t0;
+            float len1 = length * t1;
 
-        vertices[3].x = x - length * t;
-        vertices[3].y = y - (startWidth + (endWidth - startWidth) * t) / 2;
+            float w0 = startWidth + (endWidth - startWidth) * t0;
+            float w1 = startWidth + (endWidth - startWidth) * t1;
 
-        GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, 4);
-        
-        // Rotate around x and y
-        for (int i = 0; i < 4; i++) {
-        
-            float vertex_x = vertices[i].x - x;
-            float vertex_y = vertices[i].y - y;
-            float new_vertex_x = vertex_x * cosA - vertex_y * sinA;
-            float new_vertex_y = vertex_x * sinA + vertex_y * cosA;
+            Vec2 verts[4];
 
-            vertices[i].x = new_vertex_x + x;
-            vertices[i].y = new_vertex_y + y;
-            
-            float calc_x = ((vertices[i].x - state.camera_x) * SCALE) + 6 * state.mirror_mult - widthAdjust;  
-            float calc_y = screenHeight - ((vertices[i].y - state.camera_y) * SCALE) + 6;
-            
-            GX_Position3f32(get_mirror_x(calc_x, state.mirror_factor), calc_y, 0.f);
-            GX_Color1u32(color);
+            // Segment endpoints before rotation
+            verts[0].x = x - len0;
+            verts[0].y = y + w0 * 0.5f;
+
+            verts[1].x = x - len0;
+            verts[1].y = y - w0 * 0.5f;
+
+            verts[2].x = x - len1;
+            verts[2].y = y + w1 * 0.5f;
+
+            verts[3].x = x - len1;
+            verts[3].y = y - w1 * 0.5f;
+
+            GX_Begin(GX_TRIANGLESTRIP, GX_VTXFMT0, 4);
+
+            // Rotate around x and y
+            for (int i = 0; i < 4; i++) {
+                float vx = verts[i].x - x;
+                float vy = verts[i].y - y;
+                float nx = vx * cosA - vy * sinA;
+                float ny = vx * sinA + vy * cosA;
+                verts[i].x = nx + x;
+                verts[i].y = ny + y;
+
+                float calc_x = ((verts[i].x - state.camera_x) * SCALE) +
+                               6 * state.mirror_mult - widthAdjust;
+                float calc_y = screenHeight - ((verts[i].y - state.camera_y) * SCALE) + 6;
+
+                GX_Position3f32(get_mirror_x(calc_x, state.mirror_factor), calc_y, 0.f);
+                GX_Color1u32(color);
+            }
+            GX_End();
         }
-        GX_End();
 
         end_rays[ray].elapsed += dt;
     }
+
     GRRLIB_SetBlend(GRRLIB_BLEND_ALPHA);
-    
-    GX_SetVtxDesc(GX_VA_TEX0,   GX_DIRECT);
+    GX_SetVtxDesc(GX_VA_TEX0, GX_DIRECT);
     GX_SetTevOp(GX_TEVSTAGE0, GX_MODULATE);
 }
 
